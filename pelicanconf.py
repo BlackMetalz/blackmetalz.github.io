@@ -34,6 +34,4 @@ RECENT_ARTICLES_COUNT = 20
 THEME = 'themes/elegant'  # https://github.com/Pelican-Elegant/elegant
 # Show only titles on the index page
 SUMMARY_MAX_LENGTH = 0
-# Uncomment following line if you want document-relative URLs when developing
-# RELATIVE_URLS = True
 STATIC_PATHS = ['static', 'images']
