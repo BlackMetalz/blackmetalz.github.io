@@ -21,7 +21,7 @@ jobs:
         python-version: '3.9'
 
     - name: Install dependencies
-      run: pip install pelican
+      run: pip install pelican markdown
 
     - name: Build Pelican site
       run: pelican content -o output -s pelicanconf.py
