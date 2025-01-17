@@ -29,7 +29,7 @@ So how many types of Services? There are 4 types:
 #### 1. **ClusterIP**: 
 I assume you have redis pod already and you want to access it from backend server, backend server is in same k8s cluster
 - Manifest demo:
-{% highlight yaml %}
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -42,7 +42,7 @@ spec:
     targetPort: 6379
   selector:
     app: redis-test
-{% endhighlight %}
+```
 
 - Access it with FQDN: `redis-test-clusterip.redis-standalone.svc.cluster.local:6379`
 - Explains: Fully qualified domain name (FQDN) of the Service. The FQDN takes the form `service-name.namespace.svc.cluster.local`, where:
