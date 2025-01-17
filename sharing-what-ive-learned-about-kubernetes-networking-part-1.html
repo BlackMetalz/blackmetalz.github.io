@@ -103,21 +103,22 @@ So how many types of Services? There are 4 types:</p>
 </ol>
 <h3>Let's dive deep into each section with the use case and example with the manifest so you can imagine it easily!</h3>
 <h4>1. <strong>ClusterIP</strong>:</h4>
-<p _="%" endhighlight>I assume you have redis pod already and you want to access it from backend server, backend server is in same k8s cluster
-- Manifest demo:
-{% highlight yaml %}
-apiVersion: v1
-kind: Service
-metadata:
-  name: redis-test-clusterip
-  namespace: redis-standalone
-spec:
-  type: ClusterIP
-  ports:
-  - port: 6379
-    targetPort: 6379
-  selector:
-    app: redis-test</p>
+<p>I assume you have redis pod already and you want to access it from backend server, backend server is in same k8s cluster
+- Manifest demo:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis-test-clusterip</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis-standalone</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterIP</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6379</span>
+<span class="w">    </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6379</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis-test</span>
+</code></pre></div>
+
 <ul>
 <li>Access it with FQDN: <code>redis-test-clusterip.redis-standalone.svc.cluster.local:6379</code></li>
 <li>Explains: Fully qualified domain name (FQDN) of the Service. The FQDN takes the form <code>service-name.namespace.svc.cluster.local</code>, where:<ul>
