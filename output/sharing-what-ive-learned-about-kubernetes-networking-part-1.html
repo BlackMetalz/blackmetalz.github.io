@@ -78,7 +78,7 @@
         <div class="span8 offset2 article-content">
             
             <p>In the first part, I will talk about Kubernetes Service, Ingress, and Service Discovery</p>
-<h1>Kubernetes Services</h1>
+<h1>Kubernetes Services!</h1>
 <p>In Kubernetes, a Service is a method for exposing a network application that is running as one or more Pods in your cluster.
 So how many types of Services? There are 4 types:</p>
 <p><img alt="2025-01-17" src="images/2025/01/17th_1.png"></p>
@@ -190,6 +190,8 @@ So how many types of Services? There are 4 types:</p>
 </code></pre></div>
 
 <h3>Ingress!</h3>
+<p>Mostly i will talk only about nginx ingress!</p>
+<h4>Quick start</h4>
 <p>It will be a little hard to summary ingress in some words, but i will try my best to explain.</p>
 <p>Kubernetes Ingress is a resource that allows you to manage external access to your services, typically HTTP ( It does supports TLS/SSL). It acts as a reverse proxy, routing traffic from a DNS name to the appropriate services within your cluster.</p>
 <ul>
@@ -247,6 +249,233 @@ Because i installed nginx ingress as Daemonset, in default it used hostPort in p
 </code></pre></div>
 
 <p>And why i use 80 not 443?, for not double encrypt, because in Haproxy it was redirect request to HTTPS, so extra SSL is not necessary and may increase extra cpu load.</p>
+<h4>Ingress workflows:</h4>
+<ul>
+<li>Ingress have routing rules to service</li>
+<li>Ingress flows:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="mf">1.</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="n">Request</span><span class="p">:</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="n">client</span><span class="w"> </span><span class="n">sends</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">api</span><span class="o">.</span>
+<span class="mf">2.</span><span class="w"> </span><span class="n">Ingress</span><span class="w"> </span><span class="n">Controller</span><span class="p">:</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">received</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Ingress</span><span class="w"> </span><span class="n">Controller</span><span class="o">.</span>
+<span class="mf">3.</span><span class="w"> </span><span class="n">Ingress</span><span class="w"> </span><span class="n">Resource</span><span class="p">:</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">Ingress</span><span class="w"> </span><span class="n">Controller</span><span class="w"> </span><span class="n">looks</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Ingress</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">find</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">routing</span><span class="w"> </span><span class="n">rules</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">api</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">determines</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">corresponding</span><span class="w"> </span><span class="n">Service</span><span class="o">.</span>
+<span class="mf">4.</span><span class="w"> </span><span class="n">Service</span><span class="p">:</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">forwarded</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="n">named</span><span class="w"> </span><span class="n">my</span><span class="o">-</span><span class="n">service</span><span class="o">.</span>
+<span class="mf">5.</span><span class="w"> </span><span class="n">Endpoint</span><span class="p">:</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="n">finds</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">endpoints</span><span class="w"> </span><span class="p">(</span><span class="n">IP</span><span class="w"> </span><span class="n">addresses</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">Pods</span><span class="p">)</span><span class="w"> </span><span class="n">associated</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">selects</span><span class="w"> </span><span class="n">one</span><span class="w"> </span><span class="n">based</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">its</span><span class="w"> </span><span class="nb">load</span><span class="w"> </span><span class="n">balancing</span><span class="w"> </span><span class="n">policy</span><span class="o">.</span>
+<span class="mf">6.</span><span class="w"> </span><span class="n">Pod</span><span class="p">:</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">routed</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">selected</span><span class="w"> </span><span class="n">Pod</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">application</span><span class="o">.</span>
+</code></pre></div>
+
+<h4>Some common error scenarios of nginx ingress</h4>
+<p><strong>1. Missing annotation rewrite-target</strong> </br>
+I'm assume ingress controller and backend service still running. This will return 404 errors. </br></p>
+<p>Specifically, the Ingress rule is set to match requests to the path /test, but without the rewrite-target annotation, the request path is not modified before being sent to the backend service.</br></p>
+<p>Why it will return 404 error?:</br>
+- Request Path Mismatch: The Ingress rule matches requests to example.com/test and forwards them to the backend-service on port 80. </br>
+- Backend Service Path Handling: The backend service expects requests to be at the root path /, but the Ingress controller forwards the request with the original path /test </br>
+- 404 Not Found: Since the backend service does not have a handler for the /test path, it returns a 404 Not Found error. </br></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># misconfiguration</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example-ingress</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test1</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example.com</span>
+<span class="w">    </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/test</span>
+<span class="w">        </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">        </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backend-service</span>
+<span class="w">            </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Correct configuration with the rewrite-target annotation</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example-ingress</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test1</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">nginx.ingress.kubernetes.io/rewrite-target</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example.com</span>
+<span class="w">    </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/test</span>
+<span class="w">        </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">        </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backend-service</span>
+<span class="w">            </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+
+<p><strong>2. Other issues related to 404</strong> </p>
+<ul>
+<li>
+<p>Incorrect Path Configuration: If the pathType is set to Exact but the request path does not match exactly, it will return a 404. For example, if the path is /test and the request is for /test/, it will not match. Note that using the Prefix pathType allows /test to match /test/ and its sub-paths, which may avoid this issue.</p>
+</li>
+<li>
+<p>Service Name Mismatch: If the service name specified in the Ingress does not match any existing service, the Ingress will not be able to route the traffic correctly, resulting in a 404 error.</p>
+</li>
+<li>
+<p>Namespace Mismatch: If the Ingress resource is in a different namespace than the service it is trying to route to, it will not find the service and return a 404.</p>
+</li>
+<li>
+<p>Ingress Controller Not Running: If the NGINX Ingress Controller itself is not running or not properly configured, traffic will not be routed. This might result in a 404 error if another Ingress Controller handles the traffic and does not recognize the configuration. Otherwise, the traffic may fail to reach the cluster altogether.</p>
+</li>
+<li>
+<p>DNS Issues: If the DNS is not properly configured to point to the Ingress Controller, the requests will not reach the Ingress. This would typically result in a DNS resolution error, not a 404. A 404 might occur only if DNS resolves to the Ingress Controller but the Ingress rules are not properly configured.</p>
+</li>
+</ul>
+<p><strong>3. Other possible errors 400,502,503...</strong></p>
+<p>It will be way to long to include, but pretty useful in case you have to debug: 
+<a href="https://gist.github.com/BlackMetalz/dab403875c8433a800c7b61a57df2a3e">Github Gist</a></p>
+<h3>Service Discovery and DNS</h3>
+<p>Here's a concise and clear explanation of <strong>Service Discovery in Kubernetes</strong>:</p>
+<ol>
+<li>
+<p><strong>Services and Endpoints</strong>:</p>
+<ul>
+<li>
+<p>A <strong>Service</strong> in Kubernetes provides a stable IP and DNS name to access a group of Pods (e.g., from a Deployment).</p>
+</li>
+<li>
+<p>When a Service is created, Kubernetes automatically creates an <strong>Endpoint</strong> object that maps the Service to the IPs of its associated Pods.</p>
+</li>
+<li>
+<p>If your Deployment has 2 Pods, the Endpoint will list 2 IPs of pod. This updates dynamically when Pods are added, removed, or replaced.</p>
+</li>
+<li>
+<p>K8S restricts endpoints to 1000.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>DNS-based Discovery</strong>:</p>
+<ul>
+<li>
+<p>Kubernetes automatically sets up a <strong>DNS name</strong> for each Service. For example, a Service named <code>my-service</code> in the <code>default</code> namespace will be available at <code>my-service.default.svc.cluster.local</code>.</p>
+</li>
+<li>
+<p>Any Pod in the cluster can use this DNS name to connect to the Service, regardless of where the Pods are running.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Environment Variables</strong>:</p>
+<ul>
+<li>
+<p>When a Pod is started, Kubernetes injects <strong>environment variables</strong> into the container with information about Services in the same namespace.</p>
+</li>
+<li>
+<p>All Services in the same namespace that exist before the Pod starts will have their information injected into the Pod's environment variables. These environment variables will include:
+<code>&lt;SERVICE_NAME&gt;_SERVICE_HOST: The Service's cluster IP.
+&lt;SERVICE_NAME&gt;_SERVICE_PORT: The Service's port.</code></p>
+</li>
+<li>
+<p>You can check by get all services and run command <code>env</code> in a container.</p>
+</li>
+</ul>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>ERROR_499_PORT_80_TCP_PORT=80
+ERROR_499_PORT_80_TCP_PROTO=tcp
+ERROR_500_SERVICE_HOST=10.43.227.32
+ERROR_502_SERVICE_HOST=10.43.64.240
+ERROR_503_SERVICE_HOST=10.43.196.86
+ERROR_499_PORT_80_TCP=tcp://10.43.116.35:80
+ERROR_504_SERVICE_HOST=10.43.6.79
+ERROR_500_PORT=tcp://10.43.227.32:80
+ERROR_500_SERVICE_PORT=80
+ERROR_502_PORT=tcp://10.43.64.240:80
+ERROR_502_SERVICE_PORT=80
+ERROR_503_PORT=tcp://10.43.196.86:80
+ERROR_503_SERVICE_PORT=80
+ERROR_504_PORT=tcp://10.43.6.79:80
+</code></pre></div>
+
+<ul>
+<li>With following services.</li>
+</ul>
+<div class="highlight"><pre><span></span><code># kubectl get svc
+NAME                  TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                         AGE
+error-499             ClusterIP      10.43.116.35    &lt;none&gt;          80/TCP                          2d21h
+error-500             ClusterIP      10.43.227.32    &lt;none&gt;          80/TCP                          2d21h
+error-502             ClusterIP      10.43.64.240    &lt;none&gt;          80/TCP                          2d21h
+error-503             ClusterIP      10.43.196.86    &lt;none&gt;          80/TCP                          2d21h
+error-504             ClusterIP      10.43.6.79      &lt;none&gt;          80/TCP                          2d21h
+</code></pre></div>
+
+<p>Summary:</br>
+  - <strong>Endpoint</strong> links Services to Pod IPs and dynamically updates with Pod changes.</br>
+  - Pods can discover Services using <strong>DNS names</strong> or <strong>environment variables</strong>.</br>
+  - Kubernetes automatically handles traffic routing and load balancing for Services.</br>
+This ensures seamless communication and discovery between applications running in your cluster!</p>
+<h4>How DNS Resolv address</h4>
+<p>how DNS resolution works in Kubernetes based on <code>resolv.conf</code> and the behavior for resolving <code>my-app</code>:</p>
+<p><strong>Key Points:</strong></p>
+<ol>
+<li>
+<p><strong><code>/etc/resolv.conf</code></strong>:</p>
+<ul>
+<li>The <code>search</code> line specifies the DNS search domains that will be appended to any domain you try to resolve (if it doesn't have enough dots to be considered fully qualified).</li>
+<li>The <code>nameserver</code> is the IP of the Kubernetes DNS server (like CoreDNS or kube-dns).</li>
+<li><code>options ndots:5</code> means a domain must contain at least 5 dots to be considered <strong>fully qualified</strong> (e.g., <code>my-app.default.svc.cluster.local</code>).</li>
+</ul>
+</li>
+<li>
+<p><strong>How DNS Resolves <code>my-app</code></strong>:</p>
+<ul>
+<li>When you type <code>my-app</code>, DNS will append the search domains in order until a match is found or all options are exhausted.</li>
+</ul>
+<p>For <code>my-app</code>:
+- <code>my-app.default.svc.cluster.local</code> → <strong>First try</strong> (because <code>default</code> is the Pod's namespace).
+- <code>my-app.svc.cluster.local</code> → If the first fails, check here.
+- <code>my-app.cluster.local</code> → If no match, check here.
+- Finally, it tries external DNS if none match.</p>
+</li>
+<li>
+<p><strong>In Your Example (<code>my-app</code> in the <code>default</code> namespace)</strong>:</p>
+<ul>
+<li>When you type <code>my-app</code>, Kubernetes DNS will resolve it to the Service <code>my-app</code> in the same namespace (<code>default</code>) because of the <code>default.svc.cluster.local</code> search path.</li>
+</ul>
+</li>
+<li>
+<p><strong>For different namespace (argocd)</strong>:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>cat /etc/resolv.conf 
+search argocd.svc.cluster.local svc.cluster.local cluster.local
+nameserver 10.43.0.10
+options ndots:5
+</code></pre></div>
+
+<p><strong>Key Takeaway</strong>:
+if the Service is named <code>my-app</code> and in the same namespace (<code>default</code>), typing <code>my-app</code> will resolve to <code>my-app.default.svc.cluster.local</code>. This is thanks to the search domain and Kubernetes DNS configuration.</p>
+<h4>CoreDNS:</h4>
+<ul>
+<li>It watches K8S Api for new services, it will creates a DNS record</li>
+</ul>
+<h4>More note about Service:</h4>
+<ul>
+<li>When a Service is created with a selector, Kubernetes automatically creates an Endpoints object and populates it with the IPs and ports of Pods that match the selector. Whenever the set of Pods matching the selector changes, the Endpoints object is automatically updated.</li>
+</ul>
+<h1>Conclusion:</h1>
+<ul>
+<li>with help of chatGPT, some explanation much better</li>
+<li>re-memorized for my knowledge about k8s networking</li>
+</ul>
+<h1>What's next in part 2?</h1>
+<ul>
+<li>CNI</li>
+<li>Cilium</li>
+<li>And more...</li>
+</ul>
 <h1>Reference:</h1>
 <ul>
 <li><a href="https://kubernetes.io/docs/concepts/services-networking/service/">https://kubernetes.io</a></li>
