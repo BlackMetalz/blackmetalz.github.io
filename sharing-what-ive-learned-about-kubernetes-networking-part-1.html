@@ -81,7 +81,7 @@
 <h1>Kubernetes Services</h1>
 <p>In Kubernetes, a Service is a method for exposing a network application that is running as one or more Pods in your cluster.
 So how many types of Services? There are 4 types:</p>
-<p><img alt="2025-01-17" src="/images/2025/01/17th_1.png"></p>
+<p><img alt="2025-01-17" src="images/2025/01/17th_1.png"></p>
 <h3>Service type, there is 4 type of service:</h3>
 <ol>
 <li>
@@ -92,10 +92,10 @@ So how many types of Services? There are 4 types:</p>
 </li>
 <li>
 <p><strong>LoadBalancer</strong>: Exposes the Service externally using a cloud provider’s load balancer. NodePort and ClusterIP Services, to which the external load balancer routes, are automatically created.</p>
-</li>
-<li>If you're running Kubernetes on a cloud provider that supports load balancer services (like AWS, GCP, Azure), then type: LoadBalancer will work as expected</li>
-<li>
-<p>If you're running Kubernetes on-premises or on a cloud provider that doesn't support load balancers, type: LoadBalancer will not work.</p>
+<ul>
+<li>If you're running Kubernetes on a cloud provider that supports load balancer services (like AWS, GCP, Azure), then type: LoadBalancer will work as expected.</li>
+<li>If you're running Kubernetes on-premises or on a cloud provider that doesn't support load balancers, type: LoadBalancer will not work.</li>
+</ul>
 </li>
 <li>
 <p><strong>ExternalName</strong>: Maps the Service to the contents of the externalName field (e.g. <code>my.database.example.com</code>), by returning a CNAME record with its value.</p>
@@ -103,8 +103,10 @@ So how many types of Services? There are 4 types:</p>
 </ol>
 <h3>Let's dive deep into each section with the use case and example with the manifest so you can imagine it easily!</h3>
 <h4>1. <strong>ClusterIP</strong>:</h4>
-<p>I assume you have redis pod already and you want to access it from backend server, backend server is in same k8s cluster
-- Manifest demo:</p>
+<p>I assume you have redis pod already and you want to access it from backend server, backend server is in same k8s cluster. <br></p>
+<ul>
+<li>Manifest demo: </li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -131,10 +133,69 @@ So how many types of Services? There are 4 types:</p>
 <li>The DNS service in Kubernetes (like CoreDNS or kube-dns) is responsible for resolving this FQDN to the appropriate Service. When you create a Service, Kubernetes automatically creates a corresponding DNS record. This allows Pods in the cluster to access the Service using the FQDN.</li>
 </ul>
 <h4>2. <strong>NodePort</strong>:</h4>
+<p>From my experience, this is the most i used when i begin with k8s service expose ( that's time i have no idea about ingress xD). So how i used it.<br></p>
+<p>Service can be access from any node directly with <node-ip>:<port>. This mostly uses for quick access without run port-forward or any others action and ofc you have to allow access port from server to your ip address, i mean the firewall!</p>
+<ul>
+<li>For add backend to Haproxy <br></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">backend http_backend-name-here</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">mode    http</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">option forwardfor header X-Client-RIP</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">balance roundrobin</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">server 10.0.0.1:32332 10.0.0.1:32332 check inter 4000 rise 2 fall 10</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">server 10.0.0.2:32332 10.0.0.2:32332 check inter 4000 rise 2 fall 10</span>
+</code></pre></div>
+
+<ul>
+<li>Used it as target for Upstream in Kong - Apigateway <br>
+<img alt="alt text" src="images/2025/01/17th_2.png"></li>
+</ul>
+<h4>3. LoadBalancer:</h4>
+<p>At this time, i don't use K8s in cloud yet. I will update when i finish my lab with EKS/GKE later.</p>
+<h4>4. ExternalName</h4>
+<p>When i learn this for the first time or second time, i didn't really know why it gonna being used, but after several times i got this.</p>
+<ul>
+<li>
+<p>For consistency, when you change domain of external name, it takes only 5-10s second to update in container without restart. You don't have to restart container to pod take the changes, if you mount config from ConfigMap or Secret, you will have to restart pod xD.</p>
+</li>
+<li>
+<p>Leverages K8S internal DNS resolution, you don't need any external DNS server. K8S is act as DNS Server at this point xD.</p>
+</li>
+<li>
+<p>Better integration with k8s network policies and service management. I think you will not understand this sentence like me xD. So i asked Copilot to explains.</p>
+<ul>
+<li>
+<p>Network Policies: Kubernetes network policies allow you to control the communication between Pods and Services within the cluster. However, ExternalName Services do not directly interact with Pods; they map to external DNS names. This means that network policies within the cluster do not apply to the external services directly. Instead, you need to manage network policies at the cluster boundary or use other mechanisms to secure communication with external services.</p>
+</li>
+<li>
+<p>Service Management: Kubernetes provides robust service management features, such as service discovery, load balancing, and DNS resolution. ExternalName Services leverage Kubernetes' DNS resolution capabilities to provide a seamless way to access external services using a consistent internal DNS name. This allows for better integration and management of external services within the Kubernetes ecosystem, as you can reference external services using Kubernetes Service names.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Centralizes the configuration of external dependencies within K8S.</p>
+</li>
+<li>
+<p>Example manifest:</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-external-service</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sysadmin</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ExternalName</span>
+<span class="w">  </span><span class="nt">externalName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my.database.example.com</span>
+</code></pre></div>
+
+<h3>Ingress!</h3>
+<p>It will be a little hard to summary ingress in some words, but i will try my best to explain.</p>
 <h1>Reference:</h1>
 <ul>
 <li><a href="https://kubernetes.io/docs/concepts/services-networking/service/">https://kubernetes.io</a></li>
 <li><a href="https://bytebytego.com">https://bytebytego.com</a></li>
+<li><a href="https://kodekloud.com">https://kodekloud.com</a></li>
 </ul>
 
 
