@@ -103,7 +103,74 @@ spec:
 ```
 
 ### Ingress!
+
+#### Quick start
 It will be a little hard to summary ingress in some words, but i will try my best to explain.
+
+Kubernetes Ingress is a resource that allows you to manage external access to your services, typically HTTP ( It does supports TLS/SSL). It acts as a reverse proxy, routing traffic from a DNS name to the appropriate services within your cluster.
+
+- **DNS**: Points to the Ingress controller (proxy server).
+- **Ingress Controller**: Forwards traffic to the configured services based on rules defined in the Ingress resource.
+
+- Example manifest and haproxy stand before Ingress:
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+  namespace: default
+spec:
+  rules:
+  - host: example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: example-service
+            port:
+              number: 80
+``` 
+Haproxy config
+```
+backend http_example.com
+        mode    http
+        option forwardfor header X-Client-RIP
+        balance roundrobin
+        server 10.0.0.1:80 10.0.0.1:80 check inter 1000 rise 2 fall 10
+        server 10.0.0.2:80 10.0.0.2:80 check inter 1000 rise 2 fall 10
+```
+Explain: DNS will point domain to Haproxy server. Haproxy will forward traffic to Ingress Controller ( 10.0.0.1 and 10.0.0.2 are Ingress Controller). Why i know port 80 is being used?
+Because i installed nginx ingress as Daemonset, in default it used hostPort in ports section of Daemonset
+```
+        name: rke2-ingress-nginx-controller
+        ports:
+        - containerPort: 80
+          hostPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 443
+          hostPort: 443
+          name: https
+          protocol: TCP
+        - containerPort: 8443
+          name: webhook
+          protocol: TCP
+```
+And why i use 80 not 443?, for not double encrypt, because in Haproxy it was redirect request to HTTPS, so extra SSL is not necessary and may increase extra cpu load.
+
+#### Ingress workflows:
+- Ingress have routing rules to service
+- Ingress flows:
+```
+1. Client Request: A client sends a request to http://example.com/api.
+2. Ingress Controller: The request is received by the Ingress Controller.
+3. Ingress Resource: The Ingress Controller looks up the Ingress resource to find the routing rules for example.com/api and determines the corresponding Service.
+4. Service: The request is forwarded to the Service named my-service.
+5. Endpoint: The Service finds the endpoints (IP addresses of Pods) associated with it and selects one based on its load balancing policy.
+6. Pod: The request is routed to the selected Pod running the application.
+```
 
 
 # Reference:

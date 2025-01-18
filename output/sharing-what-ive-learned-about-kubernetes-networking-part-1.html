@@ -191,6 +191,62 @@ So how many types of Services? There are 4 types:</p>
 
 <h3>Ingress!</h3>
 <p>It will be a little hard to summary ingress in some words, but i will try my best to explain.</p>
+<p>Kubernetes Ingress is a resource that allows you to manage external access to your services, typically HTTP ( It does supports TLS/SSL). It acts as a reverse proxy, routing traffic from a DNS name to the appropriate services within your cluster.</p>
+<ul>
+<li><strong>DNS</strong>: Points to the Ingress controller (proxy server).</li>
+<li>
+<p><strong>Ingress Controller</strong>: Forwards traffic to the configured services based on rules defined in the Ingress resource.</p>
+</li>
+<li>
+<p>Example manifest and haproxy stand before Ingress:</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example-ingress</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example.com</span>
+<span class="w">    </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">        </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">        </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example-service</span>
+<span class="w">            </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+
+<p>Haproxy config</p>
+<div class="highlight"><pre><span></span><code>backend http_example.com
+        mode    http
+        option forwardfor header X-Client-RIP
+        balance roundrobin
+        server 10.0.0.1:80 10.0.0.1:80 check inter 1000 rise 2 fall 10
+        server 10.0.0.2:80 10.0.0.2:80 check inter 1000 rise 2 fall 10
+</code></pre></div>
+
+<p>Explain: DNS will point domain to Haproxy server. Haproxy will forward traffic to Ingress Controller ( 10.0.0.1 and 10.0.0.2 are Ingress Controller). Why i know port 80 is being used?
+Because i installed nginx ingress as Daemonset, in default it used hostPort in ports section of Daemonset</p>
+<div class="highlight"><pre><span></span><code>        name: rke2-ingress-nginx-controller
+        ports:
+        - containerPort: 80
+          hostPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 443
+          hostPort: 443
+          name: https
+          protocol: TCP
+        - containerPort: 8443
+          name: webhook
+          protocol: TCP
+</code></pre></div>
+
+<p>And why i use 80 not 443?, for not double encrypt, because in Haproxy it was redirect request to HTTPS, so extra SSL is not necessary and may increase extra cpu load.</p>
 <h1>Reference:</h1>
 <ul>
 <li><a href="https://kubernetes.io/docs/concepts/services-networking/service/">https://kubernetes.io</a></li>
