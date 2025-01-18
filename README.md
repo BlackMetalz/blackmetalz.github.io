@@ -6,7 +6,9 @@ python -m pip install "pelican[markdown]"
 
 - Themes:
 ```
-git clone https://github.com/Pelican-Elegant/elegant.git themes/elegant
+# git clone https://github.com/Pelican-Elegant/elegant.git themes/elegant
+git submodule init
+git submodule update
 ```
 
 ### Run
