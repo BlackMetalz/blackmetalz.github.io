@@ -102,7 +102,7 @@ spec:
   externalName: my.database.example.com
 ```
 
-### Ingress!
+# Ingress!
 Mostly i will talk only about nginx ingress!
 
 #### Quick start
@@ -250,7 +250,7 @@ It will be way to long to include, but pretty useful in case you have to debug:
 [Github Gist](https://gist.github.com/BlackMetalz/dab403875c8433a800c7b61a57df2a3e)
 
 
-### Service Discovery and DNS
+# Service Discovery and DNS
 Here's a concise and clear explanation of **Service Discovery in Kubernetes**:
 
 1. **Services and Endpoints**:
