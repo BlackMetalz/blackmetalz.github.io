@@ -77,7 +77,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p>In the second part, I will talk about Container network interface (CNI), Cilium CNI and Network policies</p>
+            <p>In the second part, I will talk about Container network interface (CNI), Cilium CNI and some compare with Network policies and Cilium network policies.</p>
 <h1>CNI</h1>
 <h3>What is CNI:</h3>
 <ul>
@@ -144,11 +144,169 @@
 </tbody>
 </table>
 <h1>Cilium CNI</h1>
-<h1>Network policies</h1>
+<h3>What is Cilium</h3>
+<ul>
+<li>Cilium is an open-source networking and security solution designed for Kubernetes and other container orchestration platforms. Its primary purpose is to provide secure and efficient network connectivity between application services deployed in cloud-native environments. Cilium leverages eBPF (extended Berkeley Packet Filter) technology to dynamically insert code into the Linux kernel, enabling high-performance packet processing and security enforcement.</li>
+</ul>
+<p>As a comprehensive CNI (Container Network Interface) plugin, Cilium offers advanced networking features, robust security policies, and deep observability capabilities. These features make it an ideal choice for modern cloud-native applications that require scalable and secure network infrastructure.</p>
+<h3>Key Features</h3>
+<ul>
+<li>
+<p><strong>eBPF</strong>
+Cilium uses eBPF to dynamically insert code into the Linux kernel, enabling efficient packet processing and security enforcement.</p>
+</li>
+<li>
+<p><strong>Network Policies</strong>
+Cilium implements Kubernetes Network Policies and extends them with more advanced features, allowing fine-grained control over network traffic.</p>
+</li>
+<li>
+<p><strong>Service Mesh Integration</strong>
+Cilium integrates seamlessly with service meshes like Istio, providing enhanced networking capabilities and security.</p>
+</li>
+<li>
+<p><strong>Observability</strong>
+Cilium offers robust observability features through Hubble, which provides deep visibility into network traffic and security events.</p>
+</li>
+</ul>
+<h3>eBPF explain</h3>
+<p>I think you haven't understand clear about eBPF ( so am i), so i spend time to read document, try to understand it and explain it here xD.</p>
+<ul>
+<li>First, i think you need to check Cilium is enable in hybrid mode or strict mode or not</li>
+</ul>
+<div class="highlight"><pre><span></span><code>kubectl -n kube-system edit configmap cilium-config
+</code></pre></div>
+
+<p>Looks for line <code>kube-proxy-replacement</code>, if it is empty (<code>""</code>), it is running in hybrid mode and you can see by type <code>iptables -L</code></p>
+<ul>
+<li>
+<p>Second, check kernel support or not: Cilium generally requires a kernel version &gt;= 4.19 for basic eBPF functionality and &gt;= 5.4 for kube-proxy replacement. So it will mostly about supported xD</p>
+</li>
+<li>
+<p>Third, lets focus into main objective.</p>
+<ul>
+<li>
+<p>Cilium with eBPF is generally faster than iptables. eBPF (extended Berkeley Packet Filter) allows Cilium to dynamically insert code into the Linux kernel, enabling efficient packet processing and security enforcement. This approach reduces the overhead associated with traditional iptables-based packet filtering and routing.</p>
+</li>
+<li>
+<p>Iptables operates in user space and relies on a series of rules to manage network traffic, which can become complex and slow as the number of rules increases. In contrast, eBPF operates in the kernel space, allowing for more direct and efficient handling of network packets. This results in lower latency and higher throughput, making Cilium with eBPF a more performant solution for Kubernetes networking.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><a href="https://x.com/diptanu/status/899424568422486016">Check out this tweet</a></p>
+<ul>
+<li>Examples of how Cilium utilizes eBPF: Load Balancing<ul>
+<li>Use Case: Cilium implements a high-performance, distributed load balancer for Kubernetes services</li>
+<li>eBPF Functionality:<ul>
+<li>eBPF programs attached to networking hooks can direct packets to the correct backend pod without relying on iptables.</li>
+<li>Example: A packet arriving for ClusterIP is intercepted by an eBPF program, which selects a pod backend based on a consistent hash algorithm and forwards the packet directly.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Common commands of cilium</h3>
+<div class="highlight"><pre><span></span><code>cilium-health status
+cilium status
+</code></pre></div>
+
+<h3>Cilium Observability: Hubble</h3>
+<ul>
+<li>There are many way to enable Hubble and Hubble UI, so i won't talk details in here.</li>
+<li>View network flows in real-time: <code>hubble observe</code></li>
+<li>Port forward to use hubble UI: <code>kubectl port-forward -n kube-system svc/hubble-ui 12000:80</code>
+<img alt="alt text" src="images/2025/01/20th_1.png">
+As you can see, very useful for Observability, debugging and tracing!</li>
+</ul>
+<h1>Cilium Network policies</h1>
+<h3>Comparison</h3>
+<ul>
+<li><strong>Kubernetes Network Policies</strong>: Kubernetes network policies are used to control the traffic between pods. They are defined using the NetworkPolicy resource.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allow-nginx</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">podSelector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="nt">policyTypes</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Egress</span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">frontend</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">  </span><span class="nt">egress</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">to</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backend</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+</code></pre></div>
+
+<ul>
+<li><strong>Cilium Network Policies</strong>: Cilium extends the capabilities of Kubernetes network policies by leveraging eBPF. Cilium policies can be more expressive and can include L7 (Layer 7) rules.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cilium.io/v2</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CiliumNetworkPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allow-nginx</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">endpointSelector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">fromEndpoints</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">frontend</span>
+<span class="w">    </span><span class="nt">toPorts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;80&quot;</span>
+<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">  </span><span class="nt">egress</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">toEndpoints</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backend</span>
+<span class="w">    </span><span class="nt">toPorts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;8080&quot;</span>
+<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">toServices</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">k8sService</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">        </span><span class="nt">serviceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-service</span>
+<span class="w">  </span><span class="nt">l7Rules</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GET</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api&quot;</span>
+</code></pre></div>
+
+<p>More example can be found in here: <a href="https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf">replacing_iptables_with_ebpf</a></p>
+<ul>
+<li><strong>Key Differences</strong>:<ul>
+<li>Layer 7 Policies: Cilium supports L7 policies (e.g., HTTP methods and paths), while Kubernetes network policies are limited to L3/L4 (IP and port).</li>
+<li>Integration with eBPF: Cilium uses eBPF for efficient packet processing, which can provide better performance and more advanced features.</li>
+<li>Policy Syntax: Cilium policies use CiliumNetworkPolicy and have a different syntax compared to Kubernetes NetworkPolicy.</li>
+</ul>
+</li>
+</ul>
 <h1>Conclusion</h1>
 <h1>Reference:</h1>
 <ul>
 <li><a href="https://ranchermanager.docs.rancher.com/">https://ranchermanager.docs.rancher.com/</a></li>
+<li><a href="https://docs.cilium.io/en/stable/overview/intro/">https://docs.cilium.io/en/stable/overview/intro/</a></li>
+<li><a href="https://cilium.io/blog/2018/04/17/why-is-the-kernel-community-replacing-iptables/">https://cilium.io/blog/2018/04/17/why-is-the-kernel-community-replacing-iptables/</a></li>
+<li><a href="https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf">replacing_iptables_with_ebpf</a></li>
 </ul>
 
 
