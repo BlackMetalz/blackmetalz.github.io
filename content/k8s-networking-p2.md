@@ -163,6 +163,60 @@ spec:
       path: "/api"
 ```
 
+### Real example of Cilium Network policies
+- Assume: I have 3 namespace: default, test, python-app. I have pod with tools for testing connection
+```
+kubectl run kienlt-linux-tools --image=kienlt992/linux-tools -- /bin/sh -c "sleep infinity"
+```
+
+- I created pods kienlt-linux-tools in 2 namespace: default and test. Testing connection from both pod in different namespace
+```
+/ # nc -vz python-api-app-production.python-app.svc 5000
+python-api-app-production.python-app.svc (10.43.67.70:5000) open
+/ # curl "http://python-api-app.rke2-cluster.kienlt.local/secret"
+[database]
+database_host = localhost
+database_user = admin_production
+database_pass = secret123
+```
+
+- Ok, the task will be block access to path secret from default namespace but allow other for demo. Here is the policy
+Lets get the label firt!
+```yaml 
+k get pod -n python-app -oyaml|grep labels -A2
+    labels:
+      app.kubernetes.io/instance: python-api-app-production
+      app.kubernetes.io/managed-by: Helm
+```
+Then rule will come after with information above
+```yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: deny-secret-path
+  namespace: python-app
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: python-api-app-production
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        namespace: default
+    toPorts:
+    - ports:
+      - port: "80"
+        protocol: TCP
+      rules:
+        http:
+        # Deny access to /secret
+        - method: "GET"
+          path: "^/secret$"
+        # Allow access to other GET requests
+        - method: "GET"
+          path: "^/.*"
+```
+
 More example can be found in here: [replacing_iptables_with_ebpf](https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf)
 
 - **Key Differences**:
