@@ -176,7 +176,12 @@ Cilium offers robust observability features through Hubble, which provides deep 
 <div class="highlight"><pre><span></span><code>kubectl -n kube-system edit configmap cilium-config
 </code></pre></div>
 
-<p>Looks for line <code>kube-proxy-replacement</code>, if it is empty (<code>""</code>), it is running in hybrid mode and you can see by type <code>iptables -L</code></p>
+<p>Looks for line <code>kube-proxy-replacement</code>, if it is empty (<code>""</code>), it is running in hybrid mode and you can see by type <code>iptables -L</code>. Enable it with </p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">kube-proxy-replacement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">strict</span>
+<span class="w">  </span><span class="nt">kube-proxy-replacement-healthz-bind-address</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="w">  </span><span class="nt">enable-l7-proxy</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+</code></pre></div>
+
 <ul>
 <li>
 <p>Second, check kernel support or not: Cilium generally requires a kernel version &gt;= 4.19 for basic eBPF functionality and &gt;= 5.4 for kube-proxy replacement. So it will mostly about supported xD</p>
@@ -205,6 +210,7 @@ Cilium offers robust observability features through Hubble, which provides deep 
 </ul>
 </li>
 </ul>
+<p>More example can be found in here: <a href="https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf">replacing_iptables_with_ebpf</a></p>
 <h3>Common commands of cilium</h3>
 <div class="highlight"><pre><span></span><code>cilium-health status
 cilium status
@@ -291,72 +297,74 @@ As you can see, very useful for Observability, debugging and tracing!</li>
 <span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api&quot;</span>
 </code></pre></div>
 
-<h3>Real example of Cilium Network policies</h3>
-<ul>
-<li>Assume: I have 3 namespace: default, test, python-app. I have pod with tools for testing connection</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="n">kubectl</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">kienlt</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">tools</span><span class="w"> </span><span class="o">--</span><span class="n">image</span><span class="o">=</span><span class="n">kienlt992</span><span class="o">/</span><span class="n">linux</span><span class="o">-</span><span class="n">tools</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">sh</span><span class="w"> </span><span class="o">-</span><span class="n">c</span><span class="w"> </span><span class="s2">&quot;sleep infinity&quot;</span>
-</code></pre></div>
-
-<ul>
-<li>I created pods kienlt-linux-tools in 2 namespace: default and test. Testing connection from both pod in different namespace</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="o">/</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="n">nc</span><span class="w"> </span><span class="o">-</span><span class="n">vz</span><span class="w"> </span><span class="n">python</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">app</span><span class="o">-</span><span class="n">production</span><span class="p">.</span><span class="n">python</span><span class="o">-</span><span class="n">app</span><span class="p">.</span><span class="n">svc</span><span class="w"> </span><span class="mi">5000</span>
-<span class="n">python</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">app</span><span class="o">-</span><span class="n">production</span><span class="p">.</span><span class="n">python</span><span class="o">-</span><span class="n">app</span><span class="p">.</span><span class="n">svc</span><span class="w"> </span><span class="p">(</span><span class="mf">10.43.67.70</span><span class="err">:</span><span class="mi">5000</span><span class="p">)</span><span class="w"> </span><span class="k">open</span>
-<span class="o">/</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="n">curl</span><span class="w"> </span><span class="ss">&quot;http://python-api-app.rke2-cluster.kienlt.local/secret&quot;</span>
-<span class="o">[</span><span class="n">database</span><span class="o">]</span>
-<span class="n">database_host</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">localhost</span>
-<span class="n">database_user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">admin_production</span>
-<span class="n">database_pass</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">secret123</span>
-</code></pre></div>
-
-<ul>
-<li>Ok, the task will be block access to path secret from default namespace but allow other for demo. Here is the policy
-Lets get the label firt!</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">k get pod -n python-app -oyaml|grep labels -A2</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">labels</span><span class="p p-Indicator">:</span>
-<span class="w">      </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python-api-app-production</span>
-<span class="w">      </span><span class="nt">app.kubernetes.io/managed-by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Helm</span>
-</code></pre></div>
-
-<p>Then rule will come after with information above</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cilium.io/v2</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CiliumNetworkPolicy</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deny-secret-path</span>
-<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python-app</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">endpointSelector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app.kubernetes.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python-api-app-production</span>
-<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">fromEndpoints</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-<span class="w">    </span><span class="nt">toPorts</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ports</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;80&quot;</span>
-<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
-<span class="w">      </span><span class="nt">rules</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">http</span><span class="p">:</span>
-<span class="w">        </span><span class="c1"># Deny access to /secret</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;GET&quot;</span>
-<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^/secret$&quot;</span>
-<span class="w">        </span><span class="c1"># Allow access to other GET requests</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;GET&quot;</span>
-<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;^/.*&quot;</span>
-</code></pre></div>
-
-<p>More example can be found in here: <a href="https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf">replacing_iptables_with_ebpf</a></p>
+<p>Above is just an example xD, and CiliumNetworkPolicy may not works because i copied somewhere for the content. For real example, lets continue read below xDD.</p>
 <ul>
 <li><strong>Key Differences</strong>:<ul>
 <li>Layer 7 Policies: Cilium supports L7 policies (e.g., HTTP methods and paths), while Kubernetes network policies are limited to L3/L4 (IP and port).</li>
 <li>Integration with eBPF: Cilium uses eBPF for efficient packet processing, which can provide better performance and more advanced features.</li>
-<li>Policy Syntax: Cilium policies use CiliumNetworkPolicy and have a different syntax compared to Kubernetes NetworkPolicy.</li>
 </ul>
 </li>
 </ul>
+<h3>Real example of Cilium Network policies</h3>
+<ul>
+<li>Before i'm able to write this, i wasted 3-4 hours for checking and testing why we can't have rules that allow both allow / deny. Simply it doesn't support &gt;.&gt;</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nv">Cilium</span><span class="w"> </span><span class="nv">L7</span><span class="w"> </span><span class="nv">policies</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">directly</span><span class="w"> </span><span class="nv">support</span><span class="w"> </span><span class="nv">explicit</span><span class="w"> </span><span class="nv">deny</span><span class="w"> </span><span class="nv">rules</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">specific</span><span class="w"> </span><span class="nv">HTTP</span><span class="w"> </span><span class="nv">paths</span><span class="w"> </span><span class="nv">or</span><span class="w"> </span><span class="nv">methods</span><span class="w"> </span><span class="nv">at</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">moment</span>.<span class="w"> </span><span class="nv">Instead</span>,<span class="w"> </span><span class="nv">they</span><span class="w"> </span><span class="nv">operate</span><span class="w"> </span><span class="nv">on</span><span class="w"> </span><span class="nv">an</span><span class="w"> </span><span class="nv">allowlist</span><span class="o">-</span><span class="nv">only</span><span class="w"> </span><span class="nv">model</span>,<span class="w"> </span><span class="nv">meaning</span>:
+
+<span class="mi">1</span>.<span class="w"> </span><span class="nv">Any</span><span class="w"> </span><span class="nv">traffic</span><span class="w"> </span><span class="nv">explicitly</span><span class="w"> </span><span class="nv">defined</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="nv">rules</span>.<span class="nv">l7</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">allowed</span>.
+<span class="mi">2</span>.<span class="w"> </span><span class="nv">Any</span><span class="w"> </span><span class="nv">traffic</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">explicitly</span><span class="w"> </span><span class="nv">listed</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">denied</span><span class="w"> </span><span class="nv">by</span><span class="w"> </span><span class="nv">default</span>.
+
+<span class="nv">This</span><span class="w"> </span><span class="nv">can</span><span class="w"> </span><span class="nv">feel</span><span class="w"> </span><span class="nv">limiting</span><span class="w"> </span><span class="nv">when</span><span class="w"> </span><span class="nv">you</span><span class="err">&#39;re looking for explicit deny functionality. However, there are ways to handle this situation effectively depending on your use case.</span>
+</code></pre></div>
+
+<ul>
+<li><strong>Real Example</strong>: Rule that allow access only path /employees from namespace <code>test</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code>apiVersion: &quot;cilium.io/v2&quot;
+kind: CiliumNetworkPolicy
+metadata:
+  name: &quot;python-app&quot;
+  namespace: &quot;python-app&quot;
+  # Apply this in the namespace you want to protect
+spec:
+  # Target all pods in the namespace where this policy is applied
+  endpointSelector: {} # Apply this policy to all pods in the python-app namespace
+  ingress:
+  # Allow all traffic from pods in test namespace
+  <span class="k">-</span> fromEndpoints:
+    <span class="k">-</span> matchLabels:
+        # This matches all pods in the test namespace
+        k8s:io.kubernetes.pod.namespace: test
+    toPorts:
+      <span class="k">-</span> ports:
+        <span class="k">-</span> port: &quot;5000&quot;
+          protocol: TCP
+        rules:
+          http:
+          <span class="k">-</span> method: &quot;GET&quot;
+            path: &quot;/employees.*&quot;
+</code></pre></div>
+
+<p>Lets go for testing: if the path is simple <code>path: "/employees"</code>. The request to <code>python-api-app-production.python-app.svc:5000/employees/1</code> will be denied!</p>
+<div class="highlight"><pre><span></span><code><span class="c1">### Access from namespace test</span>
+<span class="n">k</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="n">kienlt</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">tools</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="s2">&quot;python-api-app-production.python-app.svc:5000/employees&quot;</span>
+<span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Ashley&quot;</span><span class="p">},{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Kate&quot;</span><span class="p">},{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Joe&quot;</span><span class="p">}]</span>
+
+<span class="n">k</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="n">kienlt</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">tools</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="s2">&quot;python-api-app-production.python-app.svc:5000/secret&quot;</span>
+<span class="n">Access</span><span class="w"> </span><span class="n">denied</span>
+
+<span class="n">k</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="n">kienlt</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">tools</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="s2">&quot;python-api-app-production.python-app.svc:5000/&quot;</span>
+<span class="n">Access</span><span class="w"> </span><span class="n">denied</span>
+
+<span class="n">k</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="n">kienlt</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">tools</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="s2">&quot;python-api-app-production.python-app.svc:5000/employees/1&quot;</span>
+<span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Ashley&quot;</span><span class="p">}</span>
+<span class="c1">### Access from namespace default</span>
+<span class="n">k</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="n">kienlt</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">tools</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="n">nc</span><span class="w"> </span><span class="o">-</span><span class="n">w</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">-</span><span class="n">vz</span><span class="w"> </span><span class="n">python</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">app</span><span class="o">-</span><span class="n">production</span><span class="o">.</span><span class="n">python</span><span class="o">-</span><span class="n">app</span><span class="o">.</span><span class="n">svc</span><span class="w"> </span><span class="mi">5000</span>
+<span class="n">nc</span><span class="p">:</span><span class="w"> </span><span class="n">python</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">app</span><span class="o">-</span><span class="n">production</span><span class="o">.</span><span class="n">python</span><span class="o">-</span><span class="n">app</span><span class="o">.</span><span class="n">svc</span><span class="w"> </span><span class="p">(</span><span class="mf">10.43</span><span class="o">.</span><span class="mf">67.70</span><span class="p">:</span><span class="mi">5000</span><span class="p">):</span><span class="w"> </span><span class="n">Operation</span><span class="w"> </span><span class="n">timed</span><span class="w"> </span><span class="n">out</span>
+<span class="n">command</span><span class="w"> </span><span class="n">terminated</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="n">code</span><span class="w"> </span>
+</code></pre></div>
+
+<p>Specials thanks to <code>isovalent.com</code> for the tutorials xD ( included reference link below)</p>
 <h1>Conclusion</h1>
 <h1>Reference:</h1>
 <ul>
@@ -364,6 +372,7 @@ Lets get the label firt!</li>
 <li><a href="https://docs.cilium.io/en/stable/overview/intro/">https://docs.cilium.io/en/stable/overview/intro/</a></li>
 <li><a href="https://cilium.io/blog/2018/04/17/why-is-the-kernel-community-replacing-iptables/">https://cilium.io/blog/2018/04/17/why-is-the-kernel-community-replacing-iptables/</a></li>
 <li><a href="https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf">replacing_iptables_with_ebpf</a></li>
+<li><a href="https://isovalent.com/blog/post/tutorial-cilium-network-policy/">https://isovalent.com/blog/post/tutorial-cilium-network-policy/</a></li>
 </ul>
 
 
