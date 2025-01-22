@@ -58,6 +58,35 @@ Cilium offers robust observability features through Hubble, which provides deep 
 ### eBPF explain
 I think you haven't understand clear about eBPF ( so am i), so i spend time to read document, try to understand it and explain it here xD.
 
+1. Think of it as a plugin system for the kernel that can help with monitoring, networking, and security:
+    - Observe: Watch what’s happening inside the system (e.g., track network packets, file operations, etc.).
+    - Act: Modify or filter data in real-time (e.g., drop a suspicious network packet).
+
+
+2. Why is it useful?: 
+Normally, to add new functionality to the Linux kernel, you'd have to rebuild or modify the kernel—a risky and complex task. eBPF solves this by:
+    - Letting you "inject" tiny programs dynamically.
+    - Running these programs in a safe sandbox to ensure they can’t crash or harm the system.
+    - Being fast because the programs run directly inside the kernel.
+
+
+3. Simple Analogy: Imagine the Linux kernel is a busy post office:
+    - Every day, it processes letters (network packets, file reads, system events).
+    - If you wanted to filter out spam mail (e.g., suspicious packets), you'd normally need to rewrite the post office's internal processes (modify the kernel).
+    - But with eBPF, you can simply write a small "mailroom plugin" that works alongside the post office to filter spam as the letters pass through—without changing how the post office works.
+
+
+4. Example: Network Packet Filtering. Let’s say you want to block network packets coming from a suspicious IP address.
+    - Without eBPF:
+        - You might need to install complex tools or write custom firewall rules.
+        - Or, you’d need to modify the kernel, which is risky.
+    - With eBPF:
+        - You write a small eBPF program in C or a high-level language like Python (with libraries like bcc or libbpf).
+        - This program runs inside the kernel and checks every network packet:
+            - If the packet’s source IP matches the bad one, the program drops it.
+            - Otherwise, it lets the packet through.
+        - You load the eBPF program dynamically using tools like bpftool.
+### Cilium eBPF
 - First, i think you need to check Cilium is enable in hybrid mode or strict mode or not
 ```
 kubectl -n kube-system edit configmap cilium-config
@@ -72,8 +101,7 @@ Looks for line `kube-proxy-replacement`, if it is empty (`""`), it is running in
 - Second, check kernel support or not: Cilium generally requires a kernel version >= 4.19 for basic eBPF functionality and >= 5.4 for kube-proxy replacement. So it will mostly about supported xD
 
 - Third, lets focus into main objective.
-    -  Cilium with eBPF is generally faster than iptables. eBPF (extended Berkeley Packet Filter) allows Cilium to dynamically insert code into the Linux kernel, enabling efficient packet processing and security enforcement. This approach reduces the overhead associated with traditional iptables-based packet filtering and routing.
-
+    - Cilium with eBPF is generally faster than iptables. eBPF (extended Berkeley Packet Filter) allows Cilium to dynamically insert code into the Linux kernel, enabling efficient packet processing and security enforcement. This approach reduces the overhead associated with traditional iptables-based packet filtering and routing.
     - Iptables operates in user space and relies on a series of rules to manage network traffic, which can become complex and slow as the number of rules increases. In contrast, eBPF operates in the kernel space, allowing for more direct and efficient handling of network packets. This results in lower latency and higher throughput, making Cilium with eBPF a more performant solution for Kubernetes networking.
 
 [Check out this tweet](https://x.com/diptanu/status/899424568422486016)
