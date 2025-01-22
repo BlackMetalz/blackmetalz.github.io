@@ -58,29 +58,29 @@ Cilium offers robust observability features through Hubble, which provides deep 
 ### eBPF explain
 I think you haven't understand clear about eBPF ( so am i), so i spend time to read document, try to understand it and explain it here xD.
 
-1. Think of it as a plugin system for the kernel that can help with monitoring, networking, and security:
+1. `Think of it as a plugin system for the kernel` that can help with monitoring, networking, and security:
     - Observe: Watch what’s happening inside the system (e.g., track network packets, file operations, etc.).
     - Act: Modify or filter data in real-time (e.g., drop a suspicious network packet).
 
 
-2. Why is it useful?: 
+2. `Why is it useful?`: 
 Normally, to add new functionality to the Linux kernel, you'd have to rebuild or modify the kernel—a risky and complex task. eBPF solves this by:
     - Letting you "inject" tiny programs dynamically.
     - Running these programs in a safe sandbox to ensure they can’t crash or harm the system.
     - Being fast because the programs run directly inside the kernel.
 
 
-3. Simple Analogy: Imagine the Linux kernel is a busy post office:
+3. `Simple Analogy`: Imagine the Linux kernel is a busy post office:
     - Every day, it processes letters (network packets, file reads, system events).
     - If you wanted to filter out spam mail (e.g., suspicious packets), you'd normally need to rewrite the post office's internal processes (modify the kernel).
     - But with eBPF, you can simply write a small "mailroom plugin" that works alongside the post office to filter spam as the letters pass through—without changing how the post office works.
 
 
-4. Example: Network Packet Filtering. Let’s say you want to block network packets coming from a suspicious IP address.
-    - Without eBPF:
+4. `Example: Network Packet Filtering`. Let’s say you want to block network packets coming from a suspicious IP address.
+    - `Without eBPF`:
         - You might need to install complex tools or write custom firewall rules.
         - Or, you’d need to modify the kernel, which is risky.
-    - With eBPF:
+    - `With eBPF`:
         - You write a small eBPF program in C or a high-level language like Python (with libraries like bcc or libbpf).
         - This program runs inside the kernel and checks every network packet:
             - If the packet’s source IP matches the bad one, the program drops it.
