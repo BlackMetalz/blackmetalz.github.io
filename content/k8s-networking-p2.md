@@ -62,7 +62,12 @@ I think you haven't understand clear about eBPF ( so am i), so i spend time to r
 ```
 kubectl -n kube-system edit configmap cilium-config
 ```
-Looks for line `kube-proxy-replacement`, if it is empty (`""`), it is running in hybrid mode and you can see by type `iptables -L`
+Looks for line `kube-proxy-replacement`, if it is empty (`""`), it is running in hybrid mode and you can see by type `iptables -L`. Enable it with 
+```yaml
+  kube-proxy-replacement: strict
+  kube-proxy-replacement-healthz-bind-address: ""
+  enable-l7-proxy: "true"
+```
 
 - Second, check kernel support or not: Cilium generally requires a kernel version >= 4.19 for basic eBPF functionality and >= 5.4 for kube-proxy replacement. So it will mostly about supported xD
 
@@ -78,6 +83,8 @@ Looks for line `kube-proxy-replacement`, if it is empty (`""`), it is running in
     - eBPF Functionality:
         - eBPF programs attached to networking hooks can direct packets to the correct backend pod without relying on iptables.
         - Example: A packet arriving for ClusterIP is intercepted by an eBPF program, which selects a pod backend based on a consistent hash algorithm and forwards the packet directly.
+
+More example can be found in here: [replacing_iptables_with_ebpf](https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf)
 
 ### Common commands of cilium
 ```
@@ -163,66 +170,73 @@ spec:
       path: "/api"
 ```
 
-### Real example of Cilium Network policies
-- Assume: I have 3 namespace: default, test, python-app. I have pod with tools for testing connection
-```
-kubectl run kienlt-linux-tools --image=kienlt992/linux-tools -- /bin/sh -c "sleep infinity"
-```
-
-- I created pods kienlt-linux-tools in 2 namespace: default and test. Testing connection from both pod in different namespace
-```
-/ # nc -vz python-api-app-production.python-app.svc 5000
-python-api-app-production.python-app.svc (10.43.67.70:5000) open
-/ # curl "http://python-api-app.rke2-cluster.kienlt.local/secret"
-[database]
-database_host = localhost
-database_user = admin_production
-database_pass = secret123
-```
-
-- Ok, the task will be block access to path secret from default namespace but allow other for demo. Here is the policy
-Lets get the label firt!
-```yaml 
-k get pod -n python-app -oyaml|grep labels -A2
-    labels:
-      app.kubernetes.io/instance: python-api-app-production
-      app.kubernetes.io/managed-by: Helm
-```
-Then rule will come after with information above
-```yaml
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: deny-secret-path
-  namespace: python-app
-spec:
-  endpointSelector:
-    matchLabels:
-      app.kubernetes.io/instance: python-api-app-production
-  ingress:
-  - fromEndpoints:
-    - matchLabels:
-        namespace: default
-    toPorts:
-    - ports:
-      - port: "80"
-        protocol: TCP
-      rules:
-        http:
-        # Deny access to /secret
-        - method: "GET"
-          path: "^/secret$"
-        # Allow access to other GET requests
-        - method: "GET"
-          path: "^/.*"
-```
-
-More example can be found in here: [replacing_iptables_with_ebpf](https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf)
+Above is just an example xD, and CiliumNetworkPolicy may not works because i copied somewhere for the content. For real example, lets continue read below xDD.
 
 - **Key Differences**:
     - Layer 7 Policies: Cilium supports L7 policies (e.g., HTTP methods and paths), while Kubernetes network policies are limited to L3/L4 (IP and port).
     - Integration with eBPF: Cilium uses eBPF for efficient packet processing, which can provide better performance and more advanced features.
-    - Policy Syntax: Cilium policies use CiliumNetworkPolicy and have a different syntax compared to Kubernetes NetworkPolicy.
+    
+
+### Real example of Cilium Network policies
+- Before i'm able to write this, i wasted 3-4 hours for checking and testing why we can't have rules that allow both allow / deny. Simply it doesn't support >.>
+```
+Cilium L7 policies do not directly support explicit deny rules for specific HTTP paths or methods at the moment. Instead, they operate on an allowlist-only model, meaning:
+
+1. Any traffic explicitly defined in rules.l7 is allowed.
+2. Any traffic not explicitly listed is denied by default.
+
+This can feel limiting when you're looking for explicit deny functionality. However, there are ways to handle this situation effectively depending on your use case.
+```
+
+- **Real Example**: Rule that allow access only path /employees from namespace `test`
+```
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "python-app"
+  namespace: "python-app"
+  # Apply this in the namespace you want to protect
+spec:
+  # Target all pods in the namespace where this policy is applied
+  endpointSelector: {} # Apply this policy to all pods in the python-app namespace
+  ingress:
+  # Allow all traffic from pods in test namespace
+  - fromEndpoints:
+    - matchLabels:
+        # This matches all pods in the test namespace
+        k8s:io.kubernetes.pod.namespace: test
+    toPorts:
+      - ports:
+        - port: "5000"
+          protocol: TCP
+        rules:
+          http:
+          - method: "GET"
+            path: "/employees.*"
+```
+
+Lets go for testing: if the path is simple `path: "/employees"`. The request to `python-api-app-production.python-app.svc:5000/employees/1` will be denied!
+```
+### Access from namespace test
+k exec -n test kienlt-linux-tools -- curl -s "python-api-app-production.python-app.svc:5000/employees"
+[{"id":1,"name":"Ashley"},{"id":2,"name":"Kate"},{"id":3,"name":"Joe"}]
+
+k exec -n test kienlt-linux-tools -- curl -s "python-api-app-production.python-app.svc:5000/secret"
+Access denied
+
+k exec -n test kienlt-linux-tools -- curl -s "python-api-app-production.python-app.svc:5000/"
+Access denied
+
+k exec -n test kienlt-linux-tools -- curl -s "python-api-app-production.python-app.svc:5000/employees/1"
+{"id":1,"name":"Ashley"}
+### Access from namespace default
+k exec kienlt-linux-tools -- nc -w 3 -vz python-api-app-production.python-app.svc 5000
+nc: python-api-app-production.python-app.svc (10.43.67.70:5000): Operation timed out
+command terminated with exit code 
+```
+
+Specials thanks to `isovalent.com` for the tutorials xD ( included reference link below)
+
 
 # Conclusion
 
@@ -231,3 +245,4 @@ More example can be found in here: [replacing_iptables_with_ebpf](https://archiv
 - [https://docs.cilium.io/en/stable/overview/intro/](https://docs.cilium.io/en/stable/overview/intro/)
 - [https://cilium.io/blog/2018/04/17/why-is-the-kernel-community-replacing-iptables/](https://cilium.io/blog/2018/04/17/why-is-the-kernel-community-replacing-iptables/)
 - [replacing_iptables_with_ebpf](https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf)
+- [https://isovalent.com/blog/post/tutorial-cilium-network-policy/](https://isovalent.com/blog/post/tutorial-cilium-network-policy/)
