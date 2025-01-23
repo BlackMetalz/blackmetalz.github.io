@@ -347,8 +347,8 @@ spec:
             path: "/employees.*"
 ```
 
-Lets go for testing: if the path is simple `path: "/employees"`. The request to `python-api-app-production.python-app.svc:5000/employees/1` will be denied!
-```
+- Lets go for testing, if the path is simple **path: "/employees"**. The request to **python-api-app-production.python-app.svc:5000/employees/1** will be denied!
+```plain
 ### Access from namespace test
 k exec -n test kienlt-linux-tools -- curl -s "python-api-app-production.python-app.svc:5000/employees"
 [{"id":1,"name":"Ashley"},{"id":2,"name":"Kate"},{"id":3,"name":"Joe"}]
