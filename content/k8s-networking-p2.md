@@ -8,11 +8,11 @@ In the second part, I will talk about Container network interface (CNI), Cilium 
 # CNI
 
 ### What is CNI:
-- Is a framework for configuring network interfaces in Linux container , providing connectivity and ensure network isolation.
-- CNI Plugin standarize and simplify Kubernetes networking.
+- Is a framework for configuring network interfaces in Linux containers, providing connectivity, and ensuring network isolation.
+- CNI Plugin standardizes and simplifies Kubernetes networking.
 
 ### How CNI Works:
-- CNI works by invoke network plugin that handle network configuration for containers. When a container is created, the container runtime call the CNI plugin to setup the container network interface
+- CNI works by invoking a network plugin that handles network configuration for containers. When a container is created, the container runtime calls the CNI plugin to set the container network interface.
 - Works in K8S:
 ```
 Kube API --> Kubelet --> Container Runtime --> create container, network namespace
@@ -22,7 +22,7 @@ Kube API --> Kubelet --> Container Runtime --> create container, network namespa
 ### CNI specification:
 - A Json configuration file that specifies the desired network setup.
 - Standard commands: ADD, DEL, CHECK to manage network interfaces.
-- Plugin must handle these command and return results in predefined format.
+- The plugin must handle these commands and return results in a  predefined format.
 
 ### CNI community popularity:
 The following table summarizes different GitHub metrics to give you an idea of each project's popularity and activity levels. This data was collected in December 2024.
@@ -56,11 +56,11 @@ Cilium integrates seamlessly with service meshes like Istio, providing enhanced 
 Cilium offers robust observability features through `Hubble`, which provides deep visibility into network traffic and security events.
 
 ### eBPF explain
-I think you haven't understand clear about eBPF (so am i), so i tried to spent time to read document, try to understand it and explain it here xD.
+I think you haven't understood clearly about eBPF (so am i), so i tried to spend time reading the document, trying to understand it and explain it here xD.
 
 #### 1. **Think of it as a plugin system for the kernel** that can help with monitoring, networking, and security:
 - Observe: Watch what’s happening inside the system (e.g., track network packets, file operations, etc.).
-- Act: Modify or filter data in real-time (e.g., drop a suspicious network packet).
+- Act: Modify or filter data in real time (e.g., drop a suspicious network packet).
 
 #### 2. **Why is it useful?**: 
 Normally, to add new functionality to the Linux kernel, you'd have to rebuild or modify the kernel—a risky and complex task. eBPF solves this by:
@@ -71,7 +71,7 @@ Normally, to add new functionality to the Linux kernel, you'd have to rebuild or
 #### 3. **Simple Analogy**: Imagine the Linux kernel is a busy post office:
 - Every day, it processes letters (network packets, file reads, system events).
 - If you wanted to filter out spam mail (e.g., suspicious packets), you'd normally need to rewrite the post office's internal processes (modify the kernel).
-- But with eBPF, you can simply write a small "mailroom plugin" that works alongside the post office to filter spam as the letters pass through—without changing how the post office works.
+- But with eBPF, you can simply write a small "mailroom plugin" that works alongside the post office to filter spam as the letters pass through without changing how the post office works.
 
 #### 4. **Example: Network Packet Filtering**. Let’s say you want to block network packets coming from a suspicious IP address.
 - **Without eBPF**:
@@ -84,8 +84,8 @@ Normally, to add new functionality to the Linux kernel, you'd have to rebuild or
         - Otherwise, it lets the packet through.
     - You load the eBPF program dynamically using tools like bpftool.
 
-#### 5. **Additional example to how network packet filter**:
-I think i need some example code for easier imagination, same method which i used for better understand the issue.
+#### 5. **Additional example of how network packet filter**:
+I think i need some example code for easier imagination, the same method which i used to better understand the issue.
 
 - **Install required for Debian-based system**:
 ```
@@ -166,7 +166,7 @@ except KeyboardInterrupt:
     ```
 This will load the eBPF program and attach it to the specified network interface (`eth0`), dropping any packet destined for port 3306.
 
-**P/s: This is generated from Copilot xD**, but it should give idea why eBPF is strong and useful.
+**P/s: This is generated from Copilot xD**, but it should give an idea of why eBPF is strong and useful.
 
 ### Cilium eBPF
 - First, i think you need to check Cilium is enable in hybrid mode or strict mode or not
@@ -180,11 +180,11 @@ Looks for line `kube-proxy-replacement`, if it is empty (`""`), it is running in
   enable-l7-proxy: "true"
 ```
 
-- Second, check kernel support or not: Cilium generally requires a kernel version >= 4.19 for basic eBPF functionality and >= 5.4 for kube-proxy replacement. So it will mostly about supported xD
+- Second, check kernel support or not: Cilium generally requires a kernel version >= 4.19 for basic eBPF functionality and >= 5.4 for kube-proxy replacement. So it will mostly be about supported xD
 
-- Third, lets focus into main objective.
+- Third, let's focus on the main objective.
     - Cilium with eBPF is generally faster than iptables. eBPF (extended Berkeley Packet Filter) allows Cilium to dynamically insert code into the Linux kernel, enabling efficient packet processing and security enforcement. This approach reduces the overhead associated with traditional iptables-based packet filtering and routing.
-    - Iptables operates in user space and relies on a series of rules to manage network traffic, which can become complex and slow as the number of rules increases. In contrast, eBPF operates in the kernel space, allowing for more direct and efficient handling of network packets. This results in lower latency and higher throughput, making Cilium with eBPF a more performant solution for Kubernetes networking.
+    - Iptables operate in user space and rely on a series of rules to manage network traffic, which can become complex and slow as the number of rules increases. In contrast, eBPF operates in the kernel space, allowing for more direct and efficient handling of network packets. This results in lower latency and higher throughput, making Cilium with eBPF a more performant solution for Kubernetes networking.
 
 [Check out this tweet](https://x.com/diptanu/status/899424568422486016)
 
@@ -194,7 +194,7 @@ Looks for line `kube-proxy-replacement`, if it is empty (`""`), it is running in
         - eBPF programs attached to networking hooks can direct packets to the correct backend pod without relying on iptables.
         - Example: A packet arriving for ClusterIP is intercepted by an eBPF program, which selects a pod backend based on a consistent hash algorithm and forwards the packet directly.
 
-More example can be found in here: [replacing_iptables_with_ebpf](https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf)
+More examples can be found here: [replacing_iptables_with_ebpf](https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf)
 
 ### Common commands of cilium
 ```
@@ -203,11 +203,11 @@ cilium status
 ```
 
 ### Cilium Observability: Hubble
-- There are many way to enable Hubble and Hubble UI, so i won't talk details in here.
+- There are many ways to enable Hubble and Hubble UI, so i won't talk details here.
 - View network flows in real-time: `hubble observe`
-- Port forward to use hubble UI: `kubectl port-forward -n kube-system svc/hubble-ui 12000:80`
+- Port forward to use Hubble UI: `kubectl port-forward -n kube-system svc/hubble-ui 12000:80`
 ![alt text](images/2025/01/20th_1.png)
-- As you can see, very useful for Observability, debugging and tracing!, even more it show which packet get dropped so we can have idea where to check, at this point it is caused by CNP (Cilium Network Policy)
+- As you can see, very useful for Observability, debugging, and tracing!, even more, it shows which packets get dropped so we can have an  idea of where to check, at this point, it is caused by CNP (Cilium Network Policy).
 ![alt text](images/2025/01/20th_2.png)
 
 - For CLI mode which i prefer for debugging xD
@@ -302,14 +302,14 @@ spec:
       path: "/api"
 ```
 
-Above is just an example xD, and CiliumNetworkPolicy may not works because i copied somewhere for the content. For real example, lets continue read below xDD.
+The above is just an example xD, and CiliumNetworkPolicy may not work because i copied somewhere for the content. For a real example, let's continue to read below xDD.
 
 - **Key Differences**:
     - Layer 7 Policies: Cilium supports L7 policies (e.g., HTTP methods and paths), while Kubernetes network policies are limited to L3/L4 (IP and port).
     - Integration with eBPF: Cilium uses eBPF for efficient packet processing, which can provide better performance and more advanced features.
     
 
-### Real example of Cilium Network policies
+### A real example of Cilium Network policies
 - Before i'm able to write this, i wasted 3-4 hours for checking and testing why we can't have rules that allow both allow / deny. Simply it doesn't support >.>
 ```
 Cilium L7 policies do not directly support explicit deny rules for specific HTTP paths or methods at the moment. Instead, they operate on an allowlist-only model, meaning:
@@ -367,13 +367,13 @@ nc: python-api-app-production.python-app.svc (10.43.67.70:5000): Operation timed
 command terminated with exit code 
 ```
 
-Specials thanks to `isovalent.com` for the tutorials xD ( included reference link below)
+Specials thanks `isovalent.com` for the tutorials xD ( included reference link below)
 
 
 # Conclusion
-- I was little hard time to understand, but in the end, mostly i get it at some percent xD
-- K8S is complicated, understand small part will leads to bigger part. Just don't give up, keep going!
-- Learning with ChatGPT and Copilot is faster than do research with only yourself! 
+- I had a little hard time understanding, but in the end, mostly i got it at some percent xD.
+- K8S is complicated, understand a small part will lead to a bigger part. Just don't give up, keep going!
+- Learning with ChatGPT and Copilot is faster than doing research with only yourself!
 
 # Reference:
 - [https://ranchermanager.docs.rancher.com/](https://ranchermanager.docs.rancher.com/)

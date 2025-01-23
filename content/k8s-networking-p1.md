@@ -12,7 +12,7 @@ So how many types of Services? There are 4 types:
 
 ![2025-01-17](images/2025/01/17th_1.png)
 
-### Service type, there is 4 type of service:
+### Service type, there are 4 types of service:
 
 1. **ClusterIP**: Exposes the Service on a cluster-internal IP. Choosing this value makes the Service only reachable from within the cluster. This is the default ServiceType ( if you don't define the type, it will be ClusterIP)
 
@@ -27,7 +27,7 @@ So how many types of Services? There are 4 types:
 ### Let's dive deep into each section with the use case and example with the manifest so you can imagine it easily!
 
 #### 1. **ClusterIP**: 
-I assume you have redis pod already and you want to access it from backend server, backend server is in same k8s cluster. <br>
+I assume you have Redis pod already and you want to access it from the backend server, The backend server is in the same k8s cluster.
 
 - Manifest demo: 
 ```yaml
@@ -54,9 +54,9 @@ spec:
 - The DNS service in Kubernetes (like CoreDNS or kube-dns) is responsible for resolving this FQDN to the appropriate Service. When you create a Service, Kubernetes automatically creates a corresponding DNS record. This allows Pods in the cluster to access the Service using the FQDN.
 
 #### 2. **NodePort**: 
-From my experience, this is the most i used when i begin with k8s service expose ( that's time i have no idea about ingress xD). So how i used it.<br>
+From my experience, this is the most i used when i began with k8s service expose ( that's a time i had no idea about ingress xD), so how i used it.<br>
 
-Service can be access from any node directly with <node-ip>:<port>. This mostly uses for quick access without run port-forward or any others action and ofc you have to allow access port from server to your ip address, i mean the firewall!
+Service can be accessed from any node directly with <node-ip>:<port>. This is mostly used for quick access without running port-forward or any other action and ofc you have to allow access port from the server to your IP address, i mean the firewall!
 
 - For add backend to Haproxy <br>
 ```yaml
@@ -72,17 +72,16 @@ backend http_backend-name-here
 ![alt text](images/2025/01/17th_2.png)
 
 #### 3. LoadBalancer:
-At this time, i don't use K8s in cloud yet. I will update when i finish my lab with EKS/GKE later.
-
+At this time, i don't use K8s in the cloud yet. I will update you when i finish my lab with EKS/GKE later.
 
 #### 4. ExternalName
-When i learn this for the first time or second time, i didn't really know why it gonna being used, but after several times i got this.
+When i learned this for the first time or second time, i didn't really know why it gonna being used, but after several times i got this.
 
-- For consistency, when you change domain of external name, it takes only 5-10s second to update in container without restart. You don't have to restart container to pod take the changes, if you mount config from ConfigMap or Secret, you will have to restart pod xD.
+- For consistency, when you change the domain of an external name, it takes only 5–10s seconds to update in the container without restart. You don't have to restart the container to take the changes, if you mount config from ConfigMap or Secret, you will have to restart pod xD.
 
-- Leverages K8S internal DNS resolution, you don't need any external DNS server. K8S is act as DNS Server at this point xD.
+- Leverages K8S internal DNS resolution, you don't need any external DNS server. K8S acts as a DNS Server at this point xD.
 
-- Better integration with k8s network policies and service management. I think you will not understand this sentence like me xD. So i asked Copilot to explains.
+- Better integration with k8s network policies and service management. I think you will not understand this sentence like me xD. So i asked Copilot to explain.
 
     - Network Policies: Kubernetes network policies allow you to control the communication between Pods and Services within the cluster. However, ExternalName Services do not directly interact with Pods; they map to external DNS names. This means that network policies within the cluster do not apply to the external services directly. Instead, you need to manage network policies at the cluster boundary or use other mechanisms to secure communication with external services.
 
@@ -103,12 +102,12 @@ spec:
 ```
 
 # Ingress!
-Mostly i will talk only about nginx ingress!
+Mostly i will talk only about Nginx ingress!
 
 #### Quick start
-It will be a little hard to summary ingress in some words, but i will try my best to explain.
+It will be a little hard to summarize ingress in some words, but i will try my best to explain.
 
-Kubernetes Ingress is a resource that allows you to manage external access to your services, typically HTTP ( It does supports TLS/SSL). It acts as a reverse proxy, routing traffic from a DNS name to the appropriate services within your cluster.
+Kubernetes Ingress is a resource that allows you to manage external access to your services, typically HTTP ( It does support TLS/SSL). It acts as a reverse proxy, routing traffic from a DNS name to the appropriate services within your cluster.
 
 - **DNS**: Points to the Ingress controller (proxy server).
 - **Ingress Controller**: Forwards traffic to the configured services based on rules defined in the Ingress resource.
@@ -142,27 +141,27 @@ backend http_example.com
         server 10.0.0.1:80 10.0.0.1:80 check inter 1000 rise 2 fall 10
         server 10.0.0.2:80 10.0.0.2:80 check inter 1000 rise 2 fall 10
 ```
-Explain: DNS will point domain to Haproxy server. Haproxy will forward traffic to Ingress Controller ( 10.0.0.1 and 10.0.0.2 are Ingress Controller). Why i know port 80 is being used?
-Because i installed nginx ingress as Daemonset, in default it used hostPort in ports section of Daemonset
+Explain: DNS will point the domain to the Haproxy server. Haproxy will forward traffic to the Ingress Controller ( 10.0.0.1 and 10.0.0.2 are Ingress Controller). Why do i know port 80 is being used?
+Because i installed nginx ingress as Daemonset, in default it used hostPort in the ports section of Daemonset
 ```
-        name: rke2-ingress-nginx-controller
-        ports:
-        - containerPort: 80
-          hostPort: 80
-          name: http
-          protocol: TCP
-        - containerPort: 443
-          hostPort: 443
-          name: https
-          protocol: TCP
-        - containerPort: 8443
-          name: webhook
-          protocol: TCP
+name: rke2-ingress-nginx-controller
+ports:
+- containerPort: 80
+  hostPort: 80
+  name: http
+  protocol: TCP
+- containerPort: 443
+  hostPort: 443
+  name: https
+  protocol: TCP
+- containerPort: 8443
+  name: webhook
+  protocol: TCP
 ```
-And why i use 80 not 443?, for not double encrypt, because in Haproxy it was redirect request to HTTPS, so extra SSL is not necessary and may increase extra cpu load.
+And why do i use 80 not 443?, for not double encrypt, because in Haproxy it redirected requests to HTTPS, so extra SSL is not necessary and may increase extra CPU load.
 
 #### Ingress workflows:
-- Ingress have routing rules to service
+- Ingress has routing rules to service
 - Ingress flows:
 ```
 1. Client Request: A client sends a request to http://example.com/api.
@@ -176,11 +175,11 @@ And why i use 80 not 443?, for not double encrypt, because in Haproxy it was red
 #### Some common error scenarios of nginx ingress
 
 **1. Missing annotation rewrite-target** </br>
-I'm assume ingress controller and backend service still running. This will return 404 errors. </br>
+I'm assume the ingress controller and backend service still running. This will return 404 errors. </br>
 
 Specifically, the Ingress rule is set to match requests to the path /test, but without the rewrite-target annotation, the request path is not modified before being sent to the backend service.</br>
 
-Why it will return 404 error?:</br>
+Why it will return a 404 error?:</br>
 - Request Path Mismatch: The Ingress rule matches requests to example.com/test and forwards them to the backend-service on port 80. </br>
 - Backend Service Path Handling: The backend service expects requests to be at the root path /, but the Ingress controller forwards the request with the original path /test </br>
 - 404 Not Found: Since the backend service does not have a handler for the /test path, it returns a 404 Not Found error. </br>
@@ -246,7 +245,7 @@ spec:
 
 **3. Other possible errors 400,502,503...**
 
-It will be way to long to include, but pretty useful in case you have to debug: 
+It will be way too long to include, but pretty useful in case you have to debug: 
 [Github Gist](https://gist.github.com/BlackMetalz/dab403875c8433a800c7b61a57df2a3e)
 
 
@@ -259,7 +258,7 @@ Here's a concise and clear explanation of **Service Discovery in Kubernetes**:
 
     - When a Service is created, Kubernetes automatically creates an **Endpoint** object that maps the Service to the IPs of its associated Pods.
 
-    - If your Deployment has 2 Pods, the Endpoint will list 2 IPs of pod. This updates dynamically when Pods are added, removed, or replaced.
+    - If your Deployment has 2 Pods, the Endpoint will list 2 IPs of the pod. This updates dynamically when Pods are added, removed, or replaced.
 
     - K8S restricts endpoints to 1000.
 
@@ -273,13 +272,13 @@ Here's a concise and clear explanation of **Service Discovery in Kubernetes**:
 
     - When a Pod is started, Kubernetes injects **environment variables** into the container with information about Services in the same namespace.
 
-    - All Services in the same namespace that exist before the Pod starts will have their information injected into the Pod's environment variables. These environment variables will include:
+    - All Services in the same namespace that exists before the Pod starts will have their information injected into the Pod's environment variables. These environment variables will include:
     ```
     <SERVICE_NAME>_SERVICE_HOST: The Service's cluster IP.
     <SERVICE_NAME>_SERVICE_PORT: The Service's port.
     ```
 
-    - You can check by get all services and run command `env` in a container.
+    - You can check by getting all services and running the command `env` in a container.
 
 ```
 ERROR_499_PORT_80_TCP_PORT=80
@@ -351,11 +350,11 @@ if the Service is named `my-app` and in the same namespace (`default`), typing `
 #### CoreDNS:
 - It watches K8S Api for new services, it will creates a DNS record
 
-#### More note about Service:
+#### More notes about the Service:
 - When a Service is created with a selector, Kubernetes automatically creates an Endpoints object and populates it with the IPs and ports of Pods that match the selector. Whenever the set of Pods matching the selector changes, the Endpoints object is automatically updated.
 
 # Conclusion:
-- with help of chatGPT, some explanation much better
+- with the help of chatGPT, some explanations are much better
 - re-memorized for my knowledge about k8s networking
 
 # What's next in part 2?
