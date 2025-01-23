@@ -82,7 +82,7 @@
 <p>In Kubernetes, a Service is a method for exposing a network application that is running as one or more Pods in your cluster.
 So how many types of Services? There are 4 types:</p>
 <p><img alt="2025-01-17" src="images/2025/01/17th_1.png"></p>
-<h3>Service type, there is 4 type of service:</h3>
+<h3>Service type, there are 4 types of service:</h3>
 <ol>
 <li>
 <p><strong>ClusterIP</strong>: Exposes the Service on a cluster-internal IP. Choosing this value makes the Service only reachable from within the cluster. This is the default ServiceType ( if you don't define the type, it will be ClusterIP)</p>
@@ -103,7 +103,7 @@ So how many types of Services? There are 4 types:</p>
 </ol>
 <h3>Let's dive deep into each section with the use case and example with the manifest so you can imagine it easily!</h3>
 <h4>1. <strong>ClusterIP</strong>:</h4>
-<p>I assume you have redis pod already and you want to access it from backend server, backend server is in same k8s cluster. <br></p>
+<p>I assume you have Redis pod already and you want to access it from the backend server, The backend server is in the same k8s cluster.</p>
 <ul>
 <li>Manifest demo: </li>
 </ul>
@@ -133,8 +133,8 @@ So how many types of Services? There are 4 types:</p>
 <li>The DNS service in Kubernetes (like CoreDNS or kube-dns) is responsible for resolving this FQDN to the appropriate Service. When you create a Service, Kubernetes automatically creates a corresponding DNS record. This allows Pods in the cluster to access the Service using the FQDN.</li>
 </ul>
 <h4>2. <strong>NodePort</strong>:</h4>
-<p>From my experience, this is the most i used when i begin with k8s service expose ( that's time i have no idea about ingress xD). So how i used it.<br></p>
-<p>Service can be access from any node directly with <node-ip>:<port>. This mostly uses for quick access without run port-forward or any others action and ofc you have to allow access port from server to your ip address, i mean the firewall!</p>
+<p>From my experience, this is the most i used when i began with k8s service expose ( that's a time i had no idea about ingress xD), so how i used it.<br></p>
+<p>Service can be accessed from any node directly with <node-ip>:<port>. This is mostly used for quick access without running port-forward or any other action and ofc you have to allow access port from the server to your IP address, i mean the firewall!</p>
 <ul>
 <li>For add backend to Haproxy <br></li>
 </ul>
@@ -151,18 +151,18 @@ So how many types of Services? There are 4 types:</p>
 <img alt="alt text" src="images/2025/01/17th_2.png"></li>
 </ul>
 <h4>3. LoadBalancer:</h4>
-<p>At this time, i don't use K8s in cloud yet. I will update when i finish my lab with EKS/GKE later.</p>
+<p>At this time, i don't use K8s in the cloud yet. I will update you when i finish my lab with EKS/GKE later.</p>
 <h4>4. ExternalName</h4>
-<p>When i learn this for the first time or second time, i didn't really know why it gonna being used, but after several times i got this.</p>
+<p>When i learned this for the first time or second time, i didn't really know why it gonna being used, but after several times i got this.</p>
 <ul>
 <li>
-<p>For consistency, when you change domain of external name, it takes only 5-10s second to update in container without restart. You don't have to restart container to pod take the changes, if you mount config from ConfigMap or Secret, you will have to restart pod xD.</p>
+<p>For consistency, when you change the domain of an external name, it takes only 5–10s seconds to update in the container without restart. You don't have to restart the container to take the changes, if you mount config from ConfigMap or Secret, you will have to restart pod xD.</p>
 </li>
 <li>
-<p>Leverages K8S internal DNS resolution, you don't need any external DNS server. K8S is act as DNS Server at this point xD.</p>
+<p>Leverages K8S internal DNS resolution, you don't need any external DNS server. K8S acts as a DNS Server at this point xD.</p>
 </li>
 <li>
-<p>Better integration with k8s network policies and service management. I think you will not understand this sentence like me xD. So i asked Copilot to explains.</p>
+<p>Better integration with k8s network policies and service management. I think you will not understand this sentence like me xD. So i asked Copilot to explain.</p>
 <ul>
 <li>
 <p>Network Policies: Kubernetes network policies allow you to control the communication between Pods and Services within the cluster. However, ExternalName Services do not directly interact with Pods; they map to external DNS names. This means that network policies within the cluster do not apply to the external services directly. Instead, you need to manage network policies at the cluster boundary or use other mechanisms to secure communication with external services.</p>
@@ -190,10 +190,10 @@ So how many types of Services? There are 4 types:</p>
 </code></pre></div>
 
 <h1>Ingress!</h1>
-<p>Mostly i will talk only about nginx ingress!</p>
+<p>Mostly i will talk only about Nginx ingress!</p>
 <h4>Quick start</h4>
-<p>It will be a little hard to summary ingress in some words, but i will try my best to explain.</p>
-<p>Kubernetes Ingress is a resource that allows you to manage external access to your services, typically HTTP ( It does supports TLS/SSL). It acts as a reverse proxy, routing traffic from a DNS name to the appropriate services within your cluster.</p>
+<p>It will be a little hard to summarize ingress in some words, but i will try my best to explain.</p>
+<p>Kubernetes Ingress is a resource that allows you to manage external access to your services, typically HTTP ( It does support TLS/SSL). It acts as a reverse proxy, routing traffic from a DNS name to the appropriate services within your cluster.</p>
 <ul>
 <li><strong>DNS</strong>: Points to the Ingress controller (proxy server).</li>
 <li>
@@ -231,27 +231,27 @@ So how many types of Services? There are 4 types:</p>
         server 10.0.0.2:80 10.0.0.2:80 check inter 1000 rise 2 fall 10
 </code></pre></div>
 
-<p>Explain: DNS will point domain to Haproxy server. Haproxy will forward traffic to Ingress Controller ( 10.0.0.1 and 10.0.0.2 are Ingress Controller). Why i know port 80 is being used?
-Because i installed nginx ingress as Daemonset, in default it used hostPort in ports section of Daemonset</p>
-<div class="highlight"><pre><span></span><code>        name: rke2-ingress-nginx-controller
-        ports:
-        - containerPort: 80
-          hostPort: 80
-          name: http
-          protocol: TCP
-        - containerPort: 443
-          hostPort: 443
-          name: https
-          protocol: TCP
-        - containerPort: 8443
-          name: webhook
-          protocol: TCP
+<p>Explain: DNS will point the domain to the Haproxy server. Haproxy will forward traffic to the Ingress Controller ( 10.0.0.1 and 10.0.0.2 are Ingress Controller). Why do i know port 80 is being used?
+Because i installed nginx ingress as Daemonset, in default it used hostPort in the ports section of Daemonset</p>
+<div class="highlight"><pre><span></span><code><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">rke2</span><span class="o">-</span><span class="n">ingress</span><span class="o">-</span><span class="n">nginx</span><span class="o">-</span><span class="n">controller</span>
+<span class="n">ports</span><span class="o">:</span>
+<span class="o">-</span><span class="w"> </span><span class="n">containerPort</span><span class="o">:</span><span class="w"> </span><span class="mi">80</span>
+<span class="w">  </span><span class="n">hostPort</span><span class="o">:</span><span class="w"> </span><span class="mi">80</span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">http</span>
+<span class="w">  </span><span class="n">protocol</span><span class="o">:</span><span class="w"> </span><span class="n">TCP</span>
+<span class="o">-</span><span class="w"> </span><span class="n">containerPort</span><span class="o">:</span><span class="w"> </span><span class="mi">443</span>
+<span class="w">  </span><span class="n">hostPort</span><span class="o">:</span><span class="w"> </span><span class="mi">443</span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">https</span>
+<span class="w">  </span><span class="n">protocol</span><span class="o">:</span><span class="w"> </span><span class="n">TCP</span>
+<span class="o">-</span><span class="w"> </span><span class="n">containerPort</span><span class="o">:</span><span class="w"> </span><span class="mi">8443</span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">webhook</span>
+<span class="w">  </span><span class="n">protocol</span><span class="o">:</span><span class="w"> </span><span class="n">TCP</span>
 </code></pre></div>
 
-<p>And why i use 80 not 443?, for not double encrypt, because in Haproxy it was redirect request to HTTPS, so extra SSL is not necessary and may increase extra cpu load.</p>
+<p>And why do i use 80 not 443?, for not double encrypt, because in Haproxy it redirected requests to HTTPS, so extra SSL is not necessary and may increase extra CPU load.</p>
 <h4>Ingress workflows:</h4>
 <ul>
-<li>Ingress have routing rules to service</li>
+<li>Ingress has routing rules to service</li>
 <li>Ingress flows:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="mf">1.</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="n">Request</span><span class="p">:</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="n">client</span><span class="w"> </span><span class="n">sends</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">api</span><span class="o">.</span>
@@ -264,9 +264,9 @@ Because i installed nginx ingress as Daemonset, in default it used hostPort in p
 
 <h4>Some common error scenarios of nginx ingress</h4>
 <p><strong>1. Missing annotation rewrite-target</strong> </br>
-I'm assume ingress controller and backend service still running. This will return 404 errors. </br></p>
+I'm assume the ingress controller and backend service still running. This will return 404 errors. </br></p>
 <p>Specifically, the Ingress rule is set to match requests to the path /test, but without the rewrite-target annotation, the request path is not modified before being sent to the backend service.</br></p>
-<p>Why it will return 404 error?:</br>
+<p>Why it will return a 404 error?:</br>
 - Request Path Mismatch: The Ingress rule matches requests to example.com/test and forwards them to the backend-service on port 80. </br>
 - Backend Service Path Handling: The backend service expects requests to be at the root path /, but the Ingress controller forwards the request with the original path /test </br>
 - 404 Not Found: Since the backend service does not have a handler for the /test path, it returns a 404 Not Found error. </br></p>
@@ -333,7 +333,7 @@ I'm assume ingress controller and backend service still running. This will retur
 </li>
 </ul>
 <p><strong>3. Other possible errors 400,502,503...</strong></p>
-<p>It will be way to long to include, but pretty useful in case you have to debug: 
+<p>It will be way too long to include, but pretty useful in case you have to debug: 
 <a href="https://gist.github.com/BlackMetalz/dab403875c8433a800c7b61a57df2a3e">Github Gist</a></p>
 <h1>Service Discovery and DNS</h1>
 <p>Here's a concise and clear explanation of <strong>Service Discovery in Kubernetes</strong>:</p>
@@ -348,7 +348,7 @@ I'm assume ingress controller and backend service still running. This will retur
 <p>When a Service is created, Kubernetes automatically creates an <strong>Endpoint</strong> object that maps the Service to the IPs of its associated Pods.</p>
 </li>
 <li>
-<p>If your Deployment has 2 Pods, the Endpoint will list 2 IPs of pod. This updates dynamically when Pods are added, removed, or replaced.</p>
+<p>If your Deployment has 2 Pods, the Endpoint will list 2 IPs of the pod. This updates dynamically when Pods are added, removed, or replaced.</p>
 </li>
 <li>
 <p>K8S restricts endpoints to 1000.</p>
@@ -373,12 +373,12 @@ I'm assume ingress controller and backend service still running. This will retur
 <p>When a Pod is started, Kubernetes injects <strong>environment variables</strong> into the container with information about Services in the same namespace.</p>
 </li>
 <li>
-<p>All Services in the same namespace that exist before the Pod starts will have their information injected into the Pod's environment variables. These environment variables will include:
+<p>All Services in the same namespace that exists before the Pod starts will have their information injected into the Pod's environment variables. These environment variables will include:
 <code>&lt;SERVICE_NAME&gt;_SERVICE_HOST: The Service's cluster IP.
 &lt;SERVICE_NAME&gt;_SERVICE_PORT: The Service's port.</code></p>
 </li>
 <li>
-<p>You can check by get all services and run command <code>env</code> in a container.</p>
+<p>You can check by getting all services and running the command <code>env</code> in a container.</p>
 </li>
 </ul>
 </li>
@@ -461,13 +461,13 @@ if the Service is named <code>my-app</code> and in the same namespace (<code>def
 <ul>
 <li>It watches K8S Api for new services, it will creates a DNS record</li>
 </ul>
-<h4>More note about Service:</h4>
+<h4>More notes about the Service:</h4>
 <ul>
 <li>When a Service is created with a selector, Kubernetes automatically creates an Endpoints object and populates it with the IPs and ports of Pods that match the selector. Whenever the set of Pods matching the selector changes, the Endpoints object is automatically updated.</li>
 </ul>
 <h1>Conclusion:</h1>
 <ul>
-<li>with help of chatGPT, some explanation much better</li>
+<li>with the help of chatGPT, some explanations are much better</li>
 <li>re-memorized for my knowledge about k8s networking</li>
 </ul>
 <h1>What's next in part 2?</h1>

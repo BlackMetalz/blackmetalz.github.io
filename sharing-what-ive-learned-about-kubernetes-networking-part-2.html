@@ -81,12 +81,12 @@
 <h1>CNI</h1>
 <h3>What is CNI:</h3>
 <ul>
-<li>Is a framework for configuring network interfaces in Linux container , providing connectivity and ensure network isolation.</li>
-<li>CNI Plugin standarize and simplify Kubernetes networking.</li>
+<li>Is a framework for configuring network interfaces in Linux containers, providing connectivity, and ensuring network isolation.</li>
+<li>CNI Plugin standardizes and simplifies Kubernetes networking.</li>
 </ul>
 <h3>How CNI Works:</h3>
 <ul>
-<li>CNI works by invoke network plugin that handle network configuration for containers. When a container is created, the container runtime call the CNI plugin to setup the container network interface</li>
+<li>CNI works by invoking a network plugin that handles network configuration for containers. When a container is created, the container runtime calls the CNI plugin to set the container network interface.</li>
 <li>Works in K8S:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="n">Kube</span><span class="w"> </span><span class="n">API</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Kubelet</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Container</span><span class="w"> </span><span class="n">Runtime</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">create</span><span class="w"> </span><span class="n">container</span><span class="p">,</span><span class="w"> </span><span class="n">network</span><span class="w"> </span><span class="n">namespace</span>
@@ -97,7 +97,7 @@
 <ul>
 <li>A Json configuration file that specifies the desired network setup.</li>
 <li>Standard commands: ADD, DEL, CHECK to manage network interfaces.</li>
-<li>Plugin must handle these command and return results in predefined format.</li>
+<li>The plugin must handle these commands and return results in a  predefined format.</li>
 </ul>
 <h3>CNI community popularity:</h3>
 <p>The following table summarizes different GitHub metrics to give you an idea of each project's popularity and activity levels. This data was collected in December 2024.</p>
@@ -167,11 +167,11 @@ Cilium offers robust observability features through <code>Hubble</code>, which p
 </li>
 </ul>
 <h3>eBPF explain</h3>
-<p>I think you haven't understand clear about eBPF (so am i), so i tried to spent time to read document, try to understand it and explain it here xD.</p>
+<p>I think you haven't understood clearly about eBPF (so am i), so i tried to spend time reading the document, trying to understand it and explain it here xD.</p>
 <h4>1. <strong>Think of it as a plugin system for the kernel</strong> that can help with monitoring, networking, and security:</h4>
 <ul>
 <li>Observe: Watch what’s happening inside the system (e.g., track network packets, file operations, etc.).</li>
-<li>Act: Modify or filter data in real-time (e.g., drop a suspicious network packet).</li>
+<li>Act: Modify or filter data in real time (e.g., drop a suspicious network packet).</li>
 </ul>
 <h4>2. <strong>Why is it useful?</strong>:</h4>
 <p>Normally, to add new functionality to the Linux kernel, you'd have to rebuild or modify the kernel—a risky and complex task. eBPF solves this by:
@@ -182,7 +182,7 @@ Cilium offers robust observability features through <code>Hubble</code>, which p
 <ul>
 <li>Every day, it processes letters (network packets, file reads, system events).</li>
 <li>If you wanted to filter out spam mail (e.g., suspicious packets), you'd normally need to rewrite the post office's internal processes (modify the kernel).</li>
-<li>But with eBPF, you can simply write a small "mailroom plugin" that works alongside the post office to filter spam as the letters pass through—without changing how the post office works.</li>
+<li>But with eBPF, you can simply write a small "mailroom plugin" that works alongside the post office to filter spam as the letters pass through without changing how the post office works.</li>
 </ul>
 <h4>4. <strong>Example: Network Packet Filtering</strong>. Let’s say you want to block network packets coming from a suspicious IP address.</h4>
 <ul>
@@ -202,8 +202,8 @@ Cilium offers robust observability features through <code>Hubble</code>, which p
 </ul>
 </li>
 </ul>
-<h4>5. <strong>Additional example to how network packet filter</strong>:</h4>
-<p>I think i need some example code for easier imagination, same method which i used for better understand the issue.</p>
+<h4>5. <strong>Additional example of how network packet filter</strong>:</h4>
+<p>I think i need some example code for easier imagination, the same method which i used to better understand the issue.</p>
 <ul>
 <li><strong>Install required for Debian-based system</strong>:</li>
 </ul>
@@ -292,7 +292,7 @@ This will load the eBPF program and attach it to the specified network interface
 </ol>
 </li>
 </ul>
-<p><strong>P/s: This is generated from Copilot xD</strong>, but it should give idea why eBPF is strong and useful.</p>
+<p><strong>P/s: This is generated from Copilot xD</strong>, but it should give an idea of why eBPF is strong and useful.</p>
 <h3>Cilium eBPF</h3>
 <ul>
 <li>First, i think you need to check Cilium is enable in hybrid mode or strict mode or not</li>
@@ -308,13 +308,13 @@ This will load the eBPF program and attach it to the specified network interface
 
 <ul>
 <li>
-<p>Second, check kernel support or not: Cilium generally requires a kernel version &gt;= 4.19 for basic eBPF functionality and &gt;= 5.4 for kube-proxy replacement. So it will mostly about supported xD</p>
+<p>Second, check kernel support or not: Cilium generally requires a kernel version &gt;= 4.19 for basic eBPF functionality and &gt;= 5.4 for kube-proxy replacement. So it will mostly be about supported xD</p>
 </li>
 <li>
-<p>Third, lets focus into main objective.</p>
+<p>Third, let's focus on the main objective.</p>
 <ul>
 <li>Cilium with eBPF is generally faster than iptables. eBPF (extended Berkeley Packet Filter) allows Cilium to dynamically insert code into the Linux kernel, enabling efficient packet processing and security enforcement. This approach reduces the overhead associated with traditional iptables-based packet filtering and routing.</li>
-<li>Iptables operates in user space and relies on a series of rules to manage network traffic, which can become complex and slow as the number of rules increases. In contrast, eBPF operates in the kernel space, allowing for more direct and efficient handling of network packets. This results in lower latency and higher throughput, making Cilium with eBPF a more performant solution for Kubernetes networking.</li>
+<li>Iptables operate in user space and rely on a series of rules to manage network traffic, which can become complex and slow as the number of rules increases. In contrast, eBPF operates in the kernel space, allowing for more direct and efficient handling of network packets. This results in lower latency and higher throughput, making Cilium with eBPF a more performant solution for Kubernetes networking.</li>
 </ul>
 </li>
 </ul>
@@ -330,7 +330,7 @@ This will load the eBPF program and attach it to the specified network interface
 </ul>
 </li>
 </ul>
-<p>More example can be found in here: <a href="https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf">replacing_iptables_with_ebpf</a></p>
+<p>More examples can be found here: <a href="https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf">replacing_iptables_with_ebpf</a></p>
 <h3>Common commands of cilium</h3>
 <div class="highlight"><pre><span></span><code>cilium-health status
 cilium status
@@ -338,12 +338,12 @@ cilium status
 
 <h3>Cilium Observability: Hubble</h3>
 <ul>
-<li>There are many way to enable Hubble and Hubble UI, so i won't talk details in here.</li>
+<li>There are many ways to enable Hubble and Hubble UI, so i won't talk details here.</li>
 <li>View network flows in real-time: <code>hubble observe</code></li>
-<li>Port forward to use hubble UI: <code>kubectl port-forward -n kube-system svc/hubble-ui 12000:80</code>
+<li>Port forward to use Hubble UI: <code>kubectl port-forward -n kube-system svc/hubble-ui 12000:80</code>
 <img alt="alt text" src="images/2025/01/20th_1.png"></li>
 <li>
-<p>As you can see, very useful for Observability, debugging and tracing!, even more it show which packet get dropped so we can have idea where to check, at this point it is caused by CNP (Cilium Network Policy)
+<p>As you can see, very useful for Observability, debugging, and tracing!, even more, it shows which packets get dropped so we can have an  idea of where to check, at this point, it is caused by CNP (Cilium Network Policy).
 <img alt="alt text" src="images/2025/01/20th_2.png"></p>
 </li>
 <li>
@@ -440,7 +440,7 @@ cilium status
 <span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api&quot;</span>
 </code></pre></div>
 
-<p>Above is just an example xD, and CiliumNetworkPolicy may not works because i copied somewhere for the content. For real example, lets continue read below xDD.</p>
+<p>The above is just an example xD, and CiliumNetworkPolicy may not work because i copied somewhere for the content. For a real example, let's continue to read below xDD.</p>
 <ul>
 <li><strong>Key Differences</strong>:<ul>
 <li>Layer 7 Policies: Cilium supports L7 policies (e.g., HTTP methods and paths), while Kubernetes network policies are limited to L3/L4 (IP and port).</li>
@@ -448,7 +448,7 @@ cilium status
 </ul>
 </li>
 </ul>
-<h3>Real example of Cilium Network policies</h3>
+<h3>A real example of Cilium Network policies</h3>
 <ul>
 <li>Before i'm able to write this, i wasted 3-4 hours for checking and testing why we can't have rules that allow both allow / deny. Simply it doesn't support &gt;.&gt;</li>
 </ul>
@@ -509,12 +509,12 @@ spec:
 <span class="n">command</span><span class="w"> </span><span class="n">terminated</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="n">code</span><span class="w"> </span>
 </code></pre></div>
 
-<p>Specials thanks to <code>isovalent.com</code> for the tutorials xD ( included reference link below)</p>
+<p>Specials thanks <code>isovalent.com</code> for the tutorials xD ( included reference link below)</p>
 <h1>Conclusion</h1>
 <ul>
-<li>I was little hard time to understand, but in the end, mostly i get it at some percent xD</li>
-<li>K8S is complicated, understand small part will leads to bigger part. Just don't give up, keep going!</li>
-<li>Learning with ChatGPT and Copilot is faster than do research with only yourself! </li>
+<li>I had a little hard time understanding, but in the end, mostly i got it at some percent xD.</li>
+<li>K8S is complicated, understand a small part will lead to a bigger part. Just don't give up, keep going!</li>
+<li>Learning with ChatGPT and Copilot is faster than doing research with only yourself!</li>
 </ul>
 <h1>Reference:</h1>
 <ul>
