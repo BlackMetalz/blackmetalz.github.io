@@ -488,7 +488,9 @@ spec:
             path: &quot;/employees.*&quot;
 </code></pre></div>
 
-<p>Lets go for testing: if the path is simple <code>path: "/employees"</code>. The request to <code>python-api-app-production.python-app.svc:5000/employees/1</code> will be denied!</p>
+<ul>
+<li>Lets go for testing, if the path is simple <strong>path: "/employees"</strong>. The request to <strong>python-api-app-production.python-app.svc:5000/employees/1</strong> will be denied!</li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="c1">### Access from namespace test</span>
 <span class="n">k</span><span class="w"> </span><span class="n">exec</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="n">kienlt</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">tools</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="s2">&quot;python-api-app-production.python-app.svc:5000/employees&quot;</span>
 <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Ashley&quot;</span><span class="p">},{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Kate&quot;</span><span class="p">},{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Joe&quot;</span><span class="p">}]</span>
