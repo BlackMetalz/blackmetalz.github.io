@@ -88,7 +88,7 @@ So how many types of Services? There are 4 types:</p>
 <p><strong>ClusterIP</strong>: Exposes the Service on a cluster-internal IP. Choosing this value makes the Service only reachable from within the cluster. This is the default ServiceType ( if you don't define the type, it will be ClusterIP)</p>
 </li>
 <li>
-<p><strong>NodePort</strong>: Exposes the Service on each Node’s IP at a static port (the NodePort). A ClusterIP Service, to which the NodePort Service routes, is automatically created. You’ll be able to contact the NodePort Service, from outside the cluster, by requesting <NodeIP>:<NodePort>. Default port range: 30000-32767</p>
+<p><strong>NodePort</strong>: Exposes the Service on each Node’s IP at a static port (the NodePort). A ClusterIP Service, to which the NodePort Service routes, is automatically created. You’ll be able to contact the NodePort Service, from outside the cluster, by requesting <code>&lt;NodeIP&gt;:&lt;NodePort&gt;</code>. Default port range: <code>30000-32767</code></p>
 </li>
 <li>
 <p><strong>LoadBalancer</strong>: Exposes the Service externally using a cloud provider’s load balancer. NodePort and ClusterIP Services, to which the external load balancer routes, are automatically created.</p>
@@ -134,7 +134,7 @@ So how many types of Services? There are 4 types:</p>
 </ul>
 <h4>2. <strong>NodePort</strong>:</h4>
 <p>From my experience, this is the most i used when i began with k8s service expose ( that's a time i had no idea about ingress xD), so how i used it.<br></p>
-<p>Service can be accessed from any node directly with <node-ip>:<port>. This is mostly used for quick access without running port-forward or any other action and ofc you have to allow access port from the server to your IP address, i mean the firewall!</p>
+<p>Service can be accessed from any node directly with <code>&lt;node-ip&gt;:&lt;port&gt;</code>. This is mostly used for quick access without running port-forward or any other action and ofc you have to allow access port from the server to your IP address, i mean the firewall!</p>
 <ul>
 <li>For add backend to Haproxy <br></li>
 </ul>
@@ -231,7 +231,7 @@ So how many types of Services? There are 4 types:</p>
         server 10.0.0.2:80 10.0.0.2:80 check inter 1000 rise 2 fall 10
 </code></pre></div>
 
-<p>Explain: DNS will point the domain to the Haproxy server. Haproxy will forward traffic to the Ingress Controller ( 10.0.0.1 and 10.0.0.2 are Ingress Controller). Why do i know port 80 is being used?
+<p><strong>Explain</strong>: DNS will point the domain to the Haproxy server. Haproxy will forward traffic to the Ingress Controller ( 10.0.0.1 and 10.0.0.2 are Ingress Controller). Why do i know port 80 is being used?
 Because i installed nginx ingress as Daemonset, in default it used hostPort in the ports section of Daemonset</p>
 <div class="highlight"><pre><span></span><code><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">rke2</span><span class="o">-</span><span class="n">ingress</span><span class="o">-</span><span class="n">nginx</span><span class="o">-</span><span class="n">controller</span>
 <span class="n">ports</span><span class="o">:</span>
@@ -248,7 +248,7 @@ Because i installed nginx ingress as Daemonset, in default it used hostPort in t
 <span class="w">  </span><span class="n">protocol</span><span class="o">:</span><span class="w"> </span><span class="n">TCP</span>
 </code></pre></div>
 
-<p>And why do i use 80 not 443?, for not double encrypt, because in Haproxy it redirected requests to HTTPS, so extra SSL is not necessary and may increase extra CPU load.</p>
+<p>And why do i use 80 not 443?, for not double encrypt, because in Haproxy it redirected requests to HTTPS, so extra SSL is not necessary and may <strong>increase extra CPU load</strong>.</p>
 <h4>Ingress workflows:</h4>
 <ul>
 <li>Ingress has routing rules to service</li>
@@ -264,12 +264,20 @@ Because i installed nginx ingress as Daemonset, in default it used hostPort in t
 
 <h4>Some common error scenarios of nginx ingress</h4>
 <p><strong>1. Missing annotation rewrite-target</strong> </br>
-I'm assume the ingress controller and backend service still running. This will return 404 errors. </br></p>
+- I'm assume the ingress controller and backend service still running. This will return 404 errors. </br></p>
+<ul>
+<li>
 <p>Specifically, the Ingress rule is set to match requests to the path /test, but without the rewrite-target annotation, the request path is not modified before being sent to the backend service.</br></p>
-<p>Why it will return a 404 error?:</br>
-- Request Path Mismatch: The Ingress rule matches requests to example.com/test and forwards them to the backend-service on port 80. </br>
-- Backend Service Path Handling: The backend service expects requests to be at the root path /, but the Ingress controller forwards the request with the original path /test </br>
-- 404 Not Found: Since the backend service does not have a handler for the /test path, it returns a 404 Not Found error. </br></p>
+</li>
+<li>
+<p>Why it will return a 404 error?:</br></p>
+<ul>
+<li>Request Path Mismatch: The Ingress rule matches requests to example.com/test and forwards them to the backend-service on port 80. </br></li>
+<li>Backend Service Path Handling: The backend service expects requests to be at the root path /, but the Ingress controller forwards the request with the original path /test </br></li>
+<li>404 Not Found: Since the backend service does not have a handler for the /test path, it returns a 404 Not Found error. </br></li>
+</ul>
+</li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># misconfiguration</span>
 <span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
@@ -411,11 +419,13 @@ error-503             ClusterIP      10.43.196.86    &lt;none&gt;          80/TC
 error-504             ClusterIP      10.43.6.79      &lt;none&gt;          80/TCP                          2d21h
 </code></pre></div>
 
-<p>Summary:</br>
-  - <strong>Endpoint</strong> links Services to Pod IPs and dynamically updates with Pod changes.</br>
-  - Pods can discover Services using <strong>DNS names</strong> or <strong>environment variables</strong>.</br>
-  - Kubernetes automatically handles traffic routing and load balancing for Services.</br>
-This ensures seamless communication and discovery between applications running in your cluster!</p>
+<h4>Summary:</br></h4>
+<ul>
+<li><strong>Endpoint</strong> links Services to Pod IPs and dynamically updates with Pod changes.</br></li>
+<li>Pods can discover Services using <strong>DNS names</strong> or <strong>environment variables</strong>.</br></li>
+<li>Kubernetes automatically handles traffic routing and load balancing for Services.</br>
+This ensures seamless communication and discovery between applications running in your cluster!</li>
+</ul>
 <h4>How DNS Resolv address</h4>
 <p>how DNS resolution works in Kubernetes based on <code>resolv.conf</code> and the behavior for resolving <code>my-app</code>:</p>
 <p><strong>Key Points:</strong></p>
