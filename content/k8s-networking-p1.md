@@ -16,11 +16,13 @@ So how many types of Services? There are 4 types:
 
 1. **ClusterIP**: Exposes the Service on a cluster-internal IP. Choosing this value makes the Service only reachable from within the cluster. This is the default ServiceType ( if you don't define the type, it will be ClusterIP)
 
-2. **NodePort**: Exposes the Service on each Node’s IP at a static port (the NodePort). A ClusterIP Service, to which the NodePort Service routes, is automatically created. You’ll be able to contact the NodePort Service, from outside the cluster, by requesting <NodeIP>:<NodePort>. Default port range: 30000-32767
+2. **NodePort**: Exposes the Service on each Node’s IP at a static port (the NodePort). A ClusterIP Service, to which the NodePort Service routes, is automatically created. You’ll be able to contact the NodePort Service, from outside the cluster, by requesting `<NodeIP>:<NodePort>`. Default port range: `30000-32767`
 
 3. **LoadBalancer**: Exposes the Service externally using a cloud provider’s load balancer. NodePort and ClusterIP Services, to which the external load balancer routes, are automatically created.
+
     - If you're running Kubernetes on a cloud provider that supports load balancer services (like AWS, GCP, Azure), then type: LoadBalancer will work as expected.
     - If you're running Kubernetes on-premises or on a cloud provider that doesn't support load balancers, type: LoadBalancer will not work.
+
 
 4. **ExternalName**: Maps the Service to the contents of the externalName field (e.g. `my.database.example.com`), by returning a CNAME record with its value.
 
@@ -56,7 +58,7 @@ spec:
 #### 2. **NodePort**: 
 From my experience, this is the most i used when i began with k8s service expose ( that's a time i had no idea about ingress xD), so how i used it.<br>
 
-Service can be accessed from any node directly with <node-ip>:<port>. This is mostly used for quick access without running port-forward or any other action and ofc you have to allow access port from the server to your IP address, i mean the firewall!
+Service can be accessed from any node directly with `<node-ip>:<port>`. This is mostly used for quick access without running port-forward or any other action and ofc you have to allow access port from the server to your IP address, i mean the firewall!
 
 - For add backend to Haproxy <br>
 ```yaml
@@ -141,7 +143,7 @@ backend http_example.com
         server 10.0.0.1:80 10.0.0.1:80 check inter 1000 rise 2 fall 10
         server 10.0.0.2:80 10.0.0.2:80 check inter 1000 rise 2 fall 10
 ```
-Explain: DNS will point the domain to the Haproxy server. Haproxy will forward traffic to the Ingress Controller ( 10.0.0.1 and 10.0.0.2 are Ingress Controller). Why do i know port 80 is being used?
+**Explain**: DNS will point the domain to the Haproxy server. Haproxy will forward traffic to the Ingress Controller ( 10.0.0.1 and 10.0.0.2 are Ingress Controller). Why do i know port 80 is being used?
 Because i installed nginx ingress as Daemonset, in default it used hostPort in the ports section of Daemonset
 ```
 name: rke2-ingress-nginx-controller
@@ -158,7 +160,7 @@ ports:
   name: webhook
   protocol: TCP
 ```
-And why do i use 80 not 443?, for not double encrypt, because in Haproxy it redirected requests to HTTPS, so extra SSL is not necessary and may increase extra CPU load.
+And why do i use 80 not 443?, for not double encrypt, because in Haproxy it redirected requests to HTTPS, so extra SSL is not necessary and may **increase extra CPU load**.
 
 #### Ingress workflows:
 - Ingress has routing rules to service
@@ -175,14 +177,14 @@ And why do i use 80 not 443?, for not double encrypt, because in Haproxy it redi
 #### Some common error scenarios of nginx ingress
 
 **1. Missing annotation rewrite-target** </br>
-I'm assume the ingress controller and backend service still running. This will return 404 errors. </br>
+- I'm assume the ingress controller and backend service still running. This will return 404 errors. </br>
 
-Specifically, the Ingress rule is set to match requests to the path /test, but without the rewrite-target annotation, the request path is not modified before being sent to the backend service.</br>
+- Specifically, the Ingress rule is set to match requests to the path /test, but without the rewrite-target annotation, the request path is not modified before being sent to the backend service.</br>
 
-Why it will return a 404 error?:</br>
-- Request Path Mismatch: The Ingress rule matches requests to example.com/test and forwards them to the backend-service on port 80. </br>
-- Backend Service Path Handling: The backend service expects requests to be at the root path /, but the Ingress controller forwards the request with the original path /test </br>
-- 404 Not Found: Since the backend service does not have a handler for the /test path, it returns a 404 Not Found error. </br>
+- Why it will return a 404 error?:</br>
+    - Request Path Mismatch: The Ingress rule matches requests to example.com/test and forwards them to the backend-service on port 80. </br>
+    - Backend Service Path Handling: The backend service expects requests to be at the root path /, but the Ingress controller forwards the request with the original path /test </br>
+    - 404 Not Found: Since the backend service does not have a handler for the /test path, it returns a 404 Not Found error. </br>
 
 ```yaml
 # misconfiguration
@@ -308,7 +310,7 @@ error-503             ClusterIP      10.43.196.86    <none>          80/TCP     
 error-504             ClusterIP      10.43.6.79      <none>          80/TCP                          2d21h
 ```
 
-Summary:</br>
+#### Summary:</br>
   - **Endpoint** links Services to Pod IPs and dynamically updates with Pod changes.</br>
   - Pods can discover Services using **DNS names** or **environment variables**.</br>
   - Kubernetes automatically handles traffic routing and load balancing for Services.</br>
