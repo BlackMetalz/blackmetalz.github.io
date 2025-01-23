@@ -38,9 +38,9 @@ The following table summarizes different GitHub metrics to give you an idea of e
 
 # Cilium CNI
 ### What is Cilium
-- Cilium is an open-source networking and security solution designed for Kubernetes and other container orchestration platforms. Its primary purpose is to provide secure and efficient network connectivity between application services deployed in cloud-native environments. Cilium leverages eBPF (extended Berkeley Packet Filter) technology to dynamically insert code into the Linux kernel, enabling high-performance packet processing and security enforcement.
+Cilium is an open-source networking and security solution designed for Kubernetes and other container orchestration platforms. Its primary purpose is to provide secure and efficient network connectivity between application services deployed in cloud-native environments. Cilium leverages `eBPF` (extended Berkeley Packet Filter) technology to dynamically insert code into the Linux kernel, enabling high-performance packet processing and security enforcement.
 
-As a comprehensive CNI (Container Network Interface) plugin, Cilium offers advanced networking features, robust security policies, and deep observability capabilities. These features make it an ideal choice for modern cloud-native applications that require scalable and secure network infrastructure.
+As a CNI (Container Network Interface) plugin, Cilium offers advanced networking features, robust security policies, and deep observability capabilities. These features make it an ideal choice for modern cloud-native applications that require scalable and secure network infrastructure.
 
 ### Key Features
 - **eBPF**
@@ -50,42 +50,124 @@ Cilium uses eBPF to dynamically insert code into the Linux kernel, enabling effi
 Cilium implements Kubernetes Network Policies and extends them with more advanced features, allowing fine-grained control over network traffic.
 
 - **Service Mesh Integration**
-Cilium integrates seamlessly with service meshes like Istio, providing enhanced networking capabilities and security.
+Cilium integrates seamlessly with service meshes like Istio, providing enhanced networking capabilities and security. ( right now i have no idea about this. xD)
 
 - **Observability**
-Cilium offers robust observability features through Hubble, which provides deep visibility into network traffic and security events.
+Cilium offers robust observability features through `Hubble`, which provides deep visibility into network traffic and security events.
 
 ### eBPF explain
-I think you haven't understand clear about eBPF ( so am i), so i spend time to read document, try to understand it and explain it here xD.
+I think you haven't understand clear about eBPF (so am i), so i tried to spent time to read document, try to understand it and explain it here xD.
 
-1. `Think of it as a plugin system for the kernel` that can help with monitoring, networking, and security:
-    - Observe: Watch what’s happening inside the system (e.g., track network packets, file operations, etc.).
-    - Act: Modify or filter data in real-time (e.g., drop a suspicious network packet).
+#### 1. **Think of it as a plugin system for the kernel** that can help with monitoring, networking, and security:
+- Observe: Watch what’s happening inside the system (e.g., track network packets, file operations, etc.).
+- Act: Modify or filter data in real-time (e.g., drop a suspicious network packet).
 
-
-2. `Why is it useful?`: 
+#### 2. **Why is it useful?**: 
 Normally, to add new functionality to the Linux kernel, you'd have to rebuild or modify the kernel—a risky and complex task. eBPF solves this by:
-    - Letting you "inject" tiny programs dynamically.
-    - Running these programs in a safe sandbox to ensure they can’t crash or harm the system.
-    - Being fast because the programs run directly inside the kernel.
+- Letting you "inject" tiny programs dynamically.
+- Running these programs in a safe sandbox to ensure they can’t crash or harm the system.
+- Being fast because the programs run directly inside the kernel.
 
+#### 3. **Simple Analogy**: Imagine the Linux kernel is a busy post office:
+- Every day, it processes letters (network packets, file reads, system events).
+- If you wanted to filter out spam mail (e.g., suspicious packets), you'd normally need to rewrite the post office's internal processes (modify the kernel).
+- But with eBPF, you can simply write a small "mailroom plugin" that works alongside the post office to filter spam as the letters pass through—without changing how the post office works.
 
-3. `Simple Analogy`: Imagine the Linux kernel is a busy post office:
-    - Every day, it processes letters (network packets, file reads, system events).
-    - If you wanted to filter out spam mail (e.g., suspicious packets), you'd normally need to rewrite the post office's internal processes (modify the kernel).
-    - But with eBPF, you can simply write a small "mailroom plugin" that works alongside the post office to filter spam as the letters pass through—without changing how the post office works.
+#### 4. **Example: Network Packet Filtering**. Let’s say you want to block network packets coming from a suspicious IP address.
+- **Without eBPF**:
+    - You might need to install complex tools or write custom firewall rules.
+    - Or, you’d need to modify the kernel, which is risky.
+- **With eBPF**:
+    - You write a small eBPF program in C or a high-level language like Python (with libraries like bcc or libbpf).
+    - This program runs inside the kernel and checks every network packet:
+        - If the packet’s source IP matches the bad one, the program drops it.
+        - Otherwise, it lets the packet through.
+    - You load the eBPF program dynamically using tools like bpftool.
 
+#### 5. **Additional example to how network packet filter**:
+I think i need some example code for easier imagination, same method which i used for better understand the issue.
 
-4. `Example: Network Packet Filtering`. Let’s say you want to block network packets coming from a suspicious IP address.
-    - `Without eBPF`:
-        - You might need to install complex tools or write custom firewall rules.
-        - Or, you’d need to modify the kernel, which is risky.
-    - `With eBPF`:
-        - You write a small eBPF program in C or a high-level language like Python (with libraries like bcc or libbpf).
-        - This program runs inside the kernel and checks every network packet:
-            - If the packet’s source IP matches the bad one, the program drops it.
-            - Otherwise, it lets the packet through.
-        - You load the eBPF program dynamically using tools like bpftool.
+- **Install required for Debian-based system**:
+```
+sudo apt-get install bpfcc-tools linux-headers-$(uname -r)
+sudo apt-get install python3-bpfcc
+```
+
+- **Write the eBPF Program**:
+Create a file called filter.c containing the eBPF program. This program checks the destination port of each packet and drops packets destined for port 3306.
+
+```C
+#include <uapi/linux/bpf.h>
+#include <uapi/linux/if_ether.h>
+#include <uapi/linux/ip.h>
+#include <uapi/linux/tcp.h>
+
+int drop_port_3306(struct __sk_buff *skb) {
+    // Get the Ethernet header
+    struct ethhdr *eth = bpf_hdr_pointer(skb);
+    if (!eth) return 0;
+
+    // Check if the packet is an IP packet
+    if (eth->h_proto != htons(ETH_P_IP)) return 0;
+
+    struct iphdr *ip = bpf_hdr_pointer(skb, sizeof(*eth));
+    if (!ip) return 0;
+
+    // Check if the packet is a TCP packet
+    if (ip->protocol != IPPROTO_TCP) return 0;
+
+    struct tcphdr *tcp = bpf_hdr_pointer(skb, sizeof(*eth) + sizeof(*ip));
+    if (!tcp) return 0;
+
+    // Check if the destination port is 3306
+    if (tcp->dest == htons(3306)) {
+        // Drop the packet
+        return TC_ACT_SHOT;
+    }
+
+    // Allow the packet
+    return TC_ACT_OK;
+}
+```
+
+- **Load and Attach the eBPF Program**:
+Create a Python script filter.py that uses the bcc library to load and attach the eBPF program to the network interface.
+```python
+from bcc import BPF
+
+# Load the eBPF program from the C file
+b = BPF(src_file="filter.c", cflags=["-w"])
+function_skb = b.load_func("drop_port_3306", BPF.SCHED_CLS)
+
+# Attach the eBPF program to the network interface (e.g., eth0)
+INTERFACE = "eth0"
+b.attach_skb_filter(function_skb, INTERFACE)
+
+print(f"eBPF program loaded and attached to {INTERFACE}.")
+print("Dropping packets destined for port 3306...")
+
+try:
+    b.trace_print()
+except KeyboardInterrupt:
+    print("Detaching program and exiting...")
+    b.remove_skb_filter(function_skb, INTERFACE)
+```
+
+- **Explanation**:
+    - **filter.c**: This file contains the eBPF program written in C. It checks if the packet is an IP packet and a TCP packet. It then checks if the destination port is 3306 and drops the packet if true.
+    - **filter.py**: This Python script uses the bcc library to load the eBPF program from filter.c and attach it to a network interface (e.g., eth0). The trace_print function prints trace messages until the program is interrupted
+
+- **Running the Program**:
+    1. Save the eBPF program in a file named filter.c.
+    2. Save the Python script in a file named filter.py.
+    3. Run the Python script using:
+    ```sh
+    sudo python3 filter.py
+    ```
+This will load the eBPF program and attach it to the specified network interface (`eth0`), dropping any packet destined for port 3306.
+
+**P/s: This is generated from Copilot xD**, but it should give idea why eBPF is strong and useful.
+
 ### Cilium eBPF
 - First, i think you need to check Cilium is enable in hybrid mode or strict mode or not
 ```
@@ -125,7 +207,29 @@ cilium status
 - View network flows in real-time: `hubble observe`
 - Port forward to use hubble UI: `kubectl port-forward -n kube-system svc/hubble-ui 12000:80`
 ![alt text](images/2025/01/20th_1.png)
-As you can see, very useful for Observability, debugging and tracing!
+- As you can see, very useful for Observability, debugging and tracing!, even more it show which packet get dropped so we can have idea where to check, at this point it is caused by CNP (Cilium Network Policy)
+![alt text](images/2025/01/20th_2.png)
+
+- For CLI mode which i prefer for debugging xD
+```plain
+# Show full info with follow
+hubble observe -f
+Jan 23 09:14:11.844: 10.42.2.237:45738 (remote-node) <> cattle-monitoring-system/rancher-monitoring-prometheus-adapter-67bc4c68b6-v4txm:6443 (ID:45221) to-overlay FORWARDED (TCP Flags: ACK, PSH)
+Jan 23 09:14:11.844: 10.42.2.237:45738 (host) -> cattle-monitoring-system/rancher-monitoring-prometheus-adapter-67bc4c68b6-v4txm:6443 (ID:45221) to-overlay FORWARDED (TCP Flags: ACK, PSH)
+Jan 23 09:14:11.844: 10.0.0.1:59934 (host) -> 10.0.0.2:8472 (remote-node) to-network FORWARDED (UDP)
+# Filter for specific from pod:  hubble observe --from-pod <namespace>/<pod-name>.
+# But it doesn't show packet is dropped duo Cilium network policy (continue read and you will see)
+Jan 23 09:36:09.436: default/kienlt-linux-tools:39036 (ID:46060) -> kube-system/rke2-coredns-rke2-coredns-565dfc7d75-78ql9:53 (ID:8648) policy-verdict:all INGRESS ALLOWED (UDP)
+Jan 23 09:36:09.436: default/kienlt-linux-tools:39036 (ID:46060) -> kube-system/rke2-coredns-rke2-coredns-565dfc7d75-78ql9:53 (ID:8648) to-endpoint FORWARDED (UDP)
+Jan 23 09:36:09.436: default/kienlt-linux-tools:39036 (ID:46060) <> kube-system/rke2-coredns-rke2-coredns-565dfc7d75-78ql9 (ID:8648) pre-xlate-rev TRACED (UDP)
+Jan 23 09:36:09.436: default/kienlt-linux-tools:39036 (ID:46060) <> kube-system/rke2-coredns-rke2-coredns-565dfc7d75-78ql9 (ID:8648) pre-xlate-rev TRACED (UDP)
+Jan 23 09:36:09.440: default/kienlt-linux-tools:54729 (ID:46060) -> kube-system/rke2-coredns-rke2-coredns-565dfc7d75-78ql9:53 (ID:8648) policy-verdict:all INGRESS ALLOWED (UDP)
+Jan 23 09:36:09.440: default/kienlt-linux-tools:54729 (ID:46060) -> kube-system/rke2-coredns-rke2-coredns-565dfc7d75-78ql9:53 (ID:8648) to-endpoint FORWARDED (UDP)
+Jan 23 09:36:09.440: default/kienlt-linux-tools:54729 (ID:46060) <> kube-system/rke2-coredns-rke2-coredns-565dfc7d75-78ql9 (ID:8648) pre-xlate-rev TRACED (UDP)
+Jan 23 09:36:09.440: default/kienlt-linux-tools:54729 (ID:46060) <> kube-system/rke2-coredns-rke2-coredns-565dfc7d75-78ql9 (ID:8648) pre-xlate-rev TRACED (UDP)
+
+```
+
 
 # Cilium Network policies
 ### Comparison
@@ -267,6 +371,9 @@ Specials thanks to `isovalent.com` for the tutorials xD ( included reference lin
 
 
 # Conclusion
+- I was little hard time to understand, but in the end, mostly i get it at some percent xD
+- K8S is complicated, understand small part will leads to bigger part. Just don't give up, keep going!
+- Learning with ChatGPT and Copilot is faster than do research with only yourself! 
 
 # Reference:
 - [https://ranchermanager.docs.rancher.com/](https://ranchermanager.docs.rancher.com/)
