@@ -350,7 +350,7 @@ options ndots:5
 if the Service is named `my-app` and in the same namespace (`default`), typing `my-app` will resolve to `my-app.default.svc.cluster.local`. This is thanks to the search domain and Kubernetes DNS configuration.
 
 #### CoreDNS:
-- It watches K8S Api for new services, it will create a DNS record
+- It watches K8S Api for new services, it will creates a DNS record
 
 #### More notes about the Service:
 - When a Service is created with a selector, Kubernetes automatically creates an Endpoints object and populates it with the IPs and ports of Pods that match the selector. Whenever the set of Pods matching the selector changes, the Endpoints object is automatically updated.

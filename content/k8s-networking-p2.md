@@ -169,7 +169,7 @@ This will load the eBPF program and attach it to the specified network interface
 **P/s: This is generated from Copilot xD**, but it should give an idea of why eBPF is strong and useful.
 
 ### Cilium eBPF
-- First, i think you need to check Cilium is enable in hybrid mode or strict mode or not
+- First, i think you need to check if Cilium is enabled in hybrid mode or strict mode or not
 ```
 kubectl -n kube-system edit configmap cilium-config
 ```
@@ -196,7 +196,7 @@ Looks for line `kube-proxy-replacement`, if it is empty (`""`), it is running in
 
 More examples can be found here: [replacing_iptables_with_ebpf](https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf)
 
-### Common commands of cilium
+### Common commands of the cilium
 ```
 cilium-health status
 cilium status
@@ -310,7 +310,7 @@ The above is just an example xD, and CiliumNetworkPolicy may not work because i 
     
 
 ### A real example of Cilium Network policies
-- Before i'm able to write this, i wasted 3-4 hours for checking and testing why we can't have rules that allow both allow / deny. Simply it doesn't support >.>
+- Before I'm able to write this, i wasted 3-4 hours for checking and testing why we can't have rules that allow both allow/deny. Simply it doesn't support >.>
 ```
 Cilium L7 policies do not directly support explicit deny rules for specific HTTP paths or methods at the moment. Instead, they operate on an allowlist-only model, meaning:
 
@@ -320,7 +320,7 @@ Cilium L7 policies do not directly support explicit deny rules for specific HTTP
 This can feel limiting when you're looking for explicit deny functionality. However, there are ways to handle this situation effectively depending on your use case.
 ```
 
-- **Real Example**: Rule that allow access only path /employees from namespace `test`
+- **Real Example**: Rule that allows access only path /employees from namespace `test`
 ```
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
@@ -367,7 +367,7 @@ nc: python-api-app-production.python-app.svc (10.43.67.70:5000): Operation timed
 command terminated with exit code 
 ```
 
-Specials thanks `isovalent.com` for the tutorials xD ( included reference link below)
+Specials thanks to `isovalent.com` for the tutorials xD ( included reference link below)
 
 
 # Conclusion
