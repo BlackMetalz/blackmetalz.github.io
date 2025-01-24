@@ -320,7 +320,7 @@ Cilium L7 policies do not directly support explicit deny rules for specific HTTP
 This can feel limiting when you're looking for explicit deny functionality. However, there are ways to handle this situation effectively depending on your use case.
 ```
 
-- **Real Example**: Rule that allows access only path /employees from namespace `test`
+- **Real Example**: Rule that allows access only path /employees from namespace `test` to namespace `python-app`
 ```
 apiVersion: "cilium.io/v2"
 kind: CiliumNetworkPolicy
