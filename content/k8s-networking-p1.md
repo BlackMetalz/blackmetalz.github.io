@@ -60,7 +60,7 @@ From my experience, this is the most i used when i began with k8s service expose
 
 Service can be accessed from any node directly with `<node-ip>:<port>`. This is mostly used for quick access without running port-forward or any other action and ofc you have to allow access port from the server to your IP address, i mean the firewall!
 
-- For add backend to Haproxy <br>
+- For adding backend to Haproxy <br>
 ```yaml
 backend http_backend-name-here
         mode    http
@@ -70,7 +70,7 @@ backend http_backend-name-here
         server 10.0.0.2:32332 10.0.0.2:32332 check inter 4000 rise 2 fall 10
 ```
 
-- Used it as target for Upstream in Kong - Apigateway <br>
+- Used it as a target for Upstream in Kong - API Gateway <br>
 ![alt text](images/2025/01/17th_2.png)
 
 #### 3. LoadBalancer:
@@ -79,7 +79,7 @@ At this time, i don't use K8s in the cloud yet. I will update you when i finish 
 #### 4. ExternalName
 When i learned this for the first time or second time, i didn't really know why it gonna being used, but after several times i got this.
 
-- For consistency, when you change the domain of an external name, it takes only 5–10s seconds to update in the container without restart. You don't have to restart the container to take the changes, if you mount config from ConfigMap or Secret, you will have to restart pod xD.
+- For consistency, when you change the domain of an external name, it takes only 5–10 seconds to update in the container without restarting. You don't have to restart the container to take the changes, if you mount config from ConfigMap or Secret, you will have to restart pod xD.
 
 - Leverages K8S internal DNS resolution, you don't need any external DNS server. K8S acts as a DNS Server at this point xD.
 
@@ -135,7 +135,7 @@ spec:
               number: 80
 ``` 
 Haproxy config
-```
+```yaml
 backend http_example.com
         mode    http
         option forwardfor header X-Client-RIP
@@ -145,7 +145,7 @@ backend http_example.com
 ```
 **Explain**: DNS will point the domain to the Haproxy server. Haproxy will forward traffic to the Ingress Controller ( 10.0.0.1 and 10.0.0.2 are Ingress Controller). Why do i know port 80 is being used?
 Because i installed nginx ingress as Daemonset, in default it used hostPort in the ports section of Daemonset
-```
+```yaml
 name: rke2-ingress-nginx-controller
 ports:
 - containerPort: 80
@@ -177,7 +177,7 @@ And why do i use 80 not 443?, for not double encrypt, because in Haproxy it redi
 #### Some common error scenarios of nginx ingress
 
 **1. Missing annotation rewrite-target** </br>
-- I'm assume the ingress controller and backend service still running. This will return 404 errors. </br>
+- I'm assuming the ingress controller and backend service still running. This will return 404 errors. </br>
 
 - Specifically, the Ingress rule is set to match requests to the path /test, but without the rewrite-target annotation, the request path is not modified before being sent to the backend service.</br>
 
@@ -299,7 +299,7 @@ ERROR_503_SERVICE_PORT=80
 ERROR_504_PORT=tcp://10.43.6.79:80
 ```
 
-  - With following services.
+  - With the following services.
 ```
 # kubectl get svc
 NAME                  TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                         AGE
@@ -316,8 +316,8 @@ error-504             ClusterIP      10.43.6.79      <none>          80/TCP     
   - Kubernetes automatically handles traffic routing and load balancing for Services.</br>
 This ensures seamless communication and discovery between applications running in your cluster!
 
-#### How DNS Resolv address
-how DNS resolution works in Kubernetes based on `resolv.conf` and the behavior for resolving `my-app`:
+#### How DNS Resolv addresses
+how DNS resolution works in Kubernetes based on `resolv.conf` the behavior for resolving `my-app`:
 
 **Key Points:**
 
@@ -350,7 +350,7 @@ options ndots:5
 if the Service is named `my-app` and in the same namespace (`default`), typing `my-app` will resolve to `my-app.default.svc.cluster.local`. This is thanks to the search domain and Kubernetes DNS configuration.
 
 #### CoreDNS:
-- It watches K8S Api for new services, it will creates a DNS record
+- It watches K8S Api for new services, it will create a DNS record
 
 #### More notes about the Service:
 - When a Service is created with a selector, Kubernetes automatically creates an Endpoints object and populates it with the IPs and ports of Pods that match the selector. Whenever the set of Pods matching the selector changes, the Endpoints object is automatically updated.
