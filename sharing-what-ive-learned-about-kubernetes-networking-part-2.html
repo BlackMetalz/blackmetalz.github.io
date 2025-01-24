@@ -295,7 +295,7 @@ This will load the eBPF program and attach it to the specified network interface
 <p><strong>P/s: This is generated from Copilot xD</strong>, but it should give an idea of why eBPF is strong and useful.</p>
 <h3>Cilium eBPF</h3>
 <ul>
-<li>First, i think you need to check Cilium is enable in hybrid mode or strict mode or not</li>
+<li>First, i think you need to check if Cilium is enabled in hybrid mode or strict mode or not</li>
 </ul>
 <div class="highlight"><pre><span></span><code>kubectl -n kube-system edit configmap cilium-config
 </code></pre></div>
@@ -331,7 +331,7 @@ This will load the eBPF program and attach it to the specified network interface
 </li>
 </ul>
 <p>More examples can be found here: <a href="https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf">replacing_iptables_with_ebpf</a></p>
-<h3>Common commands of cilium</h3>
+<h3>Common commands of the cilium</h3>
 <div class="highlight"><pre><span></span><code>cilium-health status
 cilium status
 </code></pre></div>
@@ -450,7 +450,7 @@ cilium status
 </ul>
 <h3>A real example of Cilium Network policies</h3>
 <ul>
-<li>Before i'm able to write this, i wasted 3-4 hours for checking and testing why we can't have rules that allow both allow / deny. Simply it doesn't support &gt;.&gt;</li>
+<li>Before I'm able to write this, i wasted 3-4 hours for checking and testing why we can't have rules that allow both allow/deny. Simply it doesn't support &gt;.&gt;</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="nv">Cilium</span><span class="w"> </span><span class="nv">L7</span><span class="w"> </span><span class="nv">policies</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">directly</span><span class="w"> </span><span class="nv">support</span><span class="w"> </span><span class="nv">explicit</span><span class="w"> </span><span class="nv">deny</span><span class="w"> </span><span class="nv">rules</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">specific</span><span class="w"> </span><span class="nv">HTTP</span><span class="w"> </span><span class="nv">paths</span><span class="w"> </span><span class="nv">or</span><span class="w"> </span><span class="nv">methods</span><span class="w"> </span><span class="nv">at</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">moment</span>.<span class="w"> </span><span class="nv">Instead</span>,<span class="w"> </span><span class="nv">they</span><span class="w"> </span><span class="nv">operate</span><span class="w"> </span><span class="nv">on</span><span class="w"> </span><span class="nv">an</span><span class="w"> </span><span class="nv">allowlist</span><span class="o">-</span><span class="nv">only</span><span class="w"> </span><span class="nv">model</span>,<span class="w"> </span><span class="nv">meaning</span>:
 
@@ -461,7 +461,7 @@ cilium status
 </code></pre></div>
 
 <ul>
-<li><strong>Real Example</strong>: Rule that allow access only path /employees from namespace <code>test</code></li>
+<li><strong>Real Example</strong>: Rule that allows access only path /employees from namespace <code>test</code></li>
 </ul>
 <div class="highlight"><pre><span></span><code>apiVersion: &quot;cilium.io/v2&quot;
 kind: CiliumNetworkPolicy
@@ -509,7 +509,7 @@ spec:
 <span class="n">command</span><span class="w"> </span><span class="n">terminated</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="n">code</span><span class="w"> </span>
 </code></pre></div>
 
-<p>Specials thanks <code>isovalent.com</code> for the tutorials xD ( included reference link below)</p>
+<p>Specials thanks to <code>isovalent.com</code> for the tutorials xD ( included reference link below)</p>
 <h1>Conclusion</h1>
 <ul>
 <li>I had a little hard time understanding, but in the end, mostly i got it at some percent xD.</li>
