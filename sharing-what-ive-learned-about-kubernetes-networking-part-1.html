@@ -136,7 +136,7 @@ So how many types of Services? There are 4 types:</p>
 <p>From my experience, this is the most i used when i began with k8s service expose ( that's a time i had no idea about ingress xD), so how i used it.<br></p>
 <p>Service can be accessed from any node directly with <code>&lt;node-ip&gt;:&lt;port&gt;</code>. This is mostly used for quick access without running port-forward or any other action and ofc you have to allow access port from the server to your IP address, i mean the firewall!</p>
 <ul>
-<li>For add backend to Haproxy <br></li>
+<li>For adding backend to Haproxy <br></li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">backend http_backend-name-here</span>
 <span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">mode    http</span>
@@ -147,7 +147,7 @@ So how many types of Services? There are 4 types:</p>
 </code></pre></div>
 
 <ul>
-<li>Used it as target for Upstream in Kong - Apigateway <br>
+<li>Used it as a target for Upstream in Kong - API Gateway <br>
 <img alt="alt text" src="images/2025/01/17th_2.png"></li>
 </ul>
 <h4>3. LoadBalancer:</h4>
@@ -156,7 +156,7 @@ So how many types of Services? There are 4 types:</p>
 <p>When i learned this for the first time or second time, i didn't really know why it gonna being used, but after several times i got this.</p>
 <ul>
 <li>
-<p>For consistency, when you change the domain of an external name, it takes only 5–10s seconds to update in the container without restart. You don't have to restart the container to take the changes, if you mount config from ConfigMap or Secret, you will have to restart pod xD.</p>
+<p>For consistency, when you change the domain of an external name, it takes only 5–10 seconds to update in the container without restarting. You don't have to restart the container to take the changes, if you mount config from ConfigMap or Secret, you will have to restart pod xD.</p>
 </li>
 <li>
 <p>Leverages K8S internal DNS resolution, you don't need any external DNS server. K8S acts as a DNS Server at this point xD.</p>
@@ -223,29 +223,29 @@ So how many types of Services? There are 4 types:</p>
 </code></pre></div>
 
 <p>Haproxy config</p>
-<div class="highlight"><pre><span></span><code>backend http_example.com
-        mode    http
-        option forwardfor header X-Client-RIP
-        balance roundrobin
-        server 10.0.0.1:80 10.0.0.1:80 check inter 1000 rise 2 fall 10
-        server 10.0.0.2:80 10.0.0.2:80 check inter 1000 rise 2 fall 10
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">backend http_example.com</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">mode    http</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">option forwardfor header X-Client-RIP</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">balance roundrobin</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">server 10.0.0.1:80 10.0.0.1:80 check inter 1000 rise 2 fall 10</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">server 10.0.0.2:80 10.0.0.2:80 check inter 1000 rise 2 fall 10</span>
 </code></pre></div>
 
 <p><strong>Explain</strong>: DNS will point the domain to the Haproxy server. Haproxy will forward traffic to the Ingress Controller ( 10.0.0.1 and 10.0.0.2 are Ingress Controller). Why do i know port 80 is being used?
 Because i installed nginx ingress as Daemonset, in default it used hostPort in the ports section of Daemonset</p>
-<div class="highlight"><pre><span></span><code><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">rke2</span><span class="o">-</span><span class="n">ingress</span><span class="o">-</span><span class="n">nginx</span><span class="o">-</span><span class="n">controller</span>
-<span class="n">ports</span><span class="o">:</span>
-<span class="o">-</span><span class="w"> </span><span class="n">containerPort</span><span class="o">:</span><span class="w"> </span><span class="mi">80</span>
-<span class="w">  </span><span class="n">hostPort</span><span class="o">:</span><span class="w"> </span><span class="mi">80</span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">http</span>
-<span class="w">  </span><span class="n">protocol</span><span class="o">:</span><span class="w"> </span><span class="n">TCP</span>
-<span class="o">-</span><span class="w"> </span><span class="n">containerPort</span><span class="o">:</span><span class="w"> </span><span class="mi">443</span>
-<span class="w">  </span><span class="n">hostPort</span><span class="o">:</span><span class="w"> </span><span class="mi">443</span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">https</span>
-<span class="w">  </span><span class="n">protocol</span><span class="o">:</span><span class="w"> </span><span class="n">TCP</span>
-<span class="o">-</span><span class="w"> </span><span class="n">containerPort</span><span class="o">:</span><span class="w"> </span><span class="mi">8443</span>
-<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">webhook</span>
-<span class="w">  </span><span class="n">protocol</span><span class="o">:</span><span class="w"> </span><span class="n">TCP</span>
+<div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rke2-ingress-nginx-controller</span>
+<span class="nt">ports</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">  </span><span class="nt">hostPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">  </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+<span class="w">  </span><span class="nt">hostPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https</span>
+<span class="w">  </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8443</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook</span>
+<span class="w">  </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
 </code></pre></div>
 
 <p>And why do i use 80 not 443?, for not double encrypt, because in Haproxy it redirected requests to HTTPS, so extra SSL is not necessary and may <strong>increase extra CPU load</strong>.</p>
@@ -264,7 +264,7 @@ Because i installed nginx ingress as Daemonset, in default it used hostPort in t
 
 <h4>Some common error scenarios of nginx ingress</h4>
 <p><strong>1. Missing annotation rewrite-target</strong> </br>
-- I'm assume the ingress controller and backend service still running. This will return 404 errors. </br></p>
+- I'm assuming the ingress controller and backend service still running. This will return 404 errors. </br></p>
 <ul>
 <li>
 <p>Specifically, the Ingress rule is set to match requests to the path /test, but without the rewrite-target annotation, the request path is not modified before being sent to the backend service.</br></p>
@@ -408,7 +408,7 @@ ERROR_504_PORT=tcp://10.43.6.79:80
 </code></pre></div>
 
 <ul>
-<li>With following services.</li>
+<li>With the following services.</li>
 </ul>
 <div class="highlight"><pre><span></span><code># kubectl get svc
 NAME                  TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                         AGE
@@ -426,8 +426,8 @@ error-504             ClusterIP      10.43.6.79      &lt;none&gt;          80/TC
 <li>Kubernetes automatically handles traffic routing and load balancing for Services.</br>
 This ensures seamless communication and discovery between applications running in your cluster!</li>
 </ul>
-<h4>How DNS Resolv address</h4>
-<p>how DNS resolution works in Kubernetes based on <code>resolv.conf</code> and the behavior for resolving <code>my-app</code>:</p>
+<h4>How DNS Resolv addresses</h4>
+<p>how DNS resolution works in Kubernetes based on <code>resolv.conf</code> the behavior for resolving <code>my-app</code>:</p>
 <p><strong>Key Points:</strong></p>
 <ol>
 <li>
@@ -469,7 +469,7 @@ options ndots:5
 if the Service is named <code>my-app</code> and in the same namespace (<code>default</code>), typing <code>my-app</code> will resolve to <code>my-app.default.svc.cluster.local</code>. This is thanks to the search domain and Kubernetes DNS configuration.</p>
 <h4>CoreDNS:</h4>
 <ul>
-<li>It watches K8S Api for new services, it will creates a DNS record</li>
+<li>It watches K8S Api for new services, it will create a DNS record</li>
 </ul>
 <h4>More notes about the Service:</h4>
 <ul>
