@@ -1,6 +1,7 @@
 ### Installation
 https://docs.getpelican.com/en/latest/install.html
 ```
+sudo apt install pelican -y
 python -m pip install "pelican[markdown]"
 ```
 
