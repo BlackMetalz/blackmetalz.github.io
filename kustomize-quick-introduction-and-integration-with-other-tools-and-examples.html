@@ -115,7 +115,7 @@
 </code></pre></div>
 
 <ul>
-<li><code>app/base/kustomization.yaml</code>:</li>
+<li><code>app/base/deployment.yaml</code>:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
@@ -139,7 +139,9 @@
 </code></pre></div>
 
 <h5><strong>Dev Overlays:</strong></h5>
-<p><code>app/overlays/dev/kustomization.yaml</code></p>
+<ul>
+<li><code>app/overlays/dev/kustomization.yaml</code></li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="nt">resources</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../base</span>
 
@@ -181,7 +183,7 @@
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
 </code></pre></div>
 
-<h5>Rest for Prod / Staging</h5>
+<h5><strong>Rest for Prod / Staging</strong></h5>
 <ul>
 <li>You just need to make a new file and directory in the correct folders:</li>
 </ul>
