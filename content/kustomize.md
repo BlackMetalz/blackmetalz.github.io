@@ -38,7 +38,7 @@ resources:
   - deployment.yaml
 ```
 
-- `app/base/kustomization.yaml`:
+- `app/base/deployment.yaml`:
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -62,7 +62,7 @@ spec:
 ```
 
 ##### **Dev Overlays:**
-`app/overlays/dev/kustomization.yaml`
+- `app/overlays/dev/kustomization.yaml`
 ```yaml
 resources:
   - ../../base
@@ -82,6 +82,7 @@ spec:
 ```
 
 ##### **Output example:**
+
 ```yaml
 # kustomize build app/overlays/dev/
 apiVersion: apps/v1
@@ -104,7 +105,8 @@ spec:
         ports:
         - containerPort: 8080
 ```
-##### Rest for Prod / Staging
+
+##### **Rest for Prod / Staging**
 - You just need to make a new file and directory in the correct folders:
 ```
 # Prod
