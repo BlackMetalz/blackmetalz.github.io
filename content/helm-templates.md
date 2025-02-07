@@ -43,7 +43,7 @@ my-chart/
 ### **2. Purpose of the templates/ Directory**
 The templates/ directory contains the Kubernetes resource templates that Helm will process before deploying. These files are written in YAML but use Go templating (`{{ ... }}`) to inject dynamic values
 
-### **3.Common Template Files**
+### **3. Common Template Files**
 `deployment.yaml`:
 
 - Defines the Deployment resource, which manages the application pods.
@@ -108,7 +108,7 @@ template:
     labels:
         {{- include "common.labels" . | nindent 8 }}
 ```
-- Output Example after using template:
+- Output Example after using the template:
 ```yaml
 # Source: app-demo/templates/deployment.yaml
 apiVersion: apps/v1
@@ -148,7 +148,7 @@ template:
 
 `NOTES.txt`: 
 
-- Provides post-installation instructions to the user after run commands, it means it will show content of `NOTES.txt`.
+- Provides post-installation instructions to the user after running commands, which means it will show the content of `NOTES.txt`.
 ```
 helm install app-demo app-demo/
 helm status app-demo
@@ -423,7 +423,7 @@ config:
 
 
 # Useful commands for developing templates
-- Show template of specific file only:
+- Show the template of the specific file only:
 ```
 helm template . --show-only templates/service.yaml
 ```
@@ -434,13 +434,13 @@ helm lint
 
 # Helm template repo:
 - [https://github.com/BlackMetalz/k8s-manifest/tree/main/helm-templates/templates](https://github.com/BlackMetalz/k8s-manifest/tree/main/helm-templates/templates)
-- Include some example with configMap, namespace, secret...
-- Example can be find in [values.yaml](https://github.com/BlackMetalz/k8s-manifest/blob/main/helm-templates/values.yaml)
+- Include some examples with configMap, namespace, secret...
+- Examples can be found in [values.yaml](https://github.com/BlackMetalz/k8s-manifest/blob/main/helm-templates/values.yaml)
 
 # Use case with helm templates
-Well, we can do a lot of thing with helm templates.
+Well, we can do a lot of things with helm templates.
 
-Use scenarios: Become general template of all helm application
+Use scenarios: Become a  general template of all helm applications - Each values file is an application in an environment
 - Each values file is a application in an environment
 ```perl
 k8s-manifest/
@@ -454,7 +454,7 @@ k8s-manifest/
 │       ├── notification.yaml
 │       ├── api.yaml
 ```
-- You get the idea, right?. Next is Argocd application
+- You get the idea, right? Next is the Argocd application
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
