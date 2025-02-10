@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="k8s, Knowledge Base, " />
+
+<meta property="og:title" content="Practical DevSecOps: Securing the Pipeline from Code to Deployment - Part 1 "/>
+<meta property="og:url" content="/practical-devsecops-securing-the-pipeline-from-code-to-deployment-part-1.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2025-02-10T00:00:00+07:00" />
+<meta name="twitter:title" content="Practical DevSecOps: Securing the Pipeline from Code to Deployment - Part 1 ">
+<meta name="twitter:description" content="">
+
+        <title>Practical DevSecOps: Securing the Pipeline from Code to Deployment - Part 1  · Kienlt&#39;s notebook
+</title>
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       "/"
+                                    >Home</a>
+                                </li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="/practical-devsecops-securing-the-pipeline-from-code-to-deployment-part-1.html">
+                Practical DevSecOps: Securing the Pipeline from Code to Deployment - Part 1
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h3>This series will contains 3 part:</h3>
+<ul>
+<li>Part 1. Secure Coding Practices: Tools and Techniques for DevSecOps.</li>
+<li>Part 2. Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps.</li>
+<li>Part 3. Automating Security: Integrating DevSecOps into CI/CD with Jenkins.</li>
+</ul>
+<h1>Introduction to DevSecOps</h1>
+<p>DevSecOps is an approach that integrates security practices within the DevOps process. It involves:</p>
+<ul>
+<li><strong>Security Integration</strong>: Embedding security throughout the entire development lifecycle</li>
+<li><strong>Automation</strong>: Implementing security controls and tests automatically</li>
+<li><strong>Collaboration</strong>: Fostering cooperation between development, operations, and security teams</li>
+<li><strong>Continuous Security</strong>: Making security a continuous process rather than an afterthought</li>
+</ul>
+<p>The main goal is to deliver secure applications without compromising development speed by:</p>
+<ol>
+<li>Incorporating security testing in CI/CD pipelines</li>
+<li>Automating security gates and controls</li>
+<li>Using infrastructure as code with security policies</li>
+<li>Implementing continuous security monitoring</li>
+<li>Managing vulnerabilities throughout the application lifecycle</li>
+</ol>
+<p>This approach ensures that security is not a bottleneck but rather an integrated part of the development process.</p>
+<h1>Component in this Part</h1>
+<ol>
+<li>Talisman</li>
+<li>Mutation Testing:<ul>
+<li>PIT (PITest) for Java</li>
+<li>Mutmut for Python</li>
+<li>Go-mutesting for Golang</li>
+</ul>
+</li>
+<li>Sonarqube</li>
+<li>Dependency Checks</li>
+</ol>
+<hr>
+<h1>1. Talisman</h1>
+<p>Talisman is a tool that scans git changesets to ensure that potential secrets or sensitive information do not leave the developer's workstation.</p>
+<h3>Why we should use Talisman?</h3>
+<ul>
+<li>
+<p>Let's me give you an example, <a href="https://www.theregister.com/2015/01/06/dev_blunder_shows_github_crawling_with_keyslurping_bots/"><strong>Dev put AWS keys on Github. Then BAD THINGS happened</strong></a></p>
+</li>
+<li>
+<p>There is 2 things happens in this scenario:</p>
+<ul>
+<li>Dev pushed Amazon S3 keys to Github account.</li>
+<li>Hacker use Amazon S3 keys to create 140 servers for Bitcoin to farm itself.</li>
+</ul>
+</li>
+<li>
+<p>I think you will be curious why it is only S3 key but Hackers are able to create new EC2 instance, i bet there are some misconfigured for IAM Policies like this:</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">{</span>
+<span class="w">  </span><span class="s">&quot;Effect&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;Allow&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">  </span><span class="s">&quot;Action&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">  </span><span class="s">&quot;Resource&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+<span class="p p-Indicator">}</span>
+</code></pre></div>
+
+<p>And the first one can be avoid if we use Talisman. Pre-commit / Pre-push hooks can be installed on developer's workstations to avoid them (They can bypass this step also). We are all human and errors happen is hard to avoid, that is why we should use tool/policy to recheck if we are doing wrong xD.</p>
+<h3>Install</h3>
+<ul>
+<li>Visit <a href="https://thoughtworks.github.io/talisman/docs/installation">https://thoughtworks.github.io/talisman/docs/installation</a> </li>
+<li>For a demo i will install only for Single Project</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Download the talisman binary</span>
+curl<span class="w"> </span>https://thoughtworks.github.io/talisman/install.sh<span class="w"> </span>&gt;<span class="w"> </span>~/install-talisman.sh
+chmod<span class="w"> </span>+x<span class="w"> </span>~/install-talisman.sh
+<span class="c1"># Install to a single project (as pre-push hook)</span>
+<span class="nb">cd</span><span class="w"> </span>my-git-project
+~/install-talisman.sh
+</code></pre></div>
+
+<ul>
+<li>Output expected:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>Downloading<span class="w"> </span>talisman_linux_amd64<span class="w"> </span>from<span class="w"> </span>https://github.com/thoughtworks/talisman/releases/download/v1.32.0/talisman_linux_amd64
+Downloading<span class="w"> </span>checksums<span class="w"> </span>from<span class="w"> </span>https://github.com/thoughtworks/talisman/releases/download/v1.32.0/checksums
+talisman_linux_amd64:<span class="w"> </span>OK
+
+Talisman<span class="w"> </span>successfully<span class="w"> </span>installed<span class="w"> </span>to<span class="w"> </span><span class="s1">&#39;.git/hooks/pre-push&#39;</span>.
+</code></pre></div>
+
+<h3>Usage</h3>
+<ul>
+<li>Here is small demo with Golang: https://gist.github.com/BlackMetalz/08ec9f3e985c7796f65ae36b06004f35</li>
+<li>What happens when i tried to push?</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># git add .</span>
+<span class="c1"># git commit -m &quot;init&quot;</span>
+<span class="o">[</span>main<span class="w"> </span>92047ab<span class="o">]</span><span class="w"> </span>init
+<span class="w"> </span><span class="m">1</span><span class="w"> </span>file<span class="w"> </span>changed,<span class="w"> </span><span class="m">25</span><span class="w"> </span>insertions<span class="o">(</span>+<span class="o">)</span>
+<span class="w"> </span>create<span class="w"> </span>mode<span class="w"> </span><span class="m">100644</span><span class="w"> </span>main.go
+<span class="c1"># git push</span>
+Welcome<span class="w"> </span>to<span class="w"> </span>Kienlt<span class="w"> </span>Gitlab
+Talisman<span class="w"> </span>Scan:<span class="w"> </span><span class="m">3</span><span class="w"> </span>/<span class="w"> </span><span class="m">3</span><span class="w"> </span>&lt;---------------------------------------------------------------------------------------------------------------------------------------------------&gt;<span class="w"> </span><span class="m">100</span>.00%<span class="w">  </span>
+
+Talisman<span class="w"> </span>Report:
++---------+------------------------------------------------------+----------+
+<span class="p">|</span><span class="w">  </span>FILE<span class="w">   </span><span class="p">|</span><span class="w">                        </span>ERRORS<span class="w">                        </span><span class="p">|</span><span class="w"> </span>SEVERITY<span class="w"> </span><span class="p">|</span>
++---------+------------------------------------------------------+----------+
+<span class="p">|</span><span class="w"> </span>main.go<span class="w"> </span><span class="p">|</span><span class="w"> </span>Expected<span class="w"> </span>file<span class="w"> </span>to<span class="w"> </span>not<span class="w"> </span>contain<span class="w">                         </span><span class="p">|</span><span class="w"> </span>high<span class="w">     </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>encoded<span class="w"> </span>texts<span class="w"> </span>such<span class="w"> </span>as:<span class="w">                        </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="s2">&quot;kG1234abcd5678efgh90ijklmnop12345678ABCD&quot;</span><span class="w">           </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
++---------+------------------------------------------------------+----------+
+<span class="p">|</span><span class="w"> </span>main.go<span class="w"> </span><span class="p">|</span><span class="w"> </span>Expected<span class="w"> </span>file<span class="w"> </span>to<span class="w"> </span>not<span class="w"> </span>contain<span class="w">                         </span><span class="p">|</span><span class="w"> </span>high<span class="w">     </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>encoded<span class="w"> </span>texts<span class="w"> </span>such<span class="w"> </span>as:<span class="w">                        </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="s2">&quot;sk_test_51ABCDEfghiJKLMNOpqrsTUVW&quot;</span><span class="w">                  </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
++---------+------------------------------------------------------+----------+
+<span class="p">|</span><span class="w"> </span>main.go<span class="w"> </span><span class="p">|</span><span class="w"> </span>Expected<span class="w"> </span>file<span class="w"> </span>to<span class="w"> </span>not<span class="w"> </span>contain<span class="w">                         </span><span class="p">|</span><span class="w"> </span>high<span class="w">     </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>encoded<span class="w"> </span>texts<span class="w"> </span>such<span class="w"> </span>as:<span class="w">                        </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="s2">&quot;ghp_ABC123DEF456GHI789JKLmnopqrstuvwxyz&quot;</span><span class="w">            </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
++---------+------------------------------------------------------+----------+
+<span class="p">|</span><span class="w"> </span>main.go<span class="w"> </span><span class="p">|</span><span class="w"> </span>Potential<span class="w"> </span>secret<span class="w"> </span>pattern<span class="w">                             </span><span class="p">|</span><span class="w"> </span>low<span class="w">      </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span>:<span class="w">     </span><span class="nv">AWS_ACCESS_KEY</span><span class="w"> </span><span class="o">=</span><span class="w">                               </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="s2">&quot;AKIA4XXXXXXXXXXXXXXXXX&quot;</span><span class="w">                             </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
++---------+------------------------------------------------------+----------+
+<span class="p">|</span><span class="w"> </span>main.go<span class="w"> </span><span class="p">|</span><span class="w"> </span>Potential<span class="w"> </span>secret<span class="w"> </span>pattern<span class="w">                             </span><span class="p">|</span><span class="w"> </span>low<span class="w">      </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span>:<span class="w">     </span><span class="nv">AWS_SECRET_KEY</span><span class="w"> </span><span class="o">=</span><span class="w">                               </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="s2">&quot;kG1234abcd5678efgh90ijklmnop12345678ABCD&quot;</span><span class="w">           </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
++---------+------------------------------------------------------+----------+
+<span class="p">|</span><span class="w"> </span>main.go<span class="w"> </span><span class="p">|</span><span class="w"> </span>Potential<span class="w"> </span>secret<span class="w"> </span>pattern<span class="w">                             </span><span class="p">|</span><span class="w"> </span>low<span class="w">      </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span>:<span class="w">     </span><span class="nv">DB_PASSWORD</span><span class="w"> </span><span class="o">=</span><span class="w">                                  </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="s2">&quot;sup3r_s3cr3t_p@ssw0rd&quot;</span><span class="w">                              </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
++---------+------------------------------------------------------+----------+
+<span class="p">|</span><span class="w"> </span>main.go<span class="w"> </span><span class="p">|</span><span class="w"> </span>Potential<span class="w"> </span>secret<span class="w"> </span>pattern<span class="w"> </span>:<span class="w">     </span><span class="nv">DB_CONNECTION</span><span class="w"> </span><span class="o">=</span><span class="w">       </span><span class="p">|</span><span class="w"> </span>low<span class="w">      </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="s2">&quot;postgresql://admin:password123@localhost:5432/mydb&quot;</span><span class="w"> </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
++---------+------------------------------------------------------+----------+
+<span class="p">|</span><span class="w"> </span>main.go<span class="w"> </span><span class="p">|</span><span class="w"> </span>Potential<span class="w"> </span>secret<span class="w"> </span>pattern<span class="w">                             </span><span class="p">|</span><span class="w"> </span>low<span class="w">      </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span>:<span class="w">     </span><span class="nv">STRIPE_SECRET_KEY</span><span class="w"> </span><span class="o">=</span><span class="w">                            </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="s2">&quot;sk_test_51ABCDEfghiJKLMNOpqrsTUVW&quot;</span><span class="w">                  </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
++---------+------------------------------------------------------+----------+
+<span class="p">|</span><span class="w"> </span>main.go<span class="w"> </span><span class="p">|</span><span class="w"> </span>Potential<span class="w"> </span>secret<span class="w"> </span>pattern<span class="w"> </span>:<span class="w">                           </span><span class="p">|</span><span class="w"> </span>high<span class="w">     </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY</span><span class="w"> </span><span class="o">=</span><span class="w">                                     </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
++---------+------------------------------------------------------+----------+
+<span class="p">|</span><span class="w"> </span>main.go<span class="w"> </span><span class="p">|</span><span class="w"> </span>Potential<span class="w"> </span>secret<span class="w"> </span>pattern<span class="w"> </span>:<span class="w">                           </span><span class="p">|</span><span class="w"> </span>high<span class="w">     </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="nv">AWS_SECRET_KEY</span><span class="w"> </span><span class="o">=</span><span class="w">                                     </span><span class="p">|</span><span class="w">          </span><span class="p">|</span>
++---------+------------------------------------------------------+----------+
+
+
+If<span class="w"> </span>you<span class="w"> </span>are<span class="w"> </span>absolutely<span class="w"> </span>sure<span class="w"> </span>that<span class="w"> </span>you<span class="w"> </span>want<span class="w"> </span>to<span class="w"> </span>ignore<span class="w"> </span>the<span class="w"> </span>above<span class="w"> </span>files<span class="w"> </span>from<span class="w"> </span>talisman<span class="w"> </span>detectors,<span class="w"> </span>consider<span class="w"> </span>pasting<span class="w"> </span>the<span class="w"> </span>following<span class="w"> </span>format<span class="w"> </span><span class="k">in</span><span class="w"> </span>.talismanrc<span class="w"> </span>file<span class="w"> </span><span class="k">in</span><span class="w"> </span>the<span class="w"> </span>project<span class="w"> </span>root
+
+fileignoreconfig:
+-<span class="w"> </span>filename:<span class="w"> </span>main.go
+<span class="w">  </span>checksum:<span class="w"> </span>9676d51e34a4b78de22369c9cd8febf8e820f0ae13999b36a5b0b550dde223ca
+version:<span class="w"> </span><span class="s2">&quot;&quot;</span>
+
+Talisman<span class="w"> </span><span class="k">done</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">40</span>.339315ms
+error:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> </span>push<span class="w"> </span>some<span class="w"> </span>refs<span class="w"> </span>to<span class="w"> </span><span class="s1">&#39;ssh://git.kienlt.local:22/kienlt/talisman-test.git&#39;</span>
+</code></pre></div>
+
+<ul>
+<li>It works as expected, the secrets are not able to push. And it evens tell us how to ignore if they are not secret xD</li>
+</ul>
+<hr>
+<h1>2. Mutation Testing</h1>
+<p>Mutation testing is essentially a way of testing your unit tests. By introducing small changes (mutations) to your source code and running your unit tests against these modified versions, you can verify if your tests are capable of catching the errors. If your unit tests detect and fail on these mutations, it indicates that your tests are robust and effective. If not, it suggests that your tests might need improvement</p>
+<p>Since there is no framework for multiple languages, i will try go one by one with Python explain since i'm confident with it most. Hope it will not too longs xD</p>
+<h3>Little explains:</h3>
+<ol>
+<li>
+<p>Mutation testing works by:</p>
+<ul>
+<li>Making small changes (mutations) to your source code</li>
+<li>Running your test suite against each mutation</li>
+<li>Checking if the tests fail (mutation killed) or pass (mutation survived)</li>
+</ul>
+</li>
+<li>
+<p>Without tests:</p>
+<ul>
+<li>There's nothing to verify if the mutations break the code</li>
+<li>The tool can't determine if a mutation was "killed" or "survived"</li>
+<li>There's no way to calculate mutation coverage</li>
+</ul>
+</li>
+</ol>
+<h3>2.1. Golang</h3>
+<ul>
+<li>Repo: <a href="https://github.com/BlackMetalz/mutation-testing-golang">https://github.com/BlackMetalz/mutation-testing-golang</a></li>
+</ul>
+<h3>2.2. Java</h3>
+<ul>
+<li>Repo: <a href="https://github.com/BlackMetalz/mutation-testing-Java">https://github.com/BlackMetalz/mutation-testing-Java</a></li>
+</ul>
+<h3>2.3. Python</h3>
+<ul>
+<li>Repo: <a href="https://github.com/BlackMetalz/mutation-testing-python">https://github.com/BlackMetalz/mutation-testing-python</a></li>
+<li>You may want to read repo first, below is just highlight for how mutation testing works.</li>
+<li>Create simple function <code>calculator.py</code>:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+
+<span class="k">def</span> <span class="nf">subtract</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">-</span> <span class="n">b</span>
+
+<span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span>
+
+<span class="k">def</span> <span class="nf">divide</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot divide by zero&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">/</span> <span class="n">b</span>
+</code></pre></div>
+
+<ul>
+<li>Create simple test: <code>calculator_test.py</code>:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
+<span class="kn">from</span> <span class="nn">calculator</span> <span class="kn">import</span> <span class="n">add</span><span class="p">,</span> <span class="n">subtract</span><span class="p">,</span> <span class="n">multiply</span><span class="p">,</span> <span class="n">divide</span>
+
+<span class="k">def</span> <span class="nf">test_add</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">add</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span>
+    <span class="k">assert</span> <span class="n">add</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">test_subtract</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">subtract</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="n">subtract</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">test_multiply</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">multiply</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span>
+    <span class="k">assert</span> <span class="n">multiply</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">6</span>
+
+<span class="k">def</span> <span class="nf">test_divide</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">divide</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mf">3.0</span>
+    <span class="k">assert</span> <span class="n">divide</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mf">2.5</span>
+    <span class="c1"># This will raise a survivor in mutation testing</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    with pytest.raises(ValueError):</span>
+<span class="sd">        divide(1, 0)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This will not raise a survivor in mutation testing</span>
+    <span class="c1"># Test division by zero error message explicitly</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">divide</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">pytest</span><span class="o">.</span><span class="n">fail</span><span class="p">(</span><span class="s2">&quot;Expected ValueError&quot;</span><span class="p">)</span>  <span class="c1"># Should not reach this line</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;Cannot divide by zero&quot;</span>
+</code></pre></div>
+
+<ul>
+<li>Output example:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="nv">Mutation</span><span class="w"> </span><span class="nv">testing</span><span class="w"> </span><span class="nv">starting</span><span class="w"> </span><span class="o">-</span>
+
+<span class="nv">These</span><span class="w"> </span><span class="nv">are</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">steps</span>:
+<span class="mi">1</span>.<span class="w"> </span><span class="nv">A</span><span class="w"> </span><span class="nv">full</span><span class="w"> </span><span class="nv">test</span><span class="w"> </span><span class="nv">suite</span><span class="w"> </span><span class="nv">run</span><span class="w"> </span><span class="nv">will</span><span class="w"> </span><span class="nv">be</span><span class="w"> </span><span class="nv">made</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">make</span><span class="w"> </span><span class="nv">sure</span><span class="w"> </span><span class="nv">we</span>
+<span class="w">   </span><span class="nv">can</span><span class="w"> </span><span class="nv">run</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">tests</span><span class="w"> </span><span class="nv">successfully</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">we</span><span class="w"> </span><span class="nv">know</span><span class="w"> </span><span class="nv">how</span><span class="w"> </span><span class="nv">long</span>
+<span class="w">   </span><span class="nv">it</span><span class="w"> </span><span class="nv">takes</span><span class="w"> </span><span class="ss">(</span><span class="nv">to</span><span class="w"> </span><span class="nv">detect</span><span class="w"> </span><span class="nv">infinite</span><span class="w"> </span><span class="nv">loops</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">example</span><span class="ss">)</span>
+<span class="mi">2</span>.<span class="w"> </span><span class="nv">Mutants</span><span class="w"> </span><span class="nv">will</span><span class="w"> </span><span class="nv">be</span><span class="w"> </span><span class="nv">generated</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">checked</span>
+
+<span class="nv">Results</span><span class="w"> </span><span class="nv">are</span><span class="w"> </span><span class="nv">stored</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span>.<span class="nv">mutmut</span><span class="o">-</span><span class="nv">cache</span>.
+<span class="nv">Print</span><span class="w"> </span><span class="nv">found</span><span class="w"> </span><span class="nv">mutants</span><span class="w"> </span><span class="nv">with</span><span class="w"> </span>`<span class="nv">mutmut</span><span class="w"> </span><span class="nv">results</span>`.
+
+<span class="nv">Legend</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">output</span>:
+🎉<span class="w"> </span><span class="nv">Killed</span><span class="w"> </span><span class="nv">mutants</span>.<span class="w">   </span><span class="nv">The</span><span class="w"> </span><span class="nv">goal</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">everything</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="k">end</span><span class="w"> </span><span class="nv">up</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="nv">this</span><span class="w"> </span><span class="nv">bucket</span>.
+⏰<span class="w"> </span><span class="nb">Timeout</span>.<span class="w">          </span><span class="nv">Test</span><span class="w"> </span><span class="nv">suite</span><span class="w"> </span><span class="nv">took</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="nv">times</span><span class="w"> </span><span class="nv">as</span><span class="w"> </span><span class="nv">long</span><span class="w"> </span><span class="nv">as</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">baseline</span><span class="w"> </span><span class="nv">so</span><span class="w"> </span><span class="nv">were</span><span class="w"> </span><span class="nv">killed</span>.
+🤔<span class="w"> </span><span class="nv">Suspicious</span>.<span class="w">       </span><span class="nv">Tests</span><span class="w"> </span><span class="nv">took</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">long</span><span class="w"> </span><span class="nv">time</span>,<span class="w"> </span><span class="nv">but</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">long</span><span class="w"> </span><span class="nv">enough</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">be</span><span class="w"> </span><span class="nv">fatal</span>.
+🙁<span class="w"> </span><span class="nv">Survived</span>.<span class="w">         </span><span class="nv">This</span><span class="w"> </span><span class="nv">means</span><span class="w"> </span><span class="nv">your</span><span class="w"> </span><span class="nv">tests</span><span class="w"> </span><span class="nv">need</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">be</span><span class="w"> </span><span class="nv">expanded</span>.
+🔇<span class="w"> </span><span class="nv">Skipped</span>.<span class="w">          </span><span class="nv">Skipped</span>.
+
+<span class="nv">mutmut</span><span class="w"> </span><span class="nv">cache</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">out</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">date</span>,<span class="w"> </span><span class="nv">clearing</span><span class="w"> </span><span class="nv">it</span>...
+<span class="mi">1</span>.<span class="w"> </span><span class="nv">Running</span><span class="w"> </span><span class="nv">tests</span><span class="w"> </span><span class="nv">without</span><span class="w"> </span><span class="nv">mutations</span>
+⠴<span class="w"> </span><span class="nv">Running</span>...<span class="nv">Done</span>
+
+<span class="mi">2</span>.<span class="w"> </span><span class="nv">Checking</span><span class="w"> </span><span class="nv">mutants</span>
+⠋<span class="w"> </span><span class="mi">7</span><span class="o">/</span><span class="mi">7</span><span class="w">  </span>🎉<span class="w"> </span><span class="mi">7</span><span class="w">  </span>⏰<span class="w"> </span><span class="mi">0</span><span class="w">  </span>🤔<span class="w"> </span><span class="mi">0</span><span class="w">  </span>🙁<span class="w"> </span><span class="mi">0</span><span class="w">  </span>🔇<span class="w"> </span><span class="mi">0</span>
+</code></pre></div>
+
+<hr>
+<h1>3. Sonarqube</h1>
+<ul>
+<li>Is a Static Application Security Testing</li>
+</ul>
+<h3>Purpose:</h3>
+<ul>
+<li>SonarQube is a continuous code quality and security tool that performs static code analysis.</li>
+<li>It helps to detect code smells, bugs, security vulnerabilities, and duplications in your codebase.</li>
+</ul>
+<h3>How it Works:</h3>
+<ul>
+<li>SonarQube analyzes the source code without executing it</li>
+<li>It uses various rules and patterns to identify issues in the code.</li>
+<li>The analysis results are displayed on a dashboard, providing a clear overview of the code quality</li>
+</ul>
+<h3>Metrics:</h3>
+<ul>
+<li>Code Smells: Maintainability issues that do not necessarily indicate a bug but could lead to potential problems.</li>
+<li>Bugs: Errors in the code that could cause incorrect behavior.</li>
+<li>Vulnerabilities: Security issues that could be exploited.</li>
+<li>Duplications: Duplicate code blocks that should be consolidated.</li>
+<li>Coverage: The percentage of code covered by tests.</li>
+</ul>
+<h3>Use Cases:</h3>
+<ul>
+<li>Continuous integration and delivery pipelines.</li>
+<li>Monitoring code quality over time.</li>
+<li>Ensuring compliance with coding standards and best practices.</li>
+<li>Identifying and fixing security vulnerabilities.</li>
+</ul>
+<h3>Optional</h3>
+<ul>
+<li>There is config for Code Quality Gate status, that only check for Code Smell, not <code>Coverage</code></li>
+</ul>
+<h3>Example for Sonarqube</h3>
+<ul>
+<li>This link include Sonarqube integrated with Jenkins Pipeline<a href="https://medium.com/@kienlt.qn/my-devops-journey-with-jenkins-argocd-and-gitops-tools-e61a57201361"><strong>My DevOps Journey: with Jenkins, ArgoCD, and GitOps Tools</strong></a> </li>
+</ul>
+<hr>
+<h1>4. Dependency Checks</h1>
+<ul>
+<li>Dependency-Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project's dependencies.</li>
+</ul>
+<h3>Common way to dependency checks in serveral languages:</h3>
+<ul>
+<li>Java: <code>mvn dependency-check:check</code></li>
+<li>Python: pip-audit ( I don't like <code>safety</code> since it required login to run xD)</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install pip-audit</span>
+pip<span class="w"> </span>install<span class="w"> </span>pip-audit
+<span class="c1"># Usage</span>
+Cmd:<span class="w"> </span>pip-audit<span class="w"> </span>
+Found<span class="w"> </span><span class="m">1</span><span class="w"> </span>known<span class="w"> </span>vulnerability<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">1</span><span class="w"> </span>package
+Name<span class="w"> </span>Version<span class="w"> </span>ID<span class="w">             </span>Fix<span class="w"> </span>Versions
+----<span class="w"> </span>-------<span class="w"> </span>--------------<span class="w"> </span>------------
+pip<span class="w">  </span><span class="m">22</span>.0.2<span class="w">  </span>PYSEC-2023-228<span class="w"> </span><span class="m">23</span>.3
+<span class="c1"># Upgrade:</span>
+python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">pip</span><span class="o">==</span><span class="m">23</span>.3
+Collecting<span class="w"> </span><span class="nv">pip</span><span class="o">==</span><span class="m">23</span>.3
+......
+Successfully<span class="w"> </span>installed<span class="w"> </span>pip-23.3
+<span class="c1"># after upgrade</span>
+pip-audit<span class="w"> </span>
+No<span class="w"> </span>known<span class="w"> </span>vulnerabilities<span class="w"> </span>found
+</code></pre></div>
+
+<ul>
+<li>Golang: I would go for govulncheck
+<code>govulncheck</code> is a tool provided by the Go team to check for known vulnerabilities in Go modules</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install:</span>
+go<span class="w"> </span>install<span class="w"> </span>golang.org/x/vuln/cmd/govulncheck@latest
+<span class="c1"># Check with project: https://github.com/BlackMetalz/KubeNotifyPlus</span>
+govulncheck<span class="w"> </span>./...
+<span class="o">===</span><span class="w"> </span>Symbol<span class="w"> </span><span class="nv">Results</span><span class="w"> </span><span class="o">===</span>
+
+Vulnerability<span class="w"> </span><span class="c1">#1: GO-2025-3447</span>
+<span class="w">    </span>Timing<span class="w"> </span>sidechannel<span class="w"> </span><span class="k">for</span><span class="w"> </span>P-256<span class="w"> </span>on<span class="w"> </span>ppc64le<span class="w"> </span><span class="k">in</span><span class="w"> </span>crypto/internal/nistec
+<span class="w">  </span>More<span class="w"> </span>info:<span class="w"> </span>https://pkg.go.dev/vuln/GO-2025-3447
+<span class="w">  </span>Standard<span class="w"> </span>library
+<span class="w">    </span>Found<span class="w"> </span><span class="k">in</span>:<span class="w"> </span>crypto/internal/nistec@go1.23.2
+<span class="w">    </span>Fixed<span class="w"> </span><span class="k">in</span>:<span class="w"> </span>crypto/internal/nistec@go1.23.6
+<span class="w">    </span>Platforms:<span class="w"> </span>ppc64le
+<span class="w">    </span>Example<span class="w"> </span>traces<span class="w"> </span>found:
+<span class="w">      </span><span class="c1">#1: utils/k8s.go:62:18: utils.GetPodLogs calls io.Copy, which eventually calls nistec.P256Point.ScalarBaseMult</span>
+<span class="w">      </span><span class="c1">#2: utils/k8s.go:62:18: utils.GetPodLogs calls io.Copy, which eventually calls nistec.P256Point.ScalarMult</span>
+<span class="w">      </span><span class="c1">#3: utils/mysql.go:23:23: utils.InitMySQL calls sql.Open, which eventually calls nistec.P256Point.SetBytes</span>
+
+Vulnerability<span class="w"> </span><span class="c1">#2: GO-2025-3420</span>
+<span class="w">    </span>Sensitive<span class="w"> </span>headers<span class="w"> </span>incorrectly<span class="w"> </span>sent<span class="w"> </span>after<span class="w"> </span>cross-domain<span class="w"> </span>redirect<span class="w"> </span><span class="k">in</span><span class="w"> </span>net/http
+<span class="w">  </span>More<span class="w"> </span>info:<span class="w"> </span>https://pkg.go.dev/vuln/GO-2025-3420
+<span class="w">  </span>Standard<span class="w"> </span>library
+<span class="w">    </span>Found<span class="w"> </span><span class="k">in</span>:<span class="w"> </span>net/http@go1.23.2
+<span class="w">    </span>Fixed<span class="w"> </span><span class="k">in</span>:<span class="w"> </span>net/http@go1.23.5
+<span class="w">    </span>Example<span class="w"> </span>traces<span class="w"> </span>found:
+<span class="w">      </span><span class="c1">#1: utils/k8s.go:53:28: utils.GetPodLogs calls rest.Request.Stream, which calls http.Client.Do</span>
+<span class="w">      </span><span class="c1">#2: utils/telegram.go:38:24: utils.sendTelegramMessage calls http.Post</span>
+
+Vulnerability<span class="w"> </span><span class="c1">#3: GO-2025-3373</span>
+<span class="w">    </span>Usage<span class="w"> </span>of<span class="w"> </span>IPv6<span class="w"> </span>zone<span class="w"> </span>IDs<span class="w"> </span>can<span class="w"> </span>bypass<span class="w"> </span>URI<span class="w"> </span>name<span class="w"> </span>constraints<span class="w"> </span><span class="k">in</span><span class="w"> </span>crypto/x509
+<span class="w">  </span>More<span class="w"> </span>info:<span class="w"> </span>https://pkg.go.dev/vuln/GO-2025-3373
+<span class="w">  </span>Standard<span class="w"> </span>library
+<span class="w">    </span>Found<span class="w"> </span><span class="k">in</span>:<span class="w"> </span>crypto/x509@go1.23.2
+<span class="w">    </span>Fixed<span class="w"> </span><span class="k">in</span>:<span class="w"> </span>crypto/x509@go1.23.5
+<span class="w">    </span>Example<span class="w"> </span>traces<span class="w"> </span>found:
+<span class="w">      </span><span class="c1">#1: utils/k8s.go:58:2: utils.GetPodLogs calls http.cancelTimerBody.Close, which eventually calls x509.CertPool.AppendCertsFromPEM</span>
+<span class="w">      </span><span class="c1">#2: utils/k8s.go:62:18: utils.GetPodLogs calls io.Copy, which eventually calls x509.Certificate.Verify</span>
+<span class="w">      </span><span class="c1">#3: utils/k8s.go:62:18: utils.GetPodLogs calls io.Copy, which eventually calls x509.Certificate.VerifyHostname</span>
+<span class="w">      </span><span class="c1">#4: utils/helper.go:20:14: utils.SendResponse calls fmt.Fprintln, which eventually calls x509.HostnameError.Error</span>
+<span class="w">      </span><span class="c1">#5: utils/k8s.go:58:2: utils.GetPodLogs calls http.cancelTimerBody.Close, which eventually calls x509.ParseCertificate</span>
+<span class="w">      </span><span class="c1">#6: utils/k8s.go:35:46: utils.SetupK8sClient calls kubernetes.NewForConfig, which eventually calls x509.ParseECPrivateKey</span>
+<span class="w">      </span><span class="c1">#7: utils/k8s.go:35:46: utils.SetupK8sClient calls kubernetes.NewForConfig, which eventually calls x509.ParsePKCS1PrivateKey</span>
+<span class="w">      </span><span class="c1">#8: utils/k8s.go:35:46: utils.SetupK8sClient calls kubernetes.NewForConfig, which eventually calls x509.ParsePKCS8PrivateKey</span>
+<span class="w">      </span><span class="c1">#9: utils/mysql.go:23:23: utils.InitMySQL calls sql.Open, which eventually calls x509.ParsePKIXPublicKey</span>
+
+Your<span class="w"> </span>code<span class="w"> </span>is<span class="w"> </span>affected<span class="w"> </span>by<span class="w"> </span><span class="m">3</span><span class="w"> </span>vulnerabilities<span class="w"> </span>from<span class="w"> </span>the<span class="w"> </span>Go<span class="w"> </span>standard<span class="w"> </span>library.
+This<span class="w"> </span>scan<span class="w"> </span>found<span class="w"> </span>no<span class="w"> </span>other<span class="w"> </span>vulnerabilities<span class="w"> </span><span class="k">in</span><span class="w"> </span>packages<span class="w"> </span>you<span class="w"> </span>import<span class="w"> </span>or<span class="w"> </span>modules<span class="w"> </span>you
+require.
+Use<span class="w"> </span><span class="s1">&#39;-show verbose&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>more<span class="w"> </span>details.
+</code></pre></div>
+
+<p>Solution: upgrade go version to fix it xD.</p>
+<h1>Ref</h1>
+<ul>
+<li>https://chatgpt.com/ xD</li>
+<li>https://github.com/thoughtworks/talisman</li>
+<li>https://www.geeksforgeeks.org/software-testing-mutation-testing/</li>
+<li>https://www.aquasec.com/cloud-native-academy/supply-chain-security/owasp-dependency-check/</li>
+</ul>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2025-02-10T00:00:00+07:00">Mon 10 February 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#k8s-ref">k8s
+                    <span class="superscript">5</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
