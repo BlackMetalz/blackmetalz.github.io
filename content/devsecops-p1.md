@@ -3,7 +3,7 @@ Date: 2025-02-10
 Category: Knowledge Base
 Tags: k8s
 
-### This series will contains 3 part:
+### This series will contain 3 parts:
 - Part 1. Secure Coding Practices: Tools and Techniques for DevSecOps.
 - Part 2. Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps.
 - Part 3. Automating Security: Integrating DevSecOps into CI/CD with Jenkins.
@@ -41,16 +41,16 @@ This approach ensures that security is not a bottleneck but rather an integrated
 # 1. Talisman
 Talisman is a tool that scans git changesets to ensure that potential secrets or sensitive information do not leave the developer's workstation.
 
-### Why we should use Talisman?
+### Why should we use Talisman?
 
-- Let's me give you an example, [**Dev put AWS keys on Github. Then BAD THINGS happened**](https://www.theregister.com/2015/01/06/dev_blunder_shows_github_crawling_with_keyslurping_bots/)
+- Let me give you an example, [**Dev put AWS keys on Github. Then BAD THINGS happened**](https://www.theregister.com/2015/01/06/dev_blunder_shows_github_crawling_with_keyslurping_bots/)
 
 
-- There is 2 things happens in this scenario:
+- There are 2 things that happen in this scenario:
     - Dev pushed Amazon S3 keys to Github account.
-    - Hacker use Amazon S3 keys to create 140 servers for Bitcoin to farm itself.
+    - Hackers use Amazon S3 keys to create 140 servers for Bitcoin to farm itself.
 
-- I think you will be curious why it is only S3 key but Hackers are able to create new EC2 instance, i bet there are some misconfigured for IAM Policies like this:
+- I think you will be curious why it is only an S3 key but Hackers are able to create new EC2 instances, i bet there are some misconfigured for IAM Policies like this:
 ```yaml
 {
   "Effect": "Allow",
@@ -59,11 +59,11 @@ Talisman is a tool that scans git changesets to ensure that potential secrets or
 }
 ```
 
-And the first one can be avoid if we use Talisman. Pre-commit / Pre-push hooks can be installed on developer's workstations to avoid them (They can bypass this step also). We are all human and errors happen is hard to avoid, that is why we should use tool/policy to recheck if we are doing wrong xD.
+The first one can be avoided if we use Talisman. Pre-commit / Pre-push hooks can be installed on the developer's workstations to avoid them (They can bypass this step also). We are all human and errors are hard to avoid, that is why we should use tools/policies to recheck if we are doing wrong xD.
 
 ### Install
 - Visit [https://thoughtworks.github.io/talisman/docs/installation](https://thoughtworks.github.io/talisman/docs/installation) 
-- For a demo i will install only for Single Project
+- For a demo, i will install only for a Single Project
 ```bash
 # Download the talisman binary
 curl https://thoughtworks.github.io/talisman/install.sh > ~/install-talisman.sh
@@ -82,8 +82,8 @@ Talisman successfully installed to '.git/hooks/pre-push'.
 ```
 
 ### Usage
-- Here is small demo with Golang: https://gist.github.com/BlackMetalz/08ec9f3e985c7796f65ae36b06004f35
-- What happens when i tried to push?
+- Here is small a demo with Golang: https://gist.github.com/BlackMetalz/08ec9f3e985c7796f65ae36b06004f35
+- What happens when i try to push?
 
 ```bash
 # git add .
@@ -149,13 +149,13 @@ Talisman done in 40.339315ms
 error: failed to push some refs to 'ssh://git.kienlt.local:22/kienlt/talisman-test.git'
 ```
 
-- It works as expected, the secrets are not able to push. And it evens tell us how to ignore if they are not secret xD
+- It works as expected, the secrets are not able to push. And it even tells us how to ignore them if they are not secret xD
 
 ---
 # 2. Mutation Testing
 Mutation testing is essentially a way of testing your unit tests. By introducing small changes (mutations) to your source code and running your unit tests against these modified versions, you can verify if your tests are capable of catching the errors. If your unit tests detect and fail on these mutations, it indicates that your tests are robust and effective. If not, it suggests that your tests might need improvement
 
-Since there is no framework for multiple languages, i will try go one by one with Python explain since i'm confident with it most. Hope it will not too longs xD
+Since there is no framework for multiple languages, i will try to go one by one with Python explain since I'm confident with it most. Hope it will not be too longs xD
 
 ### Little explains:
 
@@ -177,7 +177,7 @@ Since there is no framework for multiple languages, i will try go one by one wit
 
 ### 2.3. Python
 - Repo: [https://github.com/BlackMetalz/mutation-testing-python](https://github.com/BlackMetalz/mutation-testing-python)
-- You may want to read repo first, below is just highlight for how mutation testing works.
+- You may want to read the repo first, below is just a highlight of how mutation testing works.
 - Create simple function `calculator.py`:
 ```python
 def add(a: int, b: int) -> int:
@@ -194,7 +194,7 @@ def divide(a: int, b: int) -> float:
         raise ValueError("Cannot divide by zero")
     return a / b
 ```
-- Create simple test: `calculator_test.py`:
+- Create a simple test: `calculator_test.py`:
 ```
 import pytest
 from calculator import add, subtract, multiply, divide
@@ -283,7 +283,7 @@ mutmut cache is out of date, clearing it...
 - Identifying and fixing security vulnerabilities.
 
 ### Optional
-- There is config for Code Quality Gate status, that only check for Code Smell, not `Coverage`
+- There is a config for Code Quality Gate status, that only checks for Code Smell, not `Coverage`
 
 ### Example for Sonarqube
 
@@ -292,7 +292,7 @@ mutmut cache is out of date, clearing it...
 ---
 # 4. Dependency Checks
 - Dependency-Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project's dependencies.
-### Common way to dependency checks in serveral languages:
+### Common way to dependency checks in several languages:
 - Java: `mvn dependency-check:check`
 - Python: pip-audit ( I don't like `safety` since it required login to run xD)
 ```bash
@@ -366,7 +366,7 @@ This scan found no other vulnerabilities in packages you import or modules you
 require.
 Use '-show verbose' for more details.
 ```
-Solution: upgrade go version to fix it xD.
+Solution: upgrade the go version to fix it xD.
 
 
 # Ref
