@@ -33,7 +33,7 @@ This approach ensures that security is not a bottleneck but rather an integrated
 2. Mutation Testing:
     - PIT (PITest) for Java
     - Mutmut for Python
-    - Go-mutesting for Golang
+    - Gremlins for Golang
 3. Sonarqube
 4. Dependency Checks
 
