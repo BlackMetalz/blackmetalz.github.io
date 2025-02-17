@@ -207,7 +207,7 @@ Output example with Failed with manifest [failed-deployment.yaml](https://gist.g
 
 ---
 
-# 4. Istio and mTLS (Mutual Transport Layer Security (mTLS))
+# 4. Istio and mTLS (Mutual Transport Layer Security)
 I think it will be overwhelming for me if i include it in this post. I will write separately for Istio, Service Mesh, and mTLS… in another article.
 
 ---
@@ -234,7 +234,7 @@ helm repo add falcosecurity https://falcosecurity.github.io/charts
 helm repo update
 ```
 
-2. **Install Falco to namespace Falco with limit resource**:
+2. **Install Falco to namespace Falco with limited resources**:
 ```sh
 helm install falco falcosecurity/falco \
  - set resources.requests.cpu=200m \
@@ -259,11 +259,11 @@ Show it in UI:
 ---
 
 # Ref:
-- https://github.com/gbrindisi/dockerfile-security (outdated)
-- https://github.com/controlplaneio/kubesec
-- https://github.com/aquasecurity/kube-bench
-- https://www.aquasec.com/blog/dns-spoofing-kubernetes-clusters/
-- https://falco.org/
-- https://github.com/falcosecurity/falco
-- https://chatgpt.com/ xD
-- https://claude.ai/ xD
+- [https://github.com/gbrindisi/dockerfile-security](https://github.com/gbrindisi/dockerfile-security) (outdated)
+- [https://github.com/controlplaneio/kubesec](https://github.com/controlplaneio/kubesec)
+- [https://github.com/aquasecurity/kube-bench](https://github.com/aquasecurity/kube-bench)
+- [https://www.aquasec.com/blog/dns-spoofing-kubernetes-clusters/](https://www.aquasec.com/blog/dns-spoofing-kubernetes-clusters/)
+- [https://falco.org/](https://falco.org/)
+- [https://github.com/falcosecurity/falco](https://github.com/falcosecurity/falco)
+- [https://chatgpt.com/](https://chatgpt.com/) xD
+- [https://claude.ai/](https://claude.ai/) xD
