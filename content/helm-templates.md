@@ -1,7 +1,7 @@
 Title: Getting Started with Helm Templates: A Practical Guide to Kubernetes Manifests
 Date: 2025-02-06
 Category: Knowledge Base
-Tags: k8s
+Tags: k8s, helm
 
 
 # Introduction to Helm Templates

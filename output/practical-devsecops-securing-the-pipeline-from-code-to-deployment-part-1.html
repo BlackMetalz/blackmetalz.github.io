@@ -15,7 +15,7 @@
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary">
 
-<meta name="keywords" content="k8s, Knowledge Base, " />
+<meta name="keywords" content="devsecops, Knowledge Base, " />
 
 <meta property="og:title" content="Practical DevSecOps: Securing the Pipeline from Code to Deployment - Part 1 "/>
 <meta property="og:url" content="/practical-devsecops-securing-the-pipeline-from-code-to-deployment-part-1.html" />
@@ -77,7 +77,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h3>This series will contains 3 part:</h3>
+            <h3>This series will contain 3 parts:</h3>
 <ul>
 <li>Part 1. Secure Coding Practices: Tools and Techniques for DevSecOps.</li>
 <li>Part 2. Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps.</li>
@@ -106,7 +106,7 @@
 <li>Mutation Testing:<ul>
 <li>PIT (PITest) for Java</li>
 <li>Mutmut for Python</li>
-<li>Go-mutesting for Golang</li>
+<li>Gremlins for Golang</li>
 </ul>
 </li>
 <li>Sonarqube</li>
@@ -115,20 +115,20 @@
 <hr>
 <h1>1. Talisman</h1>
 <p>Talisman is a tool that scans git changesets to ensure that potential secrets or sensitive information do not leave the developer's workstation.</p>
-<h3>Why we should use Talisman?</h3>
+<h3>Why should we use Talisman?</h3>
 <ul>
 <li>
-<p>Let's me give you an example, <a href="https://www.theregister.com/2015/01/06/dev_blunder_shows_github_crawling_with_keyslurping_bots/"><strong>Dev put AWS keys on Github. Then BAD THINGS happened</strong></a></p>
+<p>Let me give you an example, <a href="https://www.theregister.com/2015/01/06/dev_blunder_shows_github_crawling_with_keyslurping_bots/"><strong>Dev put AWS keys on Github. Then BAD THINGS happened</strong></a></p>
 </li>
 <li>
-<p>There is 2 things happens in this scenario:</p>
+<p>There are 2 things that happen in this scenario:</p>
 <ul>
 <li>Dev pushed Amazon S3 keys to Github account.</li>
-<li>Hacker use Amazon S3 keys to create 140 servers for Bitcoin to farm itself.</li>
+<li>Hackers use Amazon S3 keys to create 140 servers for Bitcoin to farm itself.</li>
 </ul>
 </li>
 <li>
-<p>I think you will be curious why it is only S3 key but Hackers are able to create new EC2 instance, i bet there are some misconfigured for IAM Policies like this:</p>
+<p>I think you will be curious why it is only an S3 key but Hackers are able to create new EC2 instances, i bet there are some misconfigured for IAM Policies like this:</p>
 </li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">{</span>
@@ -138,11 +138,11 @@
 <span class="p p-Indicator">}</span>
 </code></pre></div>
 
-<p>And the first one can be avoid if we use Talisman. Pre-commit / Pre-push hooks can be installed on developer's workstations to avoid them (They can bypass this step also). We are all human and errors happen is hard to avoid, that is why we should use tool/policy to recheck if we are doing wrong xD.</p>
+<p>The first one can be avoided if we use Talisman. Pre-commit / Pre-push hooks can be installed on the developer's workstations to avoid them (They can bypass this step also). We are all human and errors are hard to avoid, that is why we should use tools/policies to recheck if we are doing wrong xD.</p>
 <h3>Install</h3>
 <ul>
 <li>Visit <a href="https://thoughtworks.github.io/talisman/docs/installation">https://thoughtworks.github.io/talisman/docs/installation</a> </li>
-<li>For a demo i will install only for Single Project</li>
+<li>For a demo, i will install only for a Single Project</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># Download the talisman binary</span>
 curl<span class="w"> </span>https://thoughtworks.github.io/talisman/install.sh<span class="w"> </span>&gt;<span class="w"> </span>~/install-talisman.sh
@@ -164,8 +164,8 @@ Talisman<span class="w"> </span>successfully<span class="w"> </span>installed<sp
 
 <h3>Usage</h3>
 <ul>
-<li>Here is small demo with Golang: https://gist.github.com/BlackMetalz/08ec9f3e985c7796f65ae36b06004f35</li>
-<li>What happens when i tried to push?</li>
+<li>Here is small a demo with Golang: https://gist.github.com/BlackMetalz/08ec9f3e985c7796f65ae36b06004f35</li>
+<li>What happens when i try to push?</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># git add .</span>
 <span class="c1"># git commit -m &quot;init&quot;</span>
@@ -231,12 +231,12 @@ error:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> <
 </code></pre></div>
 
 <ul>
-<li>It works as expected, the secrets are not able to push. And it evens tell us how to ignore if they are not secret xD</li>
+<li>It works as expected, the secrets are not able to push. And it even tells us how to ignore them if they are not secret xD</li>
 </ul>
 <hr>
 <h1>2. Mutation Testing</h1>
 <p>Mutation testing is essentially a way of testing your unit tests. By introducing small changes (mutations) to your source code and running your unit tests against these modified versions, you can verify if your tests are capable of catching the errors. If your unit tests detect and fail on these mutations, it indicates that your tests are robust and effective. If not, it suggests that your tests might need improvement</p>
-<p>Since there is no framework for multiple languages, i will try go one by one with Python explain since i'm confident with it most. Hope it will not too longs xD</p>
+<p>Since there is no framework for multiple languages, i will try to go one by one with Python explain since I'm confident with it most. Hope it will not be too longs xD</p>
 <h3>Little explains:</h3>
 <ol>
 <li>
@@ -267,7 +267,7 @@ error:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> <
 <h3>2.3. Python</h3>
 <ul>
 <li>Repo: <a href="https://github.com/BlackMetalz/mutation-testing-python">https://github.com/BlackMetalz/mutation-testing-python</a></li>
-<li>You may want to read repo first, below is just highlight for how mutation testing works.</li>
+<li>You may want to read the repo first, below is just a highlight of how mutation testing works.</li>
 <li>Create simple function <code>calculator.py</code>:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -286,7 +286,7 @@ error:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> <
 </code></pre></div>
 
 <ul>
-<li>Create simple test: <code>calculator_test.py</code>:</li>
+<li>Create a simple test: <code>calculator_test.py</code>:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
 <span class="kn">from</span> <span class="nn">calculator</span> <span class="kn">import</span> <span class="n">add</span><span class="p">,</span> <span class="n">subtract</span><span class="p">,</span> <span class="n">multiply</span><span class="p">,</span> <span class="n">divide</span>
@@ -382,7 +382,7 @@ error:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> <
 </ul>
 <h3>Optional</h3>
 <ul>
-<li>There is config for Code Quality Gate status, that only check for Code Smell, not <code>Coverage</code></li>
+<li>There is a config for Code Quality Gate status, that only checks for Code Smell, not <code>Coverage</code></li>
 </ul>
 <h3>Example for Sonarqube</h3>
 <ul>
@@ -393,7 +393,7 @@ error:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> <
 <ul>
 <li>Dependency-Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project's dependencies.</li>
 </ul>
-<h3>Common way to dependency checks in serveral languages:</h3>
+<h3>Common way to dependency checks in several languages:</h3>
 <ul>
 <li>Java: <code>mvn dependency-check:check</code></li>
 <li>Python: pip-audit ( I don't like <code>safety</code> since it required login to run xD)</li>
@@ -471,7 +471,7 @@ require.
 Use<span class="w"> </span><span class="s1">&#39;-show verbose&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>more<span class="w"> </span>details.
 </code></pre></div>
 
-<p>Solution: upgrade go version to fix it xD.</p>
+<p>Solution: upgrade the go version to fix it xD.</p>
 <h1>Ref</h1>
 <ul>
 <li>https://chatgpt.com/ xD</li>
@@ -502,8 +502,8 @@ Use<span class="w"> </span><span class="s1">&#39;-show verbose&#39;</span><span 
             <a class="category-link" href="/categories.html#knowledge-base-ref">Knowledge Base</a>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article">
-                <li><a href="/tags.html#k8s-ref">k8s
-                    <span class="superscript">5</span>
+                <li><a href="/tags.html#devsecops-ref">devsecops
+                    <span class="superscript">2</span>
 </a></li>
             </ul>
 <h4>Contact</h4>

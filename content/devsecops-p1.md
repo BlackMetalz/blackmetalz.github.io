@@ -1,10 +1,10 @@
 Title: Practical DevSecOps: Securing the Pipeline from Code to Deployment - Part 1
 Date: 2025-02-10
 Category: Knowledge Base
-Tags: k8s
+Tags: devsecops
 
 ### This series will contain 3 parts:
-- Part 1. Secure Coding Practices: Tools and Techniques for DevSecOps.
+- Part 1. Secure Coding Practices: Tools and Techniques for DevSecOps. (**We are here!**)
 - Part 2. Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps.
 - Part 3. Automating Security: Integrating DevSecOps into CI/CD with Jenkins.
 

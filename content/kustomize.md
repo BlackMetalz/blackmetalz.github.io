@@ -1,7 +1,7 @@
 Title: Kustomize: Quick Introduction and Integration with Other Tools and Examples
 Date: 2025-02-03
 Category: Knowledge Base
-Tags: k8s
+Tags: k8s, kustomize
 
 Kustomize introduces a template-free way to customize application configuration that simplifies the use of off-the-shelf applications. Now, built into `kubectl` as `apply -k`.
 
