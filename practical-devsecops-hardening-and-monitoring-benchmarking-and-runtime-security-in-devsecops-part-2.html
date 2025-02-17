@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="k8s, devsecops, Knowledge Base, " />
+
+<meta property="og:title" content="Practical DevSecOps: Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps - Part 2 "/>
+<meta property="og:url" content="/practical-devsecops-hardening-and-monitoring-benchmarking-and-runtime-security-in-devsecops-part-2.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2025-02-17T00:00:00+07:00" />
+<meta name="twitter:title" content="Practical DevSecOps: Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps - Part 2 ">
+<meta name="twitter:description" content="">
+
+        <title>Practical DevSecOps: Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps - Part 2  · Kienlt&#39;s notebook
+</title>
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       "/"
+                                    >Home</a>
+                                </li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="/practical-devsecops-hardening-and-monitoring-benchmarking-and-runtime-security-in-devsecops-part-2.html">
+                Practical DevSecOps: Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps - Part 2
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h3>This series will contain 3 parts:</h3>
+<ul>
+<li>Part 1. Secure Coding Practices: Tools and Techniques for DevSecOps.</li>
+<li>Part 2. Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps. (<strong>We are here!</strong>)</li>
+<li>Part 3. Automating Security: Integrating DevSecOps into CI/CD with Jenkins.</li>
+</ul>
+<h1>Component in this part</h1>
+<ul>
+<li>Open Policy Agent (OPA)</li>
+<li>Cis Benchmarking and Kube-bench</li>
+<li>Falco</li>
+<li>KubeSec/Kube-scan</li>
+<li>Istio &amp; mTLS</li>
+</ul>
+<hr>
+<h1>1.Open Policy Agent</h1>
+<p>Open Policy Agent (OPA) is an open-source, general-purpose policy engine that allows you to enforce policies across a wide range of systems and services. Here are the key points about OPA:</p>
+<h3>What is OPA?</h3>
+<ul>
+<li>Purpose: OPA is designed to decouple policy decision-making from the application logic, providing a unified way to enforce policies across your stack.</li>
+<li>Language: OPA uses a high-level declarative language called Rego to write policies.</li>
+<li>Flexibility: It can be integrated with various systems such as Kubernetes, CI/CD pipelines, API gateways, microservices, and more.</li>
+</ul>
+<h3>It looks like things are complicated, right? Don't worry, i will provide simple examples</h3>
+<p>Challenges:</p>
+<ul>
+<li>I don't allow image tags to be <code>latest</code> which can be security considering.</li>
+<li>
+<p>I don't allow images to run as a <code>root</code> user.
+https://github.com/BlackMetalz/kube-bench/commit/0e716371dc4f81b01532a6e3cb1fa81885b9a8df
+So how can I prevent them when building images?</p>
+</li>
+<li>
+<p>I will use <code>openpolicyagent/conftest</code> to test it.</p>
+</li>
+<li>I built an image with the policy defined here: https://github.com/BlackMetalz/opa-custom</li>
+<li>Usage: <code>docker run - rm -v $(pwd):/project kienlt992/opa-custom:v0.56.0 test Dockerfile</code>. Output example:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="mf">5</span><span class="w"> </span><span class="n">tests</span><span class="p">,</span><span class="w"> </span><span class="mf">5</span><span class="w"> </span><span class="n">passed</span><span class="p">,</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="n">warnings</span><span class="p">,</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="n">failures</span><span class="p">,</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="n">exceptions</span>
+</code></pre></div>
+
+<ul>
+<li>Let's try with the  image to have root user and the latest tag</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c"># Build stage</span>
+<span class="c"># 3.10-alpine3.19</span>
+<span class="c"># FROM python:3.10-alpine3.19</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">python:latest</span>
+<span class="c"># Switch to root user to install dependencies</span>
+<span class="k">USER</span><span class="w"> </span><span class="s">root</span>
+</code></pre></div>
+
+<p>Output example:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-<span class="w"> </span>rm<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/project<span class="w"> </span>kienlt992/opa-custom:latest<span class="w"> </span><span class="nb">test</span><span class="w"> </span>test_Dockerfile/Dockerfile
+FAIL<span class="w"> </span>-<span class="w"> </span>test_Dockerfile/Dockerfile<span class="w"> </span>-<span class="w"> </span>main<span class="w"> </span>-<span class="w"> </span>Line<span class="w"> </span><span class="m">3</span>:<span class="w"> </span><span class="k">do</span><span class="w"> </span>not<span class="w"> </span>use<span class="w"> </span><span class="s1">&#39;latest&#39;</span><span class="w"> </span>tag<span class="w"> </span><span class="k">for</span><span class="w"> </span>base<span class="w"> </span>images
+FAIL<span class="w"> </span>-<span class="w"> </span>test_Dockerfile/Dockerfile<span class="w"> </span>-<span class="w"> </span>main<span class="w"> </span>-<span class="w"> </span>Line<span class="w"> </span><span class="m">5</span>:<span class="w"> </span>Running<span class="w"> </span>as<span class="w"> </span>root<span class="w"> </span>user<span class="w"> </span>is<span class="w"> </span>forbidden
+<span class="m">5</span><span class="w"> </span>tests,<span class="w"> </span><span class="m">3</span><span class="w"> </span>passed,<span class="w"> </span><span class="m">0</span><span class="w"> </span>warnings,<span class="w"> </span><span class="m">2</span><span class="w"> </span>failures,<span class="w"> </span><span class="m">0</span><span class="w"> </span>exceptions
+</code></pre></div>
+
+<p>So when we integrate this into the CICD Pipeline, it will break the build if checks are not passed!
+You can add more custom rules with your policy.</p>
+<hr>
+<h1>2. Kube-bench</h1>
+<p>Kube-bench is a tool that Checks Kubernetes Security Configuration:</p>
+<ul>
+<li>Runs automated tests against your Kubernetes clusters.</li>
+<li>Verifies compliance with the CIS benchmark of K8S (a set of globally recognized best practices for securely configuring IT systems).</li>
+<li>Tests both control plane and worker nodes.</li>
+</ul>
+<h3>Installation:</h3>
+<div class="highlight"><pre><span></span><code>wget<span class="w"> </span><span class="s2">&quot;https://github.com/aquasecurity/kube-bench/releases/download/v0.10.2/kube-bench_0.10.2_linux_amd64.deb&quot;</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-f<span class="w"> </span>./kube-bench_0.10.2_linux_amd64.deb
+</code></pre></div>
+
+<h3>Usage:</h3>
+<ul>
+<li>You need to install it to every node, yes holy shiet indeed if you want to use kube-bench cli.</li>
+<li>Run with example output in a worker node using a version of rke1: <code>v1.28.9</code> so i would like to use profile <code>rke-cis-1.24</code> to benchmark</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># kube-bench - benchmark rke-cis-1.24 </span>
+<span class="o">[</span>INFO<span class="o">]</span><span class="w"> </span><span class="m">4</span><span class="w"> </span>Worker<span class="w"> </span>Node<span class="w"> </span>Security<span class="w"> </span>Configuration
+<span class="o">[</span>INFO<span class="o">]</span><span class="w"> </span><span class="m">4</span>.1<span class="w"> </span>Worker<span class="w"> </span>Node<span class="w"> </span>Configuration<span class="w"> </span>Files
+<span class="o">[</span>FAIL<span class="o">]</span><span class="w"> </span><span class="m">4</span>.1.1<span class="w"> </span>Ensure<span class="w"> </span>that<span class="w"> </span>the<span class="w"> </span>kubelet<span class="w"> </span>service<span class="w"> </span>file<span class="w"> </span>permissions<span class="w"> </span>are<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to<span class="w"> </span><span class="m">644</span><span class="w"> </span>or<span class="w"> </span>more<span class="w"> </span>restrictive<span class="w"> </span><span class="o">(</span>Automated<span class="o">)</span>
+<span class="o">[</span>PASS<span class="o">]</span><span class="w"> </span><span class="m">4</span>.1.2<span class="w"> </span>Ensure<span class="w"> </span>that<span class="w"> </span>the<span class="w"> </span>kubelet<span class="w"> </span>service<span class="w"> </span>file<span class="w"> </span>ownership<span class="w"> </span>is<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to<span class="w"> </span>root:root<span class="w"> </span><span class="o">(</span>Automated<span class="o">)</span>
+<span class="o">[</span>PASS<span class="o">]</span><span class="w"> </span><span class="m">4</span>.1.3<span class="w"> </span>If<span class="w"> </span>proxy<span class="w"> </span>kubeconfig<span class="w"> </span>file<span class="w"> </span>exists<span class="w"> </span>ensure<span class="w"> </span>permissions<span class="w"> </span>are<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to<span class="w"> </span><span class="m">644</span><span class="w"> </span>or<span class="w"> </span>more<span class="w"> </span>restrictive<span class="w"> </span><span class="o">(</span>Manual<span class="o">)</span>
+<span class="o">[</span>PASS<span class="o">]</span><span class="w"> </span><span class="m">4</span>.1.4<span class="w"> </span>Ensure<span class="w"> </span>that<span class="w"> </span>the<span class="w"> </span>proxy<span class="w"> </span>kubeconfig<span class="w"> </span>file<span class="w"> </span>ownership<span class="w"> </span>is<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to<span class="w"> </span>root:root<span class="w"> </span><span class="o">(</span>Manual<span class="o">)</span>
+<span class="o">[</span>PASS<span class="o">]</span><span class="w"> </span><span class="m">4</span>.1.5<span class="w"> </span>Ensure<span class="w"> </span>that<span class="w"> </span>the<span class="w"> </span>-<span class="w"> </span>kubeconfig<span class="w"> </span>kubelet.conf<span class="w"> </span>file<span class="w"> </span>permissions<span class="w"> </span>are<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to<span class="w"> </span><span class="m">644</span><span class="w"> </span>or<span class="w"> </span>more<span class="w"> </span>restrictive<span class="w"> </span><span class="o">(</span>Automated<span class="o">)</span>
+<span class="o">[</span>PASS<span class="o">]</span><span class="w"> </span><span class="m">4</span>.1.6<span class="w"> </span>Ensure<span class="w"> </span>that<span class="w"> </span>the<span class="w"> </span>-<span class="w"> </span>kubeconfig<span class="w"> </span>kubelet.conf<span class="w"> </span>file<span class="w"> </span>ownership<span class="w"> </span>is<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to<span class="w"> </span>root:root<span class="w"> </span><span class="o">(</span>Manual<span class="o">)</span>
+<span class="o">[</span>PASS<span class="o">]</span><span class="w"> </span><span class="m">4</span>.1.7<span class="w"> </span>Ensure<span class="w"> </span>that<span class="w"> </span>the<span class="w"> </span>certificate<span class="w"> </span>authorities<span class="w"> </span>file<span class="w"> </span>permissions<span class="w"> </span>are<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to<span class="w"> </span><span class="m">644</span><span class="w"> </span>or<span class="w"> </span>more<span class="w"> </span>restrictive<span class="w"> </span><span class="o">(</span>Manual<span class="o">)</span>
+<span class="o">[</span>PASS<span class="o">]</span><span class="w"> </span><span class="m">4</span>.1.8<span class="w"> </span>Ensure<span class="w"> </span>that<span class="w"> </span>the<span class="w"> </span>client<span class="w"> </span>certificate<span class="w"> </span>authorities<span class="w"> </span>file<span class="w"> </span>ownership<span class="w"> </span>is<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to<span class="w"> </span>root:root<span class="w"> </span><span class="o">(</span>Manual<span class="o">)</span>
+<span class="o">[</span>FAIL<span class="o">]</span><span class="w"> </span><span class="m">4</span>.1.9<span class="w"> </span>Ensure<span class="w"> </span>that<span class="w"> </span>the<span class="w"> </span>kubelet<span class="w"> </span>-<span class="w"> </span>config<span class="w"> </span>configuration<span class="w"> </span>file<span class="w"> </span>has<span class="w"> </span>permissions<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to<span class="w"> </span><span class="m">644</span><span class="w"> </span>or<span class="w"> </span>more<span class="w"> </span>restrictive<span class="w"> </span><span class="o">(</span>Automated<span class="o">)</span>
+<span class="o">[</span>FAIL<span class="o">]</span><span class="w"> </span><span class="m">4</span>.1.10<span class="w"> </span>Ensure<span class="w"> </span>that<span class="w"> </span>the<span class="w"> </span>kubelet<span class="w"> </span>-<span class="w"> </span>config<span class="w"> </span>configuration<span class="w"> </span>file<span class="w"> </span>ownership<span class="w"> </span>is<span class="w"> </span><span class="nb">set</span><span class="w"> </span>to<span class="w"> </span>root:root<span class="w"> </span><span class="o">(</span>Automated<span class="o">)</span>
+….
+<span class="o">==</span><span class="w"> </span>Summary<span class="w"> </span><span class="nv">total</span><span class="w"> </span><span class="o">==</span>
+<span class="m">3</span><span class="w"> </span>checks<span class="w"> </span>PASS
+<span class="m">9</span><span class="w"> </span>checks<span class="w"> </span>FAIL
+<span class="m">35</span><span class="w"> </span>checks<span class="w"> </span>WARN
+<span class="m">0</span><span class="w"> </span>checks<span class="w"> </span>INFO
+</code></pre></div>
+
+<ul>
+<li>
+<p>Why does the check show fail? Because it is not set correct variable for kubelet service file permission in rke1: <a href="https://github.com/aquasecurity/kube-bench/blob/main/cfg/rke-cis-1.24/node.yaml#L1C1-L23C21">https://github.com/aquasecurity/kube-bench/blob/main/cfg/rke-cis-1.24/node.yaml#L1C1-L23C21</a></p>
+</li>
+<li>
+<p>I have debug logs here:</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code>I0215 11:42:25.892084 1020849 check.go:309] Command: &quot;/bin/sh -c &#39;if test -e /etc/systemd/system/kubelet.service.d/10-kubeadm.conf; then stat -c permissions=%a /etc/systemd/system/kubelet.service.d/10-kubeadm.conf; fi&#39;&quot;
+I0215 11:42:25.892231 1020849 check.go:310] Output:
+&quot;&quot;
+I0215 11:42:25.892323 1020849 check.go:231] Running 1 test_items
+I0215 11:42:25.892382 1020849 test.go:247] Flag &#39;permissions&#39; does not exist
+I0215 11:42:25.892445 1020849 check.go:255] Used auditCommand
+I0215 11:42:25.892520 1020849 check.go:287] Returning from execute on tests: finalOutput &amp;check.testOutput{testResult:false, flagFound:false, actualResult:&quot;&quot;, ExpectedResult:&quot;&#39;permissions&#39; is present&quot;}
+I0215 11:42:25.892581 1020849 check.go:184] Command: &quot;&quot; TestResult: false State: &quot;FAIL&quot;
+I0215 11:42:25.892640 1020849 check.go:110] - - - Running check 4.1.2 - - -
+I0215 11:42:25.892686 1020849 check.go:125] Test marked as skip
+I0215 11:42:25.892732 1020849 check.go:110] - - - Running check 4.1.3 - - -
+I0215 11:42:25.895644 1020849 check.go:309] Command: &quot;/bin/sh -c &#39;if test -e /etc/kubernetes/ssl/kubecfg-kube-proxy.yaml; then stat -c permissions=%a /etc/kubernetes/ssl/kubecfg-kube-proxy.yaml; fi&#39;&quot;
+I0215 11:42:25.895790 1020849 check.go:310] Output:
+&quot;permissions=600\n&quot;
+</code></pre></div>
+
+<ul>
+<li>It's time to fix the wrong check? xD. Yes, definitely.</li>
+<li>Show the debug output <code>kube-bench - benchmark rke-cis-1.24 - logtostderr - v=3</code></li>
+<li>My commit for fixes: <a href="https://github.com/BlackMetalz/kube-bench/commit/0e716371dc4f81b01532a6e3cb1fa81885b9a8df">https://github.com/BlackMetalz/kube-bench/commit/0e716371dc4f81b01532a6e3cb1fa81885b9a8df</a>.</li>
+<li>Not really called fix because i just make them don't score and correct path for required file and little updates. Output after re-run again xD:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>== Summary total ==
+20 checks PASS
+0 checks FAIL
+28 checks WARN
+5 checks INFO
+</code></pre></div>
+
+<hr>
+<h1>3. Kubesec</h1>
+<p>Kubesec is a Security risk analysis for Kubernetes resources. It provides detailed insights and recommendations on how to improve the security posture of your Kubernetes manifests.</p>
+<h3>Installation &amp;&amp; Usage:</h3>
+<p>This can be used without installation by sending your deployment manifest to the Kubesec server.</p>
+<p>Example: I include timeout to prevent stuck in the pipeline. And manifest <a href="https://gist.github.com/BlackMetalz/84e5bccdbe186ca1ee6e9fe837ff275b">passed-deployment.yaml</a></p>
+<div class="highlight"><pre><span></span><code><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nf">max</span><span class="o">-</span><span class="nc">time</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="o">-</span><span class="n">sSX</span><span class="w"> </span><span class="n">POST</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">data</span><span class="o">-</span><span class="nc">binary</span><span class="w"> </span><span class="nv">@passed</span><span class="o">-</span><span class="n">deployment</span><span class="p">.</span><span class="n">yaml</span><span class="w"> </span><span class="nl">https</span><span class="p">:</span><span class="o">//</span><span class="n">v2</span><span class="p">.</span><span class="n">kubesec</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">scan</span>
+</code></pre></div>
+
+<p>Output example with Passed: We can see <code>message</code> contains <code>Passed</code> word so we can assume it is passed.</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">[</span>
+<span class="w">  </span><span class="p p-Indicator">{</span>
+<span class="w">    </span><span class="s">&quot;object&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;Deployment/release-name-golang-webapp-testing.default&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">    </span><span class="s">&quot;valid&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">true</span><span class="p p-Indicator">,</span>
+<span class="w">    </span><span class="s">&quot;fileName&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;passed-deployment.yaml&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">    </span><span class="s">&quot;message&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;Passed</span><span class="nv"> </span><span class="s">with</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">score</span><span class="nv"> </span><span class="s">of</span><span class="nv"> </span><span class="s">3</span><span class="nv"> </span><span class="s">points&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">    </span><span class="s">&quot;score&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span>
+<span class="w">    </span><span class="s">&quot;scoring&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">      </span><span class="s">&quot;passed&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">[</span>
+<span class="w">        </span><span class="p p-Indicator">{</span>
+<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;ServiceAccountName&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;selector&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;.spec</span><span class="nv"> </span><span class="s">.serviceAccountName&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;reason&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;Service</span><span class="nv"> </span><span class="s">accounts</span><span class="nv"> </span><span class="s">restrict</span><span class="nv"> </span><span class="s">Kubernetes</span><span class="nv"> </span><span class="s">API</span><span class="nv"> </span><span class="s">access</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">should</span><span class="nv"> </span><span class="s">be</span><span class="nv"> </span><span class="s">configured</span><span class="nv"> </span><span class="s">with</span><span class="nv"> </span><span class="s">least</span><span class="nv"> </span><span class="s">privilege&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;points&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">3</span>
+<span class="w">        </span><span class="p p-Indicator">}</span>
+<span class="w">      </span><span class="p p-Indicator">],</span>
+<span class="w">      </span><span class="s">&quot;advise&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">[</span>
+<span class="w">        </span><span class="p p-Indicator">{</span>
+<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;ApparmorAny&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;selector&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;.metadata</span><span class="nv"> </span><span class="s">.annotations</span><span class="nv"> </span><span class="s">.\&quot;container.apparmor.security.beta.kubernetes.io/nginx\&quot;&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;reason&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;Well</span><span class="nv"> </span><span class="s">defined</span><span class="nv"> </span><span class="s">AppArmor</span><span class="nv"> </span><span class="s">policies</span><span class="nv"> </span><span class="s">may</span><span class="nv"> </span><span class="s">provide</span><span class="nv"> </span><span class="s">greater</span><span class="nv"> </span><span class="s">protection</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">unknown</span><span class="nv"> </span><span class="s">threats.</span><span class="nv"> </span><span class="s">WARNING:</span><span class="nv"> </span><span class="s">NOT</span><span class="nv"> </span><span class="s">PRODUCTION</span><span class="nv"> </span><span class="s">READY&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;points&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">3</span>
+<span class="w">        </span><span class="p p-Indicator">},</span>
+<span class="nv">.......</span>
+</code></pre></div>
+
+<p>Output example with Failed with manifest <a href="https://gist.github.com/BlackMetalz/ce10ec85601ef384c5fd1f3d8def6226">failed-deployment.yaml</a>: In <code>message</code> field we can see it contains <code>Failed</code> word!</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">[</span>
+<span class="w">  </span><span class="p p-Indicator">{</span>
+<span class="w">    </span><span class="s">&quot;object&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;Deployment/insecure-app.default&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">    </span><span class="s">&quot;valid&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">true</span><span class="p p-Indicator">,</span>
+<span class="w">    </span><span class="s">&quot;fileName&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;failed-deployment.yaml&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">    </span><span class="s">&quot;message&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;Failed</span><span class="nv"> </span><span class="s">with</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">score</span><span class="nv"> </span><span class="s">of</span><span class="nv"> </span><span class="s">-67</span><span class="nv"> </span><span class="s">points&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">    </span><span class="s">&quot;score&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">-67</span><span class="p p-Indicator">,</span>
+<span class="w">    </span><span class="s">&quot;scoring&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">      </span><span class="s">&quot;critical&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">[</span>
+<span class="w">        </span><span class="p p-Indicator">{</span>
+<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;CapSysAdmin&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;selector&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;containers[]</span><span class="nv"> </span><span class="s">.securityContext</span><span class="nv"> </span><span class="s">.capabilities</span><span class="nv"> </span><span class="s">.add</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">SYS_ADMIN&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;reason&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;CAP_SYS_ADMIN</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">the</span><span class="nv"> </span><span class="s">most</span><span class="nv"> </span><span class="s">privileged</span><span class="nv"> </span><span class="s">capability</span><span class="nv"> </span><span class="s">and</span><span class="nv"> </span><span class="s">should</span><span class="nv"> </span><span class="s">always</span><span class="nv"> </span><span class="s">be</span><span class="nv"> </span><span class="s">avoided&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;points&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">-30</span>
+<span class="w">        </span><span class="p p-Indicator">},</span>
+<span class="w">        </span><span class="p p-Indicator">{</span>
+<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;Privileged&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;selector&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;containers[]</span><span class="nv"> </span><span class="s">.securityContext</span><span class="nv"> </span><span class="s">.privileged</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">true&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;reason&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;Privileged</span><span class="nv"> </span><span class="s">containers</span><span class="nv"> </span><span class="s">can</span><span class="nv"> </span><span class="s">allow</span><span class="nv"> </span><span class="s">almost</span><span class="nv"> </span><span class="s">completely</span><span class="nv"> </span><span class="s">unrestricted</span><span class="nv"> </span><span class="s">host</span><span class="nv"> </span><span class="s">access&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;points&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">-30</span>
+<span class="w">        </span><span class="p p-Indicator">},</span>
+<span class="w">        </span><span class="p p-Indicator">{</span>
+<span class="w">          </span><span class="s">&quot;id&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;AllowPrivilegeEscalation&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;selector&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;containers[]</span><span class="nv"> </span><span class="s">.securityContext</span><span class="nv"> </span><span class="s">.allowPrivilegeEscalation</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">true&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;reason&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;Ensure</span><span class="nv"> </span><span class="s">a</span><span class="nv"> </span><span class="s">non-root</span><span class="nv"> </span><span class="s">process</span><span class="nv"> </span><span class="s">can</span><span class="nv"> </span><span class="s">not</span><span class="nv"> </span><span class="s">gain</span><span class="nv"> </span><span class="s">more</span><span class="nv"> </span><span class="s">privileges&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">          </span><span class="s">&quot;points&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">-7</span>
+<span class="w">        </span><span class="p p-Indicator">}</span>
+<span class="nv">....</span>
+</code></pre></div>
+
+<hr>
+<h1>4. Istio and mTLS (Mutual Transport Layer Security (mTLS))</h1>
+<p>I think it will be overwhelming for me if i include it in this post. I will write separately for Istio, Service Mesh, and mTLS… in another article.</p>
+<hr>
+<h1>5. Falco</h1>
+<p>Falco is an open-source runtime security tool originally developed by Sysdig. It is designed to monitor and detect unexpected behavior in your Kubernetes (k8s) clusters. Falco focuses on providing real-time security monitoring by analyzing the behavior of applications, containers, hosts, and network activity.</p>
+<h3>Example Use Cases:</h3>
+<ol>
+<li>
+<p><strong>Detecting Container Breakouts</strong>:
+Falco can alert if a container tries to access the host filesystem in an unexpected way, indicating a potential container breakout attempt.</p>
+</li>
+<li>
+<p><strong>Monitoring Privileged Escalation</strong>:
+Falco can detect if an application or container attempts to run with elevated privileges, which might indicate a privilege escalation attack.</p>
+</li>
+<li>
+<p><strong>Detecting Suspicious Network Activity</strong>:
+Falco can monitor network connections and alert on unusual patterns, such as unexpected outbound connections from a container.</p>
+</li>
+</ol>
+<h3>Deployment in Kubernetes:</h3>
+<p>To deploy Falco in a Kubernetes cluster, you can use the Helm chart provided by the Falco community. Below are the basic steps to get started:</p>
+<ol>
+<li><strong>Add the Falco Helm Repository</strong>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>falcosecurity<span class="w"> </span>https://falcosecurity.github.io/charts
+helm<span class="w"> </span>repo<span class="w"> </span>update
+</code></pre></div>
+
+<ol>
+<li><strong>Install Falco to namespace Falco with limit resource</strong>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>falco<span class="w"> </span>falcosecurity/falco<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>-<span class="w"> </span><span class="nb">set</span><span class="w"> </span>resources.requests.cpu<span class="o">=</span>200m<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>-<span class="w"> </span><span class="nb">set</span><span class="w"> </span>resources.requests.memory<span class="o">=</span>256Mi<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>-<span class="w"> </span><span class="nb">set</span><span class="w"> </span>resources.limits.cpu<span class="o">=</span>500m<span class="w"> </span><span class="se">\</span>
+<span class="w"> </span>-<span class="w"> </span><span class="nb">set</span><span class="w"> </span>resources.limits.memory<span class="o">=</span>512Mi<span class="w"> </span><span class="se">\</span>
+-n<span class="w"> </span>falco<span class="w"> </span>-<span class="w"> </span>create-namespace
+</code></pre></div>
+
+<p>This will deploy Falco as a DaemonSet, ensuring it runs on all nodes in your cluster and starts monitoring system calls and other activities.</p>
+<h3>Demo:</h3>
+<p>I create separate repo with some examples for Falco: https://github.com/BlackMetalz/falco</p>
+<p>Forward message to telegram when event with priority <code>ERROR</code> happened and rule <code>Terminal shell in container</code> ( I was <code>overrided</code> default rule with priority from Notice to Error for demo!)
+<img alt="Falco Telegram" src="images/2025/02/17th_1.png"></p>
+<p>Show it in UI:
+<img alt="Falco UI" src="images/2025/02/17th_2.png"></p>
+<hr>
+<h1>Ref:</h1>
+<ul>
+<li>https://github.com/gbrindisi/dockerfile-security (outdated)</li>
+<li>https://github.com/controlplaneio/kubesec</li>
+<li>https://github.com/aquasecurity/kube-bench</li>
+<li>https://www.aquasec.com/blog/dns-spoofing-kubernetes-clusters/</li>
+<li>https://falco.org/</li>
+<li>https://github.com/falcosecurity/falco</li>
+<li>https://chatgpt.com/ xD</li>
+<li>https://claude.ai/ xD</li>
+</ul>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2025-02-17T00:00:00+07:00">Mon 17 February 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#devsecops-ref">devsecops
+                    <span class="superscript">2</span>
+</a></li>
+                <li><a href="/tags.html#k8s-ref">k8s
+                    <span class="superscript">5</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
