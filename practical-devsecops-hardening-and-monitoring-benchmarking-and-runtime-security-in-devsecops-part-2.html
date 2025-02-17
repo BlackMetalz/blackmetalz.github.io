@@ -282,7 +282,7 @@ I0215 11:42:25.895790 1020849 check.go:310] Output:
 </code></pre></div>
 
 <hr>
-<h1>4. Istio and mTLS (Mutual Transport Layer Security (mTLS))</h1>
+<h1>4. Istio and mTLS (Mutual Transport Layer Security)</h1>
 <p>I think it will be overwhelming for me if i include it in this post. I will write separately for Istio, Service Mesh, and mTLS… in another article.</p>
 <hr>
 <h1>5. Falco</h1>
@@ -312,7 +312,7 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 </code></pre></div>
 
 <ol>
-<li><strong>Install Falco to namespace Falco with limit resource</strong>:</li>
+<li><strong>Install Falco to namespace Falco with limited resources</strong>:</li>
 </ol>
 <div class="highlight"><pre><span></span><code>helm<span class="w"> </span>install<span class="w"> </span>falco<span class="w"> </span>falcosecurity/falco<span class="w"> </span><span class="se">\</span>
 <span class="w"> </span>-<span class="w"> </span><span class="nb">set</span><span class="w"> </span>resources.requests.cpu<span class="o">=</span>200m<span class="w"> </span><span class="se">\</span>
@@ -332,14 +332,14 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 <hr>
 <h1>Ref:</h1>
 <ul>
-<li>https://github.com/gbrindisi/dockerfile-security (outdated)</li>
-<li>https://github.com/controlplaneio/kubesec</li>
-<li>https://github.com/aquasecurity/kube-bench</li>
-<li>https://www.aquasec.com/blog/dns-spoofing-kubernetes-clusters/</li>
-<li>https://falco.org/</li>
-<li>https://github.com/falcosecurity/falco</li>
-<li>https://chatgpt.com/ xD</li>
-<li>https://claude.ai/ xD</li>
+<li><a href="https://github.com/gbrindisi/dockerfile-security">https://github.com/gbrindisi/dockerfile-security</a> (outdated)</li>
+<li><a href="https://github.com/controlplaneio/kubesec">https://github.com/controlplaneio/kubesec</a></li>
+<li><a href="https://github.com/aquasecurity/kube-bench">https://github.com/aquasecurity/kube-bench</a></li>
+<li><a href="https://www.aquasec.com/blog/dns-spoofing-kubernetes-clusters/">https://www.aquasec.com/blog/dns-spoofing-kubernetes-clusters/</a></li>
+<li><a href="https://falco.org/">https://falco.org/</a></li>
+<li><a href="https://github.com/falcosecurity/falco">https://github.com/falcosecurity/falco</a></li>
+<li><a href="https://chatgpt.com/">https://chatgpt.com/</a> xD</li>
+<li><a href="https://claude.ai/">https://claude.ai/</a> xD</li>
 </ul>
 
 
