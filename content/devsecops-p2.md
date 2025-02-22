@@ -35,7 +35,7 @@ So how can I prevent them when building images?
 
 - I will use `openpolicyagent/conftest` to test it.
 - I built an image with the policy defined here: https://github.com/BlackMetalz/opa-custom
-- Usage: `docker run - rm -v $(pwd):/project kienlt992/opa-custom:v0.56.0 test Dockerfile`. Output example:
+- Usage: `docker run -rm -v $(pwd):/project kienlt992/opa-custom:v0.56.0 test Dockerfile`. Output example:
 ```
 5 tests, 5 passed, 0 warnings, 0 failures, 0 exceptions
 ```
