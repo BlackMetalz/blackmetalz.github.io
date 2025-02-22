@@ -113,7 +113,7 @@ So how can I prevent them when building images?</p>
 <p>I will use <code>openpolicyagent/conftest</code> to test it.</p>
 </li>
 <li>I built an image with the policy defined here: https://github.com/BlackMetalz/opa-custom</li>
-<li>Usage: <code>docker run -rm -v $(pwd):/project kienlt992/opa-custom:v0.56.0 test Dockerfile</code>. Output example:</li>
+<li>Usage: <code>docker run --rm -v $(pwd):/project kienlt992/opa-custom:v0.56.0 test Dockerfile</code>. Output example:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="mf">5</span><span class="w"> </span><span class="n">tests</span><span class="p">,</span><span class="w"> </span><span class="mf">5</span><span class="w"> </span><span class="n">passed</span><span class="p">,</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="n">warnings</span><span class="p">,</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="n">failures</span><span class="p">,</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="n">exceptions</span>
 </code></pre></div>
