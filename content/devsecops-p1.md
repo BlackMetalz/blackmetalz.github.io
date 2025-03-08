@@ -82,7 +82,7 @@ Talisman successfully installed to '.git/hooks/pre-push'.
 ```
 
 ### Usage
-- Here is small a demo with Golang: https://gist.github.com/BlackMetalz/08ec9f3e985c7796f65ae36b06004f35
+- Here is small a demo with Golang: [demo-repo](https://gist.github.com/BlackMetalz/08ec9f3e985c7796f65ae36b06004f35)
 - What happens when i try to push?
 
 ```bash

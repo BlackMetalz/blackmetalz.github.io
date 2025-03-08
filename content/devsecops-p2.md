@@ -30,7 +30,6 @@ Challenges:
 
 - I don't allow image tags to be `latest` which can be security considering.
 - I don't allow images to run as a `root` user.
-https://github.com/BlackMetalz/kube-bench/commit/0e716371dc4f81b01532a6e3cb1fa81885b9a8df
 So how can I prevent them when building images?
 
 - I will use `openpolicyagent/conftest` to test it.
@@ -121,8 +120,8 @@ I0215 11:42:25.895790 1020849 check.go:310] Output:
 ```
 
 - It's time to fix the wrong check? xD. Yes, definitely.
-- Show the debug output `kube-bench - benchmark rke-cis-1.24 - logtostderr - v=3`
-- My commit for fixes: [https://github.com/BlackMetalz/kube-bench/commit/0e716371dc4f81b01532a6e3cb1fa81885b9a8df](https://github.com/BlackMetalz/kube-bench/commit/0e716371dc4f81b01532a6e3cb1fa81885b9a8df).
+- Show the debug output `kube-bench - benchmark rke-cis-1.24 - logtostderr - v=3`.
+- My commit for fixes: [kube-bench commit](https://github.com/BlackMetalz/kube-bench/commit/0e716371dc4f81b01532a6e3cb1fa81885b9a8df)
 - Not really called fix because i just make them don't score and correct path for required file and little updates. Output after re-run again xD:
 ```text
 == Summary total ==
@@ -247,13 +246,15 @@ helm install falco falcosecurity/falco \
 This will deploy Falco as a DaemonSet, ensuring it runs on all nodes in your cluster and starts monitoring system calls and other activities.
 
 ### Demo:
-I create separate repo with some examples for Falco: https://github.com/BlackMetalz/falco
+I create separate repo with some examples for Falco: [https://github.com/BlackMetalz/falco](https://github.com/BlackMetalz/falco)
 
-Forward message to telegram when event with priority `ERROR` happened and rule `Terminal shell in container` ( I was `overrided` default rule with priority from Notice to Error for demo!)
+Forward message to telegram when event with priority **ERROR** happened and rule **Terminal shell in container** ( I was **overrided** default rule with priority from Notice to Error for demo!)
+
 ![Falco Telegram](images/2025/02/17th_1.png)
 
 
 Show it in UI:
+
 ![Falco UI](images/2025/02/17th_2.png)
 
 ---

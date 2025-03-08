@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="SRE, Knowledge Base, " />
+
+<meta property="og:title" content="What is SLA-SLO-SLI? SLO Generator introduction - Sloth and dynamic rules for SLO "/>
+<meta property="og:url" content="/what-is-sla-slo-sli-slo-generator-introduction-sloth-and-dynamic-rules-for-slo.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2025-03-08T00:00:00+07:00" />
+<meta name="twitter:title" content="What is SLA-SLO-SLI? SLO Generator introduction - Sloth and dynamic rules for SLO ">
+<meta name="twitter:description" content="">
+
+        <title>What is SLA-SLO-SLI? SLO Generator introduction - Sloth and dynamic rules for SLO  · Kienlt&#39;s notebook
+</title>
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       "/"
+                                    >Home</a>
+                                </li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="/what-is-sla-slo-sli-slo-generator-introduction-sloth-and-dynamic-rules-for-slo.html">
+                What is SLA-SLO-SLI? SLO Generator introduction - Sloth and dynamic rules for SLO
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h1>Concept, meaning, and example for SLA-SLO-SLI</h1>
+<p>I will try to explain with my ability and knowledge!</p>
+<p><strong>1.SLA</strong>:</p>
+<ul>
+<li>SLA is an abbreviation of word Service Level Agreement. It is a contract/agreement between you (service provider) and your customer/end user.</li>
+<li>What kind of contract?. Something like you promise you can make about level of service they can expect.</li>
+<li>Example: SLA might state: "The web application will have 99% uptime in a given month." This is a part of contractual, customer-facing part. It often tied to consequences like refunds or penalties if you don't meet. <ul>
+<li>Give voucher discount 10%-20% cost of customer next time.</li>
+<li>The technical team will not have KPI this month or even get salary reduced like 10%-20% xD</li>
+</ul>
+</li>
+<li>The 99% uptime means the platform can be down for no more than about 7.2 hours in a 30-day month (30 × 24 × 0.01 = 7.2 hours)</li>
+</ul>
+<p><strong>2.SLO</strong>:</p>
+<ul>
+<li>SLO is an abbreviation of word Service Level Objective, the internal goal you set to ensure you meet the SLA. This is your operational target, more specific than SLA, and guides your team's day-to-day work.</li>
+<li>For your 99% uptime SLA, you might set SLO like: "The Application will be available 99.5% of the time, measured over a 30-day period."</li>
+<li>Why 99.5%? You don't want to have any alert or warning if SLA doesn't meet.</li>
+<li>Again, this is an internal target, you and your team need to monitor it, no need to show it to customer/end-user!</li>
+</ul>
+<p><strong>3.SLI</strong>:</p>
+<ul>
+<li>SLI is an abbreviation of word Service Level Indicator which you use to track how you are doing agaist your SLO.</li>
+<li>It's raw data/metrics you collect.</li>
+<li>For your uptime example: an SLI could be "The percentage of successful HTTP requests to the application, measured every minute", the success request can be counted as not containing 499 and 5xx status codes.</li>
+<li>If your app responds status code that does not contain 499 and 5xx for 99.7% of the time in a month, that is your SLI value.</li>
+<li>It tells you precisely how the service is performing and see if you are on track!</li>
+</ul>
+<hr>
+<h1>SLO Generator - Sloth</h1>
+<p>As the title, SLO Generator. Sloth is a tool designed to simplify the management and creation of Service Level Object (SLO) for your service. Imagine your goal is to track request rate success in total requests. You probably have a query like this:</p>
+<div class="highlight"><pre><span></span><code>rate(http_requests_success[5m]) / rate(http_requests_total[5m])
+</code></pre></div>
+
+<p>But it is not enough for sure. Here is the list:</p>
+<ul>
+<li>Like how many percent left of SLO before it burned lower than your SLO? (99%). </li>
+<li>Last hour more than 5% of requests have not been successful, have you noticed it?</li>
+<li>And many more i guess xD.</li>
+</ul>
+<p>So Sloth is designed to handle those issues. It will create 3 rules:</p>
+<ol>
+<li>SLI Rules: calculate request fails in many different SLI windows (5m, 30m, 1h, 2h, ....) used to check if service is failing SLO.</li>
+<li>Metadata Rules: provide additional information like error budget, target of SLo is how much %</li>
+<li>Alert Rules: create 2 types of alert<ul>
+<li>Critical/Page: Critical alert when error budget is burning fast. Example 10% in 5 minutes.</li>
+<li>Warning/Ticket: warning alert, this is slowly burn error but still watch out. Example 2% in 1 hour.</li>
+</ul>
+</li>
+</ol>
+<h3>Sloth in action</h3>
+<ul>
+<li>Probably detailed here: <a href="https://sloth.dev/introduction/">https://sloth.dev/introduction/</a>. This will generate rules for ya 1 service for 1 rule file which contains multiple rules.</li>
+<li>
+<p>But imagine you have more than 1000 services like mine?:</p>
+<ul>
+<li>Are you gonna create 1000 rules file++?</li>
+<li>Yes, it is fine with a little automation script, but how about when a new service is added/deleted? Are you gonna do it again?</li>
+<li>See? That is why i come with dynamic service for SLO. Let me tell you about it.</li>
+</ul>
+</li>
+<li>
+<p>Sloth for Api gateway which has 1000++ services. Only 1 file is needed. I', using Kong for internal API gateway</p>
+</li>
+<li><code>kong-slos.yaml</code>:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;prometheus/v1&quot;</span>
+<span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;kong-apigateway&quot;</span><span class="w">  </span><span class="c1"># General name for the service</span>
+<span class="nt">labels</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">job</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;kong-apigateway&quot;</span>
+<span class="w">  </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;kienlt-team&quot;</span>
+<span class="nt">slos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;requests-availability&quot;</span>
+<span class="w">    </span><span class="nt">objective</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">99.9</span><span class="w">  </span><span class="c1"># SLO 99.9% availability</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Availability</span><span class="nv"> </span><span class="s">SLO</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">all</span><span class="nv"> </span><span class="s">Kong</span><span class="nv"> </span><span class="s">services&quot;</span>
+<span class="w">    </span><span class="nt">sli</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">events</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">error_query</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;sum(rate(kong_http_requests_total{job=&quot;kong-apigateway&quot;,</span><span class="nv"> </span><span class="s">code=~&quot;5..|499&quot;}[{{.window}}]))</span><span class="nv"> </span><span class="s">by</span><span class="nv"> </span><span class="s">(service)&#39;</span>
+<span class="w">        </span><span class="nt">total_query</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;sum(rate(kong_http_requests_total{job=&quot;kong-apigateway&quot;}[{{.window}}]))</span><span class="nv"> </span><span class="s">by</span><span class="nv"> </span><span class="s">(service)&#39;</span>
+<span class="w">    </span><span class="nt">alerting</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;KongServiceHighErrorRate&quot;</span>
+<span class="w">      </span><span class="nt">page_alert</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;critical&quot;</span>
+<span class="w">        </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Critical:</span><span class="nv"> </span><span class="s">{{$labels.service}}</span><span class="nv"> </span><span class="s">burning</span><span class="nv"> </span><span class="s">error</span><span class="nv"> </span><span class="s">budget</span><span class="nv"> </span><span class="s">too</span><span class="nv"> </span><span class="s">fast!&quot;</span>
+<span class="w">          </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Error</span><span class="nv"> </span><span class="s">rate</span><span class="nv"> </span><span class="s">&gt;</span><span class="nv"> </span><span class="s">5%</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">5m</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">{{$labels.service}}.&quot;</span>
+<span class="w">      </span><span class="nt">ticket_alert</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;warning&quot;</span>
+<span class="w">        </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Warning:</span><span class="nv"> </span><span class="s">{{$labels.service}}</span><span class="nv"> </span><span class="s">consuming</span><span class="nv"> </span><span class="s">error</span><span class="nv"> </span><span class="s">budget.&quot;</span>
+<span class="w">          </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Error</span><span class="nv"> </span><span class="s">rate</span><span class="nv"> </span><span class="s">&gt;</span><span class="nv"> </span><span class="s">2%</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">1h</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">{{$labels.service}}.&quot;</span>
+</code></pre></div>
+
+<ul>
+<li>Run command: <code>sloth generate -i kong-slos.yaml -o kong-slos-rules.yaml</code></li>
+<li>Output of <code>kong-slos-rules.yaml</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nn">---</span>
+<span class="c1"># Code generated by Sloth (v0.11.0): https://github.com/slok/sloth.</span>
+<span class="c1"># DO NOT EDIT.</span>
+
+<span class="nt">groups</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sloth-slo-sli-recordings-kong-apigateway-requests-availability</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">record</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">slo:sli_error:ratio_rate5m</span>
+<span class="w">    </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">      </span><span class="no">(sum(rate(kong_http_requests_total{job=&quot;kong-apigateway&quot;, code=~&quot;5..|499&quot;}[5m])) by (service))</span>
+<span class="w">      </span><span class="no">/</span>
+<span class="w">      </span><span class="no">(sum(rate(kong_http_requests_total{job=&quot;kong-apigateway&quot;}[5m])) by (service))</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">job</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kong-apigateway</span>
+<span class="w">      </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kienlt-team</span>
+<span class="w">      </span><span class="nt">sloth_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kong-apigateway-requests-availability</span>
+<span class="w">      </span><span class="nt">sloth_service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kong-apigateway</span>
+<span class="w">      </span><span class="nt">sloth_slo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">requests-availability</span>
+<span class="w">      </span><span class="nt">sloth_window</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5m</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">record</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">slo:sli_error:ratio_rate30m</span>
+<span class="w">    </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">      </span><span class="no">(sum(rate(kong_http_requests_total{job=&quot;kong-apigateway&quot;, code=~&quot;5..|499&quot;}[30m])) by (service))</span>
+<span class="w">      </span><span class="no">/</span>
+<span class="w">      </span><span class="no">(sum(rate(kong_http_requests_total{job=&quot;kong-apigateway&quot;}[30m])) by (service))</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">job</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kong-apigateway</span>
+<span class="w">      </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kienlt-team</span>
+<span class="w">      </span><span class="nt">sloth_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kong-apigateway-requests-availability</span>
+<span class="w">      </span><span class="nt">sloth_service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kong-apigateway</span>
+<span class="w">      </span><span class="nt">sloth_slo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">requests-availability</span>
+<span class="w">      </span><span class="nt">sloth_window</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30m</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">record</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">slo:sli_error:ratio_rate1h</span>
+<span class="w">    </span><span class="nt">expr</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">      </span><span class="no">(sum(rate(kong_http_requests_total{job=&quot;kong-apigateway&quot;, code=~&quot;5..|499&quot;}[1h])) by (service))</span>
+<span class="w">      </span><span class="no">/</span>
+<span class="w">      </span><span class="no">(sum(rate(kong_http_requests_total{job=&quot;kong-apigateway&quot;}[1h])) by (service))</span>
+<span class="w">      </span><span class="no">....... AND THE REST ....... I don&#39;t want to include it fully here since it is generated!</span>
+</code></pre></div>
+
+<ul>
+<li>Apply those rules to Prometheus, in my case, it was Victoria Metrics (vmalert)</li>
+<li>Now we have rules for it, but none of service metrics are available? For common, you will have to wait 30 days to get enough metrics for your SLOs. But don't worry, Victoria Metrics have feature that backfilling data for our SLO rules. Link for it in <strong>Ref</strong> section. P/S: I have no idea how it works in Prometheus since i'm not using it, only for <code>remoteWrite</code> xD.</li>
+<li>And we still have 1 more important thing to make it complete which is to modify the Dashboard to fit with dynamic service.</li>
+</ul>
+<h3>Grafana dashboard modify:</h3>
+<ul>
+<li>Sloth will use 2 dashboards from here: <a href="https://sloth.dev/introduction/dashboards/">https://sloth.dev/introduction/dashboards/</a></li>
+<li>Let's begin with dashboard: <code>SLO / Detail</code></li>
+<li>We have to modify some variables</li>
+</ul>
+<p><img alt="alt text" src="images/2025/03/08th_1.png"></p>
+<ul>
+<li>Next, modify query to filter by service: <strong>slo:current_burn_rate:ratio{service="${service}"} &gt; ${min_burning_rate}</strong>. And do the same for the rest!</li>
+</ul>
+<p><img alt="alt text" src="images/2025/03/08th_2.png"></p>
+<ul>
+<li>This is demo of service have none error budget left</li>
+</ul>
+<p><img alt="alt text" src="images/2025/03/08th_3.png"></p>
+<ul>
+<li>This is demo of service have no issue with error budget</li>
+</ul>
+<p><img alt="alt text" src="images/2025/03/08th_4.png"></p>
+<h1>Conclusion</h1>
+<ul>
+<li>This is a great way to improve service quality</li>
+<li>With correct SLOs, you can make promises, agreement with your customer/end user</li>
+<li>This consumed about 4 days of mine, the most issue was part after setup dashboard and dynamic/static service. I have no data. But with little recommend that recording metadata need to run calculate with vmalert rules-replay. I'm able to finish the task that setup SLO for Kong - APIGATEWAY</li>
+</ul>
+<h1>Ref:</h1>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=zMqo4NXDr3g&amp;lc=UgzsXWLBPB-t0LmNyUl4AaABAg">Reliability and Resilience: The Dynamic Duo of SRE</a></li>
+<li><a href="https://victoriametrics.com/blog/rules-replay/">Rules backfilling via vmalert</a></li>
+</ul>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2025-03-08T00:00:00+07:00">Sat 08 March 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#sre-ref">SRE
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

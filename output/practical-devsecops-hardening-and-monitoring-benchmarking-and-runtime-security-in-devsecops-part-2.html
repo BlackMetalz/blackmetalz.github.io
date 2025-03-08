@@ -106,7 +106,6 @@
 <li>I don't allow image tags to be <code>latest</code> which can be security considering.</li>
 <li>
 <p>I don't allow images to run as a <code>root</code> user.
-https://github.com/BlackMetalz/kube-bench/commit/0e716371dc4f81b01532a6e3cb1fa81885b9a8df
 So how can I prevent them when building images?</p>
 </li>
 <li>
@@ -203,8 +202,8 @@ I0215 11:42:25.895790 1020849 check.go:310] Output:
 
 <ul>
 <li>It's time to fix the wrong check? xD. Yes, definitely.</li>
-<li>Show the debug output <code>kube-bench - benchmark rke-cis-1.24 - logtostderr - v=3</code></li>
-<li>My commit for fixes: <a href="https://github.com/BlackMetalz/kube-bench/commit/0e716371dc4f81b01532a6e3cb1fa81885b9a8df">https://github.com/BlackMetalz/kube-bench/commit/0e716371dc4f81b01532a6e3cb1fa81885b9a8df</a>.</li>
+<li>Show the debug output <code>kube-bench - benchmark rke-cis-1.24 - logtostderr - v=3</code>.</li>
+<li>My commit for fixes: <a href="https://github.com/BlackMetalz/kube-bench/commit/0e716371dc4f81b01532a6e3cb1fa81885b9a8df">kube-bench commit</a></li>
 <li>Not really called fix because i just make them don't score and correct path for required file and little updates. Output after re-run again xD:</li>
 </ul>
 <div class="highlight"><pre><span></span><code>== Summary total ==
@@ -324,11 +323,11 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 
 <p>This will deploy Falco as a DaemonSet, ensuring it runs on all nodes in your cluster and starts monitoring system calls and other activities.</p>
 <h3>Demo:</h3>
-<p>I create separate repo with some examples for Falco: https://github.com/BlackMetalz/falco</p>
-<p>Forward message to telegram when event with priority <code>ERROR</code> happened and rule <code>Terminal shell in container</code> ( I was <code>overrided</code> default rule with priority from Notice to Error for demo!)
-<img alt="Falco Telegram" src="images/2025/02/17th_1.png"></p>
-<p>Show it in UI:
-<img alt="Falco UI" src="images/2025/02/17th_2.png"></p>
+<p>I create separate repo with some examples for Falco: <a href="https://github.com/BlackMetalz/falco">https://github.com/BlackMetalz/falco</a></p>
+<p>Forward message to telegram when event with priority <strong>ERROR</strong> happened and rule <strong>Terminal shell in container</strong> ( I was <strong>overrided</strong> default rule with priority from Notice to Error for demo!)</p>
+<p><img alt="Falco Telegram" src="images/2025/02/17th_1.png"></p>
+<p>Show it in UI:</p>
+<p><img alt="Falco UI" src="images/2025/02/17th_2.png"></p>
 <hr>
 <h1>Ref:</h1>
 <ul>

@@ -178,9 +178,11 @@ This flow ensures that the `/products` endpoint handles request validation, data
 ![filter jaeger](images/2025/03/03rd_2.png)
 
 - Then i take a look at the request with 3 seconds duration. You can see clearly each span takes how long to complete the handle
+
 ![alt text](images/2025/03/03rd_3.png)
 
-- I will look at span `processData`
+- I will look at span **processData**
+
 ![alt text](images/2025/03/03rd_4.png)
 Source code here: [https://github.com/BlackMetalz/otel-go-app-sample/blob/main/utils/mysql.go#L112-L124](https://github.com/BlackMetalz/otel-go-app-sample/blob/main/utils/mysql.go#L112-L124)
 ```go
