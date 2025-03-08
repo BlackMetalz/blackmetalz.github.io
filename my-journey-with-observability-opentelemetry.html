@@ -255,16 +255,14 @@
 </ul>
 <p><img alt="filter jaeger" src="images/2025/03/03rd_2.png"></p>
 <ul>
-<li>
-<p>Then i take a look at the request with 3 seconds duration. You can see clearly each span takes how long to complete the handle
-<img alt="alt text" src="images/2025/03/03rd_3.png"></p>
-</li>
-<li>
-<p>I will look at span <code>processData</code>
-<img alt="alt text" src="images/2025/03/03rd_4.png">
-Source code here: <a href="https://github.com/BlackMetalz/otel-go-app-sample/blob/main/utils/mysql.go#L112-L124">https://github.com/BlackMetalz/otel-go-app-sample/blob/main/utils/mysql.go#L112-L124</a></p>
-</li>
+<li>Then i take a look at the request with 3 seconds duration. You can see clearly each span takes how long to complete the handle</li>
 </ul>
+<p><img alt="alt text" src="images/2025/03/03rd_3.png"></p>
+<ul>
+<li>I will look at span <strong>processData</strong></li>
+</ul>
+<p><img alt="alt text" src="images/2025/03/03rd_4.png">
+Source code here: <a href="https://github.com/BlackMetalz/otel-go-app-sample/blob/main/utils/mysql.go#L112-L124">https://github.com/BlackMetalz/otel-go-app-sample/blob/main/utils/mysql.go#L112-L124</a></p>
 <div class="highlight"><pre><span></span><code><span class="c1">// processData simulates additional processing with a delay and possible error</span>
 <span class="kd">func</span><span class="w"> </span><span class="nx">processData</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">products</span><span class="w"> </span><span class="p">[]</span><span class="nx">Product</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">span</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">otel</span><span class="p">.</span><span class="nx">Tracer</span><span class="p">(</span><span class="s">&quot;utils&quot;</span><span class="p">).</span><span class="nx">Start</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;processData&quot;</span><span class="p">)</span>
