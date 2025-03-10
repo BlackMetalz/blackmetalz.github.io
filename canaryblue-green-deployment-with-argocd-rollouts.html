@@ -22,7 +22,7 @@
 <meta property="og:description" content="" />
 <meta property="og:site_name" content="Kienlt&#39;s notebook" />
 <meta property="og:article:author" content="kienlt" />
-<meta property="og:article:published_time" content="2025-03-09T00:00:00+07:00" />
+<meta property="og:article:published_time" content="2025-03-10T00:00:00+07:00" />
 <meta name="twitter:title" content="Canary/Blue-Green deployment with Argocd Rollouts ">
 <meta name="twitter:description" content="">
 
@@ -86,6 +86,10 @@
 <li>It doesn't related to ArgoCD. Argo Rollouts is often used in conjunction with Argo CD, the Argo project’s continuous delivery (CD) tool. Argo CD implements declarative GitOps-driven CD for Kubernetes, while Rollouts offers a controller and CRDs that let you robustly manage blue-green and canary deployments</li>
 </ul>
 <hr>
+<h1>What is Canary/Blue-Green deployment?</h1>
+<p>Umm, if i explain complete for this, this article will be long to read so i will not include here, only focus on main objective.</p>
+<p>In case of you don't know about it, google is your friend xD</p>
+<hr>
 <h1>Installation</h1>
 <h3>Install Argo Rollouts</h3>
 <ul>
@@ -98,22 +102,22 @@
 <ul>
 <li>Output after command executed is like this:</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="n">namespace</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="w"> </span><span class="n">created</span>
-<span class="n">customresourcedefinition</span><span class="p">.</span><span class="n">apiextensions</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">analysisruns</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="w"> </span><span class="n">created</span>
-<span class="n">customresourcedefinition</span><span class="p">.</span><span class="n">apiextensions</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">analysistemplates</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="w"> </span><span class="n">created</span>
-<span class="n">customresourcedefinition</span><span class="p">.</span><span class="n">apiextensions</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">clusteranalysistemplates</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="w"> </span><span class="n">created</span>
-<span class="n">customresourcedefinition</span><span class="p">.</span><span class="n">apiextensions</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">experiments</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="w"> </span><span class="n">created</span>
-<span class="n">customresourcedefinition</span><span class="p">.</span><span class="n">apiextensions</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">rollouts</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="w"> </span><span class="n">created</span>
-<span class="n">serviceaccount</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="w"> </span><span class="n">created</span>
-<span class="n">clusterrole</span><span class="p">.</span><span class="n">rbac</span><span class="p">.</span><span class="n">authorization</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="w"> </span><span class="n">created</span>
-<span class="n">clusterrole</span><span class="p">.</span><span class="n">rbac</span><span class="p">.</span><span class="n">authorization</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="o">-</span><span class="n">aggregate</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">admin</span><span class="w"> </span><span class="n">created</span>
-<span class="n">clusterrole</span><span class="p">.</span><span class="n">rbac</span><span class="p">.</span><span class="n">authorization</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="o">-</span><span class="n">aggregate</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">edit</span><span class="w"> </span><span class="n">created</span>
-<span class="n">clusterrole</span><span class="p">.</span><span class="n">rbac</span><span class="p">.</span><span class="n">authorization</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="o">-</span><span class="n">aggregate</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">view</span><span class="w"> </span><span class="n">created</span>
-<span class="n">clusterrolebinding</span><span class="p">.</span><span class="n">rbac</span><span class="p">.</span><span class="n">authorization</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="w"> </span><span class="n">created</span>
-<span class="n">configmap</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="o">-</span><span class="n">config</span><span class="w"> </span><span class="n">created</span>
-<span class="n">secret</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="o">-</span><span class="n">notification</span><span class="o">-</span><span class="n">secret</span><span class="w"> </span><span class="n">created</span>
-<span class="n">service</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="o">-</span><span class="n">metrics</span><span class="w"> </span><span class="n">created</span>
-<span class="n">deployment</span><span class="p">.</span><span class="n">apps</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="w"> </span><span class="n">created</span>
+<div class="highlight"><pre><span></span><code>namespace/argo-rollouts<span class="w"> </span>created
+customresourcedefinition.apiextensions.k8s.io/analysisruns.argoproj.io<span class="w"> </span>created
+customresourcedefinition.apiextensions.k8s.io/analysistemplates.argoproj.io<span class="w"> </span>created
+customresourcedefinition.apiextensions.k8s.io/clusteranalysistemplates.argoproj.io<span class="w"> </span>created
+customresourcedefinition.apiextensions.k8s.io/experiments.argoproj.io<span class="w"> </span>created
+customresourcedefinition.apiextensions.k8s.io/rollouts.argoproj.io<span class="w"> </span>created
+serviceaccount/argo-rollouts<span class="w"> </span>created
+clusterrole.rbac.authorization.k8s.io/argo-rollouts<span class="w"> </span>created
+clusterrole.rbac.authorization.k8s.io/argo-rollouts-aggregate-to-admin<span class="w"> </span>created
+clusterrole.rbac.authorization.k8s.io/argo-rollouts-aggregate-to-edit<span class="w"> </span>created
+clusterrole.rbac.authorization.k8s.io/argo-rollouts-aggregate-to-view<span class="w"> </span>created
+clusterrolebinding.rbac.authorization.k8s.io/argo-rollouts<span class="w"> </span>created
+configmap/argo-rollouts-config<span class="w"> </span>created
+secret/argo-rollouts-notification-secret<span class="w"> </span>created
+service/argo-rollouts-metrics<span class="w"> </span>created
+deployment.apps/argo-rollouts<span class="w"> </span>created
 </code></pre></div>
 
 <ul>
@@ -147,7 +151,8 @@ argo-rollouts-5498f9bc4b-8xt26   1/1     Running   0          69s
   Platform: linux/amd64
 </code></pre></div>
 
-<h1>Change from deployment to rollout</h1>
+<hr>
+<h1>Change from deployment to canary rollout</h1>
 <ul>
 <li>I already have argocd deployment with helm running, now i want to migrate it to Argocd rollouts. How i can achieve this?
 First, remove <code>deployment.yaml</code> and add <a href="https://github.com/BlackMetalz/k8s-manifest/blob/main/golang-webapp-testing/templates/rollout.yaml">rollout.yaml</a>.
@@ -182,7 +187,7 @@ You will notice little change in in <code>apiVersion</code> and <code>kind</code
 </code></pre></div>
 
 <ul>
-<li>Ok. Lets build new image and manually switch image tag for the fast demo. Assume new tag will be <code>v3.0.0</code></li>
+<li>Ok. Lets build new image and manually switch image tag for the fast demo. Assume new tag will be <strong>v3.0.0</strong>. Code repo:  <a href="https://github.com/BlackMetalz/Golang-Webapp-Testing">https://github.com/BlackMetalz/Golang-Webapp-Testing</a> </li>
 </ul>
 <div class="highlight"><pre><span></span><code>docker build . -t kienlt992/golang-webapp-testing:v3.0.0
 docker push kienlt992/golang-webapp-testing:v3.0.0
@@ -257,9 +262,181 @@ rollout &#39;golang-webapp-testing-production&#39; promoted
 <li>Check again rollout status for the final</li>
 </ul>
 <p><img alt="alt text" src="images/2025/03/09th_5.png"></p>
+<ul>
+<li>Check request again, you can see it is 100% switch to version 3.0.0 right now!</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">for</span><span class="w"> </span><span class="nt">i</span><span class="w"> </span><span class="nt">in</span><span class="w"> </span><span class="p">{</span><span class="err">0..100</span><span class="p">}</span><span class="o">;</span><span class="w"> </span><span class="nt">do</span><span class="w"> </span><span class="nt">curl</span><span class="w"> </span><span class="nt">-XGET</span><span class="w"> </span><span class="s2">&quot;http://golang-webapp-testing.rke2-cluster.kienlt.local/version&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nt">sleep</span><span class="w"> </span><span class="nt">1</span><span class="o">;</span><span class="w"> </span><span class="nt">done</span>
+<span class="nt">Version</span><span class="o">:</span><span class="w"> </span><span class="nt">3</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span>
+<span class="nt">Version</span><span class="o">:</span><span class="w"> </span><span class="nt">3</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span>
+<span class="nt">Version</span><span class="o">:</span><span class="w"> </span><span class="nt">3</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span>
+<span class="nt">Version</span><span class="o">:</span><span class="w"> </span><span class="nt">3</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span>
+<span class="nt">Version</span><span class="o">:</span><span class="w"> </span><span class="nt">3</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span>
+<span class="nt">Version</span><span class="o">:</span><span class="w"> </span><span class="nt">3</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span>
+<span class="nt">Version</span><span class="o">:</span><span class="w"> </span><span class="nt">3</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span>
+<span class="nt">Version</span><span class="o">:</span><span class="w"> </span><span class="nt">3</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span>
+<span class="nt">Version</span><span class="o">:</span><span class="w"> </span><span class="nt">3</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span>
+<span class="nt">Version</span><span class="o">:</span><span class="w"> </span><span class="nt">3</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span>
+<span class="o">.......</span>
+</code></pre></div>
+
+<hr>
+<h1>Trying blue-green deployment</h1>
+<h3>Config rollout for blue-green</h3>
+<ul>
+<li>Just change <code>strategy</code> section from previous rollout:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">blueGreen</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">activeService</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">include &quot;golang-webapp-testing.fullname&quot; .</span><span class="w"> </span><span class="p p-Indicator">}}</span><span class="l l-Scalar l-Scalar-Plain">-active</span>
+<span class="w">        </span><span class="nt">previewService</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">include &quot;golang-webapp-testing.fullname&quot; .</span><span class="w"> </span><span class="p p-Indicator">}}</span><span class="l l-Scalar l-Scalar-Plain">-passive</span>
+<span class="w">        </span><span class="nt">autoPromotionEnabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">  </span><span class="c1"># Do not automatically promote the new ReplicaSet to the active service</span>
+<span class="w">        </span><span class="c1"># autoPromotionSeconds: 300  # Wait 300 seconds before automatically promoting the new ReplicaSet to the active service</span>
+</code></pre></div>
+
+<ul>
+<li>Add/Update service for blue-green deployment</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Service</span>
+<span class="n">metadata</span><span class="o">:</span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="o">{{</span><span class="w"> </span><span class="k">include</span><span class="w"> </span><span class="s2">&quot;golang-webapp-testing.fullname&quot;</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">}}-</span><span class="n">active</span>
+<span class="w">  </span><span class="n">labels</span><span class="o">:</span>
+<span class="w">    </span><span class="o">{{-</span><span class="w"> </span><span class="k">include</span><span class="w"> </span><span class="s2">&quot;golang-webapp-testing.labels&quot;</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">nindent</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">}}</span>
+<span class="n">spec</span><span class="o">:</span>
+<span class="w">  </span><span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="o">{{</span><span class="w"> </span><span class="o">.</span><span class="na">Values</span><span class="o">.</span><span class="na">service</span><span class="o">.</span><span class="na">type</span><span class="w"> </span><span class="o">}}</span>
+<span class="w">  </span><span class="n">ports</span><span class="o">:</span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">port</span><span class="o">:</span><span class="w"> </span><span class="o">{{</span><span class="w"> </span><span class="o">.</span><span class="na">Values</span><span class="o">.</span><span class="na">service</span><span class="o">.</span><span class="na">port</span><span class="w"> </span><span class="o">}}</span>
+<span class="w">      </span><span class="n">targetPort</span><span class="o">:</span><span class="w"> </span><span class="n">http</span>
+<span class="w">      </span><span class="n">protocol</span><span class="o">:</span><span class="w"> </span><span class="n">TCP</span>
+<span class="w">      </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">http</span>
+<span class="w">  </span><span class="n">selector</span><span class="o">:</span>
+<span class="w">    </span><span class="o">{{-</span><span class="w"> </span><span class="k">include</span><span class="w"> </span><span class="s2">&quot;golang-webapp-testing.selectorLabels&quot;</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">nindent</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">}}</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="o">:</span><span class="w"> </span><span class="n">v1</span>
+<span class="n">kind</span><span class="o">:</span><span class="w"> </span><span class="n">Service</span>
+<span class="n">metadata</span><span class="o">:</span>
+<span class="w">  </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="o">{{</span><span class="w"> </span><span class="k">include</span><span class="w"> </span><span class="s2">&quot;golang-webapp-testing.fullname&quot;</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">}}-</span><span class="n">passive</span>
+<span class="w">  </span><span class="n">labels</span><span class="o">:</span>
+<span class="w">    </span><span class="o">{{-</span><span class="w"> </span><span class="k">include</span><span class="w"> </span><span class="s2">&quot;golang-webapp-testing.labels&quot;</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">nindent</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">}}</span>
+<span class="n">spec</span><span class="o">:</span>
+<span class="w">  </span><span class="n">type</span><span class="o">:</span><span class="w"> </span><span class="o">{{</span><span class="w"> </span><span class="o">.</span><span class="na">Values</span><span class="o">.</span><span class="na">service</span><span class="o">.</span><span class="na">type</span><span class="w"> </span><span class="o">}}</span>
+<span class="w">  </span><span class="n">ports</span><span class="o">:</span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">port</span><span class="o">:</span><span class="w"> </span><span class="o">{{</span><span class="w"> </span><span class="o">.</span><span class="na">Values</span><span class="o">.</span><span class="na">service</span><span class="o">.</span><span class="na">port</span><span class="w"> </span><span class="o">}}</span>
+<span class="w">      </span><span class="n">targetPort</span><span class="o">:</span><span class="w"> </span><span class="n">http</span>
+<span class="w">      </span><span class="n">protocol</span><span class="o">:</span><span class="w"> </span><span class="n">TCP</span>
+<span class="w">      </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">http</span>
+<span class="w">  </span><span class="n">selector</span><span class="o">:</span>
+<span class="w">    </span><span class="o">{{-</span><span class="w"> </span><span class="k">include</span><span class="w"> </span><span class="s2">&quot;golang-webapp-testing.selectorLabels&quot;</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">nindent</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">}}</span>
+</code></pre></div>
+
+<ul>
+<li>Also you need to update your ingress as well (like mine) for expose service. Just add <em>-active</em> after service name. Then you will be able access your service after switch to blue-green rollouts. </li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="cp">{{</span><span class="o">-</span> <span class="k">if</span> <span class="nv">.Values.ingress.enabled</span> -<span class="cp">}}</span>
+<span class="cp">{{</span><span class="o">-</span> <span class="err">$</span><span class="nv">fullName</span> <span class="o">:=</span> <span class="nv">include</span> <span class="s2">&quot;golang-webapp-testing.fullname&quot;</span> <span class="err">.</span> -<span class="cp">}}</span>
+<span class="cp">{{</span><span class="o">-</span> <span class="err">$</span><span class="nv">svcPort</span> <span class="o">:=</span> <span class="nv">.Values.service.port</span> -<span class="cp">}}</span>
+<span class="x">....... etc ...........</span>
+<span class="x">  rules:</span>
+<span class="x">    </span><span class="cp">{{</span><span class="o">-</span> <span class="nv">range</span> <span class="nv">.Values.ingress.hosts</span> <span class="cp">}}</span>
+<span class="x">    - host: </span><span class="cp">{{</span> <span class="nv">.host</span> <span class="o">|</span> <span class="nf">quote</span> <span class="cp">}}</span>
+<span class="x">      http:</span>
+<span class="x">        paths:</span>
+<span class="x">          </span><span class="cp">{{</span><span class="o">-</span> <span class="nv">range</span> <span class="nv">.paths</span> <span class="cp">}}</span>
+<span class="x">          - path: </span><span class="cp">{{</span> <span class="nv">.path</span> <span class="cp">}}</span>
+<span class="x">            </span><span class="cp">{{</span><span class="o">-</span> <span class="k">if</span> <span class="k">and</span> <span class="nv">.pathType</span> <span class="o">(</span><span class="nv">semverCompare</span> <span class="s2">&quot;&gt;=1.18-0&quot;</span> <span class="err">$</span><span class="nv">.Capabilities.KubeVersion.GitVersion</span><span class="o">)</span> <span class="cp">}}</span>
+<span class="x">            pathType: </span><span class="cp">{{</span> <span class="nv">.pathType</span> <span class="cp">}}</span>
+<span class="x">            </span><span class="cp">{{</span><span class="o">-</span> <span class="nv">end</span> <span class="cp">}}</span>
+<span class="x">            backend:</span>
+<span class="x">              </span><span class="cp">{{</span><span class="o">-</span> <span class="k">if</span> <span class="nv">semverCompare</span> <span class="s2">&quot;&gt;=1.19-0&quot;</span> <span class="err">$</span><span class="nv">.Capabilities.KubeVersion.GitVersion</span> <span class="cp">}}</span>
+<span class="x">              service:</span>
+<span class="x">                name: </span><span class="cp">{{</span> <span class="err">$</span><span class="nv">fullName</span> <span class="cp">}}</span><span class="x">-active</span>
+<span class="x">                port:</span>
+<span class="x">                  number: </span><span class="cp">{{</span> <span class="err">$</span><span class="nv">svcPort</span> <span class="cp">}}</span>
+<span class="x">              </span><span class="cp">{{</span><span class="o">-</span> <span class="k">else</span> <span class="cp">}}</span>
+<span class="x">              serviceName: </span><span class="cp">{{</span> <span class="err">$</span><span class="nv">fullName</span> <span class="cp">}}</span><span class="x">-active</span>
+<span class="x">              servicePort: </span><span class="cp">{{</span> <span class="err">$</span><span class="nv">svcPort</span> <span class="cp">}}</span>
+</code></pre></div>
+
+<ul>
+<li>After that, push the changes to manifest repo and get sync with Argocd.</li>
+</ul>
+<p><img alt="alt text" src="images/2025/03/09th_6.png"></p>
+<ul>
+<li>Check rollout status after Argocd healthy. You can see Strategy changed to <strong>BlueGreen</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="p">#</span><span class="w"> </span><span class="n">kubectl</span><span class="w"> </span><span class="n">argo</span><span class="w"> </span><span class="n">rollouts</span><span class="w"> </span><span class="k">get</span><span class="w"> </span><span class="n">rollout</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="n">golang</span><span class="o">-</span><span class="n">app</span><span class="w"> </span><span class="n">golang</span><span class="o">-</span><span class="n">webapp</span><span class="o">-</span><span class="n">testing</span><span class="o">-</span><span class="n">production</span>
+<span class="n">Name</span><span class="p">:</span><span class="w">            </span><span class="n">golang</span><span class="o">-</span><span class="n">webapp</span><span class="o">-</span><span class="n">testing</span><span class="o">-</span><span class="n">production</span>
+<span class="n">Namespace</span><span class="p">:</span><span class="w">       </span><span class="n">golang</span><span class="o">-</span><span class="n">app</span>
+<span class="n">Status</span><span class="p">:</span><span class="w">          </span><span class="err">✔</span><span class="w"> </span><span class="n">Healthy</span>
+<span class="n">Strategy</span><span class="p">:</span><span class="w">        </span><span class="n">BlueGreen</span>
+<span class="n">Images</span><span class="p">:</span><span class="w">          </span><span class="n">kienlt992</span><span class="o">/</span><span class="n">golang</span><span class="o">-</span><span class="n">webapp</span><span class="o">-</span><span class="n">testing</span><span class="p">:</span><span class="n">v3</span><span class="p">.</span><span class="mf">0.0</span><span class="w"> </span><span class="p">(</span><span class="n">stable</span><span class="p">,</span><span class="w"> </span><span class="n">active</span><span class="p">)</span>
+<span class="n">Replicas</span><span class="p">:</span>
+<span class="w">  </span><span class="n">Desired</span><span class="p">:</span><span class="w">       </span><span class="mi">4</span>
+<span class="w">  </span><span class="n">Current</span><span class="p">:</span><span class="w">       </span><span class="mi">4</span>
+<span class="w">  </span><span class="n">Updated</span><span class="p">:</span><span class="w">       </span><span class="mi">4</span>
+<span class="w">  </span><span class="n">Ready</span><span class="p">:</span><span class="w">         </span><span class="mi">4</span>
+<span class="w">  </span><span class="n">Available</span><span class="p">:</span><span class="w">     </span><span class="mi">4</span>
+
+<span class="n">NAME</span><span class="w">                                                          </span><span class="n">KIND</span><span class="w">        </span><span class="n">STATUS</span><span class="w">        </span><span class="n">AGE</span><span class="w">  </span><span class="n">INFO</span>
+<span class="err">⟳</span><span class="w"> </span><span class="n">golang</span><span class="o">-</span><span class="n">webapp</span><span class="o">-</span><span class="n">testing</span><span class="o">-</span><span class="n">production</span><span class="w">                            </span><span class="n">Rollout</span><span class="w">     </span><span class="err">✔</span><span class="w"> </span><span class="n">Healthy</span><span class="w">     </span><span class="mi">15</span><span class="n">h</span><span class="w">  </span>
+<span class="err">├──</span><span class="p">#</span><span class="w"> </span><span class="n">revision</span><span class="p">:</span><span class="mi">2</span><span class="w">                                                                              </span>
+<span class="err">│</span><span class="w">  </span><span class="err">└──⧉</span><span class="w"> </span><span class="n">golang</span><span class="o">-</span><span class="n">webapp</span><span class="o">-</span><span class="n">testing</span><span class="o">-</span><span class="n">production</span><span class="o">-</span><span class="mi">54</span><span class="n">b9b8c49b</span><span class="w">           </span><span class="n">ReplicaSet</span><span class="w">  </span><span class="err">✔</span><span class="w"> </span><span class="n">Healthy</span><span class="w">     </span><span class="mi">15</span><span class="n">h</span><span class="w">  </span><span class="n">stable</span><span class="p">,</span><span class="n">active</span>
+<span class="err">│</span><span class="w">     </span><span class="err">├──□</span><span class="w"> </span><span class="n">golang</span><span class="o">-</span><span class="n">webapp</span><span class="o">-</span><span class="n">testing</span><span class="o">-</span><span class="n">production</span><span class="o">-</span><span class="mi">54</span><span class="n">b9b8c49b</span><span class="o">-</span><span class="n">h72xl</span><span class="w">  </span><span class="n">Pod</span><span class="w">         </span><span class="err">✔</span><span class="w"> </span><span class="n">Running</span><span class="w">     </span><span class="mi">15</span><span class="n">h</span><span class="w">  </span><span class="n">ready</span><span class="p">:</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span>
+<span class="err">│</span><span class="w">     </span><span class="err">├──□</span><span class="w"> </span><span class="n">golang</span><span class="o">-</span><span class="n">webapp</span><span class="o">-</span><span class="n">testing</span><span class="o">-</span><span class="n">production</span><span class="o">-</span><span class="mi">54</span><span class="n">b9b8c49b</span><span class="o">-</span><span class="mi">2</span><span class="n">jtl5</span><span class="w">  </span><span class="n">Pod</span><span class="w">         </span><span class="err">✔</span><span class="w"> </span><span class="n">Running</span><span class="w">     </span><span class="mi">15</span><span class="n">h</span><span class="w">  </span><span class="n">ready</span><span class="p">:</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span>
+<span class="err">│</span><span class="w">     </span><span class="err">├──□</span><span class="w"> </span><span class="n">golang</span><span class="o">-</span><span class="n">webapp</span><span class="o">-</span><span class="n">testing</span><span class="o">-</span><span class="n">production</span><span class="o">-</span><span class="mi">54</span><span class="n">b9b8c49b</span><span class="o">-</span><span class="n">cqnxl</span><span class="w">  </span><span class="n">Pod</span><span class="w">         </span><span class="err">✔</span><span class="w"> </span><span class="n">Running</span><span class="w">     </span><span class="mi">15</span><span class="n">h</span><span class="w">  </span><span class="n">ready</span><span class="p">:</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span>
+<span class="err">│</span><span class="w">     </span><span class="err">└──□</span><span class="w"> </span><span class="n">golang</span><span class="o">-</span><span class="n">webapp</span><span class="o">-</span><span class="n">testing</span><span class="o">-</span><span class="n">production</span><span class="o">-</span><span class="mi">54</span><span class="n">b9b8c49b</span><span class="o">-</span><span class="n">mtrkh</span><span class="w">  </span><span class="n">Pod</span><span class="w">         </span><span class="err">✔</span><span class="w"> </span><span class="n">Running</span><span class="w">     </span><span class="mi">15</span><span class="n">h</span><span class="w">  </span><span class="n">ready</span><span class="p">:</span><span class="mi">1</span><span class="o">/</span><span class="mi">1</span>
+<span class="err">└──</span><span class="p">#</span><span class="w"> </span><span class="n">revision</span><span class="p">:</span><span class="mi">1</span><span class="w">                                                                              </span>
+<span class="w">   </span><span class="err">└──⧉</span><span class="w"> </span><span class="n">golang</span><span class="o">-</span><span class="n">webapp</span><span class="o">-</span><span class="n">testing</span><span class="o">-</span><span class="n">production</span><span class="o">-</span><span class="mi">6f5</span><span class="n">b799cf7</span><span class="w">           </span><span class="n">ReplicaSet</span><span class="w">  </span><span class="err">•</span><span class="w"> </span><span class="n">ScaledDown</span><span class="w">  </span><span class="mi">15</span><span class="n">h</span><span class="w">  </span>
+</code></pre></div>
+
+<ul>
+<li>Let's update new image in helm values file. Changed from <strong>v3.0.0</strong> to <strong>v4.0.0</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="w">   </span><span class="c1"># Overrides the image tag whose default is the chart appVersion.</span>
+-<span class="w">  </span>tag:<span class="w"> </span><span class="s2">&quot;v3.0.0&quot;</span>
++<span class="w">  </span>tag:<span class="w"> </span><span class="s2">&quot;v4.0.0&quot;</span>
+</code></pre></div>
+
+<ul>
+<li>Let's see what happens after we push manifest. You can see rollout status still version v3.0.0 because in strategy of rollout, i required manually promote, not auto after xxx times</li>
+</ul>
+<p>First with check version still is <strong>3.0.0</strong></p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span><span class="s2">&quot;http://golang-webapp-testing.rke2-cluster.kienlt.local/version&quot;</span>
+Version:<span class="w"> </span><span class="m">3</span>.0.0
+</code></pre></div>
+
+<p>Second check status via Argocd UI</p>
+<p><img alt="alt text" src="images/2025/03/09th_7.png"></p>
+<p>And Rollout status via CLI</p>
+<p><img alt="alt text" src="images/2025/03/09th_8.png"></p>
+<ul>
+<li>I will promote and see what happens, i like to use CLI instead of UI sometimes xD</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># kubectl argo rollouts promote golang-webapp-testing-production -n golang-app</span>
+rollout<span class="w"> </span><span class="s1">&#39;golang-webapp-testing-production&#39;</span><span class="w"> </span>promoted
+</code></pre></div>
+
+<p>Rollout status</p>
+<p><img alt="alt text" src="images/2025/03/09th_9.png"></p>
+<p>Argocd UI</p>
+<p><img alt="alt text" src="images/2025/03/09th_10.png"></p>
+<p>Check version again:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span><span class="s2">&quot;http://golang-webapp-testing.rke2-cluster.kienlt.local/version&quot;</span>
+Version:<span class="w"> </span><span class="m">4</span>.0.0
+</code></pre></div>
+
+<ul>
+<li>Complete manifest for blue-green here: 
+<a href="https://github.com/BlackMetalz/k8s-manifest/tree/main/golang-webapp-testing-bluegreen">golang-webapp-testing-bluegreen</a></li>
+</ul>
+<h1>Conclusion</h1>
+<ul>
+<li>This is just basic of canary/blue-green deployment with Argo Rollout. But good step for beginner like me.</li>
+<li>Know concept is important more than know step.</li>
+</ul>
 <h1>Ref:</h1>
 <ul>
-<li><a href="https://argo-rollouts.readthedocs.io/en/stable/">Argo Rollouts - Kubernetes Progressive Delivery Controller¶</a></li>
+<li><a href="https://argo-rollouts.readthedocs.io/en/stable/">Argo Rollouts - Kubernetes Progressive Delivery Controller</a></li>
 <li><a href="https://www.youtube.com/watch?v=hIL0E2gLkf8">Argo Rollouts Demo</a></li>
 <li><a href="https://spacelift.io/blog/argo-rollouts">Argo Rollouts – What Is It, How It Works &amp; Tutorial</a></li>
 </ul>
@@ -281,7 +458,7 @@ rollout &#39;golang-webapp-testing-production&#39; promoted
         </div>
         <section id="article-sidebar" class="span2">
             <h4>Published</h4>
-            <time itemprop="dateCreated" datetime="2025-03-09T00:00:00+07:00">Sun 09 March 2025</time>
+            <time itemprop="dateCreated" datetime="2025-03-10T00:00:00+07:00">Mon 10 March 2025</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#knowledge-base-ref">Knowledge Base</a>
             <h4>Tags</h4>
