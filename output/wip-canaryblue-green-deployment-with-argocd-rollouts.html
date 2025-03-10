@@ -17,16 +17,16 @@
 
 <meta name="keywords" content="devops, k8s, Knowledge Base, " />
 
-<meta property="og:title" content="Canary/Blue-Green deployment with Argocd Rollouts "/>
-<meta property="og:url" content="/canaryblue-green-deployment-with-argocd-rollouts.html" />
+<meta property="og:title" content="[WIP] Canary/Blue-Green deployment with Argocd Rollouts "/>
+<meta property="og:url" content="/wip-canaryblue-green-deployment-with-argocd-rollouts.html" />
 <meta property="og:description" content="" />
 <meta property="og:site_name" content="Kienlt&#39;s notebook" />
 <meta property="og:article:author" content="kienlt" />
 <meta property="og:article:published_time" content="2025-03-10T00:00:00+07:00" />
-<meta name="twitter:title" content="Canary/Blue-Green deployment with Argocd Rollouts ">
+<meta name="twitter:title" content="[WIP] Canary/Blue-Green deployment with Argocd Rollouts ">
 <meta name="twitter:description" content="">
 
-        <title>Canary/Blue-Green deployment with Argocd Rollouts  · Kienlt&#39;s notebook
+        <title>[WIP] Canary/Blue-Green deployment with Argocd Rollouts  · Kienlt&#39;s notebook
 </title>
 
 
@@ -67,8 +67,8 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="/canaryblue-green-deployment-with-argocd-rollouts.html">
-                Canary/Blue-Green deployment with Argocd Rollouts
+            <a href="/wip-canaryblue-green-deployment-with-argocd-rollouts.html">
+                [WIP] Canary/Blue-Green deployment with Argocd Rollouts
             </a>
         </h1>
     </header>
@@ -102,22 +102,22 @@
 <ul>
 <li>Output after command executed is like this:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>namespace/argo-rollouts<span class="w"> </span>created
-customresourcedefinition.apiextensions.k8s.io/analysisruns.argoproj.io<span class="w"> </span>created
-customresourcedefinition.apiextensions.k8s.io/analysistemplates.argoproj.io<span class="w"> </span>created
-customresourcedefinition.apiextensions.k8s.io/clusteranalysistemplates.argoproj.io<span class="w"> </span>created
-customresourcedefinition.apiextensions.k8s.io/experiments.argoproj.io<span class="w"> </span>created
-customresourcedefinition.apiextensions.k8s.io/rollouts.argoproj.io<span class="w"> </span>created
-serviceaccount/argo-rollouts<span class="w"> </span>created
-clusterrole.rbac.authorization.k8s.io/argo-rollouts<span class="w"> </span>created
-clusterrole.rbac.authorization.k8s.io/argo-rollouts-aggregate-to-admin<span class="w"> </span>created
-clusterrole.rbac.authorization.k8s.io/argo-rollouts-aggregate-to-edit<span class="w"> </span>created
-clusterrole.rbac.authorization.k8s.io/argo-rollouts-aggregate-to-view<span class="w"> </span>created
-clusterrolebinding.rbac.authorization.k8s.io/argo-rollouts<span class="w"> </span>created
-configmap/argo-rollouts-config<span class="w"> </span>created
-secret/argo-rollouts-notification-secret<span class="w"> </span>created
-service/argo-rollouts-metrics<span class="w"> </span>created
-deployment.apps/argo-rollouts<span class="w"> </span>created
+<div class="highlight"><pre><span></span><code><span class="n">namespace</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="w"> </span><span class="n">created</span>
+<span class="n">customresourcedefinition</span><span class="p">.</span><span class="n">apiextensions</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">analysisruns</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="w"> </span><span class="n">created</span>
+<span class="n">customresourcedefinition</span><span class="p">.</span><span class="n">apiextensions</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">analysistemplates</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="w"> </span><span class="n">created</span>
+<span class="n">customresourcedefinition</span><span class="p">.</span><span class="n">apiextensions</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">clusteranalysistemplates</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="w"> </span><span class="n">created</span>
+<span class="n">customresourcedefinition</span><span class="p">.</span><span class="n">apiextensions</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">experiments</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="w"> </span><span class="n">created</span>
+<span class="n">customresourcedefinition</span><span class="p">.</span><span class="n">apiextensions</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">rollouts</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="w"> </span><span class="n">created</span>
+<span class="n">serviceaccount</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="w"> </span><span class="n">created</span>
+<span class="n">clusterrole</span><span class="p">.</span><span class="n">rbac</span><span class="p">.</span><span class="n">authorization</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="w"> </span><span class="n">created</span>
+<span class="n">clusterrole</span><span class="p">.</span><span class="n">rbac</span><span class="p">.</span><span class="n">authorization</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="o">-</span><span class="n">aggregate</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">admin</span><span class="w"> </span><span class="n">created</span>
+<span class="n">clusterrole</span><span class="p">.</span><span class="n">rbac</span><span class="p">.</span><span class="n">authorization</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="o">-</span><span class="n">aggregate</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">edit</span><span class="w"> </span><span class="n">created</span>
+<span class="n">clusterrole</span><span class="p">.</span><span class="n">rbac</span><span class="p">.</span><span class="n">authorization</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="o">-</span><span class="n">aggregate</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">view</span><span class="w"> </span><span class="n">created</span>
+<span class="n">clusterrolebinding</span><span class="p">.</span><span class="n">rbac</span><span class="p">.</span><span class="n">authorization</span><span class="p">.</span><span class="n">k8s</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="w"> </span><span class="n">created</span>
+<span class="n">configmap</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="o">-</span><span class="n">config</span><span class="w"> </span><span class="n">created</span>
+<span class="n">secret</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="o">-</span><span class="n">notification</span><span class="o">-</span><span class="n">secret</span><span class="w"> </span><span class="n">created</span>
+<span class="n">service</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="o">-</span><span class="n">metrics</span><span class="w"> </span><span class="n">created</span>
+<span class="n">deployment</span><span class="p">.</span><span class="n">apps</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">rollouts</span><span class="w"> </span><span class="n">created</span>
 </code></pre></div>
 
 <ul>
@@ -428,11 +428,6 @@ Version:<span class="w"> </span><span class="m">4</span>.0.0
 <ul>
 <li>Complete manifest for blue-green here: 
 <a href="https://github.com/BlackMetalz/k8s-manifest/tree/main/golang-webapp-testing-bluegreen">golang-webapp-testing-bluegreen</a></li>
-</ul>
-<h1>Conclusion</h1>
-<ul>
-<li>This is just basic of canary/blue-green deployment with Argo Rollout. But good step for beginner like me.</li>
-<li>Know concept is important more than know step.</li>
 </ul>
 <h1>Ref:</h1>
 <ul>
