@@ -152,7 +152,8 @@ argo-rollouts-5498f9bc4b-8xt26   1/1     Running   0          69s
 </code></pre></div>
 
 <hr>
-<h1>Change from deployment to canary rollout</h1>
+<h1>Testing canary rollout</h1>
+<h3>Change from deployment to canary rollout</h3>
 <ul>
 <li>I already have argocd deployment with helm running, now i want to migrate it to Argocd rollouts. How i can achieve this?
 First, remove <code>deployment.yaml</code> and add <a href="https://github.com/BlackMetalz/k8s-manifest/blob/main/golang-webapp-testing/templates/rollout.yaml">rollout.yaml</a>.
@@ -277,6 +278,161 @@ rollout &#39;golang-webapp-testing-production&#39; promoted
 <span class="nt">Version</span><span class="o">:</span><span class="w"> </span><span class="nt">3</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span>
 <span class="nt">Version</span><span class="o">:</span><span class="w"> </span><span class="nt">3</span><span class="p">.</span><span class="nc">0</span><span class="p">.</span><span class="nc">0</span>
 <span class="o">.......</span>
+</code></pre></div>
+
+<h3>How could we monitor and rollback canary deployment if new version have issue?</h3>
+<ul>
+<li>This is a good question to improve this article. Let's create canary deployment first:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>argo<span class="w"> </span>rollouts<span class="w"> </span>get<span class="w"> </span>rollout<span class="w"> </span>golang-webapp-testing-production<span class="w"> </span>-n<span class="w"> </span>golang-app
+Name:<span class="w">            </span>golang-webapp-testing-production
+Namespace:<span class="w">       </span>golang-app
+Status:<span class="w">          </span>॥<span class="w"> </span>Paused
+Message:<span class="w">         </span>CanaryPauseStep
+Strategy:<span class="w">        </span>Canary
+<span class="w">  </span>Step:<span class="w">          </span><span class="m">3</span>/4
+<span class="w">  </span>SetWeight:<span class="w">     </span><span class="m">50</span>
+<span class="w">  </span>ActualWeight:<span class="w">  </span><span class="m">50</span>
+Images:<span class="w">          </span>kienlt992/golang-webapp-testing:v4.0.0<span class="w"> </span><span class="o">(</span>stable<span class="o">)</span>
+<span class="w">                 </span>kienlt992/golang-webapp-testing:v5.0.0<span class="w"> </span><span class="o">(</span>canary<span class="o">)</span>
+Replicas:
+<span class="w">  </span>Desired:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Current:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Updated:<span class="w">       </span><span class="m">2</span>
+<span class="w">  </span>Ready:<span class="w">         </span><span class="m">4</span>
+<span class="w">  </span>Available:<span class="w">     </span><span class="m">4</span>
+
+NAME<span class="w">                                                          </span>KIND<span class="w">        </span>STATUS<span class="w">        </span>AGE<span class="w">    </span>INFO
+⟳<span class="w"> </span>golang-webapp-testing-production<span class="w">                            </span>Rollout<span class="w">     </span>॥<span class="w"> </span>Paused<span class="w">      </span>46h<span class="w">    </span>
+├──#<span class="w"> </span>revision:10<span class="w">                                                                               </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-6c8c79b696<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>6m56s<span class="w">  </span>canary
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-6c8c79b696-dsltf<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>6m56s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-6c8c79b696-ggh56<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>107s<span class="w">   </span>ready:1/1
+├──#<span class="w"> </span>revision:9<span class="w">                                                                                </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-86bb7d659f<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>30h<span class="w">    </span>stable
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-r6drp<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>16m<span class="w">    </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-zgv7h<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>16m<span class="w">    </span>ready:1/1
+</code></pre></div>
+
+<ul>
+<li>Make some request for test, you can see status code 504 right below</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="k">while</span><span class="w"> </span>true<span class="p">;</span><span class="k">do</span><span class="w">  </span><span class="nv">status_code</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-w<span class="w"> </span><span class="s2">&quot;%{http_code}&quot;</span><span class="w"> </span>http://golang-webapp-testing.rke2-cluster.kienlt.local/version<span class="k">)</span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Status code: </span><span class="nv">$status_code</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span>sleep<span class="w"> </span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">504</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">504</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">504</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">200</span>
+Status<span class="w"> </span>code:<span class="w"> </span><span class="m">504</span>
+</code></pre></div>
+
+<ul>
+<li>Query in prometheus:</li>
+</ul>
+<p><img alt="alt text" src="images/2025/03/09th_12.png"></p>
+<ul>
+<li>Wait for a little times and see the alert:</li>
+</ul>
+<p><img alt="alt text" src="images/2025/03/09th_11.png"></p>
+<ul>
+<li>Hmm? Wait a minute? 100%? This is not correct. Let's me fix this by correct prometheus rule xD</li>
+</ul>
+<p><img alt="alt text" src="images/2025/03/09th_16.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_15.png"></p>
+<ul>
+<li>Now we need to rollback the canary rollout. And request will be 200 again</li>
+</ul>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>argo<span class="w"> </span>rollouts<span class="w"> </span>abort<span class="w">  </span>golang-webapp-testing-production<span class="w"> </span>-n<span class="w"> </span>golang-app
+rollout<span class="w"> </span><span class="s1">&#39;golang-webapp-testing-production&#39;</span><span class="w"> </span>aborted
+</code></pre></div>
+
+<ul>
+<li>Get rollout status:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>argo<span class="w"> </span>rollouts<span class="w"> </span>get<span class="w"> </span>rollout<span class="w"> </span>golang-webapp-testing-production<span class="w"> </span>-n<span class="w"> </span>golang-app
+Name:<span class="w">            </span>golang-webapp-testing-production
+Namespace:<span class="w">       </span>golang-app
+Status:<span class="w">          </span>✖<span class="w"> </span>Degraded
+Message:<span class="w">         </span>RolloutAborted:<span class="w"> </span>Rollout<span class="w"> </span>aborted<span class="w"> </span>update<span class="w"> </span>to<span class="w"> </span>revision<span class="w"> </span><span class="m">10</span>
+Strategy:<span class="w">        </span>Canary
+<span class="w">  </span>Step:<span class="w">          </span><span class="m">0</span>/4
+<span class="w">  </span>SetWeight:<span class="w">     </span><span class="m">0</span>
+<span class="w">  </span>ActualWeight:<span class="w">  </span><span class="m">0</span>
+Images:<span class="w">          </span>kienlt992/golang-webapp-testing:v4.0.0<span class="w"> </span><span class="o">(</span>stable<span class="o">)</span>
+Replicas:
+<span class="w">  </span>Desired:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Current:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Updated:<span class="w">       </span><span class="m">0</span>
+<span class="w">  </span>Ready:<span class="w">         </span><span class="m">4</span>
+<span class="w">  </span>Available:<span class="w">     </span><span class="m">4</span>
+
+NAME<span class="w">                                                          </span>KIND<span class="w">        </span>STATUS<span class="w">        </span>AGE<span class="w">  </span>INFO
+⟳<span class="w"> </span>golang-webapp-testing-production<span class="w">                            </span>Rollout<span class="w">     </span>✖<span class="w"> </span>Degraded<span class="w">    </span>46h<span class="w">  </span>
+├──#<span class="w"> </span>revision:10<span class="w">                                                                             </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-6c8c79b696<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>21m<span class="w">  </span>canary
+├──#<span class="w"> </span>revision:9<span class="w">                                                                              </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-86bb7d659f<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>30h<span class="w">  </span>stable
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-r6drp<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>30m<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-zgv7h<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>30m<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-6bbhk<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>32s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-6qfbd<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>32s<span class="w">  </span>ready:1/1
+</code></pre></div>
+
+<ul>
+<li>After sometimes....</li>
+</ul>
+<p><img alt="alt text" src="images/2025/03/09th_13.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_14.png"></p>
+<ul>
+<li>Let's make status Healthy again by (Don't focus on correct revision, i was test abort and promote mulitple times And it won't affect at all i guess xD)</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># kubectl argo rollouts undo golang-webapp-testing-production --to-revision=9 -n golang-app</span>
+INFO<span class="o">[</span><span class="m">0000</span><span class="o">]</span><span class="w"> </span>unknown<span class="w"> </span>field<span class="w"> </span><span class="s2">&quot;spec.template.metadata.creationTimestamp&quot;</span><span class="w"> </span>
+rollout<span class="w"> </span><span class="s1">&#39;golang-webapp-testing-production&#39;</span><span class="w"> </span>undo
+<span class="c1"># kubectl argo rollouts get rollout golang-webapp-testing-production -n golang-app</span>
+Name:<span class="w">            </span>golang-webapp-testing-production
+Namespace:<span class="w">       </span>golang-app
+Status:<span class="w">          </span>✔<span class="w"> </span>Healthy
+Strategy:<span class="w">        </span>Canary
+<span class="w">  </span>Step:<span class="w">          </span><span class="m">4</span>/4
+<span class="w">  </span>SetWeight:<span class="w">     </span><span class="m">100</span>
+<span class="w">  </span>ActualWeight:<span class="w">  </span><span class="m">100</span>
+Images:<span class="w">          </span>kienlt992/golang-webapp-testing:v4.0.0<span class="w"> </span><span class="o">(</span>stable<span class="o">)</span>
+Replicas:
+<span class="w">  </span>Desired:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Current:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Updated:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Ready:<span class="w">         </span><span class="m">4</span>
+<span class="w">  </span>Available:<span class="w">     </span><span class="m">4</span>
+
+NAME<span class="w">                                                          </span>KIND<span class="w">        </span>STATUS<span class="w">        </span>AGE<span class="w">    </span>INFO
+⟳<span class="w"> </span>golang-webapp-testing-production<span class="w">                            </span>Rollout<span class="w">     </span>✔<span class="w"> </span>Healthy<span class="w">     </span>47h<span class="w">    </span>
+├──#<span class="w"> </span>revision:13<span class="w">                                                                               </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-86bb7d659f<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>31h<span class="w">    </span>stable
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-r6drp<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>77m<span class="w">    </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-zgv7h<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>77m<span class="w">    </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-hwd2s<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>3m43s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-mt5fp<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>3m43s<span class="w">  </span>ready:1/1
+├──#<span class="w"> </span>revision:12<span class="w">                                                                               </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-6c8c79b696<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>67m<span class="w">    </span>
+├──#<span class="w"> </span>revision:11<span class="w">                                                                               </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>46h<span class="w">    </span>
+└──#<span class="w"> </span>revision:1<span class="w">                                                                                </span>
+<span class="w">   </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-6f5b799cf7<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>47h<span class="w">    </span>
 </code></pre></div>
 
 <hr>
@@ -429,6 +585,239 @@ Version:<span class="w"> </span><span class="m">4</span>.0.0
 <li>Complete manifest for blue-green here: 
 <a href="https://github.com/BlackMetalz/k8s-manifest/tree/main/golang-webapp-testing-bluegreen">golang-webapp-testing-bluegreen</a></li>
 </ul>
+<h3>How about rollback, not promote for blue-green deployment?</h3>
+<ul>
+<li>I will go for real quick! Here is status:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>argo<span class="w"> </span>rollouts<span class="w"> </span>get<span class="w"> </span>rollout<span class="w"> </span>golang-webapp-testing-production<span class="w"> </span>-n<span class="w"> </span>golang-app
+Name:<span class="w">            </span>golang-webapp-testing-production
+Namespace:<span class="w">       </span>golang-app
+Status:<span class="w">          </span>॥<span class="w"> </span>Paused
+Message:<span class="w">         </span>BlueGreenPause
+Strategy:<span class="w">        </span>BlueGreen
+Images:<span class="w">          </span>kienlt992/golang-webapp-testing:v3.0.0<span class="w"> </span><span class="o">(</span>preview<span class="o">)</span>
+<span class="w">                 </span>kienlt992/golang-webapp-testing:v4.0.0<span class="w"> </span><span class="o">(</span>stable,<span class="w"> </span>active<span class="o">)</span>
+Replicas:
+<span class="w">  </span>Desired:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Current:<span class="w">       </span><span class="m">8</span>
+<span class="w">  </span>Updated:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Ready:<span class="w">         </span><span class="m">4</span>
+<span class="w">  </span>Available:<span class="w">     </span><span class="m">4</span>
+
+NAME<span class="w">                                                          </span>KIND<span class="w">        </span>STATUS<span class="w">        </span>AGE<span class="w">    </span>INFO
+⟳<span class="w"> </span>golang-webapp-testing-production<span class="w">                            </span>Rollout<span class="w">     </span>॥<span class="w"> </span>Paused<span class="w">      </span>45h<span class="w">    </span>
+├──#<span class="w"> </span>revision:6<span class="w">                                                                                </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>45h<span class="w">    </span>preview
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b-g6f86<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>65s<span class="w">    </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b-rmqk2<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>65s<span class="w">    </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b-znvvw<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>65s<span class="w">    </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b-zsxf7<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>65s<span class="w">    </span>ready:1/1
+├──#<span class="w"> </span>revision:5<span class="w">                                                                                </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-86bb7d659f<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>29h<span class="w">    </span>stable,active
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-gdkn2<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>7m25s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-q9p6d<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>7m22s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-ftxck<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>7m21s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-25np2<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>7m19s<span class="w">  </span>ready:1/1
+└──#<span class="w"> </span>revision:1<span class="w">                                                                                </span>
+<span class="w">   </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-6f5b799cf7<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>45h<span class="w"> </span>
+---
+<span class="c1"># curl &quot;http://golang-webapp-testing.rke2-cluster.kienlt.local/version&quot;</span>
+Version:<span class="w"> </span><span class="m">4</span>.0.0
+</code></pre></div>
+
+<ul>
+<li>Abort the rollout: </li>
+</ul>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>argo<span class="w"> </span>rollouts<span class="w"> </span>abort<span class="w"> </span>-n<span class="w"> </span>golang-app<span class="w"> </span>golang-webapp-testing-production
+rollout<span class="w"> </span><span class="s1">&#39;golang-webapp-testing-production&#39;</span><span class="w"> </span>aborted
+</code></pre></div>
+
+<ul>
+<li>Get status again and see preview gone</li>
+</ul>
+<div class="highlight"><pre><span></span><code>Name:<span class="w">            </span>golang-webapp-testing-production
+Namespace:<span class="w">       </span>golang-app
+Status:<span class="w">          </span>✖<span class="w"> </span>Degraded
+Message:<span class="w">         </span>RolloutAborted:<span class="w"> </span>Rollout<span class="w"> </span>aborted<span class="w"> </span>update<span class="w"> </span>to<span class="w"> </span>revision<span class="w"> </span><span class="m">6</span>
+Strategy:<span class="w">        </span>BlueGreen
+Images:<span class="w">          </span>kienlt992/golang-webapp-testing:v4.0.0<span class="w"> </span><span class="o">(</span>stable,<span class="w"> </span>active<span class="o">)</span>
+Replicas:
+<span class="w">  </span>Desired:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Current:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Updated:<span class="w">       </span><span class="m">0</span>
+<span class="w">  </span>Ready:<span class="w">         </span><span class="m">4</span>
+<span class="w">  </span>Available:<span class="w">     </span><span class="m">4</span>
+
+NAME<span class="w">                                                          </span>KIND<span class="w">        </span>STATUS<span class="w">        </span>AGE<span class="w">  </span>INFO
+⟳<span class="w"> </span>golang-webapp-testing-production<span class="w">                            </span>Rollout<span class="w">     </span>✖<span class="w"> </span>Degraded<span class="w">    </span>45h<span class="w">  </span>
+├──#<span class="w"> </span>revision:6<span class="w">                                                                              </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>45h<span class="w">  </span>preview,delay:passed
+├──#<span class="w"> </span>revision:5<span class="w">                                                                              </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-86bb7d659f<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>30h<span class="w">  </span>stable,active
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-gdkn2<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>13m<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-q9p6d<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>13m<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-ftxck<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>13m<span class="w">  </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-25np2<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>13m<span class="w">  </span>ready:1/1
+└──#<span class="w"> </span>revision:1<span class="w">                                                                              </span>
+<span class="w">   </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-6f5b799cf7<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>45h<span class="w">  </span>
+</code></pre></div>
+
+<ul>
+<li>Undo rollback to version 5 to make status healthy again:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>argo<span class="w"> </span>rollouts<span class="w"> </span>undo<span class="w"> </span>golang-webapp-testing-production<span class="w"> </span>--to-revision<span class="o">=</span><span class="m">5</span><span class="w"> </span>-n<span class="w"> </span>golang-app
+INFO<span class="o">[</span><span class="m">0000</span><span class="o">]</span><span class="w"> </span>unknown<span class="w"> </span>field<span class="w"> </span><span class="s2">&quot;spec.template.metadata.creationTimestamp&quot;</span><span class="w"> </span>
+rollout<span class="w"> </span><span class="s1">&#39;golang-webapp-testing-production&#39;</span><span class="w"> </span>undo
+</code></pre></div>
+
+<ul>
+<li>The result after undo:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>argo<span class="w"> </span>rollouts<span class="w"> </span>get<span class="w"> </span>rollout<span class="w"> </span>golang-webapp-testing-production<span class="w"> </span>-n<span class="w"> </span>golang-app
+Name:<span class="w">            </span>golang-webapp-testing-production
+Namespace:<span class="w">       </span>golang-app
+Status:<span class="w">          </span>✔<span class="w"> </span>Healthy
+Strategy:<span class="w">        </span>BlueGreen
+Images:<span class="w">          </span>kienlt992/golang-webapp-testing:v4.0.0<span class="w"> </span><span class="o">(</span>stable,<span class="w"> </span>active<span class="o">)</span>
+Replicas:
+<span class="w">  </span>Desired:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Current:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Updated:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Ready:<span class="w">         </span><span class="m">4</span>
+<span class="w">  </span>Available:<span class="w">     </span><span class="m">4</span>
+
+NAME<span class="w">                                                          </span>KIND<span class="w">        </span>STATUS<span class="w">        </span>AGE<span class="w">  </span>INFO
+⟳<span class="w"> </span>golang-webapp-testing-production<span class="w">                            </span>Rollout<span class="w">     </span>✔<span class="w"> </span>Healthy<span class="w">     </span>45h<span class="w">  </span>
+├──#<span class="w"> </span>revision:7<span class="w">                                                                              </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-86bb7d659f<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>30h<span class="w">  </span>stable,active
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-gdkn2<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>15m<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-q9p6d<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>15m<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-ftxck<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>15m<span class="w">  </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-25np2<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>15m<span class="w">  </span>ready:1/1
+├──#<span class="w"> </span>revision:6<span class="w">                                                                              </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>45h<span class="w">  </span>delay:passed
+└──#<span class="w"> </span>revision:1<span class="w">                                                                              </span>
+<span class="w">   </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-6f5b799cf7<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>45h<span class="w">  </span>
+</code></pre></div>
+
+<h3>Next scenario, undo the promoted in blue-green deployment</h3>
+<ul>
+<li>I will not post fully detail since they are just the same with little different.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>argo<span class="w"> </span>rollouts<span class="w"> </span>promote<span class="w"> </span>golang-webapp-testing-production<span class="w"> </span>-n<span class="w"> </span>golang-app
+rollout<span class="w"> </span><span class="s1">&#39;golang-webapp-testing-production&#39;</span><span class="w"> </span>promoted
+---
+curl<span class="w"> </span><span class="s2">&quot;http://golang-webapp-testing.rke2-cluster.kienlt.local/version&quot;</span>
+Version:<span class="w"> </span><span class="m">3</span>.0.0
+</code></pre></div>
+
+<ul>
+<li>Get status:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>argo<span class="w"> </span>rollouts<span class="w"> </span>get<span class="w"> </span>rollout<span class="w"> </span>golang-webapp-testing-production<span class="w"> </span>-n<span class="w"> </span>golang-app
+Name:<span class="w">            </span>golang-webapp-testing-production
+Namespace:<span class="w">       </span>golang-app
+Status:<span class="w">          </span>✔<span class="w"> </span>Healthy
+Strategy:<span class="w">        </span>BlueGreen
+Images:<span class="w">          </span>kienlt992/golang-webapp-testing:v3.0.0<span class="w"> </span><span class="o">(</span>stable,<span class="w"> </span>active<span class="o">)</span>
+<span class="w">                 </span>kienlt992/golang-webapp-testing:v4.0.0
+Replicas:
+<span class="w">  </span>Desired:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Current:<span class="w">       </span><span class="m">8</span>
+<span class="w">  </span>Updated:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Ready:<span class="w">         </span><span class="m">4</span>
+<span class="w">  </span>Available:<span class="w">     </span><span class="m">4</span>
+
+NAME<span class="w">                                                          </span>KIND<span class="w">        </span>STATUS<span class="w">        </span>AGE<span class="w">  </span>INFO
+⟳<span class="w"> </span>golang-webapp-testing-production<span class="w">                            </span>Rollout<span class="w">     </span>✔<span class="w"> </span>Healthy<span class="w">     </span>45h<span class="w">  </span>
+├──#<span class="w"> </span>revision:8<span class="w">                                                                              </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>45h<span class="w">  </span>stable,active
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b-b6ss5<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>80s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b-fkm6b<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>80s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b-xm2jt<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>80s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b-bnkvq<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>79s<span class="w">  </span>ready:1/1
+├──#<span class="w"> </span>revision:7<span class="w">                                                                              </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-86bb7d659f<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>30h<span class="w">  </span>delay:23s
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-gdkn2<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>21m<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-q9p6d<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>21m<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-ftxck<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>21m<span class="w">  </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-25np2<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>21m<span class="w">  </span>ready:1/1
+└──#<span class="w"> </span>revision:1<span class="w">                                                                              </span>
+<span class="w">   </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-6f5b799cf7<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>45h<span class="w">  </span>
+</code></pre></div>
+
+<ul>
+<li>Undo to previous version which is 7:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>argo<span class="w"> </span>rollouts<span class="w"> </span>undo<span class="w"> </span>golang-webapp-testing-production<span class="w"> </span>--to-revision<span class="o">=</span><span class="m">7</span><span class="w"> </span>-n<span class="w"> </span>golang-app
+INFO<span class="o">[</span><span class="m">0000</span><span class="o">]</span><span class="w"> </span>unknown<span class="w"> </span>field<span class="w"> </span><span class="s2">&quot;spec.template.metadata.creationTimestamp&quot;</span><span class="w"> </span>
+rollout<span class="w"> </span><span class="s1">&#39;golang-webapp-testing-production&#39;</span><span class="w"> </span>undo
+<span class="c1"># Need to promote as well</span>
+kubectl<span class="w"> </span>argo<span class="w"> </span>rollouts<span class="w"> </span>promote<span class="w"> </span>golang-webapp-testing-production<span class="w"> </span>-n<span class="w"> </span>golang-app
+rollout<span class="w"> </span><span class="s1">&#39;golang-webapp-testing-production&#39;</span><span class="w"> </span>promoted
+</code></pre></div>
+
+<ul>
+<li>After that, get status again, after 2-3 minutes it will remove pods in old revision (which is revision 8 in output)</li>
+</ul>
+<div class="highlight"><pre><span></span><code>Name:<span class="w">            </span>golang-webapp-testing-production
+Namespace:<span class="w">       </span>golang-app
+Status:<span class="w">          </span>✔<span class="w"> </span>Healthy
+Strategy:<span class="w">        </span>BlueGreen
+Images:<span class="w">          </span>kienlt992/golang-webapp-testing:v3.0.0
+<span class="w">                 </span>kienlt992/golang-webapp-testing:v4.0.0<span class="w"> </span><span class="o">(</span>stable,<span class="w"> </span>active<span class="o">)</span>
+Replicas:
+<span class="w">  </span>Desired:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Current:<span class="w">       </span><span class="m">8</span>
+<span class="w">  </span>Updated:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Ready:<span class="w">         </span><span class="m">4</span>
+<span class="w">  </span>Available:<span class="w">     </span><span class="m">4</span>
+
+NAME<span class="w">                                                          </span>KIND<span class="w">        </span>STATUS<span class="w">        </span>AGE<span class="w">    </span>INFO
+⟳<span class="w"> </span>golang-webapp-testing-production<span class="w">                            </span>Rollout<span class="w">     </span>✔<span class="w"> </span>Healthy<span class="w">     </span>45h<span class="w">    </span>
+├──#<span class="w"> </span>revision:9<span class="w">                                                                                </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-86bb7d659f<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>30h<span class="w">    </span>stable,active
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-582kj<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>44s<span class="w">    </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-bsb8v<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>44s<span class="w">    </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-r6drp<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>44s<span class="w">    </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-zgv7h<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>44s<span class="w">    </span>ready:1/1
+├──#<span class="w"> </span>revision:8<span class="w">                                                                                </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>45h<span class="w">    </span>delay:27s
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b-b6ss5<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>3m34s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b-fkm6b<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>3m34s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b-xm2jt<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>3m34s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b-bnkvq<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>3m33s<span class="w">  </span>ready:1/1
+└──#<span class="w"> </span>revision:1<span class="w">                                                                                </span>
+<span class="w">   </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-6f5b799cf7<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>45h
+<span class="c1"># This is output after 2-3 minutes (maybe lower xD)</span>
+Name:<span class="w">            </span>golang-webapp-testing-production
+Namespace:<span class="w">       </span>golang-app
+Status:<span class="w">          </span>✔<span class="w"> </span>Healthy
+Strategy:<span class="w">        </span>BlueGreen
+Images:<span class="w">          </span>kienlt992/golang-webapp-testing:v4.0.0<span class="w"> </span><span class="o">(</span>stable,<span class="w"> </span>active<span class="o">)</span>
+Replicas:
+<span class="w">  </span>Desired:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Current:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Updated:<span class="w">       </span><span class="m">4</span>
+<span class="w">  </span>Ready:<span class="w">         </span><span class="m">4</span>
+<span class="w">  </span>Available:<span class="w">     </span><span class="m">4</span>
+
+NAME<span class="w">                                                          </span>KIND<span class="w">        </span>STATUS<span class="w">        </span>AGE<span class="w">    </span>INFO
+⟳<span class="w"> </span>golang-webapp-testing-production<span class="w">                            </span>Rollout<span class="w">     </span>✔<span class="w"> </span>Healthy<span class="w">     </span>45h<span class="w">    </span>
+├──#<span class="w"> </span>revision:9<span class="w">                                                                                </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-86bb7d659f<span class="w">           </span>ReplicaSet<span class="w">  </span>✔<span class="w"> </span>Healthy<span class="w">     </span>30h<span class="w">    </span>stable,active
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-582kj<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>3m16s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-bsb8v<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>3m16s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>├──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-r6drp<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>3m16s<span class="w">  </span>ready:1/1
+│<span class="w">     </span>└──□<span class="w"> </span>golang-webapp-testing-production-86bb7d659f-zgv7h<span class="w">  </span>Pod<span class="w">         </span>✔<span class="w"> </span>Running<span class="w">     </span>3m16s<span class="w">  </span>ready:1/1
+├──#<span class="w"> </span>revision:8<span class="w">                                                                                </span>
+│<span class="w">  </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-54b9b8c49b<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>45h<span class="w">    </span>
+└──#<span class="w"> </span>revision:1<span class="w">                                                                                </span>
+<span class="w">   </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-6f5b799cf7<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>45h<span class="w">    </span>
+<span class="c1"># curl &quot;http://golang-webapp-testing.rke2-cluster.kienlt.local/version&quot;</span>
+Version:<span class="w"> </span><span class="m">4</span>.0.0
+</code></pre></div>
+
 <h1>Conclusion</h1>
 <ul>
 <li>This is just basic of canary/blue-green deployment with Argo Rollout. But good step for beginner like me.</li>
