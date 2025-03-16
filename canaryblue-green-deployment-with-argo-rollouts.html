@@ -77,9 +77,9 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>What is Argo Rollouts, is it related to ArgoCD?</h1>
+            <h1>What is Argo Rollout, is it related to ArgoCD?</h1>
 <ul>
-<li>Argo Rollouts is a progressive delivery controller for K8S which provide avanced deployment capabilities such as blue-green, canary.....</li>
+<li>Argo Rollouts is a progressive delivery controller for K8S which provides advanced deployment capabilities such as blue-green, canary.....</li>
 </ul>
 <p><img alt="alt text" src="images/2025/03/09th_1.png"></p>
 <ul>
@@ -157,7 +157,7 @@ argo-rollouts-5498f9bc4b-8xt26   1/1     Running   0          69s
 <ul>
 <li>I already have argocd deployment with helm running, now i want to migrate it to Argo rollouts. How i can achieve this?
 First, remove <code>deployment.yaml</code> and add <a href="https://github.com/BlackMetalz/k8s-manifest/blob/main/golang-webapp-testing/templates/rollout.yaml">rollout.yaml</a>.
-You will notice little change in in <code>apiVersion</code> and <code>kind</code>. Then <code>strategy</code>, will be defined like below</li>
+You will notice little change in <code>apiVersion</code> and <code>kind</code>. Then <code>strategy</code>, will be defined like below</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nv">strategy</span>:
 <span class="w">      </span><span class="nv">canary</span>:
@@ -486,7 +486,7 @@ NAME<span class="w">                                                          </
 </code></pre></div>
 
 <ul>
-<li>Also you need to update your ingress as well (like mine) for expose service. Just add <em>-active</em> after service name. Then you will be able access your service after switch to blue-green rollouts. </li>
+<li>Also you need to update your ingress as well (like mine) for expose service. Just add <em>-active</em> after service name. Then you will be able to access your service after switching to blue-green rollouts. </li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="cp">{{</span><span class="o">-</span> <span class="k">if</span> <span class="nv">.Values.ingress.enabled</span> -<span class="cp">}}</span>
 <span class="cp">{{</span><span class="o">-</span> <span class="err">$</span><span class="nv">fullName</span> <span class="o">:=</span> <span class="nv">include</span> <span class="s2">&quot;golang-webapp-testing.fullname&quot;</span> <span class="err">.</span> -<span class="cp">}}</span>
