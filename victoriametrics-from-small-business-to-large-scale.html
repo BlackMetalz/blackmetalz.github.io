@@ -284,10 +284,10 @@ templates:
 </li>
 <li>
 <p>Things need to change in this script in case you want to modify the version and hosts</p>
-</li>
+<ul>
 <li>hosts: update this <code>Step 3: Update /etc/hosts</code> to your host or don't need if you have internal DNS system</li>
-<li>
-<p>variables <strong>VM_VERSION</strong>, <strong>AM_VERSION</strong></p>
+<li>variables <strong>VM_VERSION</strong>, <strong>AM_VERSION</strong></li>
+</ul>
 </li>
 <li>
 <p>Check logs and port status after inserting if you have any problems. Below are example output from mine:</p>
@@ -308,11 +308,13 @@ udp6<span class="w">       </span><span class="m">0</span><span class="w">      
 
 <h3>Port access and information</h3>
 <ul>
-<li><strong>vmstorage</strong>: This have 3 ports</li>
+<li>
+<p><strong>vmstorage</strong>: This have 3 ports</p>
+<ul>
 <li><strong>8400</strong>: Receive metrics from <strong>vminsert</strong></li>
 <li><strong>8401</strong>: internal communication between vmstorage in the cluster</li>
-<li>
-<p><strong>8482</strong>: No idea about this much but this is where exporter expose metrics of <strong>vmstorage</strong> with path: <code>vm-node1:8482/metrics</code></p>
+<li><strong>8482</strong>: No idea about this much but this is where exporter expose metrics of <strong>vmstorage</strong> with path: <code>vm-node1:8482/metrics</code></li>
+</ul>
 </li>
 <li>
 <p><strong>vminsert</strong>: receive metrics from other sources and optimize process writes data into <strong>vmstorage</strong> in a distributed way!
@@ -341,11 +343,13 @@ Here is an example write into <strong>vmstorage</strong> via <strong>vminsert</s
 <h3>Conclusion</h3>
 <ul>
 <li>This is a simple article for VictoriaMetrics like how it works in single mode and cluster mode</li>
-<li>I'm so lazy at this time and so this article still lacks of things below:</li>
+<li>I'm so lazy at this time and so this article still lacks of things below:<ul>
 <li>Real notification setup for alert manager</li>
 <li>Backup and Restore with vmutils</li>
 <li>Authentication: no auth for endpoints to access <strong>vminsert</strong> / <strong>vmselect</strong></li>
 <li>No HAProxy for failover and load balancing</li>
+</ul>
+</li>
 <li>There are many features i still don't know about VictoriaMetrics, i will write more articles in case i need to learn to use xD</li>
 </ul>
 <hr>
