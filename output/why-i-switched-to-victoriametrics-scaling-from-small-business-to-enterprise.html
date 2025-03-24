@@ -324,6 +324,11 @@ Here is an example write into <strong>vmstorage</strong> via <strong>vminsert</s
 <div class="highlight"><pre><span></span><code>curl -X POST --data-binary &#39;kienlt_victoria_metrics_cluster,kiendepzai=ahihi value=42&#39; &quot;http://vm-node1:8480/insert/0/influx/write&quot;
 </code></pre></div>
 
+<p>remoteWrite setting from Prometheus to VictoriaMetrics for <strong>vminsert</strong>:</p>
+<div class="highlight"><pre><span></span><code>    remoteWrite:
+      - url: http://victoria-metrics:8480/insert/0/prometheus/api/v1/write
+</code></pre></div>
+
 <ul>
 <li><strong>vmselect</strong>: We have inserted data, now let's check. The endpoint will be: </li>
 </ul>
