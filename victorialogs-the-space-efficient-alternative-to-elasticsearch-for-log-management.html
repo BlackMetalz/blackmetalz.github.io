@@ -408,7 +408,7 @@ nginx_access_log  34147211      1.7gb        887mb
 <li>How about scale? Simple add more disk to VictoriaLogs. I assumed you used LVM for the beginning (You should calculate how much log VictoriaLogs will store).</li>
 <li>An example: you can use 3 disk that combined with LVM and resize or add more disk to increase storage of VictoriaLogs.</li>
 </ul>
-<h3>My option</h3>
+<h3>My opinions</h3>
 <ul>
 <li>VictoriaLogs used less disk space than Elasticsearch, could be up to 10x in some specific scenarios.</li>
 <li>VictoriaLogs inserts data faster and uses less CPU than Elasticsearch.</li>
