@@ -309,7 +309,7 @@ nginx_access_log  34147211      1.7gb        887mb
 
 <h3>VictoriaLogs disk Usage:</h3>
 <ul>
-<li>Count total document: <code>* | stats count() as logs_total</code></li>
+<li>Count total documents: <code>* | stats count() as logs_total</code></li>
 </ul>
 <p><img alt="alt text" src="images/2025/03/30th_2.png"></p>
 <ul>
@@ -323,7 +323,7 @@ nginx_access_log  34147211      1.7gb        887mb
 <li>VictoriaLogs: 137Mb</li>
 </ul>
 <p>So for this quick test, the VictoriaLogs use space to store logs less than ~6.5 times that of Elasticsearch.</p>
-<p>In another test that is not created by myself but the result here xD</p>
+<p>In another test that is not created by me, but the result here xD</p>
 <table>
 <thead>
 <tr>
@@ -350,8 +350,8 @@ nginx_access_log  34147211      1.7gb        887mb
 </tr>
 <tr>
 <td>Disk</td>
-<td>\~120GB / day</td>
-<td>\~1.1 TB / day</td>
+<td>~120GB/day</td>
+<td>~1.1 TB/day</td>
 </tr>
 <tr>
 <td>Log shipper</td>
@@ -360,11 +360,11 @@ nginx_access_log  34147211      1.7gb        887mb
 </tr>
 </tbody>
 </table>
-<p>After this test you can see how much resource we save from replace Elasticsearch with VictoriaLogs!</p>
+<p>After this test, you can see how much resource we save from replacing Elasticsearch with VictoriaLogs!</p>
 <h1>Cluster Mode</h1>
-<p>So to be honest, VictoriaLogs did great work for single node, that can handle everything we need for. But you can have think like me, where is the cluster mode, how we can failover if the single node is dead? So to answer that question. Simply we will use: 2x VictoriaLogs + vmauth</p>
+<p>To be honest, VictoriaLogs did great work for a single node, which can handle everything we need. But you can think like me, where is the cluster mode, how can we failover if the single node is dead? So to answer that question. Simply, we will use: 2x VictoriaLogs + vmauth.</p>
 <ul>
-<li>So what is vmauth? It is a tool of VictoriaMetrics, used as proxy and manage connection to instance backend like VictoriaLogs, it added basic auth, route the request based URL and support load balancing, easy to run and config. Below is an example with Docker compose</li>
+<li>So what is vmauth? It is a tool of VictoriaMetrics, used as a proxy and to manage connection to instance backends like VictoriaLogs, it added basic auth, routes the request based on URL, and supports load balancing, is easy to run and configure. Below is an example with Docker Compose:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="n">services</span><span class="o">:</span>
 <span class="w">  </span><span class="n">vmauth</span><span class="o">:</span>
@@ -397,26 +397,26 @@ nginx_access_log  34147211      1.7gb        887mb
 </code></pre></div>
 
 <ul>
-<li>Then we can use that to config as endpoint of VictoriaLogs datasource in Grafana</li>
+<li>Then we can use that to configure as an endpoint of the VictoriaLogs datasource in Grafana</li>
 </ul>
 <p><img alt="alt text" src="images/2025/03/30th_3.png"></p>
 <ul>
-<li>Then query logs in Grafana datasource explorer(This is demo), althought we still have add dashboard <a href="https://grafana.com/grafana/dashboards/22759-victorialogs-explorer/">like this</a> and do a little modify to query and filter for search log in production</li>
+<li>Then query logs in Grafana datasource explorer(This is a demo), although we still have to add a dashboard <a href="https://grafana.com/grafana/dashboards/22759-victorialogs-explorer/">like this</a> and make a few modifications to query and filter for search log in production</li>
 </ul>
 <p><img alt="alt text" src="images/2025/03/30th_4.png"></p>
 <ul>
-<li>How about scale? Simple add more disk to VictoriaLogs. I assumed you used LVM for the beginning (You should calculate how much log VictoriaLogs will store).</li>
-<li>An example: you can use 3 disk that combined with LVM and resize or add more disk to increase storage of VictoriaLogs.</li>
+<li>How about scale? Simply add more disk to VictoriaLogs. I assumed you used LVM for the beginning (You should calculate how much log VictoriaLogs will store).</li>
+<li>An example: you can use 3 disks that combined with LVM and resize or add more disks to increase the storage of VictoriaLogs.</li>
 </ul>
-<h3>My option</h3>
+<h3>My opinions</h3>
 <ul>
-<li>VictoriaLogs used less disk space than Elasticsearch, could be up to 10x in some specific scenarios.</li>
+<li>VictoriaLogs used less disk space than Elasticsearch, which could be up to 10x in some specific scenarios.</li>
 <li>VictoriaLogs inserts data faster and uses less CPU than Elasticsearch.</li>
 <li>VictoriaLogs simple read is faster than Elasticsearch, but when it comes to queries with AGG, Elasticsearch wins xD</li>
 <li>And many other things i don't know yet at this time when I'm writing this article.</li>
 <li>In my company, we have used 4 VictoriaLogs instances with 1 vmauth, 2 instances for 10 K8S cluster logging and 2 instances for Kong - APIGateway with an average request of about 20k -&gt; 80k RPS and it has been tested for 3 months before we dropped Elasticsearch.</li>
 <li>Good for logging solution where user need a place to check logs of their container in K8S environment with multiple clusters.</li>
-<li>Right now VictoriaLogs doesn't have the cluster mode but there is solution for it is add 1 one more instance and distributed them with vmauth utility</li>
+<li>Right now, VictoriaLogs doesn't have the cluster mode, but there is a solution for it is add 1 one more instance and distribute them with the vmauth utility.</li>
 </ul>
 <h1>Ref:</h1>
 <ul>
