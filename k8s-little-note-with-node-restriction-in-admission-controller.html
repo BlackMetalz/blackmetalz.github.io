@@ -79,15 +79,11 @@
             
             <h3>Purpose: Learned it once, write it again to remember longer? xD</h3>
 <ul>
-<li>
-<p>The content comes from: https://killercoda.com/killer-shell-cks. When I get too bored, I need to do something useful rather than play games all day...</p>
-</li>
-<li>
-<p>Question: Ok, don't tell shit, what is NodeRestriction?</p>
-</li>
+<li>The content comes from: <a href="https://killercoda.com/killer-shell-cks">https://killercoda.com/killer-shell-cks</a> .When I get too bored, I need to do something useful rather than play games all day...</li>
+<li>Question: Ok, don't tell shit, what is NodeRestriction?</li>
 <li>Answer: Sure, it is an Admission Plugin in K8s.</li>
 <li>Question: What is the Admission Plugin? Tell everything about it, don't make me type a question again!</li>
-<li>Answer: Admission Plugin is something that intercepts and processes API requests to the Kubernetes API server before they are executed. Read more about it in this link: https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/.</li>
+<li>Answer: Admission Plugin is something that intercepts and processes API requests to the Kubernetes API server before they are executed. Read more about it in this link: <a href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/">https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/</a></li>
 <li>Question: Okay, but what do you want to write here?</li>
 <li>Answer: Just a little knowledge that i want to save for myself in case i forget in the near future &gt;.&gt;</li>
 </ul>
@@ -98,9 +94,9 @@
 <p>In Kubernetes 1.33, NodeRestriction is NOT enabled by default, creating a security gap where...</p>
 <h3>How it works</h3>
 <ul>
-<li>Ref: https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction</li>
+<li>Ref: <a href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction">https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction</a></li>
 <li>Prevents kubelets from adding/removing/updating labels with a node-restriction.kubernetes.io/ prefix. This label prefix is reserved for administrators to label their Node objects for workload isolation purposes, and kubelets will not be allowed to modify labels with that prefix. That is the important point, more info will go to kubernetes document.</li>
-<li>Enable it by updating/adding the flag in the kube-apiserver manifest (Ref: https://kubernetes.io/docs/reference/access-authn-authz/node/)</li>
+<li>Enable it by updating/adding the flag in the kube-apiserver manifest (Ref: <a href="https://kubernetes.io/docs/reference/access-authn-authz/node/">https://kubernetes.io/docs/reference/access-authn-authz/node/</a>)</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># /etc/kubernetes/manifests/kube-apiserver.yaml</span>
 <span class="nt">spec</span><span class="p">:</span>
