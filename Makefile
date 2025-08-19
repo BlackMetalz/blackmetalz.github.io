@@ -29,6 +29,8 @@ ifneq ($(PORT), 0)
 	PELICANOPTS += -p $(PORT)
 endif
 
+local:
+	pelican content && pelican --listen
 
 help:
 	@echo 'Makefile for a pelican Web site                                           '
