@@ -83,21 +83,22 @@
 <li>What context you should know before take the exam</li>
 <li>Practice without any bucks spent!</li>
 <li>Resource for learning/preparing for the exam!</li>
+<li>Conclusion</li>
 </ul>
 <p>Let's begin!</p>
 <h1>1. Why exam, do you think certification is the golden ticket to help you get a better job?</h1>
 <p>The context below is just my personal opinion:</p>
 <ul>
 <li>To be honest, certification just shows that you know the basics about and maybe a little achievement, nothing more.</li>
-<li>It will not help you get a better job or increase salary, the important thing is when you prepare for the exam, you learned how it works, that is the point i want to tell (at least for my case, maybe not for your case).</li>
+<li>It will not help you get a better job or increase salary, the important thing is when you prepare for the exam, you learned how it works, that is the point I want to tell (at least for my case, maybe not for your case).</li>
 <li>When you have no real project to show during an interview, better to have a certification than nothing xD</li>
-<li>Last, certifications are not golden tickets; it is the only thing i proved to myself that i finished that course properly and know the basics, specifically here is Terraform Associate level.</li>
+<li>Last, certifications are not golden tickets; it is the only thing I proved to myself that I finished that course properly and know the basics, specifically here is Terraform Associate level.</li>
 </ul>
 <h1>2. What context you should know before take the exam</h1>
-<p>I also write this to myself to remind what i need to remember for exam, haha. This section could contain a lot of text. I will use aws provider as example.</p>
+<p>I also write this to myself to remind what I need to remember for exam, haha. This section could contain a lot of text. I will use AWS provider as example.</p>
 <h2>Basic concept of Terraform</h2>
 <h3>Provider Plugin</h3>
-<p>It allows terraform manage 1 external API, when we run terraform init, plugins needed for provider will automatically download from Terraform Registry (default) or other if configured and save into local directory <strong>.terraform/providers/</strong></p>
+<p>It allows Terraform manage 1 external API, when we run terraform init, plugins needed for provider will automatically download from Terraform Registry (default) or other if configured and save into local directory <strong>.terraform/providers/</strong></p>
 <h3>Resource Blocks</h3>
 <p>Resource block describe 1 or multiple infrastructure object</p>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;aws_instance&quot;</span><span class="w"> </span><span class="nv">&quot;myec2&quot;</span><span class="w"> </span><span class="p">{</span>
@@ -122,8 +123,8 @@
 </ul>
 <h3>Terraform State file - terraform.tfstate (this is important)</h3>
 <ul>
-<li>Terraform saves state of infra created to tf files. This state allow terraform map resource with current config</li>
-<li>After creating resources, terraform will save information of resource (with example of ec2 instance) like instance-id, instance-type, security-group... Lets take a look at example below</li>
+<li>Terraform saves state of infra created to tf files. This state allow Terraform map resource with current config</li>
+<li>After creating resources, terraform will save information of resource (with example of ec2 instance) like instance-id, instance-type, security-group... Let's take a look at example below</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="s2">&quot;resource&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
@@ -135,20 +136,20 @@
 
 <ul>
 <li>And more than that, tfstate save actual state (in terraform.tfstate) of live resource (desired state: in .tf config files). Recommendation: never ever manually edit this file!</li>
-<li>If you accident edit this file like remove state, if you run terraform apply again it will create another ec2 instance for example.</li>
-<li>State files contain sensitive data --&gt; need to secure. Recommend to use remote backend (S3, Terraform Cloud) instead of local.</li>
+<li>If you accidentally edit this file like remove state, if you run terraform apply again it will create another ec2 instance for example.</li>
+<li>State files contain sensitive data → need to secure. Recommend to use remote backend (S3, Terraform Cloud) instead of local.</li>
 <li>Use state locking to avoid conflict when working with a team!</li>
 </ul>
 <h3>AWS Provider - Authentication Configuration</h3>
 <ul>
-<li>Default config: Linux/MacOS: "$HOME/.aws/config" &amp;&amp; "$HOME/.aws/credentials"</li>
+<li>Default config: Linux/macOS: "$HOME/.aws/config" &amp;&amp; "$HOME/.aws/credentials"</li>
 <li>You can install and setup <code>awscli</code> to auth with terraform, no need to set secret/access key inside terraform xD</li>
 <li>Or recommend use env: AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY + AWS_REGION</li>
 </ul>
 <h2>Function, Data Types, Resource Attributes, Output Values, Variables, Meta-Argument</h2>
 <h3>Function</h3>
 <ul>
-<li>So for this section i will introduce <code>terraform console</code>, you can imagine it works like <code>python console</code> xD. For example:</li>
+<li>So for this section I will introduce <code>terraform console</code>, you can imagine it works like <code>python console</code> xD. For example:</li>
 </ul>
 <div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>console
 &gt;<span class="w"> </span>max<span class="o">(</span><span class="m">10</span>,20,30<span class="o">)</span>
@@ -232,7 +233,7 @@
 </ul>
 <h3>Output Values</h3>
 <ul>
-<li>Output values: display after run terraform apply. For example</li>
+<li>Display after run terraform apply. For example</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># Display vpc id value</span>
 <span class="kr">output</span><span class="w"> </span><span class="nv">&quot;vpc_id&quot;</span><span class="w"> </span><span class="p">{</span>
@@ -313,7 +314,7 @@ terraform<span class="w"> </span>apply<span class="w"> </span>-var-file<span cla
 </code></pre></div>
 
 <ul>
-<li>File terraform.tfvars or *.auto.tfvars will auto load, no need to define flag <code>-var-file</code></li>
+<li>File terraform.tfvars or *.auto.tfvars will autoload, no need to define flag <code>-var-file</code></li>
 <li>File *.tfvars need to define with flag <code>-var-file</code></li>
 <li>Common practice</li>
 </ul>
@@ -329,7 +330,7 @@ terraform<span class="w"> </span>apply<span class="w"> </span>-var-file<span cla
 
 <h4>Variable definition precedence</h4>
 <ul>
-<li>This question could be appear in exam</li>
+<li>This question could be appearing in exam</li>
 <li>Priority from highest (5) to lowest (1) xD</li>
 <li><strong>1. Environment Variable</strong></li>
 <li><strong>2. terraform.tfvars file if exists</strong></li>
@@ -340,7 +341,7 @@ terraform<span class="w"> </span>apply<span class="w"> </span>-var-file<span cla
 <h3>Meta-Argument</h3>
 <ul>
 <li><a href="https://developer.hashicorp.com/terraform/language/meta-arguments">Meta-Argument Documents</a></li>
-<li>I will show 2 popular example i like:</li>
+<li>I will show 2 popular example I like:</li>
 </ul>
 <h4>Count</h4>
 <ul>
@@ -364,7 +365,7 @@ aws_instance.local_resource_name[2]
 <h3>for_each</h3>
 <ul>
 <li>With count, we can not create resource with different name (aws_instance), only index (0,1,2)</li>
-<li>If we want multiple instance and each instance have different name --&gt; use <code>for_each</code></li>
+<li>If we want multiple instance and each instance have different name → use <code>for_each</code></li>
 <li>Remember <code>Name</code> is special tag, display in first column in EC2 console</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="err">❌</span><span class="w"> </span><span class="err">count</span><span class="w"> </span><span class="err">-</span><span class="w"> </span><span class="err">only</span><span class="w"> </span><span class="err">index</span><span class="p">,</span><span class="w"> </span><span class="err">same</span><span class="w"> </span><span class="err">instance</span><span class="w"> </span><span class="err">name</span>
@@ -396,16 +397,93 @@ aws_instance.local_resource_name[2]
 <ul>
 <li>So, use <code>for_each</code> over <code>count</code> when need flexible naming/config!</li>
 </ul>
+<h3>Splat Expressions - Get All Resource IDs</h3>
+<p>This is crucial topic for exam! Splat expressions provide a concise way to extract attributes from lists of resources.</p>
+<h4>Modern Splat Expression <code>[*]</code> (Recommended)</h4>
+<ul>
+<li>Use <code>[*]</code> to get all attributes from a list of resources</li>
+<li>More flexible and consistent behavior</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create multiple instances with count</span>
+<span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;aws_instance&quot;</span><span class="w"> </span><span class="nv">&quot;web&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">count</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="m">3</span>
+<span class="w">  </span><span class="na">ami</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ami-1234&quot;</span>
+<span class="w">  </span><span class="na">instance_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;t2.micro&quot;</span>
+<span class="p">}</span>
+
+<span class="c1"># Get all instance IDs using modern splat expression</span>
+<span class="kr">output</span><span class="w"> </span><span class="nv">&quot;all_instance_ids&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">aws_instance.web</span><span class="p">[</span><span class="err">*</span><span class="p">].</span><span class="err">id</span><span class="c1">  # Returns: [&quot;i-123&quot;, &quot;i-456&quot;, &quot;i-789&quot;]</span>
+<span class="p">}</span>
+
+<span class="c1"># Get all private IPs</span>
+<span class="kr">output</span><span class="w"> </span><span class="nv">&quot;all_private_ips&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">aws_instance.web</span><span class="p">[</span><span class="err">*</span><span class="p">].</span><span class="err">private_ip</span>
+<span class="p">}</span>
+
+<span class="c1"># Access nested attributes</span>
+<span class="kr">output</span><span class="w"> </span><span class="nv">&quot;all_instance_names&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">aws_instance.web</span><span class="p">[</span><span class="err">*</span><span class="p">].</span><span class="nv">tags.Name</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4>Legacy Splat Expression <code>.*</code> (Deprecated)</h4>
+<ul>
+<li>Older syntax using <code>.*</code> instead of <code>[*]</code></li>
+<li>Still supported for backward compatibility but <strong>NOT recommended</strong></li>
+<li>Has subtle different behavior and limitations</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># ❌ Legacy syntax - avoid using this</span>
+<span class="kr">output</span><span class="w"> </span><span class="nv">&quot;legacy_instance_ids&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">aws_instance.web</span><span class="p">.</span><span class="err">*</span><span class="p">.</span><span class="err">id</span>
+<span class="p">}</span>
+
+<span class="c1"># The legacy form has different behavior with indexing:</span>
+<span class="c1"># aws_instance.web.*.tags[0] != aws_instance.web[*].tags[0]</span>
+</code></pre></div>
+
+<h4>Key Differences:</h4>
+<table>
+<thead>
+<tr>
+<th>Modern <code>[*]</code></th>
+<th>Legacy <code>.*</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>aws_instance.web[*].id</code></td>
+<td><code>aws_instance.web.*.id</code></td>
+</tr>
+<tr>
+<td>More consistent indexing</td>
+<td>Limited indexing support</td>
+</tr>
+<tr>
+<td>Works with complex expressions</td>
+<td>Attribute-only access</td>
+</tr>
+<tr>
+<td><strong>Recommended</strong></td>
+<td><strong>Deprecated</strong></td>
+</tr>
+</tbody>
+</table>
+<h4>When to Use Splat Expressions:</h4>
+<ul>
+<li>✅ <strong>Use with <code>count</code></strong>: Resources created with <code>count</code> meta-argument</li>
+<li>❌ <strong>Don't use with <code>for_each</code></strong>: Resources created with <code>for_each</code> are maps, not lists</li>
+</ul>
 <h2>Terraform Provisioner</h2>
 <ul>
 <li>This is known as removed from exam?</li>
-<li>Even Terraform is not recommend use this, but in some scenario, you can not use Ansible/Saltstack, here you go...</li>
+<li>Even Terraform is not recommend use this, but in some scenario, you can not use Ansible/Salt stack, here you go...</li>
 <li>Provisioners used to <code>execute scripts on a local or remote machine</code> as part of resource creation or Destruction!</li>
 <li>2 major types of provisioners: local-exec and remote-exec</li>
 </ul>
 <h3>Local-exec provisioner</h3>
 <ul>
-<li>Invoke local execute after resource created, like after EC2 created, get ip of EC2 instance save to file called server_ip.txt in where we run terraform apply</li>
+<li>Invoke local execute after resource created, like after EC2 created, get IP of EC2 instance save to file called server_ip.txt in where we run terraform apply</li>
 </ul>
 <h3>remote-exec provisioner</h3>
 <ul>
@@ -413,7 +491,7 @@ aws_instance.local_resource_name[2]
 </ul>
 <h3>Defining provisioner</h3>
 <ul>
-<li>Need to be <strong>define inside resource block</strong></li>
+<li>Need to be <strong>defined inside resource block</strong></li>
 <li>For example remote-exec</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;aws_instance&quot;</span><span class="w"> </span><span class="nv">&quot;myec2&quot;</span><span class="w"> </span><span class="p">{</span>
@@ -458,23 +536,23 @@ aws_instance.local_resource_name[2]
 </ul>
 <h2>Terraform Module</h2>
 <ul>
-<li>Till this line, i'm so lazy to continue even this is one of really important component in Terraform, so i will go for it real quick T_T</li>
-<li>Module is extremely important for DRY code ( Don't Repeat Yourself!)</li>
+<li>Till this line, I'm so lazy to continue even this is one of really important component in Terraform, so I will go for it real quick T_T</li>
+<li>Module is extremely important for DRY code (Don't Repeat Yourself!)</li>
 <li>Challenge when we have no idea about module:<ul>
-<li>Everytime we create ec2 instance, there is 1 resource block added, 10 teams 10 resource block?</li>
+<li>Every time we create ec2 instance, there is 1 resource block added, 10 teams 10 resource blocks?</li>
 <li>When AWS provider changed, we need to change in terraform config of 10 teams?</li>
 <li>No standard for 10 teams? Hard to management!</li>
 </ul>
 </li>
 <li>Terraform module allow manage resource configuration in central, make it works in multiple project</li>
 <li>Instead write module from beginning, we could use multiple module available and ready to use.</li>
-<li>When not to use module? You want to write your own module, you think there is no module better than your xDD. Otherwise, keep use module instead of write from scratch!</li>
+<li>When not to use module? You want to write your own module, you think there is no module better than your xD. Otherwise, keep use module instead of write from scratch!</li>
 <li><a href="https://registry.terraform.io/browse/modules">View more module here</a></li>
-<li>When run: <code>terraform init</code>, it will download module code and provider into local folder <code>.terraform</code>, module code is github repo!</li>
+<li>When run: <code>terraform init</code>, it will download module code and provider into local folder <code>.terraform</code>, module code is GitHub repo!</li>
 </ul>
 <p>And many more...</p>
 <h2>Terraform Workspace, remote state management, sensitive parameter, multiple provider configuration, dependency lock file, terraform cloud</h2>
-<p>They are all keyword you need to learn and understand in order to have well prepared state for the exam, but if write all of them here, this post would contains more than 1000 lines T_T.</p>
+<p>They are all keyword you need to learn and understand in order to have well-prepared state for the exam, but if write all of them here, this post would contain more than 1000 lines T_T.</p>
 <h1>3. Practice without any bucks spent</h1>
 <ul>
 <li>
@@ -574,6 +652,15 @@ aws_instance.local_resource_name[2]
 <li>Well, they're all available in Terraform documentation, but for the best and most effective preparation, learn via a structured course.</li>
 <li>Which course did I choose? <a href="https://www.udemy.com/course/terraform-beginner-to-advanced/">HashiCorp Certified: Terraform Associate 2025</a></li>
 <li>Fun fact: I've listened to so much India-English from tech tutorials that by 2025, I don't need subtitles anymore! 😄</li>
+</ul>
+<h1>5. Conclusion</h1>
+<ul>
+<li>Well, that exam is not easy like what I thought, 20-30% questions are not in my knowledge.</li>
+<li>Some domains you should understand are HashiCorp Terraform Cloud basics, workspace management, and remote state.</li>
+<li>After passing the exam, I think the course I provided in section 4 is really, really worth learning. Even though its length is 22 hours, it explains everything including practice that contains everything you should know before taking the exam.</li>
+<li>For example: <strong>Splat expressions</strong> (<code>[*]</code>) and <strong>legacy splat syntax</strong> (<code>.*</code>) are important concepts that appear in the exam, but in my example, if I don't know about legacy splat syntax, I would lose 1 question for that!</li>
+<li>Practice with real scenarios, not just theory. Set up actual infrastructure and break things to understand how Terraform behaves.</li>
+<li>So learn and practice carefully - one mistake, and you will lose $70 for the exam cost!</li>
 </ul>
 
 
