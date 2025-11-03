@@ -77,10 +77,11 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>My little experience to prepare for the Terraform Associate Exam in 2025</h1>
+            <p><img alt="alt text" src="images/2025/11/01.jpg"></p>
+<h1>My little experience to prepare for the Terraform Associate Exam in 2025</h1>
 <ul>
 <li>Why exam, do you think certification is the golden ticket to help you get a better job???</li>
-<li>What context you should know before take the exam</li>
+<li>What context should you know before taking the exam</li>
 <li>Practice without any bucks spent!</li>
 <li>Resource for learning/preparing for the exam!</li>
 <li>Conclusion</li>
@@ -90,17 +91,17 @@
 <p>The context below is just my personal opinion:</p>
 <ul>
 <li>To be honest, certification just shows that you know the basics about and maybe a little achievement, nothing more.</li>
-<li>It will not help you get a better job or increase salary, the important thing is when you prepare for the exam, you learned how it works, that is the point I want to tell (at least for my case, maybe not for your case).</li>
+<li>It will not help you get a better job or increase your salary, the important thing is that when you prepare for the exam, you learned how it works, that is the point I want to tell (at least for my case, maybe not for your case).</li>
 <li>When you have no real project to show during an interview, better to have a certification than nothing xD</li>
 <li>Last, certifications are not golden tickets; it is the only thing I proved to myself that I finished that course properly and know the basics, specifically here is Terraform Associate level.</li>
 </ul>
-<h1>2. What context you should know before take the exam</h1>
-<p>I also write this to myself to remind what I need to remember for exam, haha. This section could contain a lot of text. I will use AWS provider as example.</p>
+<h1>2. What context should you know before taking the exam</h1>
+<p>I also write this to myself to remind me what I need to remember for the exam, haha. This section could contain a lot of text. I will use the AWS provider as an example.</p>
 <h2>Basic concept of Terraform</h2>
 <h3>Provider Plugin</h3>
 <p>It allows Terraform manage 1 external API, when we run terraform init, plugins needed for provider will automatically download from Terraform Registry (default) or other if configured and save into local directory <strong>.terraform/providers/</strong></p>
 <h3>Resource Blocks</h3>
-<p>Resource block describe 1 or multiple infrastructure object</p>
+<p>A resource block describes 1 or multiple infrastructure objects</p>
 <div class="highlight"><pre><span></span><code><span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;aws_instance&quot;</span><span class="w"> </span><span class="nv">&quot;myec2&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="na">ami</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ami-123456&quot;</span>
 <span class="w">    </span><span class="na">instance_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;t2.micro&quot;</span>
@@ -112,9 +113,9 @@
 <li><strong>Resource type</strong>: <code>aws_instance</code></li>
 <li><strong>Resource name</strong>: <code>myec2</code> </li>
 <li><strong>Resource ID format</strong>: <code>&lt;resource_type&gt;.&lt;resource_name&gt;</code> → <code>aws_instance.myec2</code></li>
-<li>Resource type and resource name together serving for resource identity, so it must be unique (resource name)</li>
+<li>Resource type and resource name together serve for resource identity, so it must be unique (resource name)</li>
 <li>Use this ID for reference: <strong>aws_instance.myec2.id</strong></li>
-<li>You can not use resource type <code>aws_instance</code> in provider <code>azurerm</code> xD</li>
+<li>You can not use the resource type <code>aws_instance</code> in provider <code>azurerm</code> xD</li>
 </ul>
 <h3>Terraform Destroy</h3>
 <ul>
@@ -123,8 +124,8 @@
 </ul>
 <h3>Terraform State file - terraform.tfstate (this is important)</h3>
 <ul>
-<li>Terraform saves state of infra created to tf files. This state allow Terraform map resource with current config</li>
-<li>After creating resources, terraform will save information of resource (with example of ec2 instance) like instance-id, instance-type, security-group... Let's take a look at example below</li>
+<li>Terraform saves the state of infrastructure created to tf files. This state allows Terraform to map resources with the current config</li>
+<li>After creating resources, Terraform will save information of the resource (with example of EC2 instance) like instance-id, instance-type, security-group… Let's take a look at the example below</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="s2">&quot;resource&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
@@ -135,9 +136,9 @@
 </code></pre></div>
 
 <ul>
-<li>And more than that, tfstate save actual state (in terraform.tfstate) of live resource (desired state: in .tf config files). Recommendation: never ever manually edit this file!</li>
+<li>And more than that, tfstate saves actual state (in terraform.tfstate) of live resource (desired state: in .tf config files). Recommendation: never ever manually edit this file!</li>
 <li>If you accidentally edit this file like remove state, if you run terraform apply again it will create another ec2 instance for example.</li>
-<li>State files contain sensitive data → need to secure. Recommend to use remote backend (S3, Terraform Cloud) instead of local.</li>
+<li>State files contain sensitive data → need to secure. Recommend using remote backend (S3, Terraform Cloud) instead of local.</li>
 <li>Use state locking to avoid conflict when working with a team!</li>
 </ul>
 <h3>AWS Provider - Authentication Configuration</h3>
@@ -289,8 +290,8 @@
 </ul>
 <h4>Variable Definition File (TFVARS)</h4>
 <ul>
-<li>Hashicorp recommend create file separated with name of *.tfvars to define all variable in a project</li>
-<li>Manage variable in production env is 1 of way to achieve code clean and reuseable</li>
+<li>Hashicorp recommends create file separated with the name of *.tfvars to define all variables in a project</li>
+<li>Managing variables in production env is 1 of ways to achieve code clean and reusable</li>
 <li>For example:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># variables.tf</span>
@@ -315,7 +316,7 @@ terraform<span class="w"> </span>apply<span class="w"> </span>-var-file<span cla
 
 <ul>
 <li>File terraform.tfvars or *.auto.tfvars will autoload, no need to define flag <code>-var-file</code></li>
-<li>File *.tfvars need to define with flag <code>-var-file</code></li>
+<li>File *.tfvars needs to be defined with flag -var-file</li>
 <li>Common practice</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="n">project</span><span class="o">/</span>
@@ -330,7 +331,7 @@ terraform<span class="w"> </span>apply<span class="w"> </span>-var-file<span cla
 
 <h4>Variable definition precedence</h4>
 <ul>
-<li>This question could be appearing in exam</li>
+<li>This question could appear in the exam</li>
 <li>Priority from highest (5) to lowest (1) xD</li>
 <li><strong>1. Environment Variable</strong></li>
 <li><strong>2. terraform.tfvars file if exists</strong></li>
@@ -341,7 +342,7 @@ terraform<span class="w"> </span>apply<span class="w"> </span>-var-file<span cla
 <h3>Meta-Argument</h3>
 <ul>
 <li><a href="https://developer.hashicorp.com/terraform/language/meta-arguments">Meta-Argument Documents</a></li>
-<li>I will show 2 popular example I like:</li>
+<li>I will show 2 popular examples I like:</li>
 </ul>
 <h4>Count</h4>
 <ul>
@@ -476,7 +477,7 @@ aws_instance.local_resource_name[2]
 </ul>
 <h2>Terraform Provisioner</h2>
 <ul>
-<li>This is known as removed from exam?</li>
+<li>This is known as being removed from the exam? (NO)</li>
 <li>Even Terraform is not recommend use this, but in some scenario, you can not use Ansible/Salt stack, here you go...</li>
 <li>Provisioners used to <code>execute scripts on a local or remote machine</code> as part of resource creation or Destruction!</li>
 <li>2 major types of provisioners: local-exec and remote-exec</li>
