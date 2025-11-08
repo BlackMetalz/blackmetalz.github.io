@@ -147,9 +147,11 @@
 
 <p>For scenario that I have multiple K8S cluster (13 for example, based real story), I can choose which K8S cluster to deploy with Jenkins, but with GitLab I think it is not flexible like that.</p>
 <h3>Rollback with Tag Selection</h3>
-<p>Scenario if ArgoCD project set manual sync
-- Jenkins: UI can be customized with action select tag and action for DEPLOY/ROLLBACK/RESTART/STOP (Defined in Jenkins.)
-- GitLab CI: no dropdown, action like stop k8s pod, restart k8s need manually update Gitops repo. </p>
+<p>Scenario if ArgoCD project set manual sync:</p>
+<ul>
+<li>Jenkins: UI can be customized with action select tag and action for DEPLOY/ROLLBACK/RESTART/STOP (Defined in Jenkins.)</li>
+<li>GitLab CI: no dropdown, action like stop k8s pod, restart k8s need manually update Gitops repo. </li>
+</ul>
 <h3>Super important things to remember</h3>
 <ul>
 <li>After write to this line, I think it is depends on workflow, environment and conditions of team, central in company then we can decide to use which technology!</li>
@@ -223,22 +225,24 @@
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker logout $CI_REGISTRY</span>
 </code></pre></div>
 
-<p>And here is the link to the pipeline in case of you are new to GitLab CI: https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/pipelines/2147473044</p>
+<p>And here is the link to the pipeline in case of you are new to GitLab CI: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/pipelines/2147473044">https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/pipelines/2147473044</a></p>
 <h3>Test Stage</h3>
 <ul>
 <li>So this stage has 2 jobs run in order which defined first and run in parallel to save time!</li>
-<li>Artifact store report in XML format, here is demo screenshot
-<img alt="Artifact store report in XML format" src="images/2025/11/02.png"></li>
+<li>Artifact store report in XML format, here is demo screenshot</li>
 </ul>
+<p><img alt="Artifact store report in XML format" src="images/2025/11/02.png"></p>
 <h3>Build Stage</h3>
 <ul>
 <li>So for the quick demo, I include Image Scanner which is Trivy in build stage.</li>
 <li>The severity was set to MEDIUM, HIGH, CRITICAL when scan that should give Developers awareness about Medium vulnerability.</li>
 <li>Second line will make pipeline fail if only HIGH AND CRITICAL vulnerabilities appears!</li>
 <li>If it fails, don't push to the registry.</li>
-<li>Here is example when it failed with HIGH vulnerabilities: https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/jobs/12020989478, Lets me show you a screenshot for quick view
-<img alt="quick view" src="images/2025/03.png"> </li>
-<li>Here is the simple fix that do as Trivy instruct, haha: https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/commit/d77cd77a4eaef634b1d04c6dec61d6a04375c553</li>
+<li>Here is example when it failed with HIGH vulnerabilities: [https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/jobs/12020989478], Lets me show you a screenshot for quick view</li>
+</ul>
+<p><img alt="quick view" src="images/2025/11/03.png"> </p>
+<ul>
+<li>Here is the simple fix that do as Trivy instruct, haha: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/commit/d77cd77a4eaef634b1d04c6dec61d6a04375c553">https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/commit/d77cd77a4eaef634b1d04c6dec61d6a04375c553</a></li>
 </ul>
 <div class="highlight"><pre><span></span><code>pytest==7.4.3
 pytest-flask==1.3.0
@@ -253,32 +257,44 @@ flake8==6.1.0
 </ul>
 <h1>Template Repository</h1>
 <h3>Introduction</h3>
-<p>This is my favorite section in GitLab CI when I'm writing this article. Centralization for GitLab pipeline configuration. Here is the information for repositories:
-- Template repository: https://gitlab.com/kienlt-gitlab-ci-demo/gitlab-ci-templates
-- Repository used template: https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates</p>
-<h3>Examples</h3>
-<p>Notice:
-- I used Copilot to generate those examples.
-- Copilot is bad and not good as Claude!</p>
-<p>And here is some example pipelines:
-- First: https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates/-/pipelines/2147717833
-- Second: https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates/-/pipelines/2147722237
-- Third: https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates/-/pipelines/2147724078</p>
-<p>Some screenshots for the first example:
-- Pipeline displays:
-<img alt="Pipeline displays" src="images/2025/11/05.png"></p>
+<p>This is my favorite section in GitLab CI when I'm writing this article. Centralization for GitLab pipeline configuration. Here is the information for repositories:</p>
 <ul>
-<li>Clean GitLab pipeline configurations xD
-<img alt="Clean GitLab pipeline configurations" src="images/2025/11/06.png">
-<img alt="Clean GitLab pipeline configurations" src="images/2025/11/07.png"></li>
+<li>Template repository: https://gitlab.com/kienlt-gitlab-ci-demo/gitlab-ci-templates</li>
+<li>Repository used template: https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates</li>
 </ul>
+<h3>Examples</h3>
+<p>Notice:</p>
+<ul>
+<li>I used Copilot to generate those examples.</li>
+<li>Copilot is bad and not good as Claude!</li>
+</ul>
+<p>And here is some example pipelines:</p>
+<ul>
+<li>First: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates/-/pipelines/2147717833">https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates/-/pipelines/2147717833</a></li>
+<li>Second: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates/-/pipelines/2147722237">https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates/-/pipelines/2147722237</a></li>
+<li>Third: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates/-/pipelines/2147724078">https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates/-/pipelines/2147724078</a></li>
+</ul>
+<p>Some screenshots for the first example:</p>
+<ul>
+<li>
+<p>Pipeline displays:
+<img alt="Pipeline displays" src="images/2025/11/05.png"></p>
+</li>
+<li>
+<p>Clean GitLab pipeline configurations xD</p>
+</li>
+</ul>
+<p><img alt="Clean GitLab pipeline configurations" src="images/2025/11/06.png">
+<img alt="Clean GitLab pipeline configurations" src="images/2025/11/07.png"></p>
 <h3>Information</h3>
 <p>First, I don't know this could work at all, I was just thinking if with Jenkins I can do it, how about do the same for GitLab CI? Then I finally know basic about template repository which is <a href="https://docs.gitlab.com/ci/yaml/includes/">included file</a></p>
 <h3>Benefit</h3>
-<p>Lets me explain real quick benefits of Template Repository:
-- Centralized Pipeline Management.
-- DRY principle (Don't Repeat Yourself).
-- Standardize CI/CD pipelines across multiple projects.</p>
+<p>Lets me explain real quick benefits of Template Repository:</p>
+<ul>
+<li>Centralized Pipeline Management.</li>
+<li>DRY principle (Don't Repeat Yourself).</li>
+<li>Standardize CI/CD pipelines across multiple projects.</li>
+</ul>
 <p>I hope you will understand what I tried to explain!</p>
 <h1>Extra examples</h1>
 <p>I just show some basic example about GitLab CI and it's capabilities but it still lacks of some scenario, this section I will try to fit some more.</p>
@@ -391,18 +407,20 @@ flake8==6.1.0
 <span class="w">      </span><span class="no">fi</span>
 
 <span class="w">      </span><span class="no">echo &quot;Quality gate passed!!!&quot;</span>
-<span class="w w-Error"> </span><span class="err">```</span>
+</code></pre></div>
 
-<span class="w"> </span><span class="kt">![sonarqube](images/2025/11/08.png)</span>
-
-<span class="c1">### Access an image from a private container registry</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Document</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">Access an image from a private container registry</span>
-<span class="p p-Indicator">]</span><span class="l l-Scalar l-Scalar-Plain">(https://docs.gitlab.com/ci/docker/using_docker_images/#access-an-image-from-a-private-container-registry)</span>
-
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Solution was used type variable</span><span class="p">:</span><span class="w"> </span><span class="err">`</span><span class="l l-Scalar l-Scalar-Plain">DOCKER_AUTH_CONFIG`, value will be JSON Minify, so it can be masked</span>
-<span class="nt">from</span><span class="p">:</span>
-<span class="err">```</span><span class="l l-Scalar l-Scalar-Plain">yaml</span>
-<span class="p p-Indicator">{</span>
+<p><img alt="sonarqube" src="images/2025/11/08.png"></p>
+<h3>Access an image from a private container registry</h3>
+<ul>
+<li>
+<p>Document: <a href="https://docs.gitlab.com/ci/docker/using_docker_images/#access-an-image-from-a-private-container-registry">Access an image from a private container registry</a></p>
+</li>
+<li>
+<p>Solution was used type variable: <code>DOCKER_AUTH_CONFIG</code>, value will be JSON Minify, so it can be masked
+from:</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">{</span>
 <span class="w">    </span><span class="s">&quot;auths&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
 <span class="w">        </span><span class="s">&quot;docker.io&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
 <span class="w">            </span><span class="s">&quot;auth&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;base64_of_username:password&quot;</span>
