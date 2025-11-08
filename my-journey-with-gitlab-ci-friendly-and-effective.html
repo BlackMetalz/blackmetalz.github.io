@@ -85,8 +85,16 @@
 <li>Extra examples</li>
 <li>Conclusion</li>
 </ul>
-<p>This is very, very basic, nothing advanced. All lab repo will come from my public GitLab repo, so I can see them again in future xD, and you guy can understand what is going on.</p>
+<h3>Target Audience:</h3>
+<ul>
+<li>DevOps engineers who are familiar with Jenkins and want to explore GitLab CI</li>
+<li>Developers who want to understand CI/CD pipeline basics with GitLab</li>
+<li>Teams considering migration from Jenkins to GitLab CI</li>
+<li>Intermediate level users who already know basic Git concepts</li>
+</ul>
+<p>All lab repo will come from my public GitLab repo, so I can see them again in future xD, and you guy can understand what is going on.</p>
 <p>In this series I will use GitLab account free. 400 Minutes per month (I will use runner that has Cost factor = 1, that is why I said I have 400 minutes xD). Read more about it in here: <a href="https://docs.gitlab.com/ci/pipelines/compute_minutes/">Compute Minutes</a>.</p>
+<hr>
 <h1>Comparison between GitLab CI and Jenkins</h1>
 <p>The fact my previous company used Jenkins to manage about 500++ jobs and I never tried anything different from Jenkins, if I did lab it was basic of GitLab CI with shell executor and GitHub Actions with some echo script xD. So at that time I always bias with Jenkins, everything deployment from basic to complicated, Jenkins always go first no matter!</p>
 <p>In 2025, I have switched from Jenkins to GitLab CI due to work changes, my mindset is expanded, no longer biased towards Jenkins, here is my opinion in comparison between GitLab CI and Jenkins</p>
@@ -157,9 +165,10 @@
 <li>After write to this line, I think it is depends on workflow, environment and conditions of team, central in company then we can decide to use which technology!</li>
 <li>That is enough thing to compare, Let's begin with GitLab CI introduction!</li>
 </ul>
+<hr>
 <h1>Basic example with GitLab CI (Linting + Testing + Build + SAST)</h1>
 <ul>
-<li>I used Copilot to generate this example. Here is the link to public repo: https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project</li>
+<li>I used Copilot to generate this example. Here is the link to public repo: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project">https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project</a></li>
 <li>GitLab CI Pipeline: I made it simple as I could, I believe simple is better than complex example in this section xD</li>
 <li>I don't think that I need to explain details here since this is just basic and well documented in GitLab Documents!</li>
 </ul>
@@ -225,7 +234,9 @@
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker logout $CI_REGISTRY</span>
 </code></pre></div>
 
-<p>And here is the link to the pipeline in case of you are new to GitLab CI: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/pipelines/2147473044">https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/pipelines/2147473044</a></p>
+<ul>
+<li>And here is the link to the pipeline in case of you are new to GitLab CI: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/pipelines/2147473044">kienlt-gitlab-ci-demo/sample-python-project</a></li>
+</ul>
 <h3>Test Stage</h3>
 <ul>
 <li>So this stage has 2 jobs run in order which defined first and run in parallel to save time!</li>
@@ -238,7 +249,7 @@
 <li>The severity was set to MEDIUM, HIGH, CRITICAL when scan that should give Developers awareness about Medium vulnerability.</li>
 <li>Second line will make pipeline fail if only HIGH AND CRITICAL vulnerabilities appears!</li>
 <li>If it fails, don't push to the registry.</li>
-<li>Here is example when it failed with HIGH vulnerabilities: [https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/jobs/12020989478], Lets me show you a screenshot for quick view</li>
+<li>Here is example when it failed with HIGH vulnerabilities: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/jobs/12020989478">gitlab.com/kienlt-gitlab-ci-demo/sample-python-project</a>. Lets me show you a screenshot for quick view</li>
 </ul>
 <p><img alt="quick view" src="images/2025/11/03.png"> </p>
 <ul>
@@ -255,6 +266,7 @@ flake8==6.1.0
 <li>Then pipeline was fixed and image is able to push to the registry
 <img alt="image is able to push to the registry" src="images/2025/11/04.png"></li>
 </ul>
+<hr>
 <h1>Template Repository</h1>
 <h3>Introduction</h3>
 <p>This is my favorite section in GitLab CI when I'm writing this article. Centralization for GitLab pipeline configuration. Here is the information for repositories:</p>
@@ -276,13 +288,11 @@ flake8==6.1.0
 </ul>
 <p>Some screenshots for the first example:</p>
 <ul>
-<li>
-<p>Pipeline displays:
-<img alt="Pipeline displays" src="images/2025/11/05.png"></p>
-</li>
-<li>
-<p>Clean GitLab pipeline configurations xD</p>
-</li>
+<li>Pipeline displays:</li>
+</ul>
+<p><img alt="Pipeline displays" src="images/2025/11/05.png"></p>
+<ul>
+<li>Clean GitLab pipeline configurations xD</li>
 </ul>
 <p><img alt="Clean GitLab pipeline configurations" src="images/2025/11/06.png">
 <img alt="Clean GitLab pipeline configurations" src="images/2025/11/07.png"></p>
@@ -296,6 +306,7 @@ flake8==6.1.0
 <li>Standardize CI/CD pipelines across multiple projects.</li>
 </ul>
 <p>I hope you will understand what I tried to explain!</p>
+<hr>
 <h1>Extra examples</h1>
 <p>I just show some basic example about GitLab CI and it's capabilities but it still lacks of some scenario, this section I will try to fit some more.</p>
 <h3>Workflow</h3>
@@ -326,7 +337,7 @@ flake8==6.1.0
 </code></pre></div>
 
 <h3>SonarQube</h3>
-<p>I only want to introduce the pipeline script that run SonarQube in runner that is running under proxy and able to get Quality Gateway after pushed, in this example still finish yet, it doesn't include how many issue with level Critical, High and Medium.</p>
+<p>I only want to introduce the pipeline script that run SonarQube in runner that is running under proxy and able to get Quality Gateway after pushed, it doesn't include how many issue with level Critical, High and Medium yet.</p>
 <p>The example below was well tested xD</p>
 <div class="highlight"><pre><span></span><code><span class="c1">#=== SONARQUBE STAGE ===#</span>
 <span class="c1">#=== 5.0.1 compatible with Sonarqube Server 10.5.xx ===#</span>
@@ -335,7 +346,7 @@ flake8==6.1.0
 <span class="w">  </span><span class="nt">variables</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">SONAR_PROJECT_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sonarqube-project-name&quot;</span>
 <span class="w">    </span><span class="nt">SONAR_SOURCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;scanner&quot;</span>
-<span class="w">    </span><span class="nt">SONAR_SCANNER_OPTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;-Dhttp.proxyHost=10.0.0.99</span><span class="nv"> </span><span class="s">-Dhttp.proxyPort=8080</span><span class="nv"> </span><span class="s">-Dhttps.proxyHost=10.0.0.99</span><span class="nv">     </span><span class="s">-Dhttps.proxyPort=8080&quot;</span>
+<span class="w">    </span><span class="nt">SONAR_SCANNER_OPTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;-Dhttp.proxyHost=10.0.0.99</span><span class="nv"> </span><span class="s">-Dhttp.proxyPort=8080</span><span class="nv"> </span><span class="s">-Dhttps.proxyHost=10.0.0.99</span><span class="nv"> </span><span class="s">-Dhttps.proxyPort=8080&quot;</span>
 <span class="w">  </span><span class="nt">script</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonar-scanner -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.sources=$SONAR_SOURCES -Dsonar.python.coverage.reportPaths=coverage.xml</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
@@ -416,29 +427,31 @@ flake8==6.1.0
 <p>Document: <a href="https://docs.gitlab.com/ci/docker/using_docker_images/#access-an-image-from-a-private-container-registry">Access an image from a private container registry</a></p>
 </li>
 <li>
-<p>Solution was used type variable: <code>DOCKER_AUTH_CONFIG</code>, value will be JSON Minify, so it can be masked
-from:</p>
+<p>Solution was used type variable: <code>DOCKER_AUTH_CONFIG</code>, value will be JSON Minify, so it can be masked.</p>
 </li>
+<li><strong>base64(username:password)</strong> = <strong>echo -n "username:password" | base64</strong></li>
+<li>Before minify:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">{</span>
 <span class="w">    </span><span class="s">&quot;auths&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
 <span class="w">        </span><span class="s">&quot;docker.io&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
-<span class="w">            </span><span class="s">&quot;auth&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;base64_of_username:password&quot;</span>
+<span class="w">            </span><span class="s">&quot;auth&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;base64(username:password)&quot;</span>
 <span class="w">        </span><span class="p p-Indicator">}</span>
 <span class="w">    </span><span class="p p-Indicator">}</span>
 <span class="p p-Indicator">}</span>
 </code></pre></div>
 
-<p>to this, use this website https://jsonformatter.org/json-minify</p>
-<div class="highlight"><pre><span></span><code><span class="p p-Indicator">{</span><span class="s">&quot;auths&quot;</span><span class="p p-Indicator">:{</span><span class="s">&quot;docker.io&quot;</span><span class="p p-Indicator">:{</span><span class="s">&quot;auth&quot;</span><span class="p p-Indicator">:</span><span class="s">&quot;base64_of_username:password&quot;</span><span class="p p-Indicator">}}}</span>
+<ul>
+<li>to this, use this website <a href="https://jsonformatter.org/json-minify">https://jsonformatter.org/json-minify</a></li>
+<li>After minify: </li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;auths&quot;</span><span class="p">:{</span><span class="nt">&quot;docker.io&quot;</span><span class="p">:{</span><span class="nt">&quot;auth&quot;</span><span class="p">:</span><span class="s2">&quot;base64(username:password)&quot;</span><span class="p">}}}</span>
 </code></pre></div>
 
-<h3>Build App for Window in GitLab CI that not using Window runner xD</h3>
+<h3>Build App for Window in GitLab CI that not using Window runner</h3>
 <p>Challenge: Build application for Multiple OS then upload binary to S3, then notify tester! It should not a problem with Ubuntu Jammy and Noble, but I don't want extra window runner that only run for single job</p>
 <p>Sound weird right? But in fact it is possible with Linux Runner. Here is how I do it with Pywine</p>
-<ul>
-<li>Dockerfile.windows-builder: Build this image and used this as base for pipeline</li>
-</ul>
+<p><strong>Dockerfile.windows-builder</strong>: Build this image and used this as base for pipeline</p>
 <div class="highlight"><pre><span></span><code><span class="c"># Pre-installs Wine + Python 3.12 + cx-Freeze + PySide6 + all dependencies</span>
 
 <span class="k">FROM</span><span class="w"> </span><span class="s">tobix/pywine:3.12</span>
@@ -493,9 +506,7 @@ from:</p>
 <span class="k">WORKDIR</span><span class="w"> </span><span class="s">/workspace</span>
 </code></pre></div>
 
-<ul>
-<li>GitLab pipeline config, not complete but should give you overview how it be done!</li>
-</ul>
+<p>GitLab pipeline config, this should give you overview how it be done!</p>
 <div class="highlight"><pre><span></span><code><span class="c1">#############################################</span>
 <span class="c1"># Stage 3 (continued): Build Windows Package. Built with Dockerfile.windows-builder</span>
 <span class="c1">#############################################</span>
@@ -588,10 +599,9 @@ from:</p>
 <span class="w">    </span><span class="nt">expire_in</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1</span><span class="nv"> </span><span class="s">day&quot;</span>
 </code></pre></div>
 
-<ul>
-<li>And screenshot for output of notification stage that I don't include in this xD
-<img alt="alt text" src="images/2025/11/09.png"></li>
-</ul>
+<p>And screenshot for output of notification stage that I don't include in this.</p>
+<p><img alt="alt text" src="images/2025/11/09.png"></p>
+<hr>
 <h1>Conclusion</h1>
 <ul>
 <li>Before write this article, the resource I used to learn very quick was <a href="https://www.udemy.com/course/gitlab-ci-pipelines-ci-cd-and-devops-for-beginners/">this course from Udemy</a></li>
