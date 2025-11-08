@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="ci/cd, Knowledge Base, " />
+
+<meta property="og:title" content="My journey with GitLab CI: friendly and effective! "/>
+<meta property="og:url" content="/my-journey-with-gitlab-ci-friendly-and-effective.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2025-11-08T00:00:00+07:00" />
+<meta name="twitter:title" content="My journey with GitLab CI: friendly and effective! ">
+<meta name="twitter:description" content="">
+
+        <title>My journey with GitLab CI: friendly and effective!  · Kienlt&#39;s notebook
+</title>
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       "/"
+                                    >Home</a>
+                                </li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="/my-journey-with-gitlab-ci-friendly-and-effective.html">
+                My journey with GitLab CI: friendly and effective!
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h1>Introduction</h1>
+<ul>
+<li>Comparison from me who was always biased towards Jenkins before xD</li>
+<li>Basic example with GitLab CI (Linting + Testing + Build + SAST)</li>
+<li>Template Repository</li>
+<li>Extra examples</li>
+<li>Conclusion</li>
+</ul>
+<p>This is very, very basic, nothing advanced. All lab repo will come from my public GitLab repo, so I can see them again in future xD, and you guy can understand what is going on.</p>
+<p>In this series I will use GitLab account free. 400 Minutes per month (I will use runner that has Cost factor = 1, that is why I said I have 400 minutes xD). Read more about it in here: <a href="https://docs.gitlab.com/ci/pipelines/compute_minutes/">Compute Minutes</a>.</p>
+<h1>Comparison between GitLab CI and Jenkins</h1>
+<p>The fact my previous company used Jenkins to manage about 500++ jobs and I never tried anything different from Jenkins, if I did lab it was basic of GitLab CI with shell executor and GitHub Actions with some echo script xD. So at that time I always bias with Jenkins, everything deployment from basic to complicated, Jenkins always go first no matter!</p>
+<p>In 2025, I have switched from Jenkins to GitLab CI due to work changes, my mindset is expanded, no longer biased towards Jenkins, here is my opinion in comparison between GitLab CI and Jenkins</p>
+<h3>GitLab CI</h3>
+<ul>
+<li>Easy to begin, friendly with developer.</li>
+<li>Want to set up fast, less complicated. You only need to maintain Runner if you use GitLab cloud</li>
+<li>Hard to integrate external tool. Less elegant.</li>
+<li>You can not hide pipeline config file <code>.gitlab-ci.yml</code> from Developers.</li>
+<li>Conclusion: <em>Easy and Effective in some condition!</em></li>
+</ul>
+<h3>Jenkins</h3>
+<ul>
+<li>Complicated, Plugin Hell but ready to use.</li>
+<li>Harder to maintain than GitLab, need to manage both Jenkins master and slave instances.</li>
+<li>Ability to integrate with external. More elegant.</li>
+<li>You can hide pipeline config file <code>Jenkinsfile</code> from Developers.</li>
+<li>Conclusion: <em>Complicated but flexible, can be customized with whatever you want!</em></li>
+</ul>
+<p>Hmm, above are pretty much like too much theory, no real example. Lets me go with more detail comparison.</p>
+<h3>Dynamic Parameters Dropdown</h3>
+<ul>
+<li>Jenkins: Active Choices Plugin allow dropdown automatically populate tags/branches from Git.</li>
+<li>GitLab CI: NO dynamic dropdown parameters.</li>
+</ul>
+<h3>ArgoCD Create/Update Logic</h3>
+<ul>
+<li>Jenkins: Groovy code elegant with if/else check app exists</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">// Pseudocode from argocdCreateOrUpdateApp.groovy</span>
+<span class="kt">def</span><span class="w"> </span><span class="n">appExists</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sh</span><span class="o">(</span>
+<span class="w">  </span><span class="nl">script:</span><span class="w"> </span><span class="s2">&quot;argocd app get ${appName}&quot;</span><span class="o">,</span>
+<span class="w">  </span><span class="nl">returnStatus:</span><span class="w"> </span><span class="kc">true</span>
+<span class="o">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">(</span><span class="n">appExists</span><span class="o">)</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="n">sh</span><span class="w"> </span><span class="s2">&quot;argocd app set ${appName} --repo ${repoUrl}&quot;</span>
+<span class="o">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="o">{</span>
+<span class="w">  </span><span class="n">sh</span><span class="w"> </span><span class="s2">&quot;argocd app create ${appName} --repo ${repoUrl} --dest-server https://kubernetes.default.svc --dest-namespace default --path .&quot;</span><span class="w"> </span>
+<span class="o">}</span>
+</code></pre></div>
+
+<ul>
+<li>GitLab CI: Need to write shell in YAML, less elegant but still do-able xD</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># GitLab CI .gitlab-ci.yml</span>
+<span class="nt">argocd_sync</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">      </span><span class="no">if argocd app get $APP_NAME &amp;&gt;/dev/null; then</span>
+<span class="w">        </span><span class="no">echo &quot;App exists, updating...&quot;</span>
+<span class="w">        </span><span class="no">argocd app set $APP_NAME --repo $REPO_URL</span>
+<span class="w">      </span><span class="no">else</span>
+<span class="w">        </span><span class="no">echo &quot;App not found, creating...&quot;</span>
+<span class="w">        </span><span class="no">argocd app create $APP_NAME --repo $REPO_URL --dest-server https://kubernetes.default.svc --dest-namespace default --path .</span>
+<span class="w">      </span><span class="no">fi</span>
+</code></pre></div>
+
+<p>For scenario that I have multiple K8S cluster (13 for example, based real story), I can choose which K8S cluster to deploy with Jenkins, but with GitLab I think it is not flexible like that.</p>
+<h3>Rollback with Tag Selection</h3>
+<p>Scenario if ArgoCD project set manual sync
+- Jenkins: UI can be customized with action select tag and action for DEPLOY/ROLLBACK/RESTART/STOP (Defined in Jenkins.)
+- GitLab CI: no dropdown, action like stop k8s pod, restart k8s need manually update Gitops repo. </p>
+<h3>Super important things to remember</h3>
+<ul>
+<li>After write to this line, I think it is depends on workflow, environment and conditions of team, central in company then we can decide to use which technology!</li>
+<li>That is enough thing to compare, Let's begin with GitLab CI introduction!</li>
+</ul>
+<h1>Basic example with GitLab CI (Linting + Testing + Build + SAST)</h1>
+<ul>
+<li>I used Copilot to generate this example. Here is the link to public repo: https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project</li>
+<li>GitLab CI Pipeline: I made it simple as I could, I believe simple is better than complex example in this section xD</li>
+<li>I don't think that I need to explain details here since this is just basic and well documented in GitLab Documents!</li>
+</ul>
+<h3>GitLab Pipeline Config:</h3>
+<div class="highlight"><pre><span></span><code><span class="nt">stages</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build</span>
+
+<span class="nt">variables</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">DOCKER_IMAGE_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$CI_REGISTRY_IMAGE</span>
+<span class="w">  </span><span class="nt">DOCKER_IMAGE_TAG</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$CI_COMMIT_SHORT_SHA</span>
+
+<span class="c1"># Lint job - check code quality</span>
+<span class="nt">lint</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python:3.12-slim</span>
+<span class="w">  </span><span class="nt">before_script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip install flake8</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flake8 app.py tests/ --max-line-length=100 --statistics</span>
+<span class="w">  </span><span class="nt">allow_failure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="c1"># Test job - run unit tests</span>
+<span class="nt">test</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python:3.12-slim</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip install -r requirements.txt</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pytest tests/ -v --junitxml=report.xml</span>
+<span class="w">  </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">reports</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">junit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">report.xml</span>
+
+<span class="c1"># Build and push Docker image</span>
+<span class="nt">build</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build</span>
+<span class="w">  </span><span class="nt">needs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span><span class="w"> </span><span class="c1"># Ensure tests pass before building</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker:24-dind</span>
+<span class="w">  </span><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker:24-dind</span><span class="w"> </span><span class="c1"># Without this, docker will not able to push!</span>
+<span class="w">  </span><span class="nt">before_script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">echo &quot;Container Registry - $CI_REGISTRY&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker build -t $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG -t $DOCKER_IMAGE_NAME:latest .</span>
+
+<span class="w">    </span><span class="c1"># Install Trivy</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">echo &quot;Installing Trivy...&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apk add --no-cache curl</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin</span>
+
+<span class="w">    </span><span class="c1"># Scan the image for vulnerabilities</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">echo &quot;Scanning image with Trivy for MEDIUM, HIGH and CRITICAL vulnerabilities...&quot;</span>
+<span class="w">    </span><span class="c1"># Generate full report (MEDIUM, HIGH, CRITICAL) for visibility</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trivy image --severity MEDIUM,HIGH,CRITICAL --format table $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG</span>
+<span class="w">    </span><span class="c1"># Fail build only if HIGH or CRITICAL vulnerabilities found</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trivy image --severity HIGH,CRITICAL --exit-code 1 --quiet $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG &gt; /dev/null 2&gt;&amp;1</span>
+
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker push $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker push $DOCKER_IMAGE_NAME:latest</span>
+<span class="w">  </span><span class="nt">after_script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker logout $CI_REGISTRY</span>
+</code></pre></div>
+
+<p>And here is the link to the pipeline in case of you are new to GitLab CI: https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/pipelines/2147473044</p>
+<h3>Test Stage</h3>
+<ul>
+<li>So this stage has 2 jobs run in order which defined first and run in parallel to save time!</li>
+<li>Artifact store report in XML format, here is demo screenshot
+<img alt="Artifact store report in XML format" src="images/2025/11/02.png"></li>
+</ul>
+<h3>Build Stage</h3>
+<ul>
+<li>So for the quick demo, I include Image Scanner which is Trivy in build stage.</li>
+<li>The severity was set to MEDIUM, HIGH, CRITICAL when scan that should give Developers awareness about Medium vulnerability.</li>
+<li>Second line will make pipeline fail if only HIGH AND CRITICAL vulnerabilities appears!</li>
+<li>If it fails, don't push to the registry.</li>
+<li>Here is example when it failed with HIGH vulnerabilities: https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/jobs/12020989478, Lets me show you a screenshot for quick view
+<img alt="quick view" src="images/2025/03.png"> </li>
+<li>Here is the simple fix that do as Trivy instruct, haha: https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/commit/d77cd77a4eaef634b1d04c6dec61d6a04375c553</li>
+</ul>
+<div class="highlight"><pre><span></span><code>pytest==7.4.3
+pytest-flask==1.3.0
+flake8==6.1.0
+- gunicorn==21.2.0
++ gunicorn==22.0.0
+</code></pre></div>
+
+<ul>
+<li>Then pipeline was fixed and image is able to push to the registry
+<img alt="image is able to push to the registry" src="images/2025/11/04.png"></li>
+</ul>
+<h1>Template Repository</h1>
+<h3>Introduction</h3>
+<p>This is my favorite section in GitLab CI when I'm writing this article. Centralization for GitLab pipeline configuration. Here is the information for repositories:
+- Template repository: https://gitlab.com/kienlt-gitlab-ci-demo/gitlab-ci-templates
+- Repository used template: https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates</p>
+<h3>Examples</h3>
+<p>Notice:
+- I used Copilot to generate those examples.
+- Copilot is bad and not good as Claude!</p>
+<p>And here is some example pipelines:
+- First: https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates/-/pipelines/2147717833
+- Second: https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates/-/pipelines/2147722237
+- Third: https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates/-/pipelines/2147724078</p>
+<p>Some screenshots for the first example:
+- Pipeline displays:
+<img alt="Pipeline displays" src="images/2025/11/05.png"></p>
+<ul>
+<li>Clean GitLab pipeline configurations xD
+<img alt="Clean GitLab pipeline configurations" src="images/2025/11/06.png">
+<img alt="Clean GitLab pipeline configurations" src="images/2025/11/07.png"></li>
+</ul>
+<h3>Information</h3>
+<p>First, I don't know this could work at all, I was just thinking if with Jenkins I can do it, how about do the same for GitLab CI? Then I finally know basic about template repository which is <a href="https://docs.gitlab.com/ci/yaml/includes/">included file</a></p>
+<h3>Benefit</h3>
+<p>Lets me explain real quick benefits of Template Repository:
+- Centralized Pipeline Management.
+- DRY principle (Don't Repeat Yourself).
+- Standardize CI/CD pipelines across multiple projects.</p>
+<p>I hope you will understand what I tried to explain!</p>
+<h1>Extra examples</h1>
+<p>I just show some basic example about GitLab CI and it's capabilities but it still lacks of some scenario, this section I will try to fit some more.</p>
+<h3>Workflow</h3>
+<ul>
+<li>Always run Lint + Testing</li>
+<li>Only run build if commit get tagged</li>
+<li>Example with Pseudocode:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">stages</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build</span>
+
+<span class="c1"># Lint job - check code quality</span>
+<span class="nt">lint</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+
+<span class="c1"># Test job - run unit tests</span>
+<span class="nt">test</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+
+<span class="c1"># Build and push Docker image</span>
+<span class="nt">build</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build</span>
+<span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;$CI_COMMIT_TAG&#39;</span>
+<span class="w">      </span><span class="nt">when</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">when</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">never</span>
+</code></pre></div>
+
+<h3>SonarQube</h3>
+<p>I only want to introduce the pipeline script that run SonarQube in runner that is running under proxy and able to get Quality Gateway after pushed, in this example still finish yet, it doesn't include how many issue with level Critical, High and Medium.</p>
+<p>The example below was well tested xD</p>
+<div class="highlight"><pre><span></span><code><span class="c1">#=== SONARQUBE STAGE ===#</span>
+<span class="c1">#=== 5.0.1 compatible with Sonarqube Server 10.5.xx ===#</span>
+<span class="nt">sonarqube</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">&lt;&lt;</span><span class="p">:</span><span class="w"> </span><span class="nv">*sonar_variables</span>
+<span class="w">  </span><span class="nt">variables</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">SONAR_PROJECT_KEY</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;sonarqube-project-name&quot;</span>
+<span class="w">    </span><span class="nt">SONAR_SOURCES</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;scanner&quot;</span>
+<span class="w">    </span><span class="nt">SONAR_SCANNER_OPTS</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;-Dhttp.proxyHost=10.0.0.99</span><span class="nv"> </span><span class="s">-Dhttp.proxyPort=8080</span><span class="nv"> </span><span class="s">-Dhttps.proxyHost=10.0.0.99</span><span class="nv">     </span><span class="s">-Dhttps.proxyPort=8080&quot;</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sonar-scanner -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.token=$SONAR_TOKEN -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.sources=$SONAR_SOURCES -Dsonar.python.coverage.reportPaths=coverage.xml</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">      </span><span class="no"># Get task ID from report-task.txt</span>
+<span class="w">      </span><span class="no">if [ ! -f .scannerwork/report-task.txt ]; then</span>
+<span class="w">        </span><span class="no">echo &quot;Error: report-task.txt not found&quot;</span>
+<span class="w">        </span><span class="no">exit 1</span>
+<span class="w">      </span><span class="no">fi</span>
+
+<span class="w">      </span><span class="no">TASK_ID=$(cat .scannerwork/report-task.txt | grep ceTaskId | cut -d&#39;=&#39; -f2)</span>
+
+<span class="w">      </span><span class="no">if [ -z &quot;$TASK_ID&quot; ]; then</span>
+<span class="w">        </span><span class="no">echo &quot;Error: Could not extract ceTaskId&quot;</span>
+<span class="w">        </span><span class="no">exit 1</span>
+<span class="w">      </span><span class="no">fi</span>
+
+<span class="w">      </span><span class="no">echo &quot;Task ID: ${TASK_ID}&quot;</span>
+
+<span class="w">      </span><span class="no"># Wait for task completion</span>
+<span class="w">      </span><span class="no">MAX_WAIT=600</span>
+<span class="w">      </span><span class="no">ELAPSED=0</span>
+
+<span class="w">      </span><span class="no">while [ $ELAPSED -lt $MAX_WAIT ]; do</span>
+<span class="w">        </span><span class="no">STATUS=$(curl -s -u &quot;${SONAR_TOKEN}:&quot; &quot;${SONAR_HOST_URL}/api/ce/task?id=${TASK_ID}&quot; | jq -r &#39;.task.status&#39;)</span>
+
+<span class="w">        </span><span class="no">if [ -z &quot;$STATUS&quot; ] || [ &quot;$STATUS&quot; = &quot;null&quot; ]; then</span>
+<span class="w">          </span><span class="no">echo &quot;Error: Failed to get task status from API&quot;</span>
+<span class="w">          </span><span class="no">exit 1</span>
+<span class="w">        </span><span class="no">fi</span>
+
+<span class="w">        </span><span class="no">echo &quot;Analysis status: ${STATUS} (elapsed: ${ELAPSED}s)&quot;</span>
+
+<span class="w">        </span><span class="no">if [ &quot;$STATUS&quot; = &quot;SUCCESS&quot; ]; then</span>
+<span class="w">          </span><span class="no">echo &quot;Analysis completed successfully&quot;</span>
+<span class="w">          </span><span class="no">break</span>
+<span class="w">        </span><span class="no">elif [ &quot;$STATUS&quot; = &quot;FAILED&quot; ] || [ &quot;$STATUS&quot; = &quot;CANCELED&quot; ]; then</span>
+<span class="w">          </span><span class="no">echo &quot;SonarQube analysis failed with status: ${STATUS}&quot;</span>
+<span class="w">          </span><span class="no">exit 1</span>
+<span class="w">        </span><span class="no">fi</span>
+
+<span class="w">        </span><span class="no">sleep 5</span>
+<span class="w">        </span><span class="no">ELAPSED=$((ELAPSED + 5))</span>
+<span class="w">      </span><span class="no">done</span>
+
+<span class="w">      </span><span class="no">if [ $ELAPSED -ge $MAX_WAIT ]; then</span>
+<span class="w">        </span><span class="no">echo &quot;Timeout waiting for analysis (${MAX_WAIT}s)&quot;</span>
+<span class="w">        </span><span class="no">exit 1</span>
+<span class="w">      </span><span class="no">fi</span>
+
+<span class="w">      </span><span class="no"># Check quality gate</span>
+<span class="w">      </span><span class="no">echo &quot;Checking quality gate...&quot;</span>
+<span class="w">      </span><span class="no">ANALYSIS_ID=$(curl -s -u &quot;${SONAR_TOKEN}:&quot; &quot;${SONAR_HOST_URL}/api/ce/task?id=${TASK_ID}&quot; | jq -r &#39;.task.analysisId&#39;)</span>
+
+<span class="w">      </span><span class="no">if [ -z &quot;$ANALYSIS_ID&quot; ] || [ &quot;$ANALYSIS_ID&quot; = &quot;null&quot; ]; then</span>
+<span class="w">        </span><span class="no">echo &quot;Error: Could not get analysisId&quot;</span>
+<span class="w">        </span><span class="no">exit 1</span>
+<span class="w">      </span><span class="no">fi</span>
+
+<span class="w">      </span><span class="no">echo &quot;Analysis ID: ${ANALYSIS_ID}&quot;</span>
+
+<span class="w">      </span><span class="no">QG_STATUS=$(curl -s -u &quot;${SONAR_TOKEN}:&quot; &quot;${SONAR_HOST_URL}/api/qualitygates/project_status?analysisId=${ANALYSIS_ID}&quot; | jq -r &#39;.projectStatus.status&#39;)</span>
+
+<span class="w">      </span><span class="no">echo &quot;Quality Gate status: ${QG_STATUS}&quot;</span>
+
+<span class="w">      </span><span class="no">if [ &quot;$QG_STATUS&quot; != &quot;OK&quot; ]; then</span>
+<span class="w">        </span><span class="no">echo &quot;Quality gate failed: ${QG_STATUS}&quot;</span>
+<span class="w">        </span><span class="no">echo &quot;View details at: ${SONAR_HOST_URL}/dashboard?id=${SONAR_PROJECT_KEY}&quot;</span>
+<span class="w">        </span><span class="no">exit 1</span>
+<span class="w">      </span><span class="no">fi</span>
+
+<span class="w">      </span><span class="no">echo &quot;Quality gate passed!!!&quot;</span>
+<span class="w w-Error"> </span><span class="err">```</span>
+
+<span class="w"> </span><span class="kt">![sonarqube](images/2025/11/08.png)</span>
+
+<span class="c1">### Access an image from a private container registry</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Document</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">Access an image from a private container registry</span>
+<span class="p p-Indicator">]</span><span class="l l-Scalar l-Scalar-Plain">(https://docs.gitlab.com/ci/docker/using_docker_images/#access-an-image-from-a-private-container-registry)</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Solution was used type variable</span><span class="p">:</span><span class="w"> </span><span class="err">`</span><span class="l l-Scalar l-Scalar-Plain">DOCKER_AUTH_CONFIG`, value will be JSON Minify, so it can be masked</span>
+<span class="nt">from</span><span class="p">:</span>
+<span class="err">```</span><span class="l l-Scalar l-Scalar-Plain">yaml</span>
+<span class="p p-Indicator">{</span>
+<span class="w">    </span><span class="s">&quot;auths&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">        </span><span class="s">&quot;docker.io&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">            </span><span class="s">&quot;auth&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;base64_of_username:password&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">}</span>
+<span class="w">    </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">}</span>
+</code></pre></div>
+
+<p>to this, use this website https://jsonformatter.org/json-minify</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">{</span><span class="s">&quot;auths&quot;</span><span class="p p-Indicator">:{</span><span class="s">&quot;docker.io&quot;</span><span class="p p-Indicator">:{</span><span class="s">&quot;auth&quot;</span><span class="p p-Indicator">:</span><span class="s">&quot;base64_of_username:password&quot;</span><span class="p p-Indicator">}}}</span>
+</code></pre></div>
+
+<h3>Build App for Window in GitLab CI that not using Window runner xD</h3>
+<p>Challenge: Build application for Multiple OS then upload binary to S3, then notify tester! It should not a problem with Ubuntu Jammy and Noble, but I don't want extra window runner that only run for single job</p>
+<p>Sound weird right? But in fact it is possible with Linux Runner. Here is how I do it with Pywine</p>
+<ul>
+<li>Dockerfile.windows-builder: Build this image and used this as base for pipeline</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c"># Pre-installs Wine + Python 3.12 + cx-Freeze + PySide6 + all dependencies</span>
+
+<span class="k">FROM</span><span class="w"> </span><span class="s">tobix/pywine:3.12</span>
+
+<span class="c"># Install system dependencies</span>
+<span class="k">RUN</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>cabextract<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>curl<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>git<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>p7zip-full<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>s3cmd<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>wget<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>xvfb<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/lib/apt/lists/*
+
+<span class="c"># Debug: Check Wine prefix location</span>
+<span class="k">RUN</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;=== Wine Environment Debug ===&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>wine<span class="w"> </span>--version<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;WINEPREFIX: </span><span class="nv">$WINEPREFIX</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;HOME: </span><span class="nv">$HOME</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>wine<span class="w"> </span>cmd<span class="w"> </span>/c<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>%PROGRAMFILES%<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>wine<span class="w"> </span>cmd<span class="w"> </span>/c<span class="w"> </span>dir<span class="w"> </span><span class="s2">&quot;C:\\&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>find<span class="w"> </span>/<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;drive_c&quot;</span><span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-5
+
+<span class="c"># Download and install Inno Setup using Wine  </span>
+<span class="k">RUN</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/tmp<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>wget<span class="w"> </span>-q<span class="w"> </span>https://files.jrsoftware.org/is/6/innosetup-6.5.4.exe<span class="w"> </span>-O<span class="w"> </span>innosetup.exe<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running Inno Setup installer....&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">DISPLAY</span><span class="o">=</span>:99<span class="w"> </span>xvfb-run<span class="w"> </span>-a<span class="w"> </span>wine<span class="w"> </span>innosetup.exe<span class="w"> </span>/VERYSILENT<span class="w"> </span>/SUPPRESSMSGBOXES<span class="w"> </span>/NORESTART<span class="w"> </span>/SP-<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>wineserver<span class="w"> </span>-w<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checking Inno Setup installation...&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>ls<span class="w"> </span>-la<span class="w"> </span><span class="s2">&quot;/opt/wineprefix/drive_c/Program Files (x86)/Inno Setup 6/&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nb">test</span><span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;/opt/wineprefix/drive_c/Program Files (x86)/Inno Setup 6/ISCC.exe&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✓ ISCC.exe installed successfully&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>rm<span class="w"> </span>-rf<span class="w"> </span>/tmp/innosetup.exe
+
+<span class="c"># Pre-install Python dependencies under Wine</span>
+<span class="k">COPY</span><span class="w"> </span>requirements/base.txt<span class="w"> </span>/tmp/requirements-base.txt
+<span class="k">COPY</span><span class="w"> </span>requirements/compiler.txt<span class="w"> </span>/tmp/requirements-compiler.txt
+
+<span class="k">RUN</span><span class="w"> </span>wine<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>-r<span class="w"> </span>/tmp/requirements-base.txt<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>wine<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>-r<span class="w"> </span>/tmp/requirements-compiler.txt<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>wine<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>cx-Freeze<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>wine<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>pypiwin32<span class="w"> </span>pywin32<span class="w"> </span>pywin32-ctypes
+
+<span class="c"># Warm up Wine prefix</span>
+<span class="k">RUN</span><span class="w"> </span>wine<span class="w"> </span>python<span class="w"> </span>--version<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>wine<span class="w"> </span>pip<span class="w"> </span>--version
+
+<span class="c"># Clean up</span>
+<span class="k">RUN</span><span class="w"> </span>rm<span class="w"> </span>/tmp/requirements-*.txt
+
+<span class="k">WORKDIR</span><span class="w"> </span><span class="s">/workspace</span>
+</code></pre></div>
+
+<ul>
+<li>GitLab pipeline config, not complete but should give you overview how it be done!</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">#############################################</span>
+<span class="c1"># Stage 3 (continued): Build Windows Package. Built with Dockerfile.windows-builder</span>
+<span class="c1">#############################################</span>
+<span class="nt">build-windows</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build-packages</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${BUILDER_IMAGE_WINDOWS}</span><span class="w">  </span><span class="c1"># Pre-built Windows builder image. </span>
+<span class="w">  </span><span class="nt">dependencies</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build-windows-libs</span>
+<span class="w">  </span><span class="nt">variables</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">WINEDEBUG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;-all&quot;</span><span class="w">  </span><span class="c1"># Suppress Wine debug messages</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">      </span><span class="no"># Generate version (keep Windows version simple, just strip prefix)</span>
+<span class="w">      </span><span class="no">if [ -n &quot;${CI_COMMIT_TAG}&quot; ]; then</span>
+<span class="w">        </span><span class="no"># Strip non-numeric prefix from tag (e.g., &quot;test-1.0.0&quot; -&gt; &quot;1.0.0&quot;)</span>
+<span class="w">        </span><span class="no">VERSION=$(echo &quot;${CI_COMMIT_TAG}&quot; | sed &#39;s/^[^0-9]*//&#39;)</span>
+<span class="w">        </span><span class="no">if [ -z &quot;$VERSION&quot; ]; then</span>
+<span class="w">          </span><span class="no">VERSION=&quot;${CI_COMMIT_TAG}&quot;</span>
+<span class="w">        </span><span class="no">fi</span>
+<span class="w">      </span><span class="no">else</span>
+<span class="w">        </span><span class="no">VERSION=&quot;${CI_COMMIT_SHORT_SHA}&quot;</span>
+<span class="w">      </span><span class="no">fi</span>
+<span class="w">      </span><span class="no">echo &quot;Building Windows package - Version ${VERSION}&quot;</span>
+
+<span class="w">      </span><span class="no"># Convert QRC resources</span>
+<span class="w">      </span><span class="no">wine pyside6-rcc resources/icons.qrc -o src/views/base/pyside6/icons_rc.py</span>
+
+<span class="w">      </span><span class="no"># Build executable with cx-Freeze (dependencies already installed in image!)</span>
+<span class="w">      </span><span class="no">cd src</span>
+<span class="w">      </span><span class="no">wine python setup.py build</span>
+<span class="w">      </span><span class="no">cd ..</span>
+
+<span class="w">      </span><span class="no"># Create installer with Inno Setup using Wine</span>
+<span class="w">      </span><span class="no">echo &quot;🔧 Running Inno Setup to create installer...&quot;</span>
+<span class="w">      </span><span class="no">wine &quot;C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe&quot; fcdclient_installer.iss</span>
+
+<span class="w">      </span><span class="no"># Find the generated installer file</span>
+<span class="w">      </span><span class="no">INSTALLER_FILE=$(find Output -name &quot;*.exe&quot; -type f | head -n 1)</span>
+
+<span class="w">      </span><span class="no">if [ -f &quot;$INSTALLER_FILE&quot; ]; then</span>
+<span class="w">        </span><span class="no"># Rename with version</span>
+<span class="w">        </span><span class="no">INSTALLER_VERSIONED=&quot;FCDClient_${VERSION}_win64.exe&quot;</span>
+<span class="w">        </span><span class="no">mv &quot;$INSTALLER_FILE&quot; &quot;$INSTALLER_VERSIONED&quot;</span>
+
+<span class="w">        </span><span class="no">PACKAGE_SIZE=$(du -h &quot;$INSTALLER_VERSIONED&quot; | cut -f1)</span>
+<span class="w">        </span><span class="no">echo &quot;✓ Installer created: $INSTALLER_VERSIONED ($PACKAGE_SIZE)&quot;</span>
+<span class="w">      </span><span class="no">else</span>
+<span class="w">        </span><span class="no">echo &quot;❌ ERROR: Installer file not found!&quot;</span>
+<span class="w">        </span><span class="no">exit 1</span>
+<span class="w">      </span><span class="no">fi</span>
+
+<span class="w">      </span><span class="no"># Configure s3cmd</span>
+<span class="w">      </span><span class="no">S3_HOST=$(echo ${S3_ENDPOINT} | sed &#39;s|https://||&#39; | sed &#39;s|http://||&#39;)</span>
+<span class="w">      </span><span class="no">cat &gt; ~/.s3cfg &lt;&lt;EOF</span>
+<span class="w">      </span><span class="no">[default]</span>
+<span class="w">      </span><span class="no">access_key = ${S3_ACCESS_KEY}</span>
+<span class="w">      </span><span class="no">secret_key = ${S3_SECRET_KEY}</span>
+<span class="w">      </span><span class="no">host_base = ${S3_HOST}</span>
+<span class="w">      </span><span class="no">host_bucket = ${S3_HOST}</span>
+<span class="w">      </span><span class="no">use_https = True</span>
+<span class="w">      </span><span class="no">check_ssl_certificate = False</span>
+<span class="w">      </span><span class="no">EOF</span>
+
+<span class="w">      </span><span class="no"># Upload to S3</span>
+<span class="w">      </span><span class="no">S3_PATH=&quot;fcdclient/windows/${INSTALLER_VERSIONED}&quot;</span>
+<span class="w">      </span><span class="no">echo &quot;Uploading to S3: ${S3_PATH}&quot;</span>
+<span class="w">      </span><span class="no">s3cmd put --acl-public &quot;$INSTALLER_VERSIONED&quot; &quot;s3://${S3_BUCKET}/${S3_PATH}&quot;</span>
+
+<span class="w">      </span><span class="no"># Construct download URL (include bucket in path)</span>
+<span class="w">      </span><span class="no">DOWNLOAD_URL=&quot;${S3_ENDPOINT}/${S3_BUCKET}/${S3_PATH}&quot;</span>
+<span class="w">      </span><span class="no">echo &quot;Download URL: $DOWNLOAD_URL&quot;</span>
+
+<span class="w">      </span><span class="no"># Save build info for notify stage</span>
+<span class="w">      </span><span class="no">mkdir -p build-info</span>
+<span class="w">      </span><span class="no">echo &quot;${DOWNLOAD_URL}&quot; &gt; &quot;build-info/windows_url.txt&quot;</span>
+<span class="w">      </span><span class="no">echo &quot;${INSTALLER_VERSIONED}&quot; &gt; &quot;build-info/windows_filename.txt&quot;</span>
+<span class="w">      </span><span class="no">echo &quot;${PACKAGE_SIZE}&quot; &gt; &quot;build-info/windows_size.txt&quot;</span>
+<span class="w">      </span><span class="no">echo &quot;${VERSION}&quot; &gt; &quot;build-info/windows_version.txt&quot;</span>
+
+<span class="w">      </span><span class="no">echo &quot;✓ Windows build and upload completed successfully&quot;</span>
+<span class="w">  </span><span class="nt">after_script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">      </span><span class="no"># Save job URL (runs even on failure)</span>
+<span class="w">      </span><span class="no">mkdir -p build-info</span>
+<span class="w">      </span><span class="no">echo &quot;${CI_JOB_URL}&quot; &gt; &quot;build-info/windows_job_url.txt&quot;</span>
+<span class="w">  </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build-info/</span>
+<span class="w">    </span><span class="nt">when</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span>
+<span class="w">    </span><span class="nt">expire_in</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1</span><span class="nv"> </span><span class="s">day&quot;</span>
+</code></pre></div>
+
+<ul>
+<li>And screenshot for output of notification stage that I don't include in this xD
+<img alt="alt text" src="images/2025/11/09.png"></li>
+</ul>
+<h1>Conclusion</h1>
+<ul>
+<li>Before write this article, the resource I used to learn very quick was <a href="https://www.udemy.com/course/gitlab-ci-pipelines-ci-cd-and-devops-for-beginners/">this course from Udemy</a></li>
+<li>There are many areas that I didn't mention in here, for complete please learn from the course I linked above or simple read all <a href="https://docs.gitlab.com/user/get_started/">GitLab Document</a> which included everything and well structure!</li>
+<li>I don't think myself could do better in guide from scratch, there are a lot of tutorial like that out there.</li>
+<li>I only focused on what I'm interested.</li>
+<li>While I'm writing this article I learned a lot.</li>
+</ul>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2025-11-08T00:00:00+07:00">Sat 08 November 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#cicd-ref">ci/cd
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
