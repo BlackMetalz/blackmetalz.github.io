@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="mysql, Knowledge Base, " />
+
+<meta property="og:title" content="Lab: MySQL Galera Cluster Reliability "/>
+<meta property="og:url" content="/lab-mysql-galera-cluster-reliability.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2025-11-13T00:00:00+07:00" />
+<meta name="twitter:title" content="Lab: MySQL Galera Cluster Reliability ">
+<meta name="twitter:description" content="">
+
+        <title>Lab: MySQL Galera Cluster Reliability  · Kienlt&#39;s notebook
+</title>
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       "/"
+                                    >Home</a>
+                                </li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="/lab-mysql-galera-cluster-reliability.html">
+                Lab: MySQL Galera Cluster Reliability
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h1>Article intro</h1>
+<p>Today, I will write an article about what I have been doing with Galera MySQL for testing fault tolerance and self-healing behavior of MySQL Galera Cluster.</p>
+<p>Assumed you have MySQL Galera cluster installed, so I don't need to guide from begin!</p>
+<p><img alt="Galera Cluster" src="images/2025/11/10.png"></p>
+<p>Lab Information:</p>
+<div class="highlight"><pre><span></span><code># Cluster 1 - segment 0
+10.5.1.5 mysql-galera-db-1
+10.5.3.7 mysql-galera-db-2
+10.5.1.228 mysql-galera-db-3
+
+# Cluster 2 - segment 1
+10.5.0.80 mysql-galera-db-4
+10.5.2.76 mysql-galera-db-5
+10.5.1.219 mysql-galera-db-6
+
+# Garbd
+10.5.2.133 mysql-galera-db-7
+</code></pre></div>
+
+<h3>Quick Intro: MySQL Galera Cluster</h3>
+<p>MySQL Galera Cluster is a <strong>multi-master, synchronous replication</strong> solution providing <strong>high availability</strong> and <strong>data consistency</strong> across nodes. It uses <strong>WSREP API</strong> and <strong>quorum-based voting</strong> to maintain cluster integrity. Key components:
+- <strong>Nodes</strong>: Active database instances (read/write)
+- <strong>Garbitrator (garb)</strong>: Lightweight arbitrator for quorum in even-node setups
+- <strong>IST/SST</strong>: Incremental/State Snapshot Transfer for node recovery</p>
+<h3>Lab 1: Isolate Segment 1 → Write 1M Records to Segment 0 → Rejoin Segment 1</h3>
+<p>Test split-brain prevention, quorum, and IST/SST recovery.</p>
+<h3>Lab 2: Block Traffic Between Segment 0 &amp; 1 (Garb Still Reachable)</h3>
+<p>Validate Garb’s role in quorum decision during partial network partition.</p>
+<h3>Lab 3: Simulate Unstable Network with TC (Packet Loss, Latency, Reorder)</h3>
+<p>Use Linux <strong>Traffic Control (<code>tc</code>)</strong> – built-in, powerful, zero-install – to inject
+- <code>loss</code> (e.g. 5%)
+- <code>delay</code> (jitter) (e.g. 200ms ± 50ms)</p>
+<h3>Quick Monitor</h3>
+<p>Tools/CLI will use during lab: <code>sysbench</code>, <code>tc</code>, <code>iptables</code>, <code>systemctl</code>, <code>journalctl</code></p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-3:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;show global status where Variable_name rlike &#39;wsrep_(ready|connected|cluster_size|local_state_comment|local_recv_queue_avg|flow_control_paused|cluster_status)&#39;;&quot;</span>
++------------------------------+-----------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">                </span><span class="p">|</span><span class="w"> </span>Value<span class="w">     </span><span class="p">|</span>
++------------------------------+-----------+
+<span class="p">|</span><span class="w"> </span>wsrep_local_recv_queue_avg<span class="w">   </span><span class="p">|</span><span class="w"> </span><span class="m">0</span>.0182108<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_flow_control_paused_ns<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="m">0</span><span class="w">         </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_flow_control_paused<span class="w">    </span><span class="p">|</span><span class="w"> </span><span class="m">0</span><span class="w">         </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_local_state_comment<span class="w">    </span><span class="p">|</span><span class="w"> </span>Synced<span class="w">    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">           </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">         </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_connected<span class="w">              </span><span class="p">|</span><span class="w"> </span>ON<span class="w">        </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">         </span><span class="p">|</span><span class="w"> </span>Primary<span class="w">   </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_ready<span class="w">                  </span><span class="p">|</span><span class="w"> </span>ON<span class="w">        </span><span class="p">|</span>
++------------------------------+-----------+
+</code></pre></div>
+
+<p>Variable explain:
+- wsrep_local_recv_queue_avg: weight of receive. Should be lower than 1.0 (if its high, equal to lagging)
+- wsrep_flow_control_paused : Flow control - signal that node is slowing. Should be equal to 0 (0.0 - 1.0, if &gt; 0.1 = problems!)
+- wsrep_local_state_comment, wsrep_cluster_status, wsrep_cluster_size : cluster status
+- wsrep_cluster_status: Should be "Primary"
+- wsrep_ready: Should be "ON"
+- wsrep_cluster_conf_id: This is interesting metric, for every node join/leave, quorum loss &amp; recovery, network issues, this will be increased. If number increasing way too fast -&gt; big problem!</p>
+<h1>Lab 1: Isolate Segment 1 → Write 1M Records to Segment 0 → Rejoin Segment</h1>
+<p>Status before graceful shutdown.</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">75</span><span class="w">                                   </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>2730e7d3-ae4e-11f0-a3f7-f290a6348920<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>Primary<span class="w">                              </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+</code></pre></div>
+
+<p>After shutdown whole segment 1. (<code>systemctl stop mysql</code> on node 4,5,6)</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">4</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">78</span><span class="w">                                   </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">4</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>2730e7d3-ae4e-11f0-a3f7-f290a6348920<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>Primary<span class="w">                              </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+</code></pre></div>
+
+<p>Start process 1M record:</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>sysbench<span class="w"> </span>oltp_read_write<span class="w"> </span>--mysql-db<span class="o">=</span><span class="nb">test</span><span class="w"> </span>--mysql-user<span class="o">=</span>root<span class="w"> </span>--mysql-password<span class="o">=</span><span class="m">123123</span><span class="w"> </span>--table-size<span class="o">=</span><span class="m">1000000</span><span class="w"> </span>prepare
+sysbench<span class="w"> </span><span class="m">1</span>.0.20<span class="w"> </span><span class="o">(</span>using<span class="w"> </span>system<span class="w"> </span>LuaJIT<span class="w"> </span><span class="m">2</span>.1.0-beta3<span class="o">)</span>
+
+Creating<span class="w"> </span>table<span class="w"> </span><span class="s1">&#39;sbtest1&#39;</span>...
+Inserting<span class="w"> </span><span class="m">1000000</span><span class="w"> </span>records<span class="w"> </span>into<span class="w"> </span><span class="s1">&#39;sbtest1&#39;</span>
+Creating<span class="w"> </span>a<span class="w"> </span>secondary<span class="w"> </span>index<span class="w"> </span>on<span class="w"> </span><span class="s1">&#39;sbtest1&#39;</span>...
+root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;select count(*) from test.sbtest1&quot;</span>
++----------+
+<span class="p">|</span><span class="w"> </span>count<span class="o">(</span>*<span class="o">)</span><span class="w"> </span><span class="p">|</span>
++----------+
+<span class="p">|</span><span class="w">  </span><span class="m">1000000</span><span class="w"> </span><span class="p">|</span>
++----------+
+</code></pre></div>
+
+<p>Start all mysql in segment 1 which was shutdown and check the result for data sync.</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-4:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">81</span><span class="w">                                   </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>2730e7d3-ae4e-11f0-a3f7-f290a6348920<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>Primary<span class="w">                              </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+root@mysql-galera-db-4:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;select count(*) from test.sbtest1&quot;</span>
++----------+
+<span class="p">|</span><span class="w"> </span>count<span class="o">(</span>*<span class="o">)</span><span class="w"> </span><span class="p">|</span>
++----------+
+<span class="p">|</span><span class="w">  </span><span class="m">1000000</span><span class="w"> </span><span class="p">|</span>
++----------+
+</code></pre></div>
+
+<p>Scenario above was using <code>graceful shutdown</code>, how about <code>ungraceful shutdown</code> (with <strong>pkill -9 mysql</strong>)?
+Nodes in segment 1 doesn't send state transfer, Nodes in segment 0 have no idea if nodes in segment 1 died or network partition. Galera see 3 nodes gone -&gt; suspicion of split-brain -&gt; change to non-primary to avoid 2 segment write together.</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">0</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">18446744073709551615</span><span class="w">                 </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">1</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>2730e7d3-ae4e-11f0-a3f7-f290a6348920<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>non-Primary<span class="w">                          </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+</code></pre></div>
+
+<p>Cluster only can recover when nodes in segment 1 start again, this is unrealistic, therefore we will go to next case.</p>
+<h1>Lab 2: Block Traffic Between Segment 0 &amp; 1 (Garb Still Reachable)</h1>
+<div class="highlight"><pre><span></span><code><span class="c1"># Do this in 3 node of segment 1</span>
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.5.1.5<span class="w"> </span>-j<span class="w"> </span>DROP
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.5.3.7<span class="w"> </span>-j<span class="w"> </span>DROP
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.5.1.228<span class="w"> </span>-j<span class="w"> </span>DROP
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-d<span class="w"> </span><span class="m">10</span>.5.1.5<span class="w"> </span>-j<span class="w"> </span>DROP
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-d<span class="w"> </span><span class="m">10</span>.5.3.7<span class="w"> </span>-j<span class="w"> </span>DROP
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-d<span class="w"> </span><span class="m">10</span>.5.1.228<span class="w"> </span>-j<span class="w"> </span>DROP
+
+
+<span class="c1"># Do this in 3 node of segment 0</span>
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.5.0.80<span class="w"> </span>-j<span class="w"> </span>DROP
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.5.2.76<span class="w"> </span>-j<span class="w"> </span>DROP
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.5.1.219<span class="w"> </span>-j<span class="w"> </span>DROP
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-d<span class="w"> </span><span class="m">10</span>.5.0.80<span class="w"> </span>-j<span class="w"> </span>DROP
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-d<span class="w"> </span><span class="m">10</span>.5.2.76<span class="w"> </span>-j<span class="w"> </span>DROP
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-d<span class="w"> </span><span class="m">10</span>.5.1.219<span class="w"> </span>-j<span class="w"> </span>DROP
+
+root@mysql-galera-db-4:~#<span class="w"> </span>iptables<span class="w"> </span>-L<span class="w"> </span>-n<span class="w"> </span>-v
+Chain<span class="w"> </span>INPUT<span class="w"> </span><span class="o">(</span>policy<span class="w"> </span>ACCEPT<span class="w"> </span>632K<span class="w"> </span>packets,<span class="w"> </span>289M<span class="w"> </span>bytes<span class="o">)</span>
+<span class="w"> </span>pkts<span class="w"> </span>bytes<span class="w"> </span>target<span class="w">     </span>prot<span class="w"> </span>opt<span class="w"> </span><span class="k">in</span><span class="w">     </span>out<span class="w">     </span><span class="nb">source</span><span class="w">               </span>destination
+<span class="w">   </span><span class="m">28</span><span class="w">  </span><span class="m">2280</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">10</span>.5.1.5<span class="w">             </span><span class="m">0</span>.0.0.0/0
+<span class="w">   </span><span class="m">29</span><span class="w">  </span><span class="m">1920</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">10</span>.5.3.7<span class="w">             </span><span class="m">0</span>.0.0.0/0
+<span class="w">   </span><span class="m">33</span><span class="w">  </span><span class="m">5156</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">10</span>.5.1.228<span class="w">           </span><span class="m">0</span>.0.0.0/0
+
+Chain<span class="w"> </span>FORWARD<span class="w"> </span><span class="o">(</span>policy<span class="w"> </span>ACCEPT<span class="w"> </span><span class="m">0</span><span class="w"> </span>packets,<span class="w"> </span><span class="m">0</span><span class="w"> </span>bytes<span class="o">)</span>
+<span class="w"> </span>pkts<span class="w"> </span>bytes<span class="w"> </span>target<span class="w">     </span>prot<span class="w"> </span>opt<span class="w"> </span><span class="k">in</span><span class="w">     </span>out<span class="w">     </span><span class="nb">source</span><span class="w">               </span>destination
+
+Chain<span class="w"> </span>OUTPUT<span class="w"> </span><span class="o">(</span>policy<span class="w"> </span>ACCEPT<span class="w"> </span>551K<span class="w"> </span>packets,<span class="w"> </span>659M<span class="w"> </span>bytes<span class="o">)</span>
+<span class="w"> </span>pkts<span class="w"> </span>bytes<span class="w"> </span>target<span class="w">     </span>prot<span class="w"> </span>opt<span class="w"> </span><span class="k">in</span><span class="w">     </span>out<span class="w">     </span><span class="nb">source</span><span class="w">               </span>destination
+<span class="w">   </span><span class="m">33</span><span class="w"> </span><span class="m">11216</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">0</span>.0.0.0/0<span class="w">            </span><span class="m">10</span>.5.1.5
+<span class="w">   </span><span class="m">53</span><span class="w"> </span><span class="m">35948</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">0</span>.0.0.0/0<span class="w">            </span><span class="m">10</span>.5.3.7
+<span class="w">   </span><span class="m">33</span><span class="w">  </span><span class="m">8448</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">0</span>.0.0.0/0<span class="w">            </span><span class="m">10</span>.5.1.228
+
+root@mysql-galera-db-5:~#<span class="w"> </span>iptables<span class="w"> </span>-L<span class="w"> </span>-n<span class="w"> </span>-v
+Chain<span class="w"> </span>INPUT<span class="w"> </span><span class="o">(</span>policy<span class="w"> </span>ACCEPT<span class="w"> </span>644K<span class="w"> </span>packets,<span class="w"> </span>688M<span class="w"> </span>bytes<span class="o">)</span>
+<span class="w"> </span>pkts<span class="w"> </span>bytes<span class="w"> </span>target<span class="w">     </span>prot<span class="w"> </span>opt<span class="w"> </span><span class="k">in</span><span class="w">     </span>out<span class="w">     </span><span class="nb">source</span><span class="w">               </span>destination
+<span class="w">   </span><span class="m">52</span><span class="w">  </span><span class="m">7560</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">10</span>.5.1.5<span class="w">             </span><span class="m">0</span>.0.0.0/0
+<span class="w">   </span><span class="m">46</span><span class="w">  </span><span class="m">2940</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">10</span>.5.3.7<span class="w">             </span><span class="m">0</span>.0.0.0/0
+<span class="w">   </span><span class="m">46</span><span class="w">  </span><span class="m">2940</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">10</span>.5.1.228<span class="w">           </span><span class="m">0</span>.0.0.0/0
+
+Chain<span class="w"> </span>FORWARD<span class="w"> </span><span class="o">(</span>policy<span class="w"> </span>ACCEPT<span class="w"> </span><span class="m">0</span><span class="w"> </span>packets,<span class="w"> </span><span class="m">0</span><span class="w"> </span>bytes<span class="o">)</span>
+<span class="w"> </span>pkts<span class="w"> </span>bytes<span class="w"> </span>target<span class="w">     </span>prot<span class="w"> </span>opt<span class="w"> </span><span class="k">in</span><span class="w">     </span>out<span class="w">     </span><span class="nb">source</span><span class="w">               </span>destination
+
+Chain<span class="w"> </span>OUTPUT<span class="w"> </span><span class="o">(</span>policy<span class="w"> </span>ACCEPT<span class="w"> </span>501K<span class="w"> </span>packets,<span class="w"> </span>50M<span class="w"> </span>bytes<span class="o">)</span>
+<span class="w"> </span>pkts<span class="w"> </span>bytes<span class="w"> </span>target<span class="w">     </span>prot<span class="w"> </span>opt<span class="w"> </span><span class="k">in</span><span class="w">     </span>out<span class="w">     </span><span class="nb">source</span><span class="w">               </span>destination
+<span class="w">   </span><span class="m">59</span><span class="w"> </span><span class="m">33164</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">0</span>.0.0.0/0<span class="w">            </span><span class="m">10</span>.5.1.5
+<span class="w">   </span><span class="m">81</span><span class="w"> </span><span class="m">67768</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">0</span>.0.0.0/0<span class="w">            </span><span class="m">10</span>.5.3.7
+<span class="w">   </span><span class="m">57</span><span class="w"> </span><span class="m">33208</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">0</span>.0.0.0/0<span class="w">            </span><span class="m">10</span>.5.1.228
+
+root@mysql-galera-db-6:~#<span class="w"> </span>iptables<span class="w"> </span>-L<span class="w"> </span>-n<span class="w"> </span>-v
+Chain<span class="w"> </span>INPUT<span class="w"> </span><span class="o">(</span>policy<span class="w"> </span>ACCEPT<span class="w"> </span>696K<span class="w"> </span>packets,<span class="w"> </span>691M<span class="w"> </span>bytes<span class="o">)</span>
+<span class="w"> </span>pkts<span class="w"> </span>bytes<span class="w"> </span>target<span class="w">     </span>prot<span class="w"> </span>opt<span class="w"> </span><span class="k">in</span><span class="w">     </span>out<span class="w">     </span><span class="nb">source</span><span class="w">               </span>destination
+<span class="w">   </span><span class="m">48</span><span class="w"> </span><span class="m">10444</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">10</span>.5.1.5<span class="w">             </span><span class="m">0</span>.0.0.0/0
+<span class="w">   </span><span class="m">46</span><span class="w"> </span><span class="m">12344</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">10</span>.5.3.7<span class="w">             </span><span class="m">0</span>.0.0.0/0
+<span class="w">   </span><span class="m">46</span><span class="w"> </span><span class="m">11364</span><span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">10</span>.5.1.228<span class="w">           </span><span class="m">0</span>.0.0.0/0
+
+Chain<span class="w"> </span>FORWARD<span class="w"> </span><span class="o">(</span>policy<span class="w"> </span>ACCEPT<span class="w"> </span><span class="m">0</span><span class="w"> </span>packets,<span class="w"> </span><span class="m">0</span><span class="w"> </span>bytes<span class="o">)</span>
+<span class="w"> </span>pkts<span class="w"> </span>bytes<span class="w"> </span>target<span class="w">     </span>prot<span class="w"> </span>opt<span class="w"> </span><span class="k">in</span><span class="w">     </span>out<span class="w">     </span><span class="nb">source</span><span class="w">               </span>destination
+
+Chain<span class="w"> </span>OUTPUT<span class="w"> </span><span class="o">(</span>policy<span class="w"> </span>ACCEPT<span class="w"> </span>607K<span class="w"> </span>packets,<span class="w"> </span>68M<span class="w"> </span>bytes<span class="o">)</span>
+<span class="w"> </span>pkts<span class="w"> </span>bytes<span class="w"> </span>target<span class="w">     </span>prot<span class="w"> </span>opt<span class="w"> </span><span class="k">in</span><span class="w">     </span>out<span class="w">     </span><span class="nb">source</span><span class="w">               </span>destination
+<span class="w">  </span><span class="m">153</span><span class="w">  </span>181K<span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">0</span>.0.0.0/0<span class="w">            </span><span class="m">10</span>.5.1.5
+<span class="w">  </span><span class="m">176</span><span class="w">  </span>213K<span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">0</span>.0.0.0/0<span class="w">            </span><span class="m">10</span>.5.3.7
+<span class="w">  </span><span class="m">152</span><span class="w">  </span>179K<span class="w"> </span>DROP<span class="w">       </span><span class="m">0</span><span class="w">    </span>--<span class="w">  </span>*<span class="w">      </span>*<span class="w">       </span><span class="m">0</span>.0.0.0/0<span class="w">            </span><span class="m">10</span>.5.1.228
+</code></pre></div>
+
+<p>After that, check cluster status. We still see it has 7 nodes, which mean garb still see 2 segments and cluster_size still equal to 7.</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>Primary<span class="w">                              </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+
+root@mysql-galera-db-4:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>Primary<span class="w">                              </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+</code></pre></div>
+
+<p>Check with ping, check port in random node</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-5:~#<span class="w"> </span>nc<span class="w"> </span>-vz<span class="w"> </span>-w<span class="w"> </span><span class="m">1</span><span class="w"> </span>mysql-galera-db-1<span class="w"> </span><span class="m">4567</span>
+nc:<span class="w"> </span>connect<span class="w"> </span>to<span class="w"> </span>mysql-galera-db-1<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.1.5<span class="o">)</span><span class="w"> </span>port<span class="w"> </span><span class="m">4567</span><span class="w"> </span><span class="o">(</span>tcp<span class="o">)</span><span class="w"> </span>timed<span class="w"> </span>out:<span class="w"> </span>Operation<span class="w"> </span>now<span class="w"> </span><span class="k">in</span><span class="w"> </span>progress
+root@mysql-galera-db-5:~#<span class="w"> </span>ping<span class="w"> </span>-w<span class="w"> </span><span class="m">1</span><span class="w"> </span>mysql-galera-db-1
+PING<span class="w"> </span>mysql-galera-db-1<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.1.5<span class="o">)</span><span class="w"> </span><span class="m">56</span><span class="o">(</span><span class="m">84</span><span class="o">)</span><span class="w"> </span>bytes<span class="w"> </span>of<span class="w"> </span>data.
+
+---<span class="w"> </span>mysql-galera-db-1<span class="w"> </span>ping<span class="w"> </span>statistics<span class="w"> </span>---
+<span class="m">1</span><span class="w"> </span>packets<span class="w"> </span>transmitted,<span class="w"> </span><span class="m">0</span><span class="w"> </span>received,<span class="w"> </span><span class="m">100</span>%<span class="w"> </span>packet<span class="w"> </span>loss,<span class="w"> </span><span class="nb">time</span><span class="w"> </span>0ms
+-----------------------------------------------------
+
+
+root@mysql-galera-db-1:~#<span class="w"> </span>nc<span class="w"> </span>-vz<span class="w"> </span>-w<span class="w"> </span><span class="m">1</span><span class="w"> </span>mysql-galera-db-5<span class="w"> </span><span class="m">4567</span>
+nc:<span class="w"> </span>connect<span class="w"> </span>to<span class="w"> </span>mysql-galera-db-5<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.2.76<span class="o">)</span><span class="w"> </span>port<span class="w"> </span><span class="m">4567</span><span class="w"> </span><span class="o">(</span>tcp<span class="o">)</span><span class="w"> </span>timed<span class="w"> </span>out:<span class="w"> </span>Operation<span class="w"> </span>now<span class="w"> </span><span class="k">in</span><span class="w"> </span>progress
+root@mysql-galera-db-1:~#<span class="w"> </span>ping<span class="w"> </span>-w<span class="w"> </span><span class="m">1</span><span class="w"> </span>mysql-galera-db-5
+PING<span class="w"> </span>mysql-galera-db-5<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.2.76<span class="o">)</span><span class="w"> </span><span class="m">56</span><span class="o">(</span><span class="m">84</span><span class="o">)</span><span class="w"> </span>bytes<span class="w"> </span>of<span class="w"> </span>data.
+
+---<span class="w"> </span>mysql-galera-db-5<span class="w"> </span>ping<span class="w"> </span>statistics<span class="w"> </span>---
+<span class="m">1</span><span class="w"> </span>packets<span class="w"> </span>transmitted,<span class="w"> </span><span class="m">0</span><span class="w"> </span>received,<span class="w"> </span><span class="m">100</span>%<span class="w"> </span>packet<span class="w"> </span>loss,<span class="w"> </span><span class="nb">time</span><span class="w"> </span>0ms
+</code></pre></div>
+
+<p>Hmm, test with 1 more node to make sure we are going in right way</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-2:~#<span class="w"> </span>nc<span class="w"> </span>-vz<span class="w"> </span>-w<span class="w"> </span><span class="m">1</span><span class="w"> </span>mysql-galera-db-4<span class="w"> </span><span class="m">4567</span>
+nc:<span class="w"> </span>connect<span class="w"> </span>to<span class="w"> </span>mysql-galera-db-4<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.0.80<span class="o">)</span><span class="w"> </span>port<span class="w"> </span><span class="m">4567</span><span class="w"> </span><span class="o">(</span>tcp<span class="o">)</span><span class="w"> </span>timed<span class="w"> </span>out:<span class="w"> </span>Operation<span class="w"> </span>now<span class="w"> </span><span class="k">in</span><span class="w"> </span>progress
+root@mysql-galera-db-2:~#<span class="w"> </span>ping<span class="w"> </span>-w<span class="w"> </span><span class="m">1</span><span class="w"> </span>mysql-galera-db-4
+PING<span class="w"> </span>mysql-galera-db-4<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.0.80<span class="o">)</span><span class="w"> </span><span class="m">56</span><span class="o">(</span><span class="m">84</span><span class="o">)</span><span class="w"> </span>bytes<span class="w"> </span>of<span class="w"> </span>data.
+
+---<span class="w"> </span>mysql-galera-db-4<span class="w"> </span>ping<span class="w"> </span>statistics<span class="w"> </span>---
+<span class="m">1</span><span class="w"> </span>packets<span class="w"> </span>transmitted,<span class="w"> </span><span class="m">0</span><span class="w"> </span>received,<span class="w"> </span><span class="m">100</span>%<span class="w"> </span>packet<span class="w"> </span>loss,<span class="w"> </span><span class="nb">time</span><span class="w"> </span>0ms
+</code></pre></div>
+
+<p>Ok, Let's create new database for data synchronization</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Node 1 (segment 0)</span>
+mysql&gt;<span class="w"> </span>create<span class="w"> </span>database<span class="w"> </span>test1<span class="p">;</span>
+Query<span class="w"> </span>OK,<span class="w"> </span><span class="m">1</span><span class="w"> </span>row<span class="w"> </span>affected<span class="w"> </span><span class="o">(</span><span class="m">0</span>.01<span class="w"> </span>sec<span class="o">)</span>
+
+mysql&gt;<span class="w"> </span>create<span class="w"> </span>database<span class="w"> </span>test2<span class="p">;</span>
+Query<span class="w"> </span>OK,<span class="w"> </span><span class="m">1</span><span class="w"> </span>row<span class="w"> </span>affected<span class="w"> </span><span class="o">(</span><span class="m">0</span>.01<span class="w"> </span>sec<span class="o">)</span>
+------------------------------------
+
+<span class="c1"># Node 5 (segment 1)</span>
+root@mysql-galera-db-5:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;create database test3&quot;</span>
+root@mysql-galera-db-5:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;create database test4&quot;</span>
+root@mysql-galera-db-5:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;show databases&quot;</span>
++--------------------+
+<span class="p">|</span><span class="w"> </span>Database<span class="w">           </span><span class="p">|</span>
++--------------------+
+<span class="p">|</span><span class="w"> </span>information_schema<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>mysql<span class="w">              </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>performance_schema<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>sys<span class="w">                </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>test1<span class="w">              </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>test2<span class="w">              </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>test3<span class="w">              </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>test4<span class="w">              </span><span class="p">|</span>
++--------------------+
+</code></pre></div>
+
+<p>Test write in node 1</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>sysbench<span class="w"> </span>oltp_read_write<span class="w"> </span>--mysql-db<span class="o">=</span>test2<span class="w"> </span>--mysql-user<span class="o">=</span>root<span class="w"> </span>--mysql-password<span class="o">=</span><span class="m">123123</span><span class="w"> </span>--table-size<span class="o">=</span><span class="m">2000000</span><span class="w"> </span>prepare
+sysbench<span class="w"> </span><span class="m">1</span>.0.20<span class="w"> </span><span class="o">(</span>using<span class="w"> </span>system<span class="w"> </span>LuaJIT<span class="w"> </span><span class="m">2</span>.1.0-beta3<span class="o">)</span>
+
+Creating<span class="w"> </span>table<span class="w"> </span><span class="s1">&#39;sbtest1&#39;</span>...
+Inserting<span class="w"> </span><span class="m">2000000</span><span class="w"> </span>records<span class="w"> </span>into<span class="w"> </span><span class="s1">&#39;sbtest1&#39;</span>
+Creating<span class="w"> </span>a<span class="w"> </span>secondary<span class="w"> </span>index<span class="w"> </span>on<span class="w"> </span><span class="s1">&#39;sbtest1&#39;</span>...
+</code></pre></div>
+
+<p>Check data in node 2</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-4:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;select count(*) from test2.sbtest1;&quot;</span>
++----------+
+<span class="p">|</span><span class="w"> </span>count<span class="o">(</span>*<span class="o">)</span><span class="w"> </span><span class="p">|</span>
++----------+
+<span class="p">|</span><span class="w">  </span><span class="m">2000000</span><span class="w"> </span><span class="p">|</span>
++----------+
+</code></pre></div>
+
+<p>This part will surely have the question of why right? The answer is node garb, it took a little time to prove. First is to check traffic via tcpdump, this is when tcpdump is turned on when node 1 insert.</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-7:~#<span class="w"> </span>tcpdump<span class="w"> </span>-i<span class="w"> </span>eth0<span class="w"> </span>port<span class="w"> </span><span class="m">4567</span><span class="w"> </span>-w<span class="w"> </span>galera.pcap
+tcpdump:<span class="w"> </span>listening<span class="w"> </span>on<span class="w"> </span>eth0,<span class="w"> </span>link-type<span class="w"> </span>EN10MB<span class="w"> </span><span class="o">(</span>Ethernet<span class="o">)</span>,<span class="w"> </span>snapshot<span class="w"> </span>length<span class="w"> </span><span class="m">262144</span><span class="w"> </span>bytes
+^C2147624<span class="w"> </span>packets<span class="w"> </span>captured
+<span class="m">2148191</span><span class="w"> </span>packets<span class="w"> </span>received<span class="w"> </span>by<span class="w"> </span>filter
+<span class="m">0</span><span class="w"> </span>packets<span class="w"> </span>dropped<span class="w"> </span>by<span class="w"> </span>kernel
+root@mysql-galera-db-7:~#<span class="w"> </span>ls<span class="w"> </span>-lh
+total<span class="w"> </span><span class="m">2</span>.6G
+-rw-r--r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>tcpdump<span class="w"> </span>tcpdump<span class="w"> </span><span class="m">2</span>.6G<span class="w"> </span>Oct<span class="w"> </span><span class="m">24</span><span class="w"> </span><span class="m">09</span>:34<span class="w"> </span>galera.pcap
+</code></pre></div>
+
+<p>Quite heavy, open Wireshark then open the tcpdump file.</p>
+<p><img alt="wireshark" src="images/2025/11/11.png"></p>
+<p>Looking confused and not understanding much, I should probably do the wireshark course =_=. However, if it's difficult, ask, and here is the answer</p>
+<p>Based on this tcpdump data, ~~I analyze as follows~~, I copy this from Claude AI xD</p>
+<h3>Key Observation</h3>
+<p>Node 10.5.2.133 is acting as a clear relay/coordinator.</p>
+<p>Communication Pattern:
+- 10.5.2.133 receives data from many nodes (10.5.2.76, 10.5.1.5, 10.5.1.228, 10.5.3.7, 10.5.0.80, 10.5.1.219)
+- Then broadcast/forward to ALL other nodes
+- All using port 4567 (destination port)</p>
+<p>Evidence of relay behavior:
+- Frame 1236874-1236875: 10.5.2.133 sends data to 10.5.2.76 (80+108 bytes)
+- Frame 1236876: 10.5.2.133 sends data to 10.5.1.5 (108 bytes)
+- Frame 1236879: 10.5.2.133 sends data to 10.5.3.7 (108 bytes)
+- Frame 1236880: 10.5.2.133 sends data to 10.5.1.228 (108 bytes)
+- Frame 1236881: 10.5.2.133 sends data to 10.5.0.80 (108 bytes)
+- Frame 1236882: 10.5.2.133 sends data to 10.5.1.219 (108 bytes)</p>
+<p>Data size pattern:
+- Majority: 108 bytes payload (may be standard message size)
+- Occasional: 80 bytes (may be ACK or heartbeat)
+- Base TCP overhead: 66 bytes (pure ACK)</p>
+<p>Timing analysis:
+- All events occur in ~0.1 seconds (from 25.174043 → 25.174227)
+- Node 10.5.2.133 sends messages almost simultaneously to all nodes
+- Latency is very low, indicating this is a local network</p>
+<h3>Conclusion</h3>
+<p>10.5.2.133 is definitely a relay/hub node, not just participating in voting.</p>
+<p>Well of course there must be evidence since I used explanation from AI. First is this article: http://blog.yannickjaquier.com/mariadb/galera-arbitrator-as-an-odd-node-in-galera-cluster.html (search keyword relay)</p>
+<p>Reality on node garb</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-7:/var/log#<span class="w"> </span>cat<span class="w"> </span>garbd.log<span class="w"> </span><span class="p">|</span>grep<span class="w"> </span>-i<span class="w"> </span>relay
+<span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:02:33.870<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>6325ebf1-9e99,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>off
+<span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:02:44.767<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>6325ebf1-9e99,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>on,<span class="w"> </span>nonlive<span class="w"> </span>peers:<span class="w"> </span>tcp://10.5.0.80:4567
+<span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:02:47.871<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>6325ebf1-9e99,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>off
+<span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:03:17.872<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>6325ebf1-9e99,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>off
+<span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:03:34.873<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>6325ebf1-9e99,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>off
+<span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:32:49.280<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>9d377f5a-9e1b,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>off
+<span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:33:50.779<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>c1df7af4-ac85,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>off
+<span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:34:44.237<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>e1bc7bfa-8f5d,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>off
+<span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:43:04.498<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>0bea5770-a3e5,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>off
+<span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:44:23.824<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>0bea5770-a3e5,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>on,<span class="w"> </span>nonlive<span class="w"> </span>peers:<span class="w"> </span>tcp://10.5.1.5:4567
+<span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:44:24.816<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>0bea5770-a3e5,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>off
+<span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:44:33.148<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>0bea5770-a3e5,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>off
+</code></pre></div>
+
+<p>In conclusion, in this case, the network block between segment 0 and 1 can still be synchronized thanks to garb as a relay. Try stopping garb and keeping the block between segment 0 and 1 as is, the result is as follows:</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-7:~#<span class="w"> </span>systemctl<span class="w"> </span>stop<span class="w"> </span>garb
+
+root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">0</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">18446744073709551615</span><span class="w">                 </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">3</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>non-Primary<span class="w">                          </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+
+root@mysql-galera-db-6:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">0</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">18446744073709551615</span><span class="w">                 </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">3</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>non-Primary<span class="w">                          </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+</code></pre></div>
+
+<h3>What's next?</h3>
+<p>Turn on garb node again to test if traffic goes through garb node?</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-7:~#<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>garb
+
+root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">0</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">18446744073709551615</span><span class="w">                 </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>non-Primary<span class="w">                          </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+</code></pre></div>
+
+<p>Even though there are 7 nodes and iptables has been flushed, the cluster still lost quorum. After trying to restart, I couldn't turn on any node, all reported errors.</p>
+<div class="highlight"><pre><span></span><code><span class="m">2025</span>-10-23T10:36:43.663708Z<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">[</span>System<span class="o">]</span><span class="w"> </span><span class="o">[</span>MY-000000<span class="o">]</span><span class="w"> </span><span class="o">[</span>WSREP<span class="o">]</span><span class="w"> </span>P:<span class="w"> </span><span class="o">(</span>1cffc6a5-9efc,<span class="w"> </span><span class="s1">&#39;tcp://0.0.0.0:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>off
+<span class="m">2025</span>-10-23T10:36:51.164207Z<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">[</span>ERROR<span class="o">]</span><span class="w"> </span><span class="o">[</span>MY-000000<span class="o">]</span><span class="w"> </span><span class="o">[</span>WSREP<span class="o">]</span><span class="w"> </span>P:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> </span>open<span class="w"> </span>gcomm<span class="w"> </span>backend<span class="w"> </span>connection:<span class="w"> </span><span class="m">110</span>:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> </span>reach<span class="w"> </span>primary<span class="w"> </span>view
+<span class="w">     </span>at<span class="w"> </span>./gcomm/src/pc.cpp:connect<span class="o">()</span>:160
+<span class="m">2025</span>-10-23T10:36:51.164260Z<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">[</span>ERROR<span class="o">]</span><span class="w"> </span><span class="o">[</span>MY-000000<span class="o">]</span><span class="w"> </span><span class="o">[</span>WSREP<span class="o">]</span><span class="w"> </span>P:<span class="w"> </span>./gcs/src/gcs_core.cpp:gcs_core_open<span class="o">()</span>:256:<span class="w"> </span>Failed<span class="w"> </span>to<span class="w"> </span>open<span class="w"> </span>backend<span class="w"> </span>connection:<span class="w"> </span>-110<span class="w"> </span><span class="o">(</span>Connection<span class="w"> </span>timed<span class="w"> </span>out<span class="o">)</span>
+<span class="m">2025</span>-10-23T10:36:52.164756Z<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">[</span>ERROR<span class="o">]</span><span class="w"> </span><span class="o">[</span>MY-000000<span class="o">]</span><span class="w"> </span><span class="o">[</span>WSREP<span class="o">]</span><span class="w"> </span>P:<span class="w"> </span>./gcs/src/gcs.cpp:gcs_open<span class="o">()</span>:1701:<span class="w"> </span>Failed<span class="w"> </span>to<span class="w"> </span>open<span class="w"> </span>channel<span class="w"> </span><span class="s1">&#39;fpt_id&#39;</span><span class="w"> </span>at<span class="w"> </span><span class="s1">&#39;gcomm://10.5.1.5,10.5.3.7,10.5.1.228&#39;</span>:<span class="w"> </span>-110<span class="w"> </span><span class="o">(</span>Connection<span class="w"> </span>timed<span class="w"> </span>out<span class="o">)</span>
+<span class="m">2025</span>-10-23T10:36:52.164796Z<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">[</span>ERROR<span class="o">]</span><span class="w"> </span><span class="o">[</span>MY-000000<span class="o">]</span><span class="w"> </span><span class="o">[</span>WSREP<span class="o">]</span><span class="w"> </span>P:<span class="w"> </span>gcs<span class="w"> </span>connect<span class="w"> </span>failed:<span class="w"> </span>Operation<span class="w"> </span>timed<span class="w"> </span>out
+<span class="m">2025</span>-10-23T10:36:52.164803Z<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">[</span>ERROR<span class="o">]</span><span class="w"> </span><span class="o">[</span>MY-000000<span class="o">]</span><span class="w"> </span><span class="o">[</span>WSREP<span class="o">]</span><span class="w"> </span>wsrep::connect<span class="o">(</span>gcomm://10.5.1.5,10.5.3.7,10.5.1.228<span class="o">)</span><span class="w"> </span>failed:<span class="w"> </span><span class="m">7</span>
+<span class="m">2025</span>-10-23T10:36:52.164809Z<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">[</span>ERROR<span class="o">]</span><span class="w"> </span><span class="o">[</span>MY-010119<span class="o">]</span><span class="w"> </span><span class="o">[</span>Server<span class="o">]</span><span class="w"> </span>Aborting
+</code></pre></div>
+
+<p>Perform recovery, for example with node1 being the node with the most complete data (highest <code>seqno</code>)</p>
+<p>Edit this file: <code>/etc/mysql/conf.d/galera.conf</code> then change comment this line: <code>wsrep_cluster_address="gcomm://node1,node2,node3"</code></p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>cat<span class="w"> </span>/var/lib/mysql/grastate.dat
+<span class="c1"># GALERA saved state</span>
+version:<span class="w"> </span><span class="m">2</span>.1
+uuid:<span class="w">    </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893
+seqno:<span class="w">   </span><span class="m">1234</span>
+safe_to_bootstrap:<span class="w"> </span>-1
+</code></pre></div>
+
+<p>Change to <code>safe_to_bootstrap: 1</code> (I understand this is manually fixed).</p>
+<p>Then start it and check databases</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;show databases&quot;</span>
++--------------------+
+<span class="p">|</span><span class="w"> </span>Database<span class="w">           </span><span class="p">|</span>
++--------------------+
+<span class="p">|</span><span class="w"> </span>information_schema<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>mysql<span class="w">              </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>performance_schema<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>sys<span class="w">                </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>test1<span class="w">              </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>test2<span class="w">              </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>test3<span class="w">              </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>test4<span class="w">              </span><span class="p">|</span>
++--------------------+
+</code></pre></div>
+
+<p>Proceed to turn on other nodes + garb. After turning it on, remember to edit the config in the bootstrap node. If you don't restart it, it's easy to get into trouble, but you don't need to restart node 1. Restarting to confirm is ok.</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-6:~#<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>mysql
+sleep<span class="w"> </span><span class="m">10</span>
+mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">6</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>Primary<span class="w">                              </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+
+<span class="c1"># Node 1 after edit mysql config and restart! </span>
+root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">8</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>Primary<span class="w">                              </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+</code></pre></div>
+
+<p>In conclusion, if the connection to garb is lost and the network between the two segments is blocked, recovery must be performed manually. What if only the network between the two segments is blocked and garb is still alive? We will have to check if the data traffic goes through the garb node.</p>
+<p>So we will have a question like: How to know which node to enable to bootstrap in case of recovery?
+- Document here: https://mariadb.com/docs/galera-cluster/high-availability/recovering-a-primary-component#manual-bootstrap-using-grastate.dat
+- The <code>grastate.dat</code> file is the most important one to determine which node has the latest data and should bootstrap the cluster from that node</p>
+<p>The grastate.dat file contains metadata about the node state:</p>
+<div class="highlight"><pre><span></span><code># GALERA saved state
+version: 2.1
+uuid:    5ee99582-bb8d-11e3-b6c1-3c970e3bf0cb
+seqno:   -1
+safe_to_bootstrap: 0
+</code></pre></div>
+
+<p>seqno (sequence number):
+- Last transaction number this node committed
+- Node with highest seqno = latest data
+- If seqno: -1 = node crashed/shutdown not graceful</p>
+<p>safe_to_bootstrap:
+- 1 = safe to bootstrap
+- 0 = should not bootstrap from this node
+- Last shutdown node usually has value 1</p>
+<h3>Correct recovery procedure</h3>
+<p>Add a link for credibility: https://galeracluster.com/documentation/html_docs_remove-wsrep-new-cluster/documentation/crash-recovery.html</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Check grastate.dat on ALL nodes</span>
+cat<span class="w"> </span>/var/lib/mysql/grastate.dat
+
+<span class="c1"># 2. Select the node with the highest seqno</span>
+<span class="c1"># Example:</span>
+<span class="c1"># Node A: seqno: 1850</span>
+<span class="c1"># Node B: seqno: 1848</span>
+<span class="c1"># Node C: seqno: -1</span>
+<span class="c1"># =&gt; Select Node A</span>
+
+<span class="c1"># 3. If all are seqno: -1, use the script check:</span>
+mysqld<span class="w"> </span>--wsrep-recover
+
+<span class="c1"># Output will show:</span>
+<span class="c1"># Recovered position: 5ee99582-bb8d-11e3-b6c1-3c970e3bf0cb:1850</span>
+
+<span class="c1"># 4. Bootstrap from the node with the latest data</span>
+<span class="c1"># Method 1: Set safe_to_bootstrap = 1 in grastate.dat</span>
+vi<span class="w"> </span>/var/lib/mysql/grastate.dat
+<span class="c1"># Change safe_to_bootstrap: 0 to safe_to_bootstrap: 1</span>
+
+<span class="c1"># Method 2: Force bootstrap</span>
+<span class="c1"># Apply to mysql galera community, the guide mainly shows instructions for MariaDB</span>
+mysqld_bootstrap
+
+<span class="c1"># 5. Start the remaining nodes normally</span>
+systemctl<span class="w"> </span>start<span class="w"> </span>mysql
+</code></pre></div>
+
+<h1>Lab 3: Simulate Unstable Network with TC (Packet Loss, Latency, Reorder)</h1>
+<p>Scenario: Simulate a slow network scenario by dropping packages, increasing network latency. We have many tools but the 2 most prominent tools in this are</p>
+<ul>
+<li>tc (Traffic Control) Built-in Linux: available, powerful, no need to install additional</li>
+<li>Comcast: This tool is found on github, 10k5 stars, seems to be stable. https://github.com/tylertreat/comcast</li>
+</ul>
+<p>But to keep it simple, I will use tc, whichever is easier is preferred.</p>
+<p>TLDR: the output is a bit long, the summary of results here is for lazy people</p>
+<div class="highlight"><pre><span></span><code>| Network Condition | Packet Loss | Latency | Jitter  | Result       |
+|-------------------|-------------|---------|---------|--------------|
+| **Good**          | ≤ 5%        | ~50ms   | ±10ms   | OK           |
+| **Bad**           | ≥ 30%       | ~100ms  | ±50ms   | Cluster die  |
+| **Common**        | ≤ 5%        | ~100ms  | ±50ms   | OK           |
+</code></pre></div>
+
+<p>Simulate writing to 2 segments continuously with the same DB, basically keycloak uses uuid-v4 as id so multi-write is possible without fear of conflict, so we also test the same case.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Create DB in any node.</span>
+root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;CREATE DATABASE test_failover;&quot;</span>
+root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;USE test_failover; CREATE TABLE users (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(50), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);&quot;</span>
+<span class="c1"># Check in node 4 segment 1</span>
+root@mysql-galera-db-4:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;show databases&quot;</span><span class="p">|</span>grep<span class="w"> </span>test_failover
+test_failover
+</code></pre></div>
+
+<p>Basic tc commands:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">### 1. Packet loss (flickering) ###</span>
+<span class="c1"># Add 10% packet loss on interface eth0</span>
+tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>loss<span class="w"> </span><span class="m">10</span>%
+
+<span class="c1"># Packet loss random 10-30%</span>
+tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>loss<span class="w"> </span><span class="m">10</span>%<span class="w"> </span><span class="m">20</span>%
+
+<span class="c1"># Delete rule</span>
+tc<span class="w"> </span>qdisc<span class="w"> </span>del<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root
+
+<span class="c1">### 2. Network delay (latency) ###</span>
+<span class="c1"># Add 100ms delay</span>
+tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>delay<span class="w"> </span>100ms
+
+<span class="c1"># Delay 100ms ± 10ms (jitter)</span>
+tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>delay<span class="w"> </span>100ms<span class="w"> </span>10ms
+
+<span class="c1"># Delay with distribution</span>
+tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>delay<span class="w"> </span>100ms<span class="w"> </span>20ms<span class="w"> </span>distribution<span class="w"> </span>normal
+
+<span class="c1">### 3.Bandwidth limit ###</span>
+<span class="c1"># Bandwidth limit 1Mbit</span>
+tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>tbf<span class="w"> </span>rate<span class="w"> </span>1mbit<span class="w"> </span>burst<span class="w"> </span>32kbit<span class="w"> </span>latency<span class="w"> </span>400ms
+
+<span class="c1">### 4. Combine multiple conditions (most realistic) ###</span>
+<span class="c1"># Packet loss + delay + jitter (like real network)</span>
+tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>loss<span class="w"> </span><span class="m">5</span>%<span class="w"> </span>delay<span class="w"> </span>50ms<span class="w"> </span>10ms
+
+<span class="c1">### 5. After testing, must delete.</span>
+tc<span class="w"> </span>qdisc<span class="w"> </span>del<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root
+</code></pre></div>
+
+<p>We will use the combine command to test it to make it look like reality. Setup is recorded at node 1 (segment 0) and node 4 (segment 1).</p>
+<p>Explanation: <code>tc qdisc add dev eth0 root netem loss 5% delay 50ms 10ms</code>
+- loss 5%: packets will be dropped 5%
+- delay 50ms: each packet will be delayed at least 50ms
+- jitter 10ms: latency will fluctuate, for example, actual latency will be between 40ms-60ms</p>
+<p>Like this:</p>
+<div class="highlight"><pre><span></span><code>Packet<span class="w"> </span><span class="m">1</span>:<span class="w"> </span><span class="nv">delay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>50ms<span class="w"> </span>+<span class="w"> </span>random<span class="o">(</span>-10ms<span class="w"> </span>to<span class="w"> </span>+10ms<span class="o">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>45ms
+Packet<span class="w"> </span><span class="m">2</span>:<span class="w"> </span><span class="nv">delay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>50ms<span class="w"> </span>+<span class="w"> </span>random<span class="o">(</span>-10ms<span class="w"> </span>to<span class="w"> </span>+10ms<span class="o">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>58ms<span class="w">  </span>
+Packet<span class="w"> </span><span class="m">3</span>:<span class="w"> </span><span class="nv">delay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>50ms<span class="w"> </span>+<span class="w"> </span>random<span class="o">(</span>-10ms<span class="w"> </span>to<span class="w"> </span>+10ms<span class="o">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>42ms
+Packet<span class="w"> </span><span class="m">4</span>:<span class="w"> </span><span class="nv">delay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>50ms<span class="w"> </span>+<span class="w"> </span>random<span class="o">(</span>-10ms<span class="w"> </span>to<span class="w"> </span>+10ms<span class="o">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>60ms
+Packet<span class="w"> </span><span class="m">5</span>:<span class="w"> </span>DROPPED<span class="w"> </span><span class="o">(</span><span class="m">5</span>%<span class="w"> </span>packet<span class="w"> </span>loss<span class="o">)</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="k">while</span><span class="w"> </span>true<span class="p">;</span><span class="w"> </span>due<span class="w"> </span>
+<span class="w">    </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;USE test_failover; INSERT INTO users (name) VALUES (&#39;User </span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span><span class="s2">&#39;);&quot;</span><span class="w"> </span>
+<span class="w">    </span>sleep<span class="w"> </span><span class="m">1</span>
+<span class="k">done</span>
+
+
+<span class="c1">### Count at node 2 and node 5 ###</span>
+root@mysql-galera-db-2:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;use test_failover; select count(*) from users;&quot;</span>
++----------+
+<span class="p">|</span><span class="w"> </span>count<span class="o">(</span>*<span class="o">)</span><span class="w"> </span><span class="p">|</span>
++----------+
+<span class="p">|</span><span class="w"> </span><span class="m">116</span><span class="w">      </span><span class="p">|</span>
++----------+
+
+root@mysql-galera-db-5:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;use test_failover; select count(*) from users;&quot;</span>
++----------+
+<span class="p">|</span><span class="w"> </span>count<span class="o">(</span>*<span class="o">)</span><span class="w"> </span><span class="p">|</span>
++----------+
+<span class="p">|</span><span class="w"> </span><span class="m">132</span><span class="w">      </span><span class="p">|</span>
++----------+
+
+<span class="c1">### Now we will get the scenario where all nodes in segment 1 have network problems. (Loss 5%, dela</span>
+<span class="c1"># Check at node 4,5,6 to see if it is available</span>
+
+root@mysql-galera-db-4:~#<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>loss<span class="w"> </span><span class="m">5</span>%<span class="w"> </span>delay<span class="w"> </span>50ms<span class="w"> </span>10ms
+root@mysql-galera-db-4:~#<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>show<span class="w"> </span>dev<span class="w"> </span>eth0
+qdisc<span class="w"> </span>netem<span class="w"> </span><span class="m">8001</span>:<span class="w"> </span>root<span class="w"> </span>refcnt<span class="w"> </span><span class="m">5</span><span class="w"> </span>limit<span class="w"> </span><span class="m">1000</span><span class="w"> </span>delay<span class="w"> </span>50ms<span class="w"> </span>10ms<span class="w"> </span>loss<span class="w"> </span><span class="m">5</span>%
+
+root@mysql-galera-db-5:~#<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>loss<span class="w"> </span><span class="m">5</span>%<span class="w"> </span>delay<span class="w"> </span>50ms<span class="w"> </span>10ms
+root@mysql-galera-db-5:~#<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>show<span class="w"> </span>dev<span class="w"> </span>eth0
+qdisc<span class="w"> </span>netem<span class="w"> </span><span class="m">8001</span>:<span class="w"> </span>root<span class="w"> </span>refcnt<span class="w"> </span><span class="m">5</span><span class="w"> </span>limit<span class="w"> </span><span class="m">1000</span><span class="w"> </span>delay<span class="w"> </span>50ms<span class="w"> </span>10ms<span class="w"> </span>loss<span class="w"> </span><span class="m">5</span>%
+
+root@mysql-galera-db-6:~#<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>loss<span class="w"> </span><span class="m">5</span>%<span class="w"> </span>delay<span class="w"> </span>50ms<span class="w"> </span>10ms
+root@mysql-galera-db-6:~#<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>show<span class="w"> </span>dev<span class="w"> </span>eth0
+qdisc<span class="w"> </span>netem<span class="w"> </span><span class="m">8001</span>:<span class="w"> </span>root<span class="w"> </span>refcnt<span class="w"> </span><span class="m">5</span><span class="w"> </span>limit<span class="w"> </span><span class="m">1000</span><span class="w"> </span>delay<span class="w"> </span>50ms<span class="w"> </span>10ms<span class="w"> </span>loss<span class="w"> </span><span class="m">5</span>%
+</code></pre></div>
+
+<p>Demo ping: segment 0 → segment 1 with latency 100ms + jitter 50ms</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-3:~#<span class="w"> </span>ping<span class="w"> </span>mysql-galera-db-4
+PING<span class="w"> </span>mysql-galera-db-4<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.0.80<span class="o">)</span><span class="w"> </span><span class="m">56</span><span class="o">(</span><span class="m">84</span><span class="o">)</span><span class="w"> </span>bytes<span class="w"> </span>of<span class="w"> </span>data.
+<span class="m">64</span><span class="w"> </span>bytes<span class="w"> </span>from<span class="w"> </span>mysql-galera-db-4<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.0.80<span class="o">)</span>:<span class="w"> </span><span class="nv">icmp_seq</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">ttl</span><span class="o">=</span><span class="m">64</span><span class="w"> </span><span class="nv">time</span><span class="o">=</span><span class="m">151</span><span class="w"> </span>ms
+<span class="m">64</span><span class="w"> </span>bytes<span class="w"> </span>from<span class="w"> </span>mysql-galera-db-4<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.0.80<span class="o">)</span>:<span class="w"> </span><span class="nv">icmp_seq</span><span class="o">=</span><span class="m">2</span><span class="w"> </span><span class="nv">ttl</span><span class="o">=</span><span class="m">64</span><span class="w"> </span><span class="nv">time</span><span class="o">=</span><span class="m">146</span><span class="w"> </span>ms
+<span class="m">64</span><span class="w"> </span>bytes<span class="w"> </span>from<span class="w"> </span>mysql-galera-db-4<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.0.80<span class="o">)</span>:<span class="w"> </span><span class="nv">icmp_seq</span><span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="nv">ttl</span><span class="o">=</span><span class="m">64</span><span class="w"> </span><span class="nv">time</span><span class="o">=</span><span class="m">117</span><span class="w"> </span>ms
+<span class="m">64</span><span class="w"> </span>bytes<span class="w"> </span>from<span class="w"> </span>mysql-galera-db-4<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.0.80<span class="o">)</span>:<span class="w"> </span><span class="nv">icmp_seq</span><span class="o">=</span><span class="m">4</span><span class="w"> </span><span class="nv">ttl</span><span class="o">=</span><span class="m">64</span><span class="w"> </span><span class="nv">time</span><span class="o">=</span><span class="m">99</span>.6<span class="w"> </span>ms
+<span class="m">64</span><span class="w"> </span>bytes<span class="w"> </span>from<span class="w"> </span>mysql-galera-db-4<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.0.80<span class="o">)</span>:<span class="w"> </span><span class="nv">icmp_seq</span><span class="o">=</span><span class="m">5</span><span class="w"> </span><span class="nv">ttl</span><span class="o">=</span><span class="m">64</span><span class="w"> </span><span class="nv">time</span><span class="o">=</span><span class="m">110</span><span class="w"> </span>ms
+<span class="m">64</span><span class="w"> </span>bytes<span class="w"> </span>from<span class="w"> </span>mysql-galera-db-4<span class="w"> </span><span class="o">(</span><span class="m">10</span>.5.0.80<span class="o">)</span>:<span class="w"> </span><span class="nv">icmp_seq</span><span class="o">=</span><span class="m">6</span><span class="w"> </span><span class="nv">ttl</span><span class="o">=</span><span class="m">64</span><span class="w"> </span><span class="nv">time</span><span class="o">=</span><span class="m">91</span>.5<span class="w"> </span>ms
+</code></pre></div>
+
+<p>Results after a short time: with 5% dropped packages, no problem. At least that's what the count shows, this is the count after stopping recording at both ends</p>
+<div class="highlight"><pre><span></span><code>root@mysql-galera-db-2:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;use test_failover; select count(*) from users;&quot;</span>
++----------+
+<span class="p">|</span><span class="w"> </span>count<span class="o">(</span>*<span class="o">)</span><span class="w"> </span><span class="p">|</span>
++----------+
+<span class="p">|</span><span class="w">     </span><span class="m">1156</span><span class="w"> </span><span class="p">|</span>
++----------+
+root@mysql-galera-db-5:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;use test_failover; select count(*) from users;&quot;</span>
++----------+
+<span class="p">|</span><span class="w"> </span>count<span class="o">(</span>*<span class="o">)</span><span class="w"> </span><span class="p">|</span>
++----------+
+<span class="p">|</span><span class="w">     </span><span class="m">1156</span><span class="w"> </span><span class="p">|</span>
++----------+
+</code></pre></div>
+
+<p>So with 5% packets dropped, latency is 50ms, Jitter 10ms is not a problem. Try adding 1 higher one and see?
+- Packet loss: 30%
+- Latency: 100ms
+- Jitter: 50ms</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Still updating on nodes in segment 1 (node ​​4,5,6)</span>
+root@mysql-galera-db-4:~#<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>del<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root
+root@mysql-galera-db-4:~#<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>loss<span class="w"> </span><span class="m">30</span>%<span class="w"> </span>delay<span class="w"> </span>100ms<span class="w"> </span>50ms
+root@mysql-galera-db-4:~#<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>show<span class="w"> </span>dev<span class="w"> </span>eth0
+qdisc<span class="w"> </span>netem<span class="w"> </span><span class="m">8002</span>:<span class="w"> </span>root<span class="w"> </span>refcnt<span class="w"> </span><span class="m">5</span><span class="w"> </span>limit<span class="w"> </span><span class="m">1000</span><span class="w"> </span>delay<span class="w"> </span>100ms<span class="w"> </span>50ms<span class="w"> </span>loss<span class="w"> </span><span class="m">30</span>%
+..............
+<span class="c1"># Hmmm, just about to write it, it turned into non-Primary</span>
+root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">0</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">18446744073709551615</span><span class="w">                 </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">1</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>non-Primary<span class="w">                          </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+
+root@mysql-galera-db-4:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">0</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">18446744073709551615</span><span class="w">                 </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">1</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>non-Primary<span class="w">                          </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+
+root@mysql-galera-db-5:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">0</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">18446744073709551615</span><span class="w">                 </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">1</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>non-Primary<span class="w">                          </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+
+root@mysql-galera-db-6:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">0</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">18446744073709551615</span><span class="w">                 </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">1</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>non-Primary<span class="w">                          </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+
+<span class="c1"># After deleting the rule and dropping 30% of the network, it was ok again</span>
+root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">9</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>Primary<span class="w">                              </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+
+root@mysql-galera-db-4:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">9</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>Primary<span class="w">                              </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+
+root@mysql-galera-db-5:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">9</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>Primary<span class="w">                              </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+
+root@mysql-galera-db-6:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>Variable_name<span class="w">              </span><span class="p">|</span><span class="w"> </span>Value<span class="w">                                </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_weight<span class="w">       </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_capabilities<span class="w"> </span><span class="p">|</span><span class="w">                                      </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_conf_id<span class="w">      </span><span class="p">|</span><span class="w"> </span><span class="m">9</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_size<span class="w">         </span><span class="p">|</span><span class="w"> </span><span class="m">7</span><span class="w">                                    </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_state_uuid<span class="w">   </span><span class="p">|</span><span class="w"> </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893<span class="w"> </span><span class="p">|</span>
+<span class="p">|</span><span class="w"> </span>wsrep_cluster_status<span class="w">       </span><span class="p">|</span><span class="w"> </span>Primary<span class="w">                              </span><span class="p">|</span>
++----------------------------+--------------------------------------+
+</code></pre></div>
+
+<p>In conclusion, with 2 tests of network drop 5%, latency 40-60ms, cluster works ok. For network with 30% packet drop, cluster cooks itself.</p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2025-11-13T00:00:00+07:00">Thu 13 November 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#mysql-ref">mysql
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
