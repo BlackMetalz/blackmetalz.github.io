@@ -508,16 +508,16 @@ root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e
 </code></pre></div>
 
 <p>Perform recovery, for example with node1 being the node with the most complete data (highest <code>seqno</code>).</p>
-<p>Edit this file <code>/etc/mysql/conf.d/galera.conf</code> then change comment this line: <code>wsrep_cluster_address="gcomm://node1,node2,node3"</code></p>
+<p>Edit this file <code>/etc/mysql/conf.d/galera.conf</code> then change comment this line: <code>wsrep_cluster_address="gcomm://node1,node2,node3"</code>
+Change to <code>safe_to_bootstrap: 1</code> (I understand this is manually fixed).</p>
 <div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>cat<span class="w"> </span>/var/lib/mysql/grastate.dat
 <span class="c1"># GALERA saved state</span>
 version:<span class="w"> </span><span class="m">2</span>.1
 uuid:<span class="w">    </span>0e38a58c-aff7-11f0-b1f0-6ee869c6a893
 seqno:<span class="w">   </span><span class="m">1234</span>
-safe_to_bootstrap:<span class="w"> </span>-1
+safe_to_bootstrap:<span class="w"> </span><span class="m">1</span>
 </code></pre></div>
 
-<p>Change to <code>safe_to_bootstrap: 1</code> (I understand this is manually fixed).</p>
 <p>Then start it and check databases</p>
 <div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;show databases&quot;</span>
 +--------------------+
