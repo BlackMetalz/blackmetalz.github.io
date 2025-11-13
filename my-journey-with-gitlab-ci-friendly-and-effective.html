@@ -448,6 +448,40 @@ flake8==6.1.0
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;auths&quot;</span><span class="p">:{</span><span class="nt">&quot;docker.io&quot;</span><span class="p">:{</span><span class="nt">&quot;auth&quot;</span><span class="p">:</span><span class="s2">&quot;base64(username:password)&quot;</span><span class="p">}}}</span>
 </code></pre></div>
 
+<h3>Another template example that i'm using</h3>
+<ul>
+<li>Link to repo: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/demo-real-template">https://gitlab.com/kienlt-gitlab-ci-demo/demo-real-template</a></li>
+<li>Example for clean GitLab pipline configuration with template repo:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">include</span><span class="p">:</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="n">project</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;kientl-demo-group/demo-real-template&#39;</span>
+<span class="w">    </span><span class="n">ref</span><span class="p">:</span><span class="w"> </span><span class="n">v0</span><span class="o">.</span><span class="mf">0.7</span>
+<span class="w">    </span><span class="n">file</span><span class="p">:</span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="s1">&#39;/templates/jobs/sonarqube.yml&#39;</span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="s1">&#39;/templates/jobs/build-and-scan-image.yml&#39;</span>
+
+<span class="n">stages</span><span class="p">:</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="n">sonarqube</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="n">build</span>
+
+<span class="c1">#=== SONARQUBE STAGE ===#</span>
+<span class="c1">#=== 5.0.1 compatible with Sonarqube Server 10.5.xx ===#</span>
+<span class="n">sonarqube</span><span class="p">:</span><span class="w"> </span><span class="c1"># ← This is the KEY that links template and consumer</span>
+<span class="w">  </span><span class="n">variables</span><span class="p">:</span>
+<span class="w">    </span><span class="n">SONAR_PROJECT_KEY</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo-project-key&quot;</span>
+<span class="w">    </span><span class="n">SONAR_SOURCES</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;.&quot;</span><span class="w"> </span><span class="c1"># scan all files in repo</span>
+
+<span class="c1"># Add workflow to build stage</span>
+<span class="n">build</span><span class="o">-</span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="c1"># ← This is the KEY that links template and consumer</span>
+<span class="w">  </span><span class="n">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="k">if</span><span class="p">:</span><span class="w"> </span><span class="o">&gt;</span>
+<span class="w">        </span><span class="o">$</span><span class="n">CI_PIPELINE_SOURCE</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;merge_request_event&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">        </span><span class="o">$</span><span class="n">CI_COMMIT_BRANCH</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="o">$</span><span class="n">CI_DEFAULT_BRANCH</span><span class="w"> </span><span class="o">&amp;&amp;</span>
+<span class="w">        </span><span class="o">$</span><span class="n">CI_COMMIT_TAG</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb nb-Type">null</span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="k">if</span><span class="p">:</span><span class="w"> </span><span class="o">$</span><span class="n">CI_COMMIT_BRANCH</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;kienlt-demo-branch&quot;</span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="k">if</span><span class="p">:</span><span class="w"> </span><span class="o">$</span><span class="n">CI_COMMIT_TAG</span>
+</code></pre></div>
+
 <h3>Build App for Window in GitLab CI that not using Window runner</h3>
 <p>Challenge: Build application for Multiple OS then upload binary to S3, then notify tester! It should not a problem with Ubuntu Jammy and Noble, but I don't want extra window runner that only run for single job</p>
 <p>Sound weird right? But in fact it is possible with Linux Runner. Here is how I do it with Pywine</p>

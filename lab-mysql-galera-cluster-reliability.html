@@ -97,18 +97,21 @@
 </code></pre></div>
 
 <h3>Quick Intro: MySQL Galera Cluster</h3>
-<p>MySQL Galera Cluster is a <strong>multi-master, synchronous replication</strong> solution providing <strong>high availability</strong> and <strong>data consistency</strong> across nodes. It uses <strong>WSREP API</strong> and <strong>quorum-based voting</strong> to maintain cluster integrity. Key components:
-- <strong>Nodes</strong>: Active database instances (read/write)
-- <strong>Garbitrator (garb)</strong>: Lightweight arbitrator for quorum in even-node setups
-- <strong>IST/SST</strong>: Incremental/State Snapshot Transfer for node recovery</p>
+<p>MySQL Galera Cluster is a <strong>multi-master, synchronous replication</strong> solution providing <strong>high availability</strong> and <strong>data consistency</strong> across nodes. It uses <a href="https://mariadb.com/docs/galera-cluster/galera-architecture/introduction-to-galera-architecture#the-wsrep-api"><strong>WSREP API</strong></a> and <a href="https://mariadb.com/docs/galera-cluster/high-availability/understanding-quorum-monitoring-and-recovery#quorum-calculation"><strong>quorum-based voting</strong></a> to maintain cluster integrity. Key components:</p>
+<ul>
+<li><strong>Nodes</strong>: Active database instances (read/write)</li>
+<li><a href="https://mariadb.com/docs/galera-cluster/readme/mariadb-galera-cluster-usage-guide#galera-arbitrator"><strong>Galera Arbitrator (garb)</strong></a>: Lightweight arbitrator for quorum in even-node setups</li>
+</ul>
 <h3>Lab 1: Isolate Segment 1 → Write 1M Records to Segment 0 → Rejoin Segment 1</h3>
 <p>Test split-brain prevention, quorum, and IST/SST recovery.</p>
 <h3>Lab 2: Block Traffic Between Segment 0 &amp; 1 (Garb Still Reachable)</h3>
 <p>Validate Garb’s role in quorum decision during partial network partition.</p>
 <h3>Lab 3: Simulate Unstable Network with TC (Packet Loss, Latency, Reorder)</h3>
-<p>Use Linux <strong>Traffic Control (<code>tc</code>)</strong> – built-in, powerful, zero-install – to inject
-- <code>loss</code> (e.g. 5%)
-- <code>delay</code> (jitter) (e.g. 200ms ± 50ms)</p>
+<p>Use Linux <strong>Traffic Control (<code>tc</code>)</strong> – built-in, powerful, zero-install – to inject</p>
+<ul>
+<li><code>loss</code> (e.g. 5%)</li>
+<li><code>delay</code> (jitter) (e.g. 200ms ± 50ms)</li>
+</ul>
 <h3>Quick Monitor</h3>
 <p>Tools/CLI will use during lab: <code>sysbench</code>, <code>tc</code>, <code>iptables</code>, <code>systemctl</code>, <code>journalctl</code></p>
 <div class="highlight"><pre><span></span><code>root@mysql-galera-db-3:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;show global status where Variable_name rlike &#39;wsrep_(ready|connected|cluster_size|local_state_comment|local_recv_queue_avg|flow_control_paused|cluster_status)&#39;;&quot;</span>
@@ -126,13 +129,16 @@
 +------------------------------+-----------+
 </code></pre></div>
 
-<p>Variable explain:
-- wsrep_local_recv_queue_avg: weight of receive. Should be lower than 1.0 (if its high, equal to lagging)
-- wsrep_flow_control_paused : Flow control - signal that node is slowing. Should be equal to 0 (0.0 - 1.0, if &gt; 0.1 = problems!)
-- wsrep_local_state_comment, wsrep_cluster_status, wsrep_cluster_size : cluster status
-- wsrep_cluster_status: Should be "Primary"
-- wsrep_ready: Should be "ON"
-- wsrep_cluster_conf_id: This is interesting metric, for every node join/leave, quorum loss &amp; recovery, network issues, this will be increased. If number increasing way too fast -&gt; big problem!</p>
+<p><strong>Variable explain:</strong></p>
+<ul>
+<li>wsrep_local_recv_queue_avg: weight of receive. Should be lower than 1.0 (if its high, equal to lagging)</li>
+<li>wsrep_flow_control_paused : Flow control - signal that node is slowing. Should be equal to 0 (0.0 - 1.0, if &gt; 0.1 = problems!)</li>
+<li>wsrep_local_state_comment, wsrep_cluster_status, wsrep_cluster_size : cluster status</li>
+<li>wsrep_cluster_status: Should be "Primary"</li>
+<li>wsrep_ready: Should be "ON"</li>
+<li>wsrep_cluster_conf_id: This is interesting metric, for every node join/leave, quorum loss &amp; recovery, network issues, this will be increased. If number increasing way too fast -&gt; big problem!</li>
+</ul>
+<hr>
 <h1>Lab 1: Isolate Segment 1 → Write 1M Records to Segment 0 → Rejoin Segment</h1>
 <p>Status before graceful shutdown.</p>
 <div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
@@ -213,6 +219,7 @@ Nodes in segment 1 doesn't send state transfer, Nodes in segment 0 have no idea 
 </code></pre></div>
 
 <p>Cluster only can recover when nodes in segment 1 start again, this is unrealistic, therefore we will go to next case.</p>
+<hr>
 <h1>Lab 2: Block Traffic Between Segment 0 &amp; 1 (Garb Still Reachable)</h1>
 <div class="highlight"><pre><span></span><code><span class="c1"># Do this in 3 node of segment 1</span>
 iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.5.1.5<span class="w"> </span>-j<span class="w"> </span>DROP
@@ -398,28 +405,36 @@ total<span class="w"> </span><span class="m">2</span>.6G
 <p>Based on this tcpdump data, ~~I analyze as follows~~, I copy this from Claude AI xD</p>
 <h3>Key Observation</h3>
 <p>Node 10.5.2.133 is acting as a clear relay/coordinator.</p>
-<p>Communication Pattern:
-- 10.5.2.133 receives data from many nodes (10.5.2.76, 10.5.1.5, 10.5.1.228, 10.5.3.7, 10.5.0.80, 10.5.1.219)
-- Then broadcast/forward to ALL other nodes
-- All using port 4567 (destination port)</p>
-<p>Evidence of relay behavior:
-- Frame 1236874-1236875: 10.5.2.133 sends data to 10.5.2.76 (80+108 bytes)
-- Frame 1236876: 10.5.2.133 sends data to 10.5.1.5 (108 bytes)
-- Frame 1236879: 10.5.2.133 sends data to 10.5.3.7 (108 bytes)
-- Frame 1236880: 10.5.2.133 sends data to 10.5.1.228 (108 bytes)
-- Frame 1236881: 10.5.2.133 sends data to 10.5.0.80 (108 bytes)
-- Frame 1236882: 10.5.2.133 sends data to 10.5.1.219 (108 bytes)</p>
-<p>Data size pattern:
-- Majority: 108 bytes payload (may be standard message size)
-- Occasional: 80 bytes (may be ACK or heartbeat)
-- Base TCP overhead: 66 bytes (pure ACK)</p>
-<p>Timing analysis:
-- All events occur in ~0.1 seconds (from 25.174043 → 25.174227)
-- Node 10.5.2.133 sends messages almost simultaneously to all nodes
-- Latency is very low, indicating this is a local network</p>
+<p>Communication Pattern:</p>
+<ul>
+<li>10.5.2.133 receives data from many nodes (10.5.2.76, 10.5.1.5, 10.5.1.228, 10.5.3.7, 10.5.0.80, 10.5.1.219)</li>
+<li>Then broadcast/forward to ALL other nodes</li>
+<li>All using port 4567 (destination port)</li>
+</ul>
+<p>Evidence of relay behavior:</p>
+<ul>
+<li>Frame 1236874-1236875: 10.5.2.133 sends data to 10.5.2.76 (80+108 bytes)</li>
+<li>Frame 1236876: 10.5.2.133 sends data to 10.5.1.5 (108 bytes)</li>
+<li>Frame 1236879: 10.5.2.133 sends data to 10.5.3.7 (108 bytes)</li>
+<li>Frame 1236880: 10.5.2.133 sends data to 10.5.1.228 (108 bytes)</li>
+<li>Frame 1236881: 10.5.2.133 sends data to 10.5.0.80 (108 bytes)</li>
+<li>Frame 1236882: 10.5.2.133 sends data to 10.5.1.219 (108 bytes)</li>
+</ul>
+<p>Data size pattern:</p>
+<ul>
+<li>Majority: 108 bytes payload (may be standard message size)</li>
+<li>Occasional: 80 bytes (may be ACK or heartbeat)</li>
+<li>Base TCP overhead: 66 bytes (pure ACK)</li>
+</ul>
+<p>Timing analysis:</p>
+<ul>
+<li>All events occur in ~0.1 seconds (from 25.174043 → 25.174227)</li>
+<li>Node 10.5.2.133 sends messages almost simultaneously to all nodes</li>
+<li>Latency is very low, indicating this is a local network</li>
+</ul>
 <h3>Conclusion</h3>
 <p>10.5.2.133 is definitely a relay/hub node, not just participating in voting.</p>
-<p>Well of course there must be evidence since I used explanation from AI. First is this article: http://blog.yannickjaquier.com/mariadb/galera-arbitrator-as-an-odd-node-in-galera-cluster.html (search keyword relay)</p>
+<p>Well of course there must be evidence since I used explanation from AI. First is this article: <a href="http://blog.yannickjaquier.com/mariadb/galera-arbitrator-as-an-odd-node-in-galera-cluster.html">http://blog.yannickjaquier.com/mariadb/galera-arbitrator-as-an-odd-node-in-galera-cluster.html</a> (search keyword relay)</p>
 <p>Reality on node garb</p>
 <div class="highlight"><pre><span></span><code>root@mysql-galera-db-7:/var/log#<span class="w"> </span>cat<span class="w"> </span>garbd.log<span class="w"> </span><span class="p">|</span>grep<span class="w"> </span>-i<span class="w"> </span>relay
 <span class="m">2025</span>-10-23<span class="w"> </span><span class="m">17</span>:02:33.870<span class="w">  </span>INFO:<span class="w"> </span><span class="o">(</span>6325ebf1-9e99,<span class="w"> </span><span class="s1">&#39;tcp://10.5.2.133:4567&#39;</span><span class="o">)</span><span class="w"> </span>turning<span class="w"> </span>message<span class="w"> </span>relay<span class="w"> </span>requesting<span class="w"> </span>off
@@ -492,8 +507,8 @@ root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e
 <span class="m">2025</span>-10-23T10:36:52.164809Z<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">[</span>ERROR<span class="o">]</span><span class="w"> </span><span class="o">[</span>MY-010119<span class="o">]</span><span class="w"> </span><span class="o">[</span>Server<span class="o">]</span><span class="w"> </span>Aborting
 </code></pre></div>
 
-<p>Perform recovery, for example with node1 being the node with the most complete data (highest <code>seqno</code>)</p>
-<p>Edit this file: <code>/etc/mysql/conf.d/galera.conf</code> then change comment this line: <code>wsrep_cluster_address="gcomm://node1,node2,node3"</code></p>
+<p>Perform recovery, for example with node1 being the node with the most complete data (highest <code>seqno</code>).</p>
+<p>Edit this file <code>/etc/mysql/conf.d/galera.conf</code> then change comment this line: <code>wsrep_cluster_address="gcomm://node1,node2,node3"</code></p>
 <div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>cat<span class="w"> </span>/var/lib/mysql/grastate.dat
 <span class="c1"># GALERA saved state</span>
 version:<span class="w"> </span><span class="m">2</span>.1
@@ -549,27 +564,37 @@ root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e
 </code></pre></div>
 
 <p>In conclusion, if the connection to garb is lost and the network between the two segments is blocked, recovery must be performed manually. What if only the network between the two segments is blocked and garb is still alive? We will have to check if the data traffic goes through the garb node.</p>
-<p>So we will have a question like: How to know which node to enable to bootstrap in case of recovery?
-- Document here: https://mariadb.com/docs/galera-cluster/high-availability/recovering-a-primary-component#manual-bootstrap-using-grastate.dat
-- The <code>grastate.dat</code> file is the most important one to determine which node has the latest data and should bootstrap the cluster from that node</p>
+<p>So we will have a question like: How to know which node to enable to bootstrap in case of recovery?</p>
+<ul>
+<li>Document here: <a href="https://mariadb.com/docs/galera-cluster/high-availability/recovering-a-primary-component#manual-bootstrap-using-grastate.dat">https://mariadb.com/docs/galera-cluster/high-availability/recovering-a-primary-component#manual-bootstrap-using-grastate.dat</a></li>
+<li>The <code>grastate.dat</code> file is the most important one to determine which node has the latest data and should bootstrap the cluster from that node</li>
+</ul>
 <p>The grastate.dat file contains metadata about the node state:</p>
 <div class="highlight"><pre><span></span><code># GALERA saved state
 version: 2.1
 uuid:    5ee99582-bb8d-11e3-b6c1-3c970e3bf0cb
 seqno:   -1
-safe_to_bootstrap: 0
+safe_to_bootstrap: 1
 </code></pre></div>
 
-<p>seqno (sequence number):
-- Last transaction number this node committed
-- Node with highest seqno = latest data
-- If seqno: -1 = node crashed/shutdown not graceful</p>
-<p>safe_to_bootstrap:
-- 1 = safe to bootstrap
-- 0 = should not bootstrap from this node
-- Last shutdown node usually has value 1</p>
+<p>seqno (sequence number):</p>
+<ul>
+<li>Last transaction number this node committed</li>
+<li>Node with highest seqno = latest data</li>
+<li>If seqno: -1 = node crashed/shutdown not graceful</li>
+</ul>
+<p>safe_to_bootstrap:</p>
+<ul>
+<li>1 = safe to bootstrap</li>
+<li>0 = should not bootstrap from this node</li>
+<li>Last shutdown node usually has value 1</li>
+</ul>
 <h3>Correct recovery procedure</h3>
-<p>Add a link for credibility: https://galeracluster.com/documentation/html_docs_remove-wsrep-new-cluster/documentation/crash-recovery.html</p>
+<p>Add a link for credibility: </p>
+<ul>
+<li><a href="https://galeracluster.com/documentation/html_docs_remove-wsrep-new-cluster/documentation/crash-recovery.html">https://galeracluster.com/documentation/html_docs_remove-wsrep-new-cluster/documentation/crash-recovery.html</a></li>
+<li><a href="https://mariadb.com/docs/galera-cluster/high-availability/recovering-a-primary-component">https://mariadb.com/docs/galera-cluster/high-availability/recovering-a-primary-component</a></li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># 1. Check grastate.dat on ALL nodes</span>
 cat<span class="w"> </span>/var/lib/mysql/grastate.dat
 
@@ -599,6 +624,7 @@ mysqld_bootstrap
 systemctl<span class="w"> </span>start<span class="w"> </span>mysql
 </code></pre></div>
 
+<hr>
 <h1>Lab 3: Simulate Unstable Network with TC (Packet Loss, Latency, Reorder)</h1>
 <p>Scenario: Simulate a slow network scenario by dropping packages, increasing network latency. We have many tools but the 2 most prominent tools in this are</p>
 <ul>
@@ -657,10 +683,12 @@ tc<span class="w"> </span>qdisc<span class="w"> </span>del<span class="w"> </spa
 </code></pre></div>
 
 <p>We will use the combine command to test it to make it look like reality. Setup is recorded at node 1 (segment 0) and node 4 (segment 1).</p>
-<p>Explanation: <code>tc qdisc add dev eth0 root netem loss 5% delay 50ms 10ms</code>
-- loss 5%: packets will be dropped 5%
-- delay 50ms: each packet will be delayed at least 50ms
-- jitter 10ms: latency will fluctuate, for example, actual latency will be between 40ms-60ms</p>
+<p>Explanation: <code>tc qdisc add dev eth0 root netem loss 5% delay 50ms 10ms</code></p>
+<ul>
+<li>loss 5%: packets will be dropped 5%</li>
+<li>delay 50ms: each packet will be delayed at least 50ms</li>
+<li>jitter 10ms: latency will fluctuate, for example, actual latency will be between 40ms-60ms</li>
+</ul>
 <p>Like this:</p>
 <div class="highlight"><pre><span></span><code>Packet<span class="w"> </span><span class="m">1</span>:<span class="w"> </span><span class="nv">delay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>50ms<span class="w"> </span>+<span class="w"> </span>random<span class="o">(</span>-10ms<span class="w"> </span>to<span class="w"> </span>+10ms<span class="o">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>45ms
 Packet<span class="w"> </span><span class="m">2</span>:<span class="w"> </span><span class="nv">delay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>50ms<span class="w"> </span>+<span class="w"> </span>random<span class="o">(</span>-10ms<span class="w"> </span>to<span class="w"> </span>+10ms<span class="o">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>58ms<span class="w">  </span>
@@ -732,10 +760,12 @@ root@mysql-galera-db-5:~#<span class="w"> </span>mysql<span class="w"> </span>-e
 +----------+
 </code></pre></div>
 
-<p>So with 5% packets dropped, latency is 50ms, Jitter 10ms is not a problem. Try adding 1 higher one and see?
-- Packet loss: 30%
-- Latency: 100ms
-- Jitter: 50ms</p>
+<p>So with 5% packets dropped, latency is 50ms, Jitter 10ms is not a problem. Try adding 1 higher one and see?</p>
+<ul>
+<li>Packet loss: 30%</li>
+<li>Latency: 100ms</li>
+<li>Jitter: 50ms</li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># Still updating on nodes in segment 1 (node ​​4,5,6)</span>
 root@mysql-galera-db-4:~#<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>del<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root
 root@mysql-galera-db-4:~#<span class="w"> </span>tc<span class="w"> </span>qdisc<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>eth0<span class="w"> </span>root<span class="w"> </span>netem<span class="w"> </span>loss<span class="w"> </span><span class="m">30</span>%<span class="w"> </span>delay<span class="w"> </span>100ms<span class="w"> </span>50ms
@@ -842,6 +872,44 @@ root@mysql-galera-db-6:~#<span class="w"> </span>mysql<span class="w"> </span>-e
 </code></pre></div>
 
 <p>In conclusion, with 2 tests of network drop 5%, latency 40-60ms, cluster works ok. For network with 30% packet drop, cluster cooks itself.</p>
+<p>Extra node for test case 3, when drop 30% why they are not become split-brain?. It need consensus before talking about quorum.
+Here is the link to the discussion <a href="https://groups.google.com/g/codership-team/c/VWE3YE5dZgE/m/sgeJEU5EuJwJ">https://groups.google.com/g/codership-team/c/VWE3YE5dZgE/m/sgeJEU5EuJwJ</a></p>
+<div class="highlight"><pre><span></span><code>Well, before you even start thinking about *quorum*, you need to come to
+a *consensus* about membership. And you know what *consensus* means.
+*Everybody* must agree. Now suppose you have nodes A, B, C, D, E. And
+for the sake of the argument you have such (50%) packet loss on E, so
+that at a given round it sees only B and D. The overall picture is:
+
+A sees A, B, C, D
+B sees A, B, C, D, E
+C sees A, B, C, D
+D sees A, B, C, D, E
+E sees B, D, E
+
+So not only all 5 of them can&#39;t agree on the membership, even 4 &quot;well
+connected&quot; nodes can&#39;t. And more than half of the nodes see E. Now it
+still may seem quite simple to you, since you know that the packet loss
+is on E. But how do the nodes know? Maybe the packet loss is actually on
+A and C?
+
+So by default Galera tries 3 times and gives up (instead of trying
+indefinitely which would have an appearance of hanging).
+
+Had the packet loss been lower, 1 of three attempts would have resulted
+in all of A, B, C, D seeing E and reaching consensus on 5-node
+membership. Had the packet loss been higher, 1 of the attempts would
+have resulted in all of A, B, C, D not seeing E and reaching consensus
+on 4-node membership.
+
+Only then you can get to &quot;quorum&quot; calculation.
+</code></pre></div>
+
+<p>In galera documen mentioned this problem: <a href="https://galeracluster.com/library/galera-documentation.pdf">https://galeracluster.com/library/galera-documentation.pdf</a></p>
+<div class="highlight"><pre><span></span><code>If no messages were received from the node for a period greater than the evs.inactive_timeout (page 282) period, the
+node is declared failed regardless of the consensus. The failed node remains non-operational until all members agree
+on its membership. If the members cannot reach consensus on the liveness of a node, the network is too unstable for
+cluster operations.
+</code></pre></div>
 
 
              
