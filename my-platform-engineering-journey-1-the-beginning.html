@@ -114,8 +114,8 @@
 <hr>
 <h1>What I know/understand about Platform Engineering?</h1>
 <ul>
-<li>It is based DevOps and allow DevOps scale, so it will not gonna replace DevOps!</li>
-<li>Centralized everything at 1 portal (portal is an interface in Platform Engineering)</li>
+<li>It is based DevOps and allow DevOps scale, so it will not gonna replace DevOps. Platform Engineering evolves from DevOps!</li>
+<li>Centralized developer-facing services/tools (portal is an interface in Platform Engineering)</li>
 <li>Build Internal Developer Platform (IDP) as integrated product, not another internal tools or project. And user is Developer. Make developer satisfied and happy are our job! </li>
 <li>An Internal Developer Platform must be built as a <strong>product</strong> following product management best practices.</li>
 <li>Cover every operational necessities of entire lifecycle (services &amp; applications).</li>
@@ -136,12 +136,11 @@
 <span class="w">  </span><span class="nt">template</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">securityContext</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">runAsNonRoot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">        </span><span class="nt">seccompProfile</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RuntimeDefault</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span>
-<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/distroless/base:nonroot</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/distroless/static:nonroot</span>
 <span class="w">        </span><span class="nt">securityContext</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">allowPrivilegeEscalation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <span class="w">          </span><span class="nt">runAsNonRoot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -152,7 +151,13 @@
 </code></pre></div>
 
 <p>And step build in Dockerfile for example with optimized flags:</p>
-<div class="highlight"><pre><span></span><code><span class="k">RUN</span><span class="w"> </span><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code><span class="c"># Best practice: specify Go version</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">golang:1.21-alpine</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">builder</span>
+
+<span class="c"># Best practice: use specific user ID</span>
+<span class="k">USER</span><span class="w"> </span><span class="s">65532:65532</span>
+
+<span class="k">RUN</span><span class="w"> </span><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>go<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
 <span class="w">      </span>-ldflags<span class="o">=</span><span class="s2">&quot;-s -w&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">      </span>-o<span class="w"> </span>main<span class="w"> </span>.
