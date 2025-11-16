@@ -17,16 +17,16 @@
 
 <meta name="keywords" content="platform-engineering, Knowledge Base, " />
 
-<meta property="og:title" content="[WIP] My Platform Engineering Journey #1: The Beginning "/>
-<meta property="og:url" content="/wip-my-platform-engineering-journey-1-the-beginning.html" />
+<meta property="og:title" content="My Platform Engineering Journey #1: The Beginning "/>
+<meta property="og:url" content="/my-platform-engineering-journey-1-the-beginning.html" />
 <meta property="og:description" content="" />
 <meta property="og:site_name" content="Kienlt&#39;s notebook" />
 <meta property="og:article:author" content="kienlt" />
 <meta property="og:article:published_time" content="2025-11-15T00:00:00+07:00" />
-<meta name="twitter:title" content="[WIP] My Platform Engineering Journey #1: The Beginning ">
+<meta name="twitter:title" content="My Platform Engineering Journey #1: The Beginning ">
 <meta name="twitter:description" content="">
 
-        <title>[WIP] My Platform Engineering Journey #1: The Beginning  · Kienlt&#39;s notebook
+        <title>My Platform Engineering Journey #1: The Beginning  · Kienlt&#39;s notebook
 </title>
 
 
@@ -67,8 +67,8 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="/wip-my-platform-engineering-journey-1-the-beginning.html">
-                [WIP] My Platform Engineering Journey #1: The Beginning
+            <a href="/my-platform-engineering-journey-1-the-beginning.html">
+                My Platform Engineering Journey #1: The Beginning
             </a>
         </h1>
     </header>
@@ -84,25 +84,25 @@
 <li>Service section: Integrates everything internally - deployments, metrics, logs - eliminating the need for external Grafana dashboards</li>
 <li>Deployment: Standard templates allowing users to get endpoints/deployments with minimal clicks</li>
 </ul>
-<p>That is my motivation come from, let's begin. My first resource as well this article: 
+<p>That is my motivation come from, let's begin. My first resources for this article: 
 - <a href="https://www.udemy.com/course/introduction-to-platform-engineering/">Introduction to Platform Engineering</a>
 - <a href="https://platformengineering.org/">platformengineering.org</a>
-- <a href="InternalDeveloperPlatform.org">InternalDeveloperPlatform.org</a>
+- <a href="https://internaldeveloperplatform.org/">InternalDeveloperPlatform.org</a>
 - <a href="https://www.youtube.com/watch?v=ghzsBm8vOms">Platform engineering vs DevOps</a></p>
 <h1>Let's talk about salary, career opportunities</h1>
 <ul>
-<li>Most of the people will tell that Platform Engineer will have higher than salary than DevOps/SRE/CloudOps/Infrastructure engineers. But it will be the same result if you replace the word DevOps vs SRE/CloudOps/etc... xD. So what is the point? In my personal opinion, it depended on what you have built/able to build, not fancy certifications or beautiful resume/curriculum vitae (It is my personal opinion, I repeated xD)</li>
+<li>Most of the people will tell that Platform Engineer will have higher salary than DevOps/SRE/CloudOps/Infrastructure engineers. But it will be the same result if you replace the word DevOps vs SRE/CloudOps/etc... xD. So what is the point? In my personal opinion, it depended on what you have built/able to build, not fancy certifications or beautiful resume/curriculum vitae (It is my personal opinion, I repeated xD)</li>
 <li>when I'm writing this article, I don't have much idea about career opportunities, I just like keyword Platform Engineering and what it's capability, that's all nothing more. And this will consume 6 months of mine to achieve the basic stuff I guess xD</li>
 </ul>
-<h1>Let's learn about Platform Engineering</h1>
-<h3>Problems to be resolved - repeated DevOps tasks</h3>
-<p>First example, I'm currently working as DevOps Engineer role. I managed GitLab groups that have hundreds repositories and 50 repositories needed to be set with CI/CD (event rewrite Dockerfile to best practices!), monitoring and so on. When I begin to set up, first 10 repositories is completely fine, it costs about 3 hours (because they are all Go and Python). But from 11th repositories I have feeling that I'm doing repeated job and this is not the first time, before was Jenkins. So I'm starting to think is there any solution would allow me escaped from this bored task?</p>
+<h1>Problems to be resolved - repeated DevOps tasks</h1>
+<p>First example, I'm currently working as DevOps Engineer role. I managed GitLab groups that have hundreds repositories and 50 repositories needed to be set with CI/CD (even rewrite Dockerfile to best practices!), monitoring and so on. When I begin to set up, first 10 repositories is completely fine, it costs about 3 hours (because they are all Go and Python). But from 11th repositories I have feeling that I'm doing repeated job and this is not the first time, before was Jenkins. So I'm starting to think is there any solution would allow me escaped from this bored task?</p>
 <p>Second example, complicated for users (Developers):
 - They need to remember which URL is for their application logs or how to query for their service.
 - Which Grafana dashboard and query is correct for their service's metrics. 
 - How to check their service status, is their pod get restarted by OOM or crashed, do they know the reason if they don't have access to K8s cluster?</p>
+<p>Third example, when I moved to new company, each of the teams have their own DevOps and config CI/CD by their own, self-managed infrastructure -&gt; duplicate effort.</p>
 <p>A lot of stuff I have been reading, but only thing made me feel interest. That is Platform Engineering, after watch it's concepts, I think this is the key to solve problems I see in the past (In the past not only lack of experience, I also lack of knowledge!)</p>
-<h3>What I know about Platform Engineering?</h3>
+<h1>What I know/understand about Platform Engineering?</h1>
 <ul>
 <li>It is based DevOps and allow DevOps scale, so it will not gonna replace DevOps!</li>
 <li>Centralized everything at 1 portal (portal is an interface in Platform Engineering)</li>
@@ -111,8 +111,66 @@
 <li>Cover every operational necessities of entire lifecycle (services &amp; applications).</li>
 <li>Automation &amp; Standardization, Compliance, Governance &amp; Security by design.</li>
 </ul>
-<h3>Build IDP as a Product</h3>
-<h3>Value of Platform Team</h3>
+<h1>Golden path for developers</h1>
+<p>From what I've learned so far... It will have project, CI/CD pipelines, document templates for developers.
+- Less time to ask deploy to where, who involved in that step, then the goal will be less time spend for new developer onboarding?
+- Everything at 1 portal, easy to remember, less effort to learn, well documented?</p>
+<p>That is my expectation, build for developers, used by developers xD</p>
+<h1>Standardization, Compliance, Governance &amp; Security by design</h1>
+<p>Another important things I want to talk about. The problems were not every developer in our company are equal, some developers are lack of knowledge, some developers are lazy and afraid of changes. For example, I will talk about myself, I'm not only lack of basic knowledge but also lazy AF, I don't want new thing since I will have to relearn and always have thinking that using new tools will be wasted of time and that tool will send to graveyard soon xD. Hmm, seem like unrelated story to this section =.=</p>
+<p>Lets me take some example from my knowledge:
+- Standardization: Standard for Dockerfile is what we want to achieve, for example with Golang, multi build layer, use <a href="https://github.com/GoogleContainerTools/distroless">Distroless</a> as image to run application and non-root users. We will not need to config User and Group ID in securityContext of K8S pod/containers....</p>
+<div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">securityContext</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">runAsNonRoot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">seccompProfile</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RuntimeDefault</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcr.io/distroless/base:nonroot</span>
+<span class="w">        </span><span class="nt">securityContext</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">allowPrivilegeEscalation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">          </span><span class="nt">runAsNonRoot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">          </span><span class="nt">capabilities</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">drop</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALL</span>
+<span class="w">          </span><span class="nt">readOnlyRootFilesystem</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+
+<p>And step build in Dockerfile for example with optimized flags:</p>
+<div class="highlight"><pre><span></span><code><span class="k">RUN</span><span class="w"> </span><span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>go<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-ldflags<span class="o">=</span><span class="s2">&quot;-s -w&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>-o<span class="w"> </span>main<span class="w"> </span>.
+</code></pre></div>
+
+<p>~~Let me explain these flags~~ Lets AI explain these flags:
+- <code>CGO_ENABLED=0</code>: Disable CGO to create a fully static binary (no C dependencies), perfect for minimal containers
+- <code>-ldflags="-s -w"</code>: Strip debug information and symbol table to reduce binary size
+- <code>-s</code>: Omit the symbol table and debug information
+- <code>-w</code>: Omit the DWARF symbol table
+- <code>-o main</code>: Output binary name</p>
+<p>With these flags, we get a smaller, more secure binary that works perfectly with Distroless images!</p>
+<p>Most of us know how it works, how we can secure it, but we won't implement it anyway with a ton of excuse! We can not force every Golang application but if they used our IDP, this will be default, right? xD</p>
+<p>After Standardization, after standardization? I think I already included some basic security stuff to reduce surface attack. Compliance and Governance? Developers using our product, they used what we defined!</p>
+<p>Wait, I mentioned word "product", yes. We should treat IDP (internal developer platform, not internal developer portal haha) as a "product".</p>
+<h1>Treat IDP as a product</h1>
+<p>Why product, is it is another internal tools?. Because developers are the main user here:</p>
+<ul>
+<li>Mindset shift: Developers are internal customers.</li>
+<li>We want to satisfy developers, make them happy by bring them good product, they only need to use our product and focus on coding/development, not environment, deployment hell. So developers are users/customers, and you know what, customers is the king xD</li>
+<li>We need to understand developer pain points then solve it for them.</li>
+<li>What I would approach? Implement basic stuff, tight feedback loop until we get MVP (Minimum Viable Platform).</li>
+</ul>
+<h1>What's Next?</h1>
+<p>In the next part, I'll share about Backstage (I'm learning it, btw). It is component to make Internal Platform Portal, not whole IDP</p>
+<h1>Conclusion</h1>
+<p>To be honest, I'm still learning about this anyway. I estimated that this shit will cost 6 months of mine to have a running demo with my current ability.</p>
+<p>I guess there are some hidden, wrong stuff/theory I wrote in this article, if you know please give me feedback for improve!</p>
+<p>Platform Engineer will not resolve, golden path for everything, only with "right implementation"</p>
+<p>But what is "right implementation". There is nothing called right implementation, it depends on a lot of thing like people, company/work culture, resources... You have to find the right way so do I xD</p>
 
 
              
