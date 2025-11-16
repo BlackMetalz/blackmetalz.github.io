@@ -84,24 +84,34 @@
 <li>Service section: Integrates everything internally - deployments, metrics, logs - eliminating the need for external Grafana dashboards</li>
 <li>Deployment: Standard templates allowing users to get endpoints/deployments with minimal clicks</li>
 </ul>
-<p>That is my motivation come from, let's begin. My first resources for this article: 
-- <a href="https://www.udemy.com/course/introduction-to-platform-engineering/">Introduction to Platform Engineering</a>
-- <a href="https://platformengineering.org/">platformengineering.org</a>
-- <a href="https://internaldeveloperplatform.org/">InternalDeveloperPlatform.org</a>
-- <a href="https://www.youtube.com/watch?v=ghzsBm8vOms">Platform engineering vs DevOps</a></p>
+<p>That is my motivation come from, let's begin. My first resources for this article: </p>
+<ul>
+<li><a href="https://www.udemy.com/course/introduction-to-platform-engineering/">Introduction to Platform Engineering</a></li>
+<li><a href="https://platformengineering.org/">platformengineering.org</a></li>
+<li><a href="https://internaldeveloperplatform.org/">InternalDeveloperPlatform.org</a></li>
+<li><a href="https://www.youtube.com/watch?v=ghzsBm8vOms">Platform engineering vs DevOps</a></li>
+</ul>
+<hr>
 <h1>Let's talk about salary, career opportunities</h1>
 <ul>
 <li>Most of the people will tell that Platform Engineer will have higher salary than DevOps/SRE/CloudOps/Infrastructure engineers. But it will be the same result if you replace the word DevOps vs SRE/CloudOps/etc... xD. So what is the point? In my personal opinion, it depended on what you have built/able to build, not fancy certifications or beautiful resume/curriculum vitae (It is my personal opinion, I repeated xD)</li>
-<li>when I'm writing this article, I don't have much idea about career opportunities, I just like keyword Platform Engineering and what it's capability, that's all nothing more. And this will consume 6 months of mine to achieve the basic stuff I guess xD</li>
+<li>when I'm writing this article, I don't have much idea about career opportunities, I just like keyword Platform Engineering and what it's capability, that's all nothing more. And this will consume about 6 months of mine to achieve the basic stuff I guess xD</li>
 </ul>
+<hr>
 <h1>Problems to be resolved - repeated DevOps tasks</h1>
-<p>First example, I'm currently working as DevOps Engineer role. I managed GitLab groups that have hundreds repositories and 50 repositories needed to be set with CI/CD (even rewrite Dockerfile to best practices!), monitoring and so on. When I begin to set up, first 10 repositories is completely fine, it costs about 3 hours (because they are all Go and Python). But from 11th repositories I have feeling that I'm doing repeated job and this is not the first time, before was Jenkins. So I'm starting to think is there any solution would allow me escaped from this bored task?</p>
-<p>Second example, complicated for users (Developers):
-- They need to remember which URL is for their application logs or how to query for their service.
-- Which Grafana dashboard and query is correct for their service's metrics. 
-- How to check their service status, is their pod get restarted by OOM or crashed, do they know the reason if they don't have access to K8s cluster?</p>
-<p>Third example, when I moved to new company, each of the teams have their own DevOps and config CI/CD by their own, self-managed infrastructure -&gt; duplicate effort.</p>
+<h3>First example - repeated tasks</h3>
+<p>I'm currently working as DevOps Engineer role. I managed GitLab groups that have hundreds repositories and 50 repositories needed to be set with CI/CD (even rewrite Dockerfile to best practices!), monitoring and so on. </p>
+<p>When I begin to set up, first 10 repositories is completely fine, it costs about 3 hours (because they are all Go and Python). But from 11th repositories I have feeling that I'm doing repeated job and this is not the first time, before was Jenkins. So I'm starting to think is there any solution would allow me escaped from this bored task?</p>
+<h3>Second example complicated for users (Developers):</h3>
+<ul>
+<li>They need to remember which URL is for their application logs or how to query for their service.</li>
+<li>Which Grafana dashboard and query is correct for their service's metrics. </li>
+<li>How to check their service status, is their pod get restarted by OOM or crashed, do they know the reason if they don't have access to K8s cluster?</li>
+</ul>
+<h3>Third example</h3>
+<p>When I moved to new company, each of the teams have their own DevOps and config CI/CD by their own, self-managed infrastructure -&gt; duplicate effort.</p>
 <p>A lot of stuff I have been reading, but only thing made me feel interest. That is Platform Engineering, after watch it's concepts, I think this is the key to solve problems I see in the past (In the past not only lack of experience, I also lack of knowledge!)</p>
+<hr>
 <h1>What I know/understand about Platform Engineering?</h1>
 <ul>
 <li>It is based DevOps and allow DevOps scale, so it will not gonna replace DevOps!</li>
@@ -111,11 +121,13 @@
 <li>Cover every operational necessities of entire lifecycle (services &amp; applications).</li>
 <li>Automation &amp; Standardization, Compliance, Governance &amp; Security by design.</li>
 </ul>
+<hr>
 <h1>Golden path for developers</h1>
 <p>From what I've learned so far... It will have project, CI/CD pipelines, document templates for developers.
 - Less time to ask deploy to where, who involved in that step, then the goal will be less time spend for new developer onboarding?
 - Everything at 1 portal, easy to remember, less effort to learn, well documented?</p>
-<p>That is my expectation, build for developers, used by developers xD</p>
+<p>That is my expectation, build for developers, used by developers.</p>
+<hr>
 <h1>Standardization, Compliance, Governance &amp; Security by design</h1>
 <p>Another important things I want to talk about. The problems were not every developer in our company are equal, some developers are lack of knowledge, some developers are lazy and afraid of changes. For example, I will talk about myself, I'm not only lack of basic knowledge but also lazy AF, I don't want new thing since I will have to relearn and always have thinking that using new tools will be wasted of time and that tool will send to graveyard soon xD. Hmm, seem like unrelated story to this section =.=</p>
 <p>Lets me take some example from my knowledge:
@@ -146,31 +158,36 @@
 <span class="w">      </span>-o<span class="w"> </span>main<span class="w"> </span>.
 </code></pre></div>
 
-<p>~~Let me explain these flags~~ Lets AI explain these flags:
-- <code>CGO_ENABLED=0</code>: Disable CGO to create a fully static binary (no C dependencies), perfect for minimal containers
-- <code>-ldflags="-s -w"</code>: Strip debug information and symbol table to reduce binary size
-- <code>-s</code>: Omit the symbol table and debug information
-- <code>-w</code>: Omit the DWARF symbol table
-- <code>-o main</code>: Output binary name</p>
+<p><del>Let me explain these flags</del> Lets AI explain these flags:</p>
+<ul>
+<li><code>CGO_ENABLED=0</code>: Disable CGO to create a fully static binary (no C dependencies), perfect for minimal containers</li>
+<li><code>-ldflags="-s -w"</code>: Strip debug information and symbol table to reduce binary size</li>
+<li><code>-s</code>: Omit the symbol table and debug information</li>
+<li><code>-w</code>: Omit the DWARF symbol table</li>
+<li><code>-o main</code>: Output binary name</li>
+</ul>
 <p>With these flags, we get a smaller, more secure binary that works perfectly with Distroless images!</p>
 <p>Most of us know how it works, how we can secure it, but we won't implement it anyway with a ton of excuse! We can not force every Golang application but if they used our IDP, this will be default, right? xD</p>
 <p>After Standardization, after standardization? I think I already included some basic security stuff to reduce surface attack. Compliance and Governance? Developers using our product, they used what we defined!</p>
 <p>Wait, I mentioned word "product", yes. We should treat IDP (internal developer platform, not internal developer portal haha) as a "product".</p>
+<hr>
 <h1>Treat IDP as a product</h1>
-<p>Why product, is it is another internal tools?. Because developers are the main user here:</p>
+<p>Why product, is it is an another internal tools?. Because developers are the main user here:</p>
 <ul>
 <li>Mindset shift: Developers are internal customers.</li>
 <li>We want to satisfy developers, make them happy by bring them good product, they only need to use our product and focus on coding/development, not environment, deployment hell. So developers are users/customers, and you know what, customers is the king xD</li>
 <li>We need to understand developer pain points then solve it for them.</li>
 <li>What I would approach? Implement basic stuff, tight feedback loop until we get MVP (Minimum Viable Platform).</li>
 </ul>
+<hr>
 <h1>What's Next?</h1>
 <p>In the next part, I'll share about Backstage (I'm learning it, btw). It is component to make Internal Platform Portal, not whole IDP</p>
+<hr>
 <h1>Conclusion</h1>
 <p>To be honest, I'm still learning about this anyway. I estimated that this shit will cost 6 months of mine to have a running demo with my current ability.</p>
 <p>I guess there are some hidden, wrong stuff/theory I wrote in this article, if you know please give me feedback for improve!</p>
-<p>Platform Engineer will not resolve, golden path for everything, only with "right implementation"</p>
-<p>But what is "right implementation". There is nothing called right implementation, it depends on a lot of thing like people, company/work culture, resources... You have to find the right way so do I xD</p>
+<p>Platform Engineer will not resolve, golden path for everything, only with "right implementation!"</p>
+<p>But what is "right implementation". There is nothing called right implementation, it depends on a lot of thing like people, company/work culture, resources... You have to find the right way so do I xD.</p>
 
 
              
