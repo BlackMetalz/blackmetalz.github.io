@@ -6,3 +6,5 @@ Gemfile.lock
 vendor/
 __pycache__/
 .vscode/
+venv/
+output/
