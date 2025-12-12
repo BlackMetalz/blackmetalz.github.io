@@ -123,3 +123,33 @@ cAdvisor (Container Advisor) provides container users an understanding of the re
 ```
 
 Haha, even though I passed the CKA exam, I never knew about this deep dive! What great information to finally understand!
+
+So with this, you can answer the question: How does `kube-state-metrics` differ from `node-exporter`?
+
+
+### Prometheus metric core type?
+Prometheus has 4 core types: Counter, Gauge, Histogram, Summary.
+
+### What is RED Method stand for in Prometheus?
+The 'RED Method' in monitoring, especially for microservices with tools like Prometheus, stands for three key request-focused metrics: Rate (requests per second), Errors (count of failed requests), and Duration (time taken for requests), providing a streamlined view of service health and performance from the user's perspective. (Copy from Google AI xD)
+
+### What does the 'USE Method' stand for?
+The Utilization Saturation and Errors (USE) Method is a methodology for analyzing the performance of any system.
+
+### Some basic operator for query you need to remember
+Document: [https://prometheus.io/docs/prometheus/latest/querying/basics/](https://prometheus.io/docs/prometheus/latest/querying/basics/)
+
+- `=` : Equal
+- `!=` : Not Equal
+- `=~` : Regex Match
+- `!~` : Regex Not Match
+
+Some examples:
+- `{...}` : use `!=` to remove labels
+- If you find/compare value, use `==`, `>`, ... outside `{....}`
+
+### What does the `offset` modifier do?
+Shifts the time of the query evaluation (e.g., `http_requests_total offset 1w` returns values from 1 week ago)
+
+### What is 'White-box Monitoring'?
+Monitoring based on metrics exposed by the internals of the system (e.g., HTTP handler, JVM memory)
