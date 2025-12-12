@@ -153,3 +153,211 @@ Shifts the time of the query evaluation (e.g., `http_requests_total offset 1w` r
 
 ### What is 'White-box Monitoring'?
 Monitoring based on metrics exposed by the internals of the system (e.g., HTTP handler, JVM memory)
+
+### clamp_max() function?
+- Used to set capping for value of metric.
+- Example: `clamp_max(metric_here, 100)`. If `metric_here` is 120, it will set to 100 and if `metric_here` is 80, it still is 80, get the idea?
+- What it used for? Fix display in graph, sometime or somehow CPU usage reached more than 100%, so set capping at 100 will make display better! Or Remove some outliers/spikes metric values like 99999 that make graph nonsense xD
+
+### Vector matching
+Another knowledge that I never know before! [Document here!](https://prometheus.io/docs/prometheus/latest/querying/operators/#vector-matching)
+
+Enrichment - Most used case
+- So issue metric `container_cpu_usage_seconds_total` from cAdvisor let you know Pod X is eating how much CPU. But it doesn't tell you Pod X come from which Node or which Image it is using.
+
+- Your leader asked you, hey show me container used image version 2.0 is eating how much CPU compared with container used image version 1.0? So original metric doesn't have labeled `image`, how group by?
+
+- Solution: join metric `kube_pod_info`, this guy contains any information about pod.
+
+```
+# Metric 1: CPU Usage (only have pod name, namespace)
+container_cpu_usage_seconds_total
+
+# Metric 2: Pod Info (have pod name, namespace and image version, host ip...)
+kube_pod_info
+
+# JOIN TOGETHER:
+container_cpu_usage_seconds_total * on(pod, namespace) group_left(image) kube_pod_info
+
+# Attach node and image
+container_cpu * on(pod, namespace) group_left(node, image) kube_pod_info
+
+# attach more label (if needed!)
+container_cpu * on(pod, namespace) group_left(image, created_by_name, host_ip) kube_pod_info{created_by_kind="ReplicaSet"}
+```
+
+- Result: You still have CPU usage but include label `image`
+- Explain: `group_left(image)` means take the label `image` from right, cover into left!
+
+Common Pitfalls
+```promql
+# ❌ BAD - Cardinality explosion
+container_cpu * on() group_left(image) kube_pod_info
+
+# ✅ GOOD - Specify matching labels
+container_cpu * on(pod, namespace) group_left(image) kube_pod_info
+
+# ❌ BAD - Wrong side (left has more series than right)
+kube_pod_info * on(pod) group_left container_cpu
+
+# ✅ GOOD
+container_cpu * on(pod) group_left(image) kube_pod_info
+```
+
+Ignoring case:
+- `metric1 * ignoring(instance, job) metric2` : match if metric2 don't have `instance` and `job` label
+
+### What does `absent(metric_name)` return?
+- 1 if the metric does not exist, empty if it does
+- Use case: alert if a service died or not gonna to send metric!
+
+### What is `evaluation_interval`?
+`evaluation_interval `determines how frequently Prometheus evaluates recording rules and alerting rules. 
+Or [How frequently to evaluate rules](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#configuration-file).
+
+### Why is 'Sampling' (in instrumentation) bad for metrics?
+Metrics should account for 100% of events (e.g., total request count); sampling loses accuracy and Traces (too heavy to keep all).
+
+### Which function predicts the value of a gauge in 4 hours based on recent trend?
+- `predict_linear(metric[range], 4*3600)`
+- Linear regression prediction. Great for 'Disk Full in X hours' alerts.
+
+### What is the difference between `sum` and `sum_over_time`?
+`sum()` input: Instant Vector. 
+Example: `sum(node_cpu_seconds_total)` --> Adds up CPU usage of all nodes right now.
+
+`sum_over_time()` input: Range Vector
+Example: `sum_over_time(http_requests_total[5m])` --> Adds up all scrape values of one specific metric over the last 5 minutes. 
+
+### What is `relabel_configs` used for?
+Modifying labels `before` the scrape (e.g., filtering targets, changing addresses)
+
+### How do you drop a target during discovery if a certain label is present?
+To drop a target during discovery, you use `relabel_configs` with the `action: drop`.
+
+
+- Example 1:
+```
+scrape_configs:
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+    
+    relabel_configs:
+      # Scenario: Drop if the label 'do_not_scrape' is PRESENT (any value)
+      - source_labels: [__meta_kubernetes_pod_label_do_not_scrape]
+        action: drop
+        regex: '.+'  # Matches any string with at least 1 character
+```
+
+- Example 2:
+```
+scrape_configs:
+  - job_name: 'my-app'
+    # ...
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        action: drop
+        # Use | List metric for "drop"
+        regex: 'go_gc_duration_seconds|kubelet_volume_stats_inodes_used|other_metric_to_drop'
+```
+
+- Example 3:
+```
+relabel_configs:
+  # Rule 1: If env=test -> DROP
+  - source_labels: [__meta_kubernetes_pod_label_env]
+    action: drop
+    regex: test
+  
+  # Rule 2: If role=backup -> DROP (If metric pass Rule 1, in Rule 2 will continue to check!)
+  - source_labels: [__meta_kubernetes_pod_label_role]
+    action: drop
+    regex: backup
+```
+
+### Which operator has the highest precedence in Prometheus?
+
+Remember this for exam!
+1. `^` (Powers)
+2. `*, /, %`
+3. `+, -`
+4. `==, !=, <=, <, >=, >`
+5. `and, unless`
+6. `or`
+
+### If you want to attach a constant label `env=prod` to all metrics in a job, where do you put it?
+
+Example
+```promql
+scrape_configs:
+  # Job 1: Scrape env PROD
+  - job_name: 'web-app-prod'
+    static_configs:
+      - targets: ['192.168.1.100:9090']
+        labels:
+          env: prod      # <--- Here we go
+          region: us-east
+
+  # Job 2: Scrape env STAGING
+  - job_name: 'web-app-staging'
+    static_configs:
+      - targets: ['192.168.1.200:9090']
+        labels:
+          env: staging   # <--- Different Label for this target!
+          region: us-east
+```
+
+### What is 'Federation' in Prometheus?
+Short answer for exam: `A mechanism for a Prometheus server to scrape metrics from another Prometheus server`
+
+Document: [https://prometheus.io/docs/prometheus/latest/federation/#use-cases](https://prometheus.io/docs/prometheus/latest/federation/#use-cases)
+```
+There are different use cases for federation. Commonly, it is used to either achieve scalable 
+Prometheus monitoring setups or to pull related metrics from one service's Prometheus into another.
+```
+
+### What is the `external_labels` config in Prometheus used for?
+Seem like same as `labels` under `static_config`? No, it's not!
+
+Instead of set label for specific job, `external_labels` will set for whole Prometheus instance!
+
+It was born to identify Prometheus instance.
+
+Example when we have 2 Prometheus instance for HA. Both of them scrape same targets.
+- Issue when alert, both prometheus instances will yell at fucking Alert Manager. Without `external_labels`,
+AlertManager will see it is 2 different issues --> duplicate alert!
+- RemoteWrite: when write data into Thanos for long-live storage. Thanos needs to know metrics come from which Prometheus instances
+to [`deduplicate`](https://www.cloudraft.io/blog/scaling-prometheus-with-thanos)
+
+From Document Page
+```
+  # The labels to add to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  # Environment variable references `${var}` or `$var` are replaced according
+  # to the values of the current environment variables.
+  # References to undefined variables are replaced by the empty string.
+  # The `$` character can be escaped by using `$$`.
+```
+
+### What is `Subquery`?
+`Subquery` allow you run query that return `Range Vector`
+
+Syntax: `query[<range>:<resolution>]`
+Example: `rate(http_requests[5m])[30m:1m]` or `max_over_time( rate(http_requests_total[5m])[1h:1m] )`
+Explain: 
+- `[1h:1m]` or `[30m:1m]` is Subquery
+- `[1h:1m]`: within hour, each minute, calculate the fucking `rate` for me!
+- Result will be rate values (Range Vector)
+- After that, use `max_over_time` to find the largest number in that range which return `Instance Vector`
+
+Prometheus `Subquery` Cheat Sheet:
+
+| Query Type                  | Returns             | Example                                              |
+|-----------------------------|---------------------|------------------------------------------------------|
+| Normal query                | Instant vector      | `rate(http_requests_total[5m])`                      |
+| With subquery               | Range vector        | `rate(http_requests_total[5m])[1h:]`                 |
+| Subquery + _over_time function | Instant vector   | `max_over_time(rate(http_requests_total[5m])[1h:])`  |
+| Subquery + other aggregators (_avg_, _min_, _last_, etc.) | Instant vector | `avg_over_time(rate(node_cpu_seconds_total[5m][5m])[30m:10s])` |
+
+Document: [https://prometheus.io/docs/prometheus/latest/querying/basics/#subquery](https://prometheus.io/docs/prometheus/latest/querying/basics/#subquery)
