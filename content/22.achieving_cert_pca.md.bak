@@ -1,0 +1,125 @@
+Title: [WIP]
+Date: 2025-12-12
+Category: Knowledge Base
+Tags: prometheus
+
+# Prerequisite
+I only talk about some section that will show in PCA exam, because some of them you and me may never be used or know about it before xD
+- You have basic knowledge about Prometheus
+- How it works, how to install it, how it scrapes metrics and how to query metric via PromQL (Prometheus Query Language)
+
+# Some section need to be understood 
+
+### Push Gateway
+- It is used for Short-lived jobs (Ephemeral jobs). Example Cronjob/Job that will die after 15-30 seconds.
+- You know that prometheus scrape metric within interval, so push gateway help to keep metric from Cronjob/Job then it will let Prometheus scrape metric from Push Gateway.
+- Trap in PCA exam: If they asked to be use Push Gateway for long-running service, mark them false!
+
+### Operator used for Regex matching?
+- Answer: `=~`, remember it xD
+
+### In context of Metric, what is Label?
+- Key-value pair attached to a metric (e.g., `method="POST"`) to add context and allow filtering
+
+### What is Gauge metric?
+- A metric that represents a single numerical value that can arbitrarily go up and down
+- Example: `memory_usage_bytes`, `cpu_temp_celsius`
+- PCA Exam rule: Never use `rate()` or `increase()` function for Gauge. Commonly used with `min()`, `max()`, `avg()`, `sum()` functions
+
+### How to monitor request of each customer without explode Prometheus?
+- No, Prometheus can only count how many requests have 5xx status.
+- For specific request, you have to use Log/trace (Elastic/Loki/VictoriaLogs), I won't talk much detail about it since we are in PCA exam preparation.
+- But there is secret weapon "[Exemplars](https://prometheus.io/docs/prometheus/latest/feature_flags/#exemplars-storage)". Issue: see line of CPU usage surge. Solution: Use Exemplars, it allows to attach a little metadata like trace_id but need app instrument code to inject trace_id into metric (commonly achieved by using SDK of Prometheus or Opentelemetry)
+- PCA note for Exemplar: used to link metric into Log/Trace, used most with Histograms, doesn't increase Cardinality.
+
+### Instant Vector vs Range Vector
+I have no idea about Instant/Range Vector before, so this is a chance for me xD. So `Instance Vector` can be understanding simply as snapshot for data at a unique time.
+- Function `rate()`, `increase()`, `delta()` need input as `Range Vector`, but output is `Instance Vector`
+- So: `metric_name` is `Instance Vector`, `metric_name[5m]` is `Range Vector`
+- Example: `http_requests[5m]` is data set (Range Vector), `rate(...)` is function that calculate avg value of those data set, so result for example will be `2 req/s` which is `Instance Vector`
+
+### Different between rate and irate
+`rate` uses all data points in the range (smooth) `irate` uses only the last two data points (spiky/instant)
+
+- `rate()`: avg sum rate, Smooth line, should be use for alerting, bad for debug.
+- `irate()`: instance rate, jagged line, should not be use for alerting because spam, good for debug.
+- `rate()` = (Last - First) / Time (Average over range)
+- `irate()` with data set in 5 minutes (10,20,30,40,50) and scrape interval is 15s => (50-40)/15 = 0.66s (Instant look)
+
+### What is counter metric?
+- A metric that only increase, not going down.
+- Document detail here: [https://prometheus.io/docs/concepts/metric_types/#counter](https://prometheus.io/docs/concepts/metric_types/#counter)
+- It used to count `http_requests_total` or `errors_total` which never can be 0, right? For example metric `http_requests_total` at 9:00 AM counter: 1000 requests, next 9:10 AM `http_requests_total` counter: 1200 requests. But in reality, we don't care about raw number 1200 requests, we only care about how many queries from 9:00 to 9:10. In this scenario it can be achieved by using `rate(http_requests_total[10m])`.
+
+### Black-box Monitoring / Blackbox Exporter
+- Link: [https://github.com/prometheus/blackbox_exporter](https://github.com/prometheus/blackbox_exporter)
+- I think I heard this for the first time, but after read document, it works same logic like plugin monitor http/tcp in Nagios/CheckMK. 
+- BlackBox exporter will return some important metrics like this:
+```
+probe_success{instance="https://api.example.com/health"} 1  # 1 = OK, 0 = FAIL
+probe_http_status_code{...} 200
+probe_duration_seconds{...} 0.123
+probe_ssl_earliest_cert_expiry{...} 1234567890
+```
+
+### What is a Recording Rule?
+- Purposes: Performance, No Backfilling, Evaluation Interval. 
+- Little explain in Performance: Recording rule was born to increase performance for Prometheus, instead of query when user refresh, it already calculated in background.
+- Documents: [https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/](https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/)
+- Some best practices [https://prometheus.io/docs/practices/rules/](https://prometheus.io/docs/practices/rules/)
+- Naming Convention: `level:metric:operations`. Example: `job:http_inprogress_requests:sum`
+
+
+### What is the suffix for the total count of observations in a Histogram?
+- Answer: `_count`
+- Document: [the count of events that have been observed, exposed as <basename>_count (identical to <basename>_bucket{le="+Inf"} above)](https://prometheus.io/docs/concepts/metric_types/#histogram)
+
+### Service Discovery
+Wow, I never really understood this before, until I started preparing for the PCA exam. So, what have I learned from this section?
+
+First, [read the document first](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config)
+
+To scrape metrics from a K8s cluster using `Service Discovery`, Prometheus requires a `Service Account` bound to a `ClusterRole`. This grants permissions to fetch `targets/metadata` (not metrics) directly from the K8s API. It uses the `WATCH` mechanism, so the K8s API actively notifies Prometheus of changes (New Pod Added, Pod Deleted...) instead of polling constantly.
+
+The flow is:
+- 1. Discover: Get target list from API.
+- 2. Relabel: Filter or modify targets (e.g., keep only pods with specific annotations).
+- 3. Scrape: Prometheus connects to the Pod's IP to pull metrics.
+
+```yaml
+# 1. Declare job in prometheus.yml
+scrape_configs:
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod  # <-- Tell it to get the fucking list of Pod for me.
+    
+    # 2. Filtering step (Relabeling)
+    relabel_configs:
+      # If Pod doesn't have annotation 'scrape=true', drop it.
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+```
+
+But wait, I wonder how it scrapes infrastructure metrics like CPU/Memory/Network usage? Node Exporter won't get that information for individual containers, right?
+
+Exactly! It gets those metrics from the Kubelet API Port (10250). Here is the flow:
+
+- Prometheus calls into API `https://<Node-IP>:10250/metrics/cadvisor`. Example for `kube-prometheus-stack` link [here](https://github.com/prometheus-community/helm-charts/blob/kube-prometheus-stack-69.8.2/charts/kube-prometheus-stack/templates/exporters/kubelet/servicemonitor.yaml#L63) 
+- The Kubelet (listening on port 10250) receives the scrape request.
+- The Kubelet forwards the request to its internal cAdvisor module.
+- cAdvisor reads directly from Cgroups (Linux Control Groups – where the Linux kernel tracks resource usage for each process/container) on the node.
+- The Kubelet aggregates this data and returns it to Prometheus in metrics format.
+
+Document to prove what I said: https://kubernetes.io/docs/concepts/cluster-administration/system-metrics/#metrics-in-kubernetes
+You will see section related to `cAdvisor` like:
+```
+Note that kubelet also exposes metrics in /metrics/cadvisor, /metrics/resource and /metrics/probes endpoints.
+```
+
+Document for [cAdvisor](https://github.com/google/cadvisor)
+```
+cAdvisor (Container Advisor) provides container users an understanding of the resource usage and performance characteristics of their running containers. It is a running daemon that collects, aggregates, processes, and exports information about running containers. Specifically, for each container it keeps resource isolation parameters, historical resource usage, histograms of complete historical resource usage and network statistics. This data is exported by container and machine-wide.
+```
+
+Haha, even though I passed the CKA exam, I never knew about this deep dive! What great information to finally understand!
