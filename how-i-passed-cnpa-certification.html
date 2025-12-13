@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="platform-engineering, certification, linux-foundation, Knowledge Base, " />
+
+<meta property="og:title" content="How I Passed the Certified Cloud Native Platform Associate (CNPA) Exam "/>
+<meta property="og:url" content="/how-i-passed-cnpa-certification.html" />
+<meta property="og:description" content="My experience preparing for and passing the new Cloud Native Platform Associate (CNPA) exam, including the resources that helped me the most." />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2025-12-13T00:00:00+07:00" />
+<meta name="twitter:title" content="How I Passed the Certified Cloud Native Platform Associate (CNPA) Exam ">
+<meta name="twitter:description" content="My experience preparing for and passing the new Cloud Native Platform Associate (CNPA) exam, including the resources that helped me the most.">
+
+        <title>How I Passed the Certified Cloud Native Platform Associate (CNPA) Exam  · Kienlt&#39;s notebook
+</title>
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       "/"
+                                    >Home</a>
+                                </li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="/how-i-passed-cnpa-certification.html">
+                How I Passed the Certified Cloud Native Platform Associate (CNPA) Exam
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>Hey everyone!</p>
+<p>I'm excited to share that I've recently passed the <strong>Cloud Native Platform Associate (CNPA)</strong> exam. With Platform Engineering emerging as a critical discipline in the cloud-native world, I wanted to validate my understanding of the ecosystem. This certification was the perfect way to do that.</p>
+<p>Since this is a relatively new certification from the Linux Foundation, I noticed there aren't too many "battle reports" out there yet. So, I decided to write up my experience to help anyone else looking to sit for this exam.</p>
+<h2>What is the CNPA?</h2>
+<p>Unlike the CKA (Certified Kubernetes Administrator) which is hands-on and very technical, the CNPA is a knowledge-based, multiple-choice exam. It focuses on the concepts, patterns, and architecture of modern platforms.</p>
+<p>It validates that you understand how to support platform engineering teams. Furthermore, it's not just about "how do I configure this pod," but rather "how do we build a self-service platform that developers actually want to use?"</p>
+<p><strong>The Exam at a Glance:</strong>
+*   <strong>Format:</strong> Multiple Choice
+*   <strong>Duration:</strong> 90 Minutes
+*   <strong>Validity:</strong> 2 Years
+*   <strong>Prerequisites:</strong> None (but 6-12 months of experience is recommended)</p>
+<h2>The Key Domains</h2>
+<p>The exam covers a broad range of topics. You can't just know Kubernetes; you need to understand the full lifecycle. Here is what I focused on:</p>
+<h3>1. Platform Engineering Fundamentals</h3>
+<p>This is the core. You need to understand the difference between DevOps and Platform Engineering. It covers the concept of "Platform as a Product" and why Internal Developer Platforms (IDPs) are essential for scaling organizations.</p>
+<h3>2. Continuous Delivery &amp; GitOps</h3>
+<p>This section tests your knowledge of modern deployment strategies. I saw questions related to ArgoCD, Flux, and the principles of GitOps. Make sure you understand Canary vs. Blue/Green deployments and how they fit into a platform context.</p>
+<h3>3. Observability</h3>
+<p>It's not enough to just deploy code; you need to know how it behaves. The exam dives into Prometheus, Grafana, OpenTelemetry, and the distinction between logs, metrics, and traces.</p>
+<h3>4. Security &amp; Compliance</h3>
+<p>This is huge. You need to know about "Shift Left" security, supply chain security (SBOMs), and policy-as-code (like OPA/Kyverno). They want to ensure you know how to bake security into the platform itself.</p>
+<h2>How I Prepared (and Passed!)</h2>
+<p>Since resources are still scarce, I had to be selective. I read through the official Linux Foundation domains, but reading documentation can only get you so far.</p>
+<p>The <strong>biggest game-changer</strong> for me was doing practice tests. I wanted to get a feel for the question style and the depth of knowledge required.</p>
+<p>I highly recommend this <strong>Udemy Mock Exam</strong> course:
+👉 <a href="https://www.udemy.com/course/certified-cloud-native-platform-associate-cnpa-exam/?referralCode=76CD9E9BBE89B1A62E20">https://www.udemy.com/course/certified-cloud-native-platform-associate-cnpa-exam/</a></p>
+<p>I passed the exam largely thanks to this course. The questions were incredibly similar to the real thing, and the explanations helped clarify <em>why</em> an answer was correct (or incorrect). It gave me the confidence I needed going in.</p>
+<h2>Exam Day Experience</h2>
+<p>The process was smooth. Since it's proctored online, I cleared my desk, set up my webcam, and launched the secure browser. The 90 minutes felt like plenty of time. I flagged a few questions I wasn't sure about and had enough time to review them at the end.</p>
+<h2>Final Thoughts</h2>
+<p>If you are working in DevOps, SRE, or specifically in a Platform team, this certification is worth it. It helps standardize the terminology and ensures you aren't missing any pillars of a robust platform.</p>
+<p>Good luck to anyone planning to take it! If you have questions, feel free to reach out.</p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2025-12-13T00:00:00+07:00">Sat 13 December 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#certification-ref">certification
+                    <span class="superscript">3</span>
+</a></li>
+                <li><a href="/tags.html#linux-foundation-ref">linux-foundation
+                    <span class="superscript">3</span>
+</a></li>
+                <li><a href="/tags.html#platform-engineering-ref">platform-engineering
+                    <span class="superscript">3</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

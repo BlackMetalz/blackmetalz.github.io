@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="prometheus, certification, linux-foundation, pca, Knowledge Base, " />
+
+<meta property="og:title" content="How I Passed the Prometheus Certified Associate (PCA) Exam "/>
+<meta property="og:url" content="/how-i-passed-the-prometheus-certified-associate-pca-exam.html" />
+<meta property="og:description" content="A deep dive into my preparation notes, key concepts, and the resources I used to pass the Prometheus Certified Associate (PCA) exam." />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2025-12-15T00:00:00+07:00" />
+<meta name="twitter:title" content="How I Passed the Prometheus Certified Associate (PCA) Exam ">
+<meta name="twitter:description" content="A deep dive into my preparation notes, key concepts, and the resources I used to pass the Prometheus Certified Associate (PCA) exam.">
+
+        <title>How I Passed the Prometheus Certified Associate (PCA) Exam  · Kienlt&#39;s notebook
+</title>
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       "/"
+                                    >Home</a>
+                                </li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="/how-i-passed-the-prometheus-certified-associate-pca-exam.html">
+                How I Passed the Prometheus Certified Associate (PCA) Exam
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>Hey everyone!</p>
+<p>I'm happy to share that I've passed the <strong>Prometheus Certified Associate (PCA)</strong> exam. This was a really interesting deep dive into observability. Even though I had some experience with Prometheus, this exam forced me to really understand the internal mechanics—like how Service Discovery <em>actually</em> works, the nuances of <code>rate</code> vs <code>irate</code>, and how to construct complex PromQL queries without exploding the database.</p>
+<p>I documented my entire learning process in the notes below. I hope they help you as much as they helped me!</p>
+<h2>My Secret Weapon for Passing</h2>
+<p>While official documentation is great, nothing beats practicing with realistic scenarios. I used this specific Udemy course to validate my knowledge before the real exam. It covered every edge case I encountered:</p>
+<p>👉 <strong>[LINK TO UDEMY COURSE - WIP]</strong></p>
+<p>If you can score well on these practice tests, you are ready for the real thing.</p>
+<h2>Prerequisite Notes &amp; "Gotchas"</h2>
+<p>I only talk about some sections that will show up in the PCA exam here, because some of them you and I may never use or know about otherwise xD.</p>
+<ul>
+<li>You have basic knowledge about Prometheus.</li>
+<li>How it works, how to install it, how it scrapes metrics, and how to query metrics via PromQL (Prometheus Query Language).</li>
+</ul>
+<h1>Some sections need to be understood</h1>
+<h3>Push Gateway</h3>
+<ul>
+<li>It is used for Short-lived jobs (Ephemeral jobs). Example Cronjob/Job that will die after 15-30 seconds.</li>
+<li>You know that prometheus scrape metric within interval, so push gateway help to keep metric from Cronjob/Job then it will let Prometheus scrape metric from Push Gateway.</li>
+<li>Trap in PCA exam: If they asked to be use Push Gateway for long-running service, mark them false!</li>
+</ul>
+<h3>Operator used for Regex matching?</h3>
+<ul>
+<li>Answer: <code>=~</code>, remember it xD</li>
+</ul>
+<h3>In context of Metric, what is Label?</h3>
+<ul>
+<li>Key-value pair attached to a metric (e.g., <code>method="POST"</code>) to add context and allow filtering</li>
+</ul>
+<h3>What is Gauge metric?</h3>
+<ul>
+<li>A metric that represents a single numerical value that can arbitrarily go up and down</li>
+<li>Example: <code>memory_usage_bytes</code>, <code>cpu_temp_celsius</code></li>
+<li>PCA Exam rule: Never use <code>rate()</code> or <code>increase()</code> function for Gauge. Commonly used with <code>min()</code>, <code>max()</code>, <code>avg()</code>, <code>sum()</code> functions</li>
+</ul>
+<h3>How to monitor request of each customer without explode Prometheus?</h3>
+<ul>
+<li>No, Prometheus can only count how many requests have 5xx status.</li>
+<li>For specific request, you have to use Log/trace (Elastic/Loki/VictoriaLogs), I won't talk much detail about it since we are in PCA exam preparation.</li>
+<li>But there is secret weapon "<a href="https://prometheus.io/docs/prometheus/latest/feature_flags/#exemplars-storage">Exemplars</a>". Issue: see line of CPU usage surge. Solution: Use Exemplars, it allows to attach a little metadata like trace_id but need app instrument code to inject trace_id into metric (commonly achieved by using SDK of Prometheus or Opentelemetry)</li>
+<li>PCA note for Exemplar: used to link metric into Log/Trace, used most with Histograms, doesn't increase Cardinality.</li>
+</ul>
+<h3>Instant Vector vs Range Vector</h3>
+<p>I have no idea about Instant/Range Vector before, so this is a chance for me xD. So <code>Instant Vector</code> can be understanding simply as snapshot for data at a unique time.
+- Function <code>rate()</code>, <code>increase()</code>, <code>delta()</code> need input as <code>Range Vector</code>, but output is <code>Instant Vector</code>
+- So: <code>metric_name</code> is <code>Instant Vector</code>, <code>metric_name[5m]</code> is <code>Range Vector</code>
+- Example: <code>http_requests[5m]</code> is data set (Range Vector), <code>rate(...)</code> is function that calculate avg value of those data set, so result for example will be <code>2 req/s</code> which is <code>Instant Vector</code></p>
+<h3>Different between rate and irate</h3>
+<p><code>rate</code> uses all data points in the range (smooth) <code>irate</code> uses only the last two data points (spiky/instant) but good to remember it ignores the rest of the range provided in <code>[]</code>.</p>
+<ul>
+<li><code>rate()</code>: avg sum rate, Smooth line, should be use for alerting, bad for debug.</li>
+<li><code>irate()</code>: instance rate, jagged line, should not be use for alerting because spam, good for debug.</li>
+<li><code>rate()</code> = (Last - First) / Time (Average over range)</li>
+<li><code>irate()</code> with data set in 5 minutes (10,20,30,40,50) and scrape interval is 15s =&gt; (50-40)/15 = 0.66s (Instant look)</li>
+</ul>
+<h3>What is counter metric?</h3>
+<ul>
+<li>A metric that only increase, not going down.</li>
+<li>Document detail here: <a href="https://prometheus.io/docs/concepts/metric_types/#counter">https://prometheus.io/docs/concepts/metric_types/#counter</a></li>
+<li>It used to count <code>http_requests_total</code> or <code>errors_total</code> which never can be 0, right? For example metric <code>http_requests_total</code> at 9:00 AM counter: 1000 requests, next 9:10 AM <code>http_requests_total</code> counter: 1200 requests. But in reality, we don't care about raw number 1200 requests, we only care about how many queries from 9:00 to 9:10. In this scenario it can be achieved by using <code>increase(http_requests_total[10m])</code>.</li>
+</ul>
+<h3>Black-box Monitoring / Blackbox Exporter</h3>
+<ul>
+<li>Link: <a href="https://github.com/prometheus/blackbox_exporter">https://github.com/prometheus/blackbox_exporter</a></li>
+<li>I think I heard this for the first time, but after read document, it works same logic like plugin monitor http/tcp in Nagios/CheckMK. </li>
+<li>BlackBox exporter will return some important metrics like this:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>probe_success{instance=&quot;https://api.example.com/health&quot;} 1  # 1 = OK, 0 = FAIL
+probe_http_status_code{...} 200
+probe_duration_seconds{...} 0.123
+probe_ssl_earliest_cert_expiry{...} 1234567890
+</code></pre></div>
+
+<h3>What is a Recording Rule?</h3>
+<ul>
+<li>Purposes: Performance, No Backfilling, Evaluation Interval. </li>
+<li>Little explain in Performance: Recording rule was born to increase performance for Prometheus, instead of query when user refresh, it already calculated in background.</li>
+<li>Documents: <a href="https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/">https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/</a></li>
+<li>Some best practices <a href="https://prometheus.io/docs/practices/rules/">https://prometheus.io/docs/practices/rules/</a></li>
+<li>Naming Convention: <code>level:metric:operations</code>. Example: <code>job:http_inprogress_requests:sum</code></li>
+</ul>
+<h3>What is the suffix for the total count of observations in a Histogram?</h3>
+<ul>
+<li>Answer: <code>_count</code></li>
+<li>Document: <a href="https://prometheus.io/docs/concepts/metric_types/#histogram">the count of events that have been observed, exposed as <basename>_count (identical to <basename>_bucket{le="+Inf"} above)</a></li>
+</ul>
+<h3>Service Discovery</h3>
+<p>Wow, I never really understood this before, until I started preparing for the PCA exam. So, what have I learned from this section?</p>
+<p>First, <a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config">read the document first</a></p>
+<p>To scrape metrics from a K8s cluster using <code>Service Discovery</code>, Prometheus requires a <code>Service Account</code> bound to a <code>ClusterRole</code>. This grants permissions to fetch <code>targets/metadata</code> (not metrics) directly from the K8s API. It uses the <code>WATCH</code> mechanism, so the K8s API actively notifies Prometheus of changes (New Pod Added, Pod Deleted...) instead of polling constantly.</p>
+<p>The flow is:
+- 1. Discover: Get target list from API.
+- 2. Relabel: Filter or modify targets (e.g., keep only pods with specific annotations).
+- 3. Scrape: Prometheus connects to the Pod's IP to pull metrics.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Declare job in prometheus.yml</span>
+<span class="nt">scrape_configs</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">job_name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;kubernetes-pods&#39;</span>
+<span class="w">    </span><span class="nt">kubernetes_sd_configs</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pod</span><span class="w">  </span><span class="c1"># &lt;-- Tell it to get the fucking list of Pod for me.</span>
+
+<span class="w">    </span><span class="c1"># 2. Filtering step (Relabeling)</span>
+<span class="w">    </span><span class="nt">relabel_configs</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># If Pod doesn&#39;t have annotation &#39;scrape=true&#39;, drop it.</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">__meta_kubernetes_pod_annotation_prometheus_io_scrape</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">keep</span>
+<span class="w">        </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+
+<p>But wait, I wonder how it scrapes infrastructure metrics like CPU/Memory/Network usage? Node Exporter won't get that information for individual containers, right?</p>
+<p>Exactly! It gets those metrics from the Kubelet API Port (10250). Here is the flow:</p>
+<ul>
+<li>Prometheus calls into API <code>https://&lt;Node-IP&gt;:10250/metrics/cadvisor</code>. Example for <code>kube-prometheus-stack</code> link <a href="https://github.com/prometheus-community/helm-charts/blob/kube-prometheus-stack-69.8.2/charts/kube-prometheus-stack/templates/exporters/kubelet/servicemonitor.yaml#L63">here</a> </li>
+<li>The Kubelet (listening on port 10250) receives the scrape request.</li>
+<li>The Kubelet forwards the request to its internal cAdvisor module.</li>
+<li>cAdvisor reads directly from Cgroups (Linux Control Groups – where the Linux kernel tracks resource usage for each process/container) on the node.</li>
+<li>The Kubelet aggregates this data and returns it to Prometheus in metrics format.</li>
+</ul>
+<p>Document to prove what I said: https://kubernetes.io/docs/concepts/cluster-administration/system-metrics/#metrics-in-kubernetes
+You will see section related to <code>cAdvisor</code> like:</p>
+<div class="highlight"><pre><span></span><code>Note that kubelet also exposes metrics in /metrics/cadvisor, /metrics/resource and /metrics/probes endpoints.
+</code></pre></div>
+
+<p>Document for <a href="https://github.com/google/cadvisor">cAdvisor</a></p>
+<div class="highlight"><pre><span></span><code><span class="n">cAdvisor</span><span class="w"> </span><span class="p">(</span><span class="n">Container</span><span class="w"> </span><span class="n">Advisor</span><span class="p">)</span><span class="w"> </span><span class="n">provides</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">understanding</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="n">usage</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">performance</span><span class="w"> </span><span class="n">characteristics</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">their</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="n">containers</span><span class="o">.</span><span class="w"> </span><span class="n">It</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="n">daemon</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">collects</span><span class="p">,</span><span class="w"> </span><span class="n">aggregates</span><span class="p">,</span><span class="w"> </span><span class="n">processes</span><span class="p">,</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">exports</span><span class="w"> </span><span class="n">information</span><span class="w"> </span><span class="n">about</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="n">containers</span><span class="o">.</span><span class="w"> </span><span class="n">Specifically</span><span class="p">,</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">keeps</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="n">isolation</span><span class="w"> </span><span class="n">parameters</span><span class="p">,</span><span class="w"> </span><span class="n">historical</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="n">usage</span><span class="p">,</span><span class="w"> </span><span class="n">histograms</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">complete</span><span class="w"> </span><span class="n">historical</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="n">usage</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">network</span><span class="w"> </span><span class="n">statistics</span><span class="o">.</span><span class="w"> </span><span class="n">This</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">exported</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">machine</span><span class="o">-</span><span class="n">wide</span><span class="o">.</span>
+</code></pre></div>
+
+<p>Haha, even though I passed the CKA exam, I never knew about this deep dive! What great information to finally understand!</p>
+<p>So with this, you can answer the question: How does <code>kube-state-metrics</code> differ from <code>node-exporter</code>?</p>
+<h3>Bonus complete flow</h3>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│ STEP 1: Prometheus ServiceAccount (SA)                      │
+│ - SA has permission to list/watch nodes from API Server     │
+│ - SA receives token (JWT) automatically mounted into pod    │
+└────────────┬────────────────────────────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 2: Kubernetes Service Discovery                        │
+│ - Prometheus uses SA token to query API Server              │
+│ - Gets list of nodes: GET /api/v1/nodes                     │
+│ - API Server checks RBAC: Does SA have &quot;list nodes&quot; perm?   │
+│ - Returns: node1 (10.0.1.5), node2 (10.0.1.6)...            │
+└────────────┬────────────────────────────────────────────────┘
+             │
+             ▼
+┌─────────────────────────────────────────────────────────────┐
+│ STEP 3: Scrape Kubelet API (IMPORTANT!)                     │
+│ ┌───────────────────────────────────────────────────────┐   │
+│ │ Prometheus sends request:                             │   │
+│ │ GET https://10.0.1.5:10250/metrics/cadvisor           │   │
+│ │ Header: Authorization: Bearer &lt;SA_TOKEN&gt;              │   │
+│ └───────────────────────────────────────────────────────┘   │
+│                                                             │
+│ ┌───────────────────────────────────────────────────────┐   │
+│ │ Kubelet receives request:                             │   │
+│ │ 1. Authentication: Verify token via API Server        │   │
+│ │    (Kubelet flag: --authentication-token-webhook)     │   │
+│ │                                                       │   │
+│ │ 2. Authorization: Check permissions                   │   │
+│ │    (Kubelet flag: --authorization-mode=Webhook)       │   │
+│ │    - Kubelet sends SubjectAccessReview to API Server  │   │
+│ │    - API Server checks RBAC rules                     │   │
+│ │    - Allow/Deny based on ClusterRole                  │   │
+│ └───────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3>Prometheus metric core type?</h3>
+<p>Prometheus has 4 core types: Counter, Gauge, Histogram, Summary.</p>
+<h3>What is RED Method stand for in Prometheus?</h3>
+<p>The 'RED Method' in monitoring, especially for microservices with tools like Prometheus, stands for three key request-focused metrics: Rate (requests per second), Errors (count of failed requests), and Duration (time taken for requests), providing a streamlined view of service health and performance from the user's perspective. (Copy from Google AI xD)</p>
+<h3>What does the 'USE Method' stand for?</h3>
+<p>The Utilization Saturation and Errors (USE) Method is a methodology for analyzing the performance of any system.</p>
+<h3>Some basic operator for query you need to remember</h3>
+<p>Document: <a href="https://prometheus.io/docs/prometheus/latest/querying/basics/">https://prometheus.io/docs/prometheus/latest/querying/basics/</a></p>
+<ul>
+<li><code>=</code> : Equal</li>
+<li><code>!=</code> : Not Equal</li>
+<li><code>=~</code> : Regex Match</li>
+<li><code>!~</code> : Regex Not Match</li>
+</ul>
+<p>Some examples:
+- <code>{...}</code> : use <code>!=</code> to remove labels
+- If you find/compare value, use <code>==</code>, <code>&gt;</code>, ... outside <code>{....}</code></p>
+<h3>What does the <code>offset</code> modifier do?</h3>
+<p>Shifts the time of the query evaluation (e.g., <code>http_requests_total offset 1w</code> returns values from 1 week ago)</p>
+<h3>What is 'White-box Monitoring'?</h3>
+<p>Monitoring based on metrics exposed by the internals of the system (e.g., HTTP handler, JVM memory)</p>
+<h3>clamp_max() function?</h3>
+<ul>
+<li>Used to set capping for value of metric.</li>
+<li>Example: <code>clamp_max(metric_here, 100)</code>. If <code>metric_here</code> is 120, it will set to 100 and if <code>metric_here</code> is 80, it still is 80, get the idea?</li>
+<li>What it used for? Fix display in graph, sometime or somehow CPU usage reached more than 100%, so set capping at 100 will make display better! Or Remove some outliers/spikes metric values like 99999 that make graph nonsense xD</li>
+</ul>
+<h3>Vector matching</h3>
+<p>Another knowledge that I never know before! <a href="https://prometheus.io/docs/prometheus/latest/querying/operators/#vector-matching">Document here!</a></p>
+<p>Enrichment - Most used case
+- So issue metric <code>container_cpu_usage_seconds_total</code> from cAdvisor let you know Pod X is eating how much CPU. But it doesn't tell you Pod X come from which Node or which Image it is using.</p>
+<ul>
+<li>
+<p>Your leader asked you, hey show me container used image version 2.0 is eating how much CPU compared with container used image version 1.0? So original metric doesn't have labeled <code>image</code>, how group by?</p>
+</li>
+<li>
+<p>Solution: join metric <code>kube_pod_info</code>, this guy contains any information about pod.</p>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="gh">#</span> Metric 1: CPU Usage (only have pod name, namespace)
+container_cpu_usage_seconds_total
+
+<span class="gh">#</span> Metric 2: Pod Info (have pod name, namespace and image version, host ip...)
+kube_pod_info
+
+<span class="gh">#</span> JOIN TOGETHER:
+container_cpu_usage_seconds_total <span class="gs">* on(pod, namespace) group_left(image) kube_pod_info</span>
+
+<span class="gs"># Attach node and image</span>
+<span class="gs">container_cpu *</span> on(pod, namespace) group_left(node, image) kube_pod_info
+
+<span class="gh">#</span> attach more label (if needed!)
+container_cpu * on(pod, namespace) group_left(image, created_by_name, host_ip) kube_pod_info{created_by_kind=&quot;ReplicaSet&quot;}
+</code></pre></div>
+
+<ul>
+<li>Result: You still have CPU usage but include label <code>image</code></li>
+<li>Explain 1: <code>group_left(image)</code> means take the label <code>image</code> from right, cover into left!</li>
+<li>Explain 2: It copies the image label from the matching series on the Right to the series on the Left.</li>
+</ul>
+<p>Common Pitfalls</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># ❌ BAD - Cardinality explosion</span>
+<span class="nv">container_cpu</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">on</span><span class="o">()</span><span class="w"> </span><span class="k">group_left</span><span class="o">(</span><span class="nv">image</span><span class="o">)</span><span class="w"> </span><span class="nv">kube_pod_info</span>
+
+<span class="c1"># ✅ GOOD - Specify matching labels</span>
+<span class="nv">container_cpu</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">on</span><span class="o">(</span><span class="nv">pod</span><span class="p">,</span><span class="w"> </span><span class="nv">namespace</span><span class="o">)</span><span class="w"> </span><span class="k">group_left</span><span class="o">(</span><span class="nv">image</span><span class="o">)</span><span class="w"> </span><span class="nv">kube_pod_info</span>
+
+<span class="c1"># ❌ BAD - Wrong side (left has more series than right)</span>
+<span class="nv">kube_pod_info</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">on</span><span class="o">(</span><span class="nv">pod</span><span class="o">)</span><span class="w"> </span><span class="k">group_left</span><span class="w"> </span><span class="nv">container_cpu</span>
+
+<span class="c1"># ✅ GOOD</span>
+<span class="nv">container_cpu</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">on</span><span class="o">(</span><span class="nv">pod</span><span class="o">)</span><span class="w"> </span><span class="k">group_left</span><span class="o">(</span><span class="nv">image</span><span class="o">)</span><span class="w"> </span><span class="nv">kube_pod_info</span>
+</code></pre></div>
+
+<p>Ignoring case:
+- <code>metric1 * ignoring(instance, job) metric2</code> : match if metric2 don't have <code>instance</code> and <code>job</code> label</p>
+<h3>What does <code>absent(metric_name)</code> return?</h3>
+<ul>
+<li>1 if the metric does not exist, empty if it does</li>
+<li>Use case: alert if a service died or not gonna to send metric!</li>
+</ul>
+<h3>What is <code>evaluation_interval</code>?</h3>
+<p><code>evaluation_interval</code>determines how frequently Prometheus evaluates recording rules and alerting rules. 
+Or <a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#configuration-file">How frequently to evaluate rules</a>.</p>
+<h3>Why is 'Sampling' (in instrumentation) bad for metrics?</h3>
+<p>Metrics should account for 100% of events (e.g., total request count); sampling loses accuracy and Traces (too heavy to keep all).</p>
+<h3>Which function predicts the value of a gauge in 4 hours based on recent trend?</h3>
+<ul>
+<li><code>predict_linear(metric[range], 4*3600)</code></li>
+<li>Linear regression prediction. Great for 'Disk Full in X hours' alerts.</li>
+</ul>
+<h3>What is the difference between <code>sum</code> and <code>sum_over_time</code>?</h3>
+<p><code>sum()</code> input: Instant Vector. 
+Example: <code>sum(node_cpu_seconds_total)</code> --&gt; Adds up CPU usage of all nodes right now.</p>
+<p><code>sum_over_time()</code> input: Range Vector
+Example: <code>sum_over_time(http_requests_total[5m])</code> --&gt; Adds up all scrape values of one specific metric over the last 5 minutes. </p>
+<h3>What is <code>relabel_configs</code> used for?</h3>
+<p>Modifying labels <code>before</code> the scrape (e.g., filtering targets, changing addresses)</p>
+<h3>How do you drop a target during discovery if a certain label is present?</h3>
+<p>To drop a target during discovery, you use <code>relabel_configs</code> with the <code>action: drop</code>.</p>
+<ul>
+<li>Example 1:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nl">scrape_configs</span><span class="p">:</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="nl">job_name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;kubernetes-pods&#39;</span>
+<span class="w">    </span><span class="nl">kubernetes_sd_configs</span><span class="p">:</span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="k">role</span><span class="err">:</span><span class="w"> </span><span class="n">pod</span>
+
+<span class="w">    </span><span class="nl">relabel_configs</span><span class="p">:</span>
+<span class="w">      </span><span class="err">#</span><span class="w"> </span><span class="nl">Scenario</span><span class="p">:</span><span class="w"> </span><span class="k">Drop</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">label</span><span class="w"> </span><span class="s1">&#39;do_not_scrape&#39;</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">PRESENT</span><span class="w"> </span><span class="p">(</span><span class="ow">any</span><span class="w"> </span><span class="k">value</span><span class="p">)</span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nl">source_labels</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">__meta_kubernetes_pod_label_do_not_scrape</span><span class="o">]</span>
+<span class="w">        </span><span class="k">action</span><span class="err">:</span><span class="w"> </span><span class="k">drop</span>
+<span class="w">        </span><span class="nl">regex</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;.+&#39;</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="n">Matches</span><span class="w"> </span><span class="ow">any</span><span class="w"> </span><span class="n">string</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="k">at</span><span class="w"> </span><span class="n">least</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">character</span>
+</code></pre></div>
+
+<ul>
+<li>Example 2:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nl">scrape_configs</span><span class="p">:</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="nl">job_name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;my-app&#39;</span>
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="p">...</span>
+<span class="w">    </span><span class="nl">metric_relabel_configs</span><span class="p">:</span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nl">source_labels</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">__name__</span><span class="o">]</span>
+<span class="w">        </span><span class="k">action</span><span class="err">:</span><span class="w"> </span><span class="k">drop</span>
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">List</span><span class="w"> </span><span class="n">metric</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="ss">&quot;drop&quot;</span>
+<span class="w">        </span><span class="nl">regex</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;go_gc_duration_seconds|kubelet_volume_stats_inodes_used|other_metric_to_drop&#39;</span>
+</code></pre></div>
+
+<ul>
+<li>Example 3:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nl">relabel_configs</span><span class="p">:</span>
+<span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="k">Rule</span><span class="w"> </span><span class="mi">1</span><span class="err">:</span><span class="w"> </span><span class="k">If</span><span class="w"> </span><span class="n">env</span><span class="o">=</span><span class="n">test</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">DROP</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="nl">source_labels</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">__meta_kubernetes_pod_label_env</span><span class="o">]</span>
+<span class="w">    </span><span class="k">action</span><span class="err">:</span><span class="w"> </span><span class="k">drop</span>
+<span class="w">    </span><span class="nl">regex</span><span class="p">:</span><span class="w"> </span><span class="n">test</span>
+
+<span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="k">Rule</span><span class="w"> </span><span class="mi">2</span><span class="err">:</span><span class="w"> </span><span class="k">If</span><span class="w"> </span><span class="k">role</span><span class="o">=</span><span class="k">backup</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">DROP</span><span class="w"> </span><span class="p">(</span><span class="k">If</span><span class="w"> </span><span class="n">metric</span><span class="w"> </span><span class="n">pass</span><span class="w"> </span><span class="k">Rule</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="k">Rule</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="k">continue</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">check</span><span class="err">!</span><span class="p">)</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="nl">source_labels</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">__meta_kubernetes_pod_label_role</span><span class="o">]</span>
+<span class="w">    </span><span class="k">action</span><span class="err">:</span><span class="w"> </span><span class="k">drop</span>
+<span class="w">    </span><span class="nl">regex</span><span class="p">:</span><span class="w"> </span><span class="k">backup</span>
+</code></pre></div>
+
+<h3>Which operator has the highest precedence in Prometheus?</h3>
+<p>Remember this for exam!
+1. <code>^</code> (Powers)
+2. <code>*, /, %</code>
+3. <code>+, -</code>
+4. <code>==, !=, &lt;=, &lt;, &gt;=, &gt;</code>
+5. <code>and, unless</code>
+6. <code>or</code></p>
+<h3>If you want to attach a constant label <code>env=prod</code> to all metrics in a job, where do you put it?</h3>
+<p>Example</p>
+<div class="highlight"><pre><span></span><code><span class="nv">scrape_configs</span><span class="err">:</span>
+<span class="w">  </span><span class="c1"># Job 1: Scrape env PROD</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="nv">job_name</span><span class="err">:</span><span class="w"> </span><span class="p">&#39;</span><span class="s">web-app-prod</span><span class="p">&#39;</span>
+<span class="w">    </span><span class="nv">static_configs</span><span class="err">:</span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nv">targets</span><span class="err">:</span><span class="w"> </span><span class="p">[</span><span class="err">&#39;192.168.1.100:9090&#39;</span><span class="p">]</span>
+<span class="w">        </span><span class="nv">labels</span><span class="err">:</span>
+<span class="w">          </span><span class="nv">env</span><span class="err">:</span><span class="w"> </span><span class="nv">prod</span><span class="w">      </span><span class="c1"># &lt;--- Here we go</span>
+<span class="w">          </span><span class="nv">region</span><span class="err">:</span><span class="w"> </span><span class="nv">us</span><span class="o">-</span><span class="nv">east</span>
+
+<span class="w">  </span><span class="c1"># Job 2: Scrape env STAGING</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="nv">job_name</span><span class="err">:</span><span class="w"> </span><span class="p">&#39;</span><span class="s">web-app-staging</span><span class="p">&#39;</span>
+<span class="w">    </span><span class="nv">static_configs</span><span class="err">:</span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nv">targets</span><span class="err">:</span><span class="w"> </span><span class="p">[</span><span class="err">&#39;192.168.1.200:9090&#39;</span><span class="p">]</span>
+<span class="w">        </span><span class="nv">labels</span><span class="err">:</span>
+<span class="w">          </span><span class="nv">env</span><span class="err">:</span><span class="w"> </span><span class="nv">staging</span><span class="w">   </span><span class="c1"># &lt;--- Different Label for this target!</span>
+<span class="w">          </span><span class="nv">region</span><span class="err">:</span><span class="w"> </span><span class="nv">us</span><span class="o">-</span><span class="nv">east</span>
+</code></pre></div>
+
+<h3>What is 'Federation' in Prometheus?</h3>
+<p>Short answer for exam: <code>A mechanism for a Prometheus server to scrape metrics from another Prometheus server</code></p>
+<p>Document: <a href="https://prometheus.io/docs/prometheus/latest/federation/#use-cases">https://prometheus.io/docs/prometheus/latest/federation/#use-cases</a></p>
+<div class="highlight"><pre><span></span><code><span class="nv">There</span><span class="w"> </span><span class="nv">are</span><span class="w"> </span><span class="nv">different</span><span class="w"> </span><span class="nv">use</span><span class="w"> </span><span class="nv">cases</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">federation</span>.<span class="w"> </span><span class="nv">Commonly</span>,<span class="w"> </span><span class="nv">it</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">used</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">either</span><span class="w"> </span><span class="nv">achieve</span><span class="w"> </span><span class="nv">scalable</span><span class="w"> </span>
+<span class="nv">Prometheus</span><span class="w"> </span><span class="nv">monitoring</span><span class="w"> </span><span class="nv">setups</span><span class="w"> </span><span class="nv">or</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">pull</span><span class="w"> </span><span class="nv">related</span><span class="w"> </span><span class="nv">metrics</span><span class="w"> </span><span class="nv">from</span><span class="w"> </span><span class="nv">one</span><span class="w"> </span><span class="nv">service</span><span class="err">&#39;s Prometheus into another.</span>
+</code></pre></div>
+
+<h3>What is the <code>external_labels</code> config in Prometheus used for?</h3>
+<p>Seem like same as <code>labels</code> under <code>static_config</code>? No, it's not!</p>
+<p>Instead of set label for specific job, <code>external_labels</code> will set for whole Prometheus instance!</p>
+<p>It was born to identify Prometheus instance.</p>
+<p>Example when we have 2 Prometheus instance for HA. Both of them scrape same targets.
+- Issue when alert, both prometheus instances will yell at fucking Alert Manager. Without <code>external_labels</code>,
+AlertManager will see it is 2 different issues --&gt; duplicate alert!
+- RemoteWrite: when write data into Thanos for long-live storage. Thanos needs to know metrics come from which Prometheus instances
+to <a href="https://www.cloudraft.io/blog/scaling-prometheus-with-thanos"><code>deduplicate</code></a></p>
+<p>From Document Page</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1"># The labels to add to any time series or alerts when communicating with</span>
+<span class="w">  </span><span class="c1"># external systems (federation, remote storage, Alertmanager).</span>
+<span class="w">  </span><span class="c1"># Environment variable references `${var}` or `$var` are replaced according</span>
+<span class="w">  </span><span class="c1"># to the values of the current environment variables.</span>
+<span class="w">  </span><span class="c1"># References to undefined variables are replaced by the empty string.</span>
+<span class="w">  </span><span class="c1"># The `$` character can be escaped by using `$$`.</span>
+</code></pre></div>
+
+<h3>What is <code>Subquery</code>?</h3>
+<p><code>Subquery</code> allow you run query that return <code>Range Vector</code></p>
+<p>Syntax: <code>query[&lt;range&gt;:&lt;resolution&gt;]</code>
+Example: <code>rate(http_requests[5m])[30m:1m]</code> or <code>max_over_time( rate(http_requests_total[5m])[1h:1m] )</code>
+Explain: 
+- <code>[1h:1m]</code> or <code>[30m:1m]</code> is Subquery
+- <code>[1h:1m]</code>: within hour, each minute, calculate the fucking <code>rate</code> for me!
+- Result will be rate values (Range Vector)
+- After that, use <code>max_over_time</code> to find the largest number in that range which return <code>Instant Vector</code></p>
+<p>Prometheus <code>Subquery</code> Cheat Sheet:</p>
+<table>
+<thead>
+<tr>
+<th>Query Type</th>
+<th>Returns</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Normal query</td>
+<td>Instant vector</td>
+<td><code>rate(http_requests_total[5m])</code></td>
+</tr>
+<tr>
+<td>With subquery</td>
+<td>Range vector</td>
+<td><code>rate(http_requests_total[5m])[1h:]</code></td>
+</tr>
+<tr>
+<td>Subquery + _over_time function</td>
+<td>Instant vector</td>
+<td><code>max_over_time(rate(http_requests_total[5m])[1h:])</code></td>
+</tr>
+<tr>
+<td>Subquery + other aggregators (<em>avg</em>, <em>min</em>, <em>last</em>, etc.)</td>
+<td>Instant vector</td>
+<td><code>avg_over_time(rate(node_cpu_seconds_total[5m][5m])[30m:10s])</code></td>
+</tr>
+</tbody>
+</table>
+<p>Document: <a href="https://prometheus.io/docs/prometheus/latest/querying/basics/#subquery">https://prometheus.io/docs/prometheus/latest/querying/basics/#subquery</a></p>
+<h3>You want to scrape a target via HTTPS with a custom CA. Which config param?</h3>
+<div class="highlight"><pre><span></span><code>scrape_configs:
+  <span class="k">-</span> job_name: &#39;scrape-secure-app&#39;
+    # 1. must be https
+    scheme: https 
+
+    static_configs:
+      <span class="k">-</span> targets: [&#39;my-internal-app.local:8443&#39;]
+
+    # 2. config TLS here
+    tls_config:
+      # path to file CA Certificate (file .pem or .crt)
+      ca_file: /etc/prometheus/certs/root-ca.pem
+
+      # (Optional) if server require Client Cert (mTLS) then add 2 lines below:
+      # cert_file: /etc/prometheus/certs/client.pem
+      # key_file: /etc/prometheus/certs/client.key
+
+      # (Optional) if you lazy or just need to test, can bypass check CA with this line (ofc, not recommend for fucking production):
+      # insecure_skip_verify: true
+</code></pre></div>
+
+<h3>What is the danger of <code>count(http_requests_total)</code> without a <code>by()</code> clause?</h3>
+<p>Using count(http_requests_total) without a by() clause is dangerous because it aggregates everything into a single scalar value and strips away all labels, effectively destroying context.</p>
+<ol>
+<li>
+<p>Return nonsense value
+Without by (method, code, instance...), Prometheus counts the total number of time series named http_requests_total across the entire system and returns a single number.</p>
+</li>
+<li>
+<p>Logical Error (Count vs. Sum)
+It is a common mistake to confuse PromQL's <code>count()</code> with SQL's <code>COUNT(*)</code>.</p>
+</li>
+<li>Reality: <code>count()</code> calculates the number of time series (the number of lines on the graph).</li>
+<li>
+<p>Misconception: Users often think it calculates the total volume of requests. To calculate total volume, you must use sum().</p>
+</li>
+<li>
+<p>Examples</p>
+</li>
+</ol>
+<p>Imagine your system has 3 active time series:</p>
+<div class="highlight"><pre><span></span><code>http_requests_total{status=&quot;200&quot;} = 1000
+http_requests_total{status=&quot;404&quot;} = 5
+http_requests_total{status=&quot;500&quot;} = 2
+</code></pre></div>
+
+<ul>
+<li>The Wrong Query (Logic Error): <code>count(http_requests_total)</code> which will return <code>3</code> (Because there are 3 active series). </li>
+<li>The Correct Query (For Volume): <code>sum(http_requests_total)</code> which will return 1007 (The total sum of all values).</li>
+<li>The Correct Query (For Cardinality): <code>count(http_requests_total) by (status)</code> which will return</li>
+</ul>
+<div class="highlight"><pre><span></span><code>{status=&quot;200&quot;} : 1
+{status=&quot;404&quot;} : 1
+{status=&quot;500&quot;} : 1
+</code></pre></div>
+
+<h3>What is scalar() function used for?</h3>
+<p>Let me deep dive into this since I did often see it before but really never understood how it works!</p>
+<p>From Prometheus document:</p>
+<div class="highlight"><pre><span></span><code>Given an input vector that contains only one element with a float sample, scalar(v instant-vector) returns the sample value of that float sample as a scalar...
+</code></pre></div>
+
+<p>Haha, I understand nothing after read that document. Let take some real example!
+- From <a href="https://notes.kodekloud.com/docs/Prometheus-Certified-Associate-PCA/PromQL/Functions#scalar-and-vector-conversions">KodeKloud</a></p>
+<div class="highlight"><pre><span></span><code>$<span class="w"> </span>process_start_time_seconds
+process_start_time_seconds<span class="o">{</span><span class="nv">instance</span><span class="o">=</span><span class="s2">&quot;node1&quot;</span><span class="o">}</span><span class="w"> </span><span class="m">1662763800</span>
+
+$<span class="w"> </span>scalar<span class="o">(</span>process_start_time_seconds<span class="o">)</span>
+scalar<span class="w"> </span><span class="m">1662763800</span>
+</code></pre></div>
+
+<p>Note: It's worth mentioning that scalar() returns NaN (Not a Number) if the input vector does not have exactly one element. If there are 0 or &gt;1 elements, it fails/returns NaN. This is a common exam "gotcha"</p>
+<h3>What does <code>histogram_quantile</code> output unit match?</h3>
+<ul>
+<li>Document: <a href="https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile">https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile</a></li>
+<li>The output unit of histogram_quantile perfectly matches the unit of the original metric (specifically, the value defined in label <code>le</code>).</li>
+<li>Example:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="gh">#</span> TYPE http_request_duration_seconds histogram
+
+http_request_duration_seconds_bucket{le=&quot;0.05&quot;, method=&quot;POST&quot;} 24054
+http_request_duration_seconds_bucket{le=&quot;0.1&quot;,  method=&quot;POST&quot;} 33444
+http_request_duration_seconds_bucket{le=&quot;0.2&quot;,  method=&quot;POST&quot;} 100392
+</code></pre></div>
+
+<h3>How do you select metrics from yesterday?</h3>
+<p>Simple answer: <code>offset</code>
+Example: <code>http_requests_total offset 1d</code> or rate of current hour yesterday <code>rate(http_requests_total[5m] offset 1d)</code>
+Note: <code>offset</code> appear inside <code>rate</code> function, it means: get the 5 minutes data of yesterday, then calculate rate</p>
+<h3>without - block/remove label</h3>
+<p>Syntax: <code>&lt;aggr-op&gt; without (list-label-want-to-remove) (metric_name)</code></p>
+<p>Example we have metric <code>http_requests_total</code> with 4 labels <code>{instance="10.0.0.1", method="POST", status="200", app="backend"}</code>.
+And we don't care about <code>instance</code> and want to remove it from metric labels.
+- Different with <code>by</code>: <code>sum by (method, status, app) (http_requests_total)</code>
+- Same result but with <code>without</code>: <code>sum without (instance) (http_requests_total)</code></p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2025-12-15T00:00:00+07:00">Mon 15 December 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#certification-ref">certification
+                    <span class="superscript">3</span>
+</a></li>
+                <li><a href="/tags.html#linux-foundation-ref">linux-foundation
+                    <span class="superscript">3</span>
+</a></li>
+                <li><a href="/tags.html#pca-ref">pca
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#prometheus-ref">prometheus
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
