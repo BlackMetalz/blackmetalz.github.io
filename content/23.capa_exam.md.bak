@@ -1,0 +1,301 @@
+Title: How I Passed the Certified Argo Project Associate (CAPA) exam
+Date: 2025-12-17
+Category: Knowledge Base
+Tags: argocd, certification, linux-foundation, capa
+
+![alt text](images/2025/12/17.png)
+
+# Prerequisite
+- Basic knowledge of [GitOps](https://blackmetalz.github.io/mastering-gitops-crushing-the-certified-gitops-associate-cgoa-exam.html)
+- ArgoCD setup installation, [ArgoCD Rollout](https://blackmetalz.github.io/canaryblue-green-deployment-with-argo-rollouts.html)
+
+# Section need to understand
+
+### What is the purpose of the `argocd-repo-server` component?
+Short answer: `git clone` and `generate manifests`
+
+The `argocd-repo-server` has two main responsibilities:
+- Repository Management: It clones and maintains a local cache of the Git repository.
+- Manifest Generation: It renders the application manifests (YAML) from the source code using configuration management tools (e.g., Helm, Kustomize).
+
+So in context `Rendered Manifests Pattern` (I generated manifest and push to GitOps repo) how it will work?.
+1. Clone/Fetch
+2. Detect & Parse: without `Chart.yaml` or `kustomization.yaml`, `repo-server` will trigger logic of `Directory Application`.
+3. Return Manifests: `repo-server` will read content of manifests then return it to `Application Controller` (argocd-application-controller)
+
+Document here: [https://argo-cd.readthedocs.io/en/stable/user-guide/directory/](https://argo-cd.readthedocs.io/en/stable/user-guide/directory/)
+
+### What is Argo Workflows?
+Wow, I never heard about Argo Workflows before, only 2 component that I know before were ArgoCD and Argo Rollouts. So let get into work!
+
+Argo Workflows is an open source container-native workflow engine for orchestrating parallel jobs on Kubernetes, native for K8S, Argo Workflows is implemented as a Kubernetes CRD. 
+
+Each step in the workflow is a container. Hmm, this seems not correct. Let me correct it: `Each step calls a template. Templates of type container/script create pods for execution, while other types (dag, steps, resource, suspend) handle orchestration without creating pods`.
+
+Example: It works same as Jenkins, GitHub Actions, or GitLab CI. It does Checkout code -> Build Docker Image -> Run Test -> Push into Registry.
+
+Document: [https://argoproj.github.io/workflows/](https://argoproj.github.io/workflows/)
+
+### How do steps in a workflow pass data to each other?
+The section above is for this question!
+
+Short answer: There are 2 types of data you can pass to each other
+- Parameters (Variable, string)
+- Artifacts (File, Folder)
+
+So let take an example from here for better understanding [https://argo-workflows.readthedocs.io/en/latest/walk-through/output-parameters/](https://argo-workflows.readthedocs.io/en/latest/walk-through/output-parameters/)
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: output-parameter-
+spec:
+  entrypoint: output-parameter
+  templates:
+  - name: output-parameter
+    steps:
+    - - name: generate-parameter
+        template: hello-world-to-file
+    - - name: consume-parameter
+        template: print-message
+        arguments:
+          parameters:
+          # Pass the hello-param output from the generate-parameter step as the message input to print-message
+          - name: message
+            value: "{{steps.generate-parameter.outputs.parameters.hello-param}}"
+
+  - name: hello-world-to-file
+    container:
+      image: busybox
+      command: [sh, -c]
+      args: ["echo -n hello world > /tmp/hello_world.txt"]  # generate the content of hello_world.txt
+    outputs:
+      parameters:
+      - name: hello-param  # name of output parameter
+        valueFrom:
+          path: /tmp/hello_world.txt # set the value of hello-param to the contents of this hello-world.txt
+
+  - name: print-message
+    inputs:
+      parameters:
+      - name: message
+    container:
+      image: busybox
+      command: [echo]
+      args: ["{{inputs.parameters.message}}"]
+```
+
+First, look at `hello-world-to-file` template
+- Action: Container run command `echo -n hello world > /tmp/hello_world.txt`
+- After container finished, but not deleted, Argo Agent will read content of file `/tmp/hello_world.txt` then set that content into variable called `hello-param`. And look at that `valueFrom` is where it's data comes from!
+
+Second, pass data, look at main template `output-parameter` in `steps`, this is where it passes data from outputs to steps
+```yaml
+    - - name: consume-parameter
+        template: print-message
+        arguments:
+          parameters:
+          # Pass the hello-param output from the generate-parameter step as the message input to print-message
+          - name: message
+            value: "{{steps.generate-parameter.outputs.parameters.hello-param}}"
+```
+
+In this step call the template `print-message`, but it said I need to load data for the fucking variable `message`.
+Syntax: `{{steps.<step_name>.outputs.parameters.<variable_name>}}`
+- It pointed to step `generate-parameter`
+- It gets the `hello-param`
+- Then it put into input `message` of current step
+
+Third, look at template `print-message`
+Define: I need the fucking input called `message` to run!
+```yaml
+inputs:
+  parameters:
+  - name: message
+```
+
+Usage:
+```yaml
+args: ["{{inputs.parameters.message}}"]
+```
+- At this moment: `{{inputs.parameters.message}}` will be replaced with "hello world"
+- Command will be `echo "hello world"`
+
+So note for the CAPA exam:
+Where is `outputs` located? 
+- `outputs` defined in template of who created that data.
+- Must use `valueFrom: path: ...` to tell Argo Workflow read from which file.
+
+Reference?
+- In `steps`, when we want to get data, we must use prefix `steps`. Example: `steps.generate-parameter...`
+- If you write with word `steps`, ex: `outputs.parameters` it will be resulted as invalid syntax.
+
+Almost 90 lines for simple explanation xD. But its worth!
+
+### What is the primary CRD for Argo Workflows?
+As for the name and what we have go through, it is `Workflow`.
+
+### In Argo Workflows, what is a 'Suspend' template?
+We can simply understand it as Pause of Workflow!
+
+Document: [https://argo-workflows.readthedocs.io/en/latest/walk-through/suspending/](https://argo-workflows.readthedocs.io/en/latest/walk-through/suspending/)
+
+```
+The suspend template is a template type that will suspend the workflow for a `duration` or `indefinitely`.
+```
+
+For exam, I think it can be best remember with `Suspend = Manual Approval`
+
+### Let's learn about Argo Events
+This is 4th project from [Argo Project](https://argoproj.github.io/) which I have no idea before xD
+
+```
+Argo Events is an event-based dependency manager for Kubernetes which helps you define multiple dependencies from a variety of event sources like webhook, s3, schedules, streams etc. and trigger Kubernetes objects after successful event dependencies resolution
+```
+
+So for exam note:
+- Argo Events = Event-Driven / Dependency Manager.
+- Source = where events raised (GitHub, Slack, SNS, Cron...)
+- Trigger = Trigger something, commonly trigger Argo Workflows
+- Sensor = Dependency Manager. Always have 2 parts: dependencies and triggers
+
+So this is important section, I will try to understand via real example:
+Source: https://github.com/argoproj/argo-events/blob/master/examples/sensors/redis.yaml
+Purpose: This Sensor acts as a bridge between Redis and Argo Workflows.
+- Dependency: It listens for the specific event from the Redis EventSource defined in dependencies.
+```json
+{
+  "header": { "timestamp": "123456" },
+  "body": {
+    "user": "admin",
+    "message": "Hello World"  <-- I want to get this!!!
+  }
+}
+```
+- Parameterization: It dynamically extracts the body.message from the Redis event payload (src) and injects it into the Workflow's arguments (dest). You can understand it as concept "Find & Replace" data from event into Workflow
+```yaml
+parameters:
+        - src:
+            dependencyName: test-dep   # 1. Get from where?
+            dataKey: body.message      # 2. Get what?
+          dest: spec.arguments.parameters.0.value  # 3. Put where? 
+```
+
+- Trigger: Once the dependency is met, it creates the Argo Workflow resource in the cluster.
+
+### Tell me about AnalysisRun in Argo Rollouts
+AnalysisRun is the initialization of AnalysisTemplate. It is responsible for querying the metrics provider and deciding whether the deployment should continue or be rolled back.
+
+### What is Sync Phases and Waves in ArgoCD?
+Document: [https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#sync-phases-and-waves](https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#sync-phases-and-waves)
+
+1. Sync Waves (The "Order")
+- Purpose: Controls the sequence of deployment between resources.
+- Mechanism: Uses integers (e.g., sync-wave: "1"). Lower numbers apply first. (Accepted number lower than 0 also xD)
+- Key Rule: Argo CD waits for the current wave to be Healthy before starting the next wave.
+- Use Case: Start Database (Wave 0) -> Start Backend (Wave 1).
+
+2. Sync Phases (The "Timing/Hooks")
+- Purpose: Controls the lifecycle steps of the synchronization.
+- Mechanism: Three main buckets: PreSync -> Sync (Main) -> PostSync.
+- Key Rule: If a hook (like PreSync) fails, the sync stops.
+- Use Case: Run DB Migration Job (PreSync) -> Deploy App (Sync) -> Send Slack Notification (PostSync).
+
+Summary Relationship:
+```
+Phases define the Strategy (When), and Waves define the Order (Who goes first) within those phases. (Note: You can even have Waves inside a Phase, e.g., multiple PreSync jobs running in order).
+```
+
+Example with sync waves
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-backend
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"  # <--- wait for wave 0 finished then run
+```
+
+Example with sync phases: database migration
+1. PreSync: Database Migration Job
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migration-job
+  annotations:
+    # This is how phase definition
+    argocd.argoproj.io/hook: PreSync
+    
+    # important for CAPA: delete this fucking job job after run to avoid trash
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      containers:
+      - name: migrate
+        image: my-app:v2
+        command: ["./migrate-db.sh"]
+      restartPolicy: Never
+```
+
+2. Sync (Main): Application Deployment
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-backend-app
+  # Without annotation hook, default is Sync phase
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: app
+        image: my-app:v2 # new code need new DB structure
+```
+
+3. PostSync: Notification Job
+This only run after second step is Healthy
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: slack-notification
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      containers:
+      - name: slack-curl
+        image: curlimages/curl
+        command: ["curl", "-X", "POST", "https://hooks.slack.com/...", "-d", "'Deploy Success!'"]
+      restartPolicy: Never
+```
+
+CAPA exam tip: remember annotation `argocd.argoproj.io/hook-delete-policy`. Without this line, next deploy will error because duplicated job name. So there are 2 policies for `hook-delete-policy`
+- `HookSucceeded`: Delete after success (Recommend)
+- `BeforeHookCreation`: Delete old before create new one
+
+### Argo Workflows - DAG templates
+As an alternative to specifying sequences of steps, you can define a workflow as a directed-acyclic graph (DAG) by specifying the dependencies of each task. DAGs can be simpler to maintain for complex workflows and allow for maximum parallelism when running tasks.
+
+Document: [https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/](https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/)
+
+### Which CLI tool is used for Argo Rollouts?
+Document: [https://argo-rollouts.readthedocs.io/en/stable/features/kubectl-plugin/](https://argo-rollouts.readthedocs.io/en/stable/features/kubectl-plugin/)
+Answer: `kubectl argo rollouts`
+
+### What is the 'Executor' in Argo Workflows?
+Document: [https://argo-workflows.readthedocs.io/en/latest/workflow-executors/](https://argo-workflows.readthedocs.io/en/latest/workflow-executors/)
+
+The executor is a process that conforms to a specific interface that allows Argo to perform certain actions like capturing artifacts, logs, etc... Emissary is the default executor
+
+### Which CLI tool is used for Argo Workflows?
+Answer: `argo`
+Document: [https://argo-workflows.readthedocs.io/en/latest/walk-through/argo-cli/](https://argo-workflows.readthedocs.io/en/latest/walk-through/argo-cli/)
+
+### 
