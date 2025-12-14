@@ -2,7 +2,9 @@ Title: How I Passed the Prometheus Certified Associate (PCA) Exam
 Date: 2025-12-15
 Category: Knowledge Base
 Tags: prometheus, certification, linux-foundation, pca
-Summary: A deep dive into my preparation notes, key concepts, and the resources I used to pass the Prometheus Certified Associate (PCA) exam.
+
+
+![alt text](images/2025/12/16.png)
 
 Hey everyone!
 
@@ -14,7 +16,7 @@ I documented my entire learning process in the notes below. I hope they help you
 
 While official documentation is great, nothing beats practicing with realistic scenarios. I used this specific Udemy course to validate my knowledge before the real exam. It covered every edge case I encountered:
 
-👉 **[LINK TO UDEMY COURSE - WIP]**
+**[LINK TO UDEMY COURSE - WIP]**
 
 If you can score well on these practice tests, you are ready for the real thing.
 
@@ -248,16 +250,16 @@ container_cpu * on(pod, namespace) group_left(image, created_by_name, host_ip) k
 
 Common Pitfalls
 ```promql
-# ❌ BAD - Cardinality explosion
+# BAD - Cardinality explosion
 container_cpu * on() group_left(image) kube_pod_info
 
-# ✅ GOOD - Specify matching labels
+# GOOD - Specify matching labels
 container_cpu * on(pod, namespace) group_left(image) kube_pod_info
 
-# ❌ BAD - Wrong side (left has more series than right)
+# BAD - Wrong side (left has more series than right)
 kube_pod_info * on(pod) group_left container_cpu
 
-# ✅ GOOD
+# GOOD
 container_cpu * on(pod) group_left(image) kube_pod_info
 ```
 
