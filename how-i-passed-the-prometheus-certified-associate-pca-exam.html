@@ -250,6 +250,15 @@ You will see section related to <code>cAdvisor</code> like:</p>
 
 <h3>Prometheus metric core type?</h3>
 <p>Prometheus has 4 core types: Counter, Gauge, Histogram, Summary.</p>
+<h3>Histogram</h3>
+<p>Samples observations (like request durations or response sizes) and counts them in configurable buckets. It also provides a sum of all observed values. You can calculate quantiles from the server side using these buckets. Great for aggregating data across multiple instances.</p>
+<h3>Summary</h3>
+<p>Also samples observations but calculates quantiles (like p50, p95, p99) directly on the client side. It provides pre-calculated quantiles, count, and sum. Can't aggregate quantiles across multiple instances though - the quantiles are calculated per instance.</p>
+<h3>Different between Summary and Histogram</h3>
+<ul>
+<li>Histogram does server-side quantile calculation (more flexible for aggregation)</li>
+<li>Summary does client-side quantile calculation (more accurate but can't aggregate).</li>
+</ul>
 <h3>What is RED Method stand for in Prometheus?</h3>
 <p>The 'RED Method' in monitoring, especially for microservices with tools like Prometheus, stands for three key request-focused metrics: Rate (requests per second), Errors (count of failed requests), and Duration (time taken for requests), providing a streamlined view of service health and performance from the user's perspective. (Copy from Google AI xD)</p>
 <h3>What does the 'USE Method' stand for?</h3>
@@ -597,6 +606,14 @@ http_request_duration_seconds_bucket{le=&quot;0.2&quot;,  method=&quot;POST&quot
 <ul>
 <li>Different with <code>by</code>: <code>sum by (method, status, app) (http_requests_total)</code></li>
 <li>Same result but with <code>without</code>: <code>sum without (instance) (http_requests_total)</code></li>
+</ul>
+<h1>Note to the exam</h1>
+<ul>
+<li>Be sure to understand concept of four core metric types. It will give you at least 5 questions in exam!</li>
+<li>Be understand how alert routing works in AlertManager, in exam will have some questions like which team will receive alert.</li>
+<li>The exam required 75/100 to pass, to be honest I didn't take serious training for exam (Lazy AF), but somehow I still pass with 79/100!</li>
+<li>Exam duration: 90 minutes</li>
+<li>Exam questions: 60 questions</li>
 </ul>
 <h1>That's a Wrap!</h1>
 <p>Hope these notes save you some time. If you spot any mistakes or have questions, feel free to reach out.</p>
