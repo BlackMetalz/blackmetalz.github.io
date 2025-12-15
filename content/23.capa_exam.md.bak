@@ -298,4 +298,102 @@ The executor is a process that conforms to a specific interface that allows Argo
 Answer: `argo`
 Document: [https://argo-workflows.readthedocs.io/en/latest/walk-through/argo-cli/](https://argo-workflows.readthedocs.io/en/latest/walk-through/argo-cli/)
 
-### 
+### Which command deletes all completed workflows?
+```
+argo delete --completed
+```
+Related Document: [https://github.com/argoproj/argo-workflows/blob/main/docs/cli/argo_delete.md](https://github.com/argoproj/argo-workflows/blob/main/docs/cli/argo_delete.md)
+
+### How do you run a script (e.g., Python) directly inside a workflow step without building a custom image?
+Short Answer: Use the `script` template type instead of `container`
+
+Example:
+```
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: scripts-python-
+spec:
+  entrypoint: python-script-example
+  templates:
+  - name: python-script-example
+    steps:
+    - - name: generate
+        template: gen-random-int
+
+  - name: gen-random-int
+    script:    # <--- use 'script' instead of 'container'
+      image: python:alpine3.6
+      command: [python]
+      source: |
+        import random
+        i = random.randint(1, 100)
+        print(i)
+```
+
+Document where I copy code xD: [https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/](https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/)
+
+
+### Which annotation allows you to delete a resource from the cluster but keep it in Git without Argo CD recreating it immediately?
+
+```
+argocd.argoproj.io/compare-options: IgnoreExtraneous
+```
+
+Document: [https://argo-cd.readthedocs.io/en/stable/user-guide/compare-options/](https://argo-cd.readthedocs.io/en/stable/user-guide/compare-options/)
+
+### What is argocd-image-updater?
+Another "WoW, what is this?"
+
+So basically it is a tool to automatically update the container images of Kubernetes workloads that are managed by Argo CD as the name of it "ArgoCD image updater" xD
+
+Document: [https://argocd-image-updater.readthedocs.io/en/stable/](https://argocd-image-updater.readthedocs.io/en/stable/)
+
+Example:
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    # 1. Enable feature for image 'my-image'
+    argocd-image-updater.argoproj.io/image-list: my-image=my-registry/my-app
+    
+    # 2. Select strategy to update (ex: only update latest version)
+    # semver: update to highest allowed version according to given image constraint
+    # More strategy: https://argocd-image-updater.readthedocs.io/en/stable/#features
+    argocd-image-updater.argoproj.io/my-image.update-strategy: semver
+    
+    # 3. Write back into Git (Fuck yeah)
+    argocd-image-updater.argoproj.io/write-back-method: git
+spec:
+  # ...
+```
+
+Note for CAPA Exam:
+- Git Write-back: it commits into gitops repo (create new commit with message like: "Update image to v1.1")
+- Argo CD API (Imperative): It tells ArgoCD use this command `argocd app set --parameter`, of course no history for this way.
+
+### ArgoCD Notifications
+
+Argo CD Notifications is a controller that continuously monitors Argo CD applications and sends alerts to external services (like Slack, Email, Telegram, Discord, or Webhooks) when specific events occur.
+
+It relies on three main concepts:
+1.  **Triggers:** Defines **when** to send a notification (e.g., `on-sync-failed`, `on-health-degraded`).
+2.  **Templates:** Defines **what** to say (the message content/format).
+3.  **Services:** Defines **where** to send it (the destination credentials).
+
+Document: [Argo CD Docs - Notifications](https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/)
+
+### What are Application URLs (External URLs)?
+
+This feature allows you to **access your deployed application** directly from the Argo CD UI (via a small "launch" icon on the Service or Ingress resource).
+
+How it works
+- Auto-Discovery: By default, Argo CD tries to automatically find the URL by looking at the `host` field in your Ingress.
+- Manual Configuration: If auto-discovery fails (or if you use `NodePort`), you can manually specify the URL by adding this specific annotation to your Ingress, Service, or Route:
+```yaml
+    link.argocd.argoproj.io/external-link: http://my-app.example.com
+```
+
+Document: [External URL](https://argo-cd.readthedocs.io/en/stable/user-guide/external-url/)
+
