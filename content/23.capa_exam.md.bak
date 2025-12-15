@@ -276,9 +276,10 @@ spec:
       restartPolicy: Never
 ```
 
-CAPA exam tip: remember annotation `argocd.argoproj.io/hook-delete-policy`. Without this line, next deploy will error because duplicated job name. So there are 2 policies for `hook-delete-policy`
+CAPA exam tip: remember annotation `argocd.argoproj.io/hook-delete-policy`. Without this line, next deploy will error because duplicated job name. So there are some policies for `hook-delete-policy`
 - `HookSucceeded`: Delete after success (Recommend)
 - `BeforeHookCreation`: Delete old before create new one
+- `HookFailed`: Delete hook if fails
 
 ### Argo Workflows - DAG templates
 As an alternative to specifying sequences of steps, you can define a workflow as a directed-acyclic graph (DAG) by specifying the dependencies of each task. DAGs can be simpler to maintain for complex workflows and allow for maximum parallelism when running tasks.
@@ -292,7 +293,7 @@ Answer: `kubectl argo rollouts`
 ### What is the 'Executor' in Argo Workflows?
 Document: [https://argo-workflows.readthedocs.io/en/latest/workflow-executors/](https://argo-workflows.readthedocs.io/en/latest/workflow-executors/)
 
-The executor is a process that conforms to a specific interface that allows Argo to perform certain actions like capturing artifacts, logs, etc... Emissary is the default executor
+The executor is a process that conforms to a specific interface that allows Argo to perform certain actions like capturing artifacts, logs, etc... Emissary is the default executor (From version 3.3+, before was Docker!)
 
 ### Which CLI tool is used for Argo Workflows?
 Answer: `argo`
@@ -335,7 +336,7 @@ Document where I copy code xD: [https://argo-workflows.readthedocs.io/en/latest/
 
 
 ### Which annotation allows you to delete a resource from the cluster but keep it in Git without Argo CD recreating it immediately?
-
+- Resource Exclusion or annotation
 ```
 argocd.argoproj.io/compare-options: IgnoreExtraneous
 ```
@@ -371,7 +372,7 @@ spec:
 
 Note for CAPA Exam:
 - Git Write-back: it commits into gitops repo (create new commit with message like: "Update image to v1.1")
-- Argo CD API (Imperative): It tells ArgoCD use this command `argocd app set --parameter`, of course no history for this way.
+- Argo CD API (Imperative): It updates the Application resource directly in the cluster via Argo CD API, without modifying Git.
 
 ### ArgoCD Notifications
 
@@ -396,4 +397,515 @@ How it works
 ```
 
 Document: [External URL](https://argo-cd.readthedocs.io/en/stable/user-guide/external-url/)
+
+
+### Argo Workflows: Artifacts - Passing Files/Folders between Steps
+
+Different from Parameters (string), Artifacts used to pass files/folders between steps.
+
+```yaml
+- name: create-file
+  container:
+    image: alpine:latest
+    command: [sh, -c]
+    args: ["echo 'hello' > /tmp/message.txt"]
+  outputs:
+    artifacts:
+    - name: message-file
+      path: /tmp/message.txt      # Argo grabs this file
+
+- name: print-file
+  inputs:
+    artifacts:
+    - name: message-file          # Same name to receive
+      path: /tmp/received.txt     # Where to put in this container
+  container:
+    image: alpine:latest
+    command: [cat, /tmp/received.txt]
+```
+
+CAPA exam note:
+
+- Parameters = small strings, use `{{steps.xxx.outputs.parameters.yyy}}`
+- Artifacts = files/folders, stored in S3/GCS/Minio (configurable)
+- Artifact storage options: s3, gcs, azure, oss, hdfs, artifactory
+
+### Argo Workflows: WorkflowTemplate vs ClusterWorkflowTemplate
+
+Same concept as ConfigMap vs ClusterRole!
+
+- WorkflowTemplate: Namespaced, only usable within same namespace
+- ClusterWorkflowTemplate: Cluster-wide, usable from any namespace
+
+How to reference:
+```
+steps:
+- - name: call-template
+    templateRef:
+      name: my-template           # Template name
+      template: main              # Which template inside
+      # clusterScope: true        # Add this for ClusterWorkflowTemplate
+```
+
+### Argo Workflows: CronWorkflow - Scheduled Workflows
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: nightly-backup
+spec:
+  schedule: "0 2 * * *"           # Cron syntax
+  timezone: "Asia/Ho_Chi_Minh"
+  concurrencyPolicy: Replace      # What if previous still running?
+  workflowSpec:
+    entrypoint: backup-job
+    templates:
+    - name: backup-job
+      container:
+        image: backup-tool:latest
+```
+
+concurrencyPolicy options (CAPA exam!):
+
+- Allow: Run concurrent (default)
+- Forbid: Skip if previous still running
+- Replace: Kill previous, start new
+
+### Argo Workflows: Retry Strategy & Timeout
+```
+templates:
+- name: flaky-step
+  retryStrategy:
+    limit: 3
+    retryPolicy: "OnFailure"      # Only retry on non-zero exit
+    backoff:
+      duration: "5s"
+      factor: 2                   # 5s -> 10s -> 20s
+  container:
+    image: my-app
+```
+
+retryPolicy options:
+
+- Always: Any failure
+- OnFailure: Non-zero exit code only
+- OnError: Argo errors only (not container failures)
+- OnTransientError: Network issues
+
+Timeout:
+```
+spec:
+  activeDeadlineSeconds: 3600     # Workflow level: 1 hour max
+  templates:
+  - name: task
+    activeDeadlineSeconds: 600    # Template level: 10 min max
+```
+
+### Argo Workflows: Parallelism - withItems, withParam, withSequence
+```
+# Static list
+- name: process
+  template: process-file
+  withItems: ["file1.csv", "file2.csv", "file3.csv"]
+
+# Dynamic list from previous step (JSON array)
+- name: process
+  template: process-file
+  withParam: "{{steps.get-files.outputs.result}}"
+
+# Generate sequence
+- name: process
+  template: work
+  withSequence:
+    count: 5          # 0,1,2,3,4
+    # OR start: 1, end: 10
+```
+
+CAPA exam note:
+- withItems: Static list in YAML
+- withParam: Dynamic JSON array from previous step
+- withSequence: Generate numbers
+
+### Argo Workflows: Exit Handler - Finally block
+
+```
+spec:
+  entrypoint: main
+  onExit: cleanup-handler         # Always run at the end!
+  
+  templates:
+  - name: cleanup-handler
+    container:
+      image: alpine
+      command: [echo, "Cleaning up..."]
+```
+
+CAPA exam note: onExit runs regardless of success/failure - like finally in code.
+
+
+### ArgoCD: Application Source Types
+ArgoCD supports multiple source types. When no `Chart.yaml` or `kustomization.yaml` found, it defaults to Directory (plain YAML).
+
+```yaml
+spec:
+  source:
+    repoURL: https://github.com/my-org/my-repo
+    targetRevision: HEAD
+    path: manifests/
+
+    # For Helm
+    helm:
+      valueFiles:
+        - values-prod.yaml
+      parameters:
+        - name: replicas
+          value: "3"
+
+    # For Kustomize
+    kustomize:
+      namePrefix: prod-
+      images:
+        - my-app:v2.0
+```
+
+CAPA exam note: Know the difference between helm.values (inline) vs helm.valueFiles (from file)
+
+### ArgoCD: Sync Options
+
+Common sync options via annotation or Application spec:
+```yaml
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: |
+      Prune=true
+      SelfHeal=true
+      CreateNamespace=true
+```
+
+CAPA exam note: SelfHeal + Prune = fully automated GitOps (no manual intervention)
+
+### ArgoCD: Health Status vs Sync Status
+Two different things!
+
+- Sync Status: Is cluster state = Git state? (Synced, OutOfSync)
+- Health Status: Is application actually working? (Healthy, Progressing, Degraded, Suspended)
+
+Example: App can be Synced but Degraded (manifests applied but pods crashing)
+
+CAPA exam note: Refresh = check, Sync = apply
+
+
+### ArgoCD: AppProject - RBAC for Applications
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: production
+spec:
+  description: Production apps only
+
+  # Allowed Git sources
+  sourceRepos:
+    - 'https://github.com/my-org/*'
+
+  # Allowed destinations
+  destinations:
+    - namespace: 'prod-*'
+      server: https://kubernetes.default.svc
+
+  # Allowed/Denied resources
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  namespaceResourceBlacklist:
+    - group: ''
+      kind: Secret
+```
+
+CAPA exam note: default project allows everything. Create custom projects to restrict source repos, destinations, and resource types.
+
+### ArgoCD: ApplicationSet - Generate Multiple Apps
+
+Instead of creating 10 Applications manually, use ApplicationSet:
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: my-apps
+spec:
+  generators:
+    # List generator - static list
+    - list:
+        elements:
+          - env: dev
+            namespace: dev
+          - env: prod
+            namespace: prod
+
+  template:
+    metadata:
+      name: 'myapp-{{env}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/org/repo
+        path: 'envs/{{env}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+```
+
+Common generators (CAPA exam!):
+- `list`: Static list of values
+- `clusters`: Generate app per cluster
+- `git`: Generate from directories/files in Git
+- `matrix`: Combine multiple generators
+
+CAPA exam note: App of Apps = manual setup, ApplicationSet = dynamic/automated generation
+
+### Argo Rollouts: AnalysisTemplate vs ClusterAnalysisTemplate
+
+Same pattern again - namespaced vs cluster-wide:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate          # or ClusterAnalysisTemplate
+metadata:
+  name: success-rate
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: success-rate
+      interval: 1m
+      count: 3                   # Run 3 times
+      successCondition: result[0] >= 0.95
+      failureLimit: 1            # Fail after 1 bad result
+      provider:
+        prometheus:
+          address: http://prometheus:9090
+          query: |
+            sum(rate(http_requests_total{status=~"2.*", app="{{args.service-name}}"}[5m])) 
+            / 
+            sum(rate(http_requests_total{app="{{args.service-name}}"}[5m]))
+```
+
+CAPA exam note:
+
+- successCondition: Expression must be true to pass
+- failureLimit: How many failures before rollback
+- count: How many times to run the measurement
+- interval: Time between measurements
+
+### Argo Events: EventBus - Transport Layer
+
+EventBus is the backbone that connects EventSources to Sensors. Think of it as message queue.
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: default
+spec:
+  # Option 1: NATS (default, simplest)
+  nats:
+    native:
+      replicas: 3
+      auth: token
+
+  # Option 2: Jetstream (NATS with persistence)
+  # jetstream:
+  #   version: latest
+
+  # Option 3: Kafka
+  # kafka:
+  #   url: kafka-broker:9092
+```
+
+CAPA exam note:
+- EventBus must exist before EventSource and Sensor work
+- Default name is default - if you name it differently, must reference in EventSource/Sensor
+- NATS = simple, Jetstream = persistent, Kafka = enterprise scale
+
+### Argo Events: Common EventSource Types
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: my-sources
+spec:
+  # Webhook - receive HTTP POST
+  webhook:
+    github-webhook:
+      port: "12000"
+      endpoint: /github
+      method: POST
+
+  # Calendar/Cron - scheduled events
+  calendar:
+    daily-trigger:
+      schedule: "0 9 * * *"      # 9 AM daily
+      timezone: "Asia/Ho_Chi_Minh"
+
+  # AWS SNS
+  sns:
+    my-sns:
+      topicArn: arn:aws:sns:us-east-1:123456789:my-topic
+      region: us-east-1
+
+  # AWS SQS
+  sqs:
+    my-sqs:
+      queue: my-queue
+      region: us-east-1
+
+  # GitHub (native integration)
+  github:
+    repo-events:
+      repositories:
+        - owner: my-org
+          names: [my-repo]
+      events: [push, pull_request]
+      webhook:
+        endpoint: /github
+        port: "13000"
+```
+
+CAPA exam note: One EventSource can have multiple sources of same or different types.
+
+
+### Argo Events: Sensor - Trigger Conditions & Filters
+
+Filter events before triggering:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: my-sensor
+spec:
+  dependencies:
+    - name: github-dep
+      eventSourceName: my-sources
+      eventName: github-webhook
+      filters:
+        data:
+          # Only trigger for 'main' branch
+          - path: body.ref
+            type: string
+            value:
+              - "refs/heads/main"
+        
+        # Time filter - only during work hours
+        time:
+          start: "09:00:00"
+          stop: "18:00:00"
+
+  triggers:
+    - template:
+        name: run-workflow
+        k8s:
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: ci-build-
+              spec:
+                entrypoint: build
+                # ... workflow spec
+```
+
+Filter types (CAPA exam!):
+
+- data: Filter by event payload content
+- time: Filter by time of day
+- context: Filter by event metadata
+- exprs: CEL expressions for complex logic
+
+### Argo Events: Multiple Dependencies - AND/OR Logic
+
+```yaml 
+spec:
+  dependencies:
+    - name: webhook-dep
+      eventSourceName: webhook-source
+      eventName: my-webhook
+    - name: calendar-dep
+      eventSourceName: calendar-source
+      eventName: daily
+
+  triggers:
+    - template:
+        name: my-trigger
+        conditions: "webhook-dep && calendar-dep"  # AND - both must fire
+        # conditions: "webhook-dep || calendar-dep"  # OR - either one
+```
+
+CAPA exam note: Default behavior (no conditions) = AND logic (all dependencies must be satisfied)
+
+
+### Argo Events: Trigger Types
+
+Sensor can trigger different resources:
+
+```yaml 
+triggers:
+  # 1. Create Argo Workflow
+  - template:
+      name: workflow-trigger
+      k8s:
+        operation: create
+        source:
+          resource:
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+
+  # 2. Create any K8s resource
+  - template:
+      name: job-trigger
+      k8s:
+        operation: create
+        source:
+          resource:
+            apiVersion: batch/v1
+            kind: Job
+
+  # 3. HTTP request (webhook out)
+  - template:
+      name: http-trigger
+      http:
+        url: https://api.example.com/webhook
+        method: POST
+
+  # 4. AWS Lambda
+  - template:
+      name: lambda-trigger
+      awsLambda:
+        functionName: my-function
+        region: us-east-1
+```
+
+CAPA exam note: Most common trigger = Argo Workflow, but can trigger **any K8s resource** or external services.
+
+
+### Argo Events: Complete Flow Diagram
+```
+┌─────────────┐     ┌──────────┐     ┌─────────┐     ┌──────────┐
+│ EventSource │ --> │ EventBus │ --> │ Sensor  │ --> │ Workflow │
+│ (webhook,   │     │ (NATS/   │     │ (filter │     │ (or any  │
+│  calendar,  │     │  Kafka)  │     │  +match)│     │  K8s res)│
+│  SNS, etc)  │     │          │     │         │     │          │
+└─────────────┘     └──────────┘     └─────────┘     └──────────┘
+```
+
+CAPA exam note summary:
+
+- EventSource: WHERE events come from
+- EventBus: HOW events are transported
+- Sensor: WHAT to do when events match (filter + trigger)
 
