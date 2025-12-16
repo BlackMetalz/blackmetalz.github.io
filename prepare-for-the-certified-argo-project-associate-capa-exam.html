@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="argocd, certification, linux-foundation, capa, Knowledge Base, " />
+
+<meta property="og:title" content="Prepare for the Certified Argo Project Associate (CAPA) exam "/>
+<meta property="og:url" content="/prepare-for-the-certified-argo-project-associate-capa-exam.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2025-12-17T00:00:00+07:00" />
+<meta name="twitter:title" content="Prepare for the Certified Argo Project Associate (CAPA) exam ">
+<meta name="twitter:description" content="">
+
+        <title>Prepare for the Certified Argo Project Associate (CAPA) exam  · Kienlt&#39;s notebook
+</title>
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       "/"
+                                    >Home</a>
+                                </li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="/prepare-for-the-certified-argo-project-associate-capa-exam.html">
+                Prepare for the Certified Argo Project Associate (CAPA) exam
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p><img alt="alt text" src="images/2025/12/17.png"></p>
+<h1>Prerequisite</h1>
+<ul>
+<li>Basic knowledge of <a href="https://blackmetalz.github.io/mastering-gitops-crushing-the-certified-gitops-associate-cgoa-exam.html">GitOps</a></li>
+<li>ArgoCD setup installation, <a href="https://blackmetalz.github.io/canaryblue-green-deployment-with-argo-rollouts.html">ArgoCD Rollout</a></li>
+</ul>
+<h1>Section need to understand</h1>
+<h3>What is the purpose of the <code>argocd-repo-server</code> component?</h3>
+<p>Short answer: <code>git clone</code> and <code>generate manifests</code></p>
+<p>The <code>argocd-repo-server</code> has two main responsibilities:
+- Repository Management: It clones and maintains a local cache of the Git repository.
+- Manifest Generation: It renders the application manifests (YAML) from the source code using configuration management tools (e.g., Helm, Kustomize).</p>
+<p>So in context <code>Rendered Manifests Pattern</code> (I generated manifest and push to GitOps repo) how it will work?.
+1. Clone/Fetch
+2. Detect &amp; Parse: without <code>Chart.yaml</code> or <code>kustomization.yaml</code>, <code>repo-server</code> will trigger logic of <code>Directory Application</code>.
+3. Return Manifests: <code>repo-server</code> will read content of manifests then return it to <code>Application Controller</code> (argocd-application-controller)</p>
+<p>Document here: <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/directory/">https://argo-cd.readthedocs.io/en/stable/user-guide/directory/</a></p>
+<h3>What is Argo Workflows?</h3>
+<p>Wow, I never heard about Argo Workflows before, only 2 component that I know before were ArgoCD and Argo Rollouts. So let get into work!</p>
+<p>Argo Workflows is an open source container-native workflow engine for orchestrating parallel jobs on Kubernetes, native for K8S, Argo Workflows is implemented as a Kubernetes CRD. </p>
+<p>Each step in the workflow is a container. Hmm, this seems not correct. Let me correct it: <code>Each step calls a template. Templates of type container/script create pods for execution, while other types (dag, steps, resource, suspend) handle orchestration without creating pods</code>.</p>
+<p>Example: It works same as Jenkins, GitHub Actions, or GitLab CI. It does Checkout code -&gt; Build Docker Image -&gt; Run Test -&gt; Push into Registry.</p>
+<p>Document: <a href="https://argoproj.github.io/workflows/">https://argoproj.github.io/workflows/</a></p>
+<h3>How do steps in a workflow pass data to each other?</h3>
+<p>The section above is for this question!</p>
+<p>Short answer: There are 2 types of data you can pass to each other
+- Parameters (Variable, string)
+- Artifacts (File, Folder)</p>
+<p>So let take an example from here for better understanding <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/output-parameters/">https://argo-workflows.readthedocs.io/en/latest/walk-through/output-parameters/</a></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Workflow</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">generateName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output-parameter-</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">entrypoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output-parameter</span>
+<span class="w">  </span><span class="nt">templates</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output-parameter</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generate-parameter</span>
+<span class="w">        </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-world-to-file</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">consume-parameter</span>
+<span class="w">        </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">print-message</span>
+<span class="w">        </span><span class="nt">arguments</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">          </span><span class="c1"># Pass the hello-param output from the generate-parameter step as the message input to print-message</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">message</span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{steps.generate-parameter.outputs.parameters.hello-param}}&quot;</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-world-to-file</span>
+<span class="w">    </span><span class="nt">container</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">busybox</span>
+<span class="w">      </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">sh</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">-c</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;echo</span><span class="nv"> </span><span class="s">-n</span><span class="nv"> </span><span class="s">hello</span><span class="nv"> </span><span class="s">world</span><span class="nv"> </span><span class="s">&gt;</span><span class="nv"> </span><span class="s">/tmp/hello_world.txt&quot;</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># generate the content of hello_world.txt</span>
+<span class="w">    </span><span class="nt">outputs</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-param</span><span class="w">  </span><span class="c1"># name of output parameter</span>
+<span class="w">        </span><span class="nt">valueFrom</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp/hello_world.txt</span><span class="w"> </span><span class="c1"># set the value of hello-param to the contents of this hello-world.txt</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">print-message</span>
+<span class="w">    </span><span class="nt">inputs</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">message</span>
+<span class="w">    </span><span class="nt">container</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">busybox</span>
+<span class="w">      </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">echo</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;{{inputs.parameters.message}}&quot;</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+
+<p>First, look at <code>hello-world-to-file</code> template
+- Action: Container run command <code>echo -n hello world &gt; /tmp/hello_world.txt</code>
+- After container finished, but not deleted, Argo Agent will read content of file <code>/tmp/hello_world.txt</code> then set that content into variable called <code>hello-param</code>. And look at that <code>valueFrom</code> is where it's data comes from!</p>
+<p>Second, pass data, look at main template <code>output-parameter</code> in <code>steps</code>, this is where it passes data from outputs to steps</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">consume-parameter</span>
+<span class="w">        </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">print-message</span>
+<span class="w">        </span><span class="nt">arguments</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">          </span><span class="c1"># Pass the hello-param output from the generate-parameter step as the message input to print-message</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">message</span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{steps.generate-parameter.outputs.parameters.hello-param}}&quot;</span>
+</code></pre></div>
+
+<p>In this step call the template <code>print-message</code>, but it said I need to load data for the fucking variable <code>message</code>.
+Syntax: <code>{{steps.&lt;step_name&gt;.outputs.parameters.&lt;variable_name&gt;}}</code>
+- It pointed to step <code>generate-parameter</code>
+- It gets the <code>hello-param</code>
+- Then it put into input <code>message</code> of current step</p>
+<p>Third, look at template <code>print-message</code>
+Define: I need the fucking input called <code>message</code> to run!</p>
+<div class="highlight"><pre><span></span><code><span class="nt">inputs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">message</span>
+</code></pre></div>
+
+<p>Usage:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;{{inputs.parameters.message}}&quot;</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+
+<ul>
+<li>At this moment: <code>{{inputs.parameters.message}}</code> will be replaced with "hello world"</li>
+<li>Command will be <code>echo "hello world"</code></li>
+</ul>
+<p>So note for the CAPA exam:
+Where is <code>outputs</code> located? 
+- <code>outputs</code> defined in template of who created that data.
+- Must use <code>valueFrom: path: ...</code> to tell Argo Workflow read from which file.</p>
+<p>Reference?
+- In <code>steps</code>, when we want to get data, we must use prefix <code>steps</code>. Example: <code>steps.generate-parameter...</code>
+- If you write with word <code>steps</code>, ex: <code>outputs.parameters</code> it will be resulted as invalid syntax.</p>
+<p>Almost 90 lines for simple explanation xD. But its worth!</p>
+<h3>What is the primary CRD for Argo Workflows?</h3>
+<p>As for the name and what we have go through, it is <code>Workflow</code>.</p>
+<h3>In Argo Workflows, what is a 'Suspend' template?</h3>
+<p>We can simply understand it as Pause of Workflow!</p>
+<p>Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/suspending/">https://argo-workflows.readthedocs.io/en/latest/walk-through/suspending/</a></p>
+<div class="highlight"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="k">suspend</span><span class="w"> </span><span class="n">template</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">template</span><span class="w"> </span><span class="k">type</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="k">suspend</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">workflow</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n n-Quoted">`duration`</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n n-Quoted">`indefinitely`</span><span class="p">.</span>
+</code></pre></div>
+
+<p>For exam, I think it can be best remember with <code>Suspend = Manual Approval</code></p>
+<h3>Let's learn about Argo Events</h3>
+<p>This is 4th project from <a href="https://argoproj.github.io/">Argo Project</a> which I have no idea before xD</p>
+<div class="highlight"><pre><span></span><code><span class="n">Argo</span><span class="w"> </span><span class="n">Events</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">event</span><span class="o">-</span><span class="n">based</span><span class="w"> </span><span class="n">dependency</span><span class="w"> </span><span class="n">manager</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Kubernetes</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">helps</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">define</span><span class="w"> </span><span class="n">multiple</span><span class="w"> </span><span class="n">dependencies</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">variety</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="n">sources</span><span class="w"> </span><span class="n">like</span><span class="w"> </span><span class="n">webhook</span><span class="p">,</span><span class="w"> </span><span class="n">s3</span><span class="p">,</span><span class="w"> </span><span class="n">schedules</span><span class="p">,</span><span class="w"> </span><span class="n">streams</span><span class="w"> </span><span class="n">etc</span><span class="o">.</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">trigger</span><span class="w"> </span><span class="n">Kubernetes</span><span class="w"> </span><span class="n">objects</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="n">successful</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="n">dependencies</span><span class="w"> </span><span class="n">resolution</span>
+</code></pre></div>
+
+<p>So for exam note:
+- Argo Events = Event-Driven / Dependency Manager.
+- Source = where events raised (GitHub, Slack, SNS, Cron...)
+- Trigger = Trigger something, commonly trigger Argo Workflows
+- Sensor = Dependency Manager. Always have 2 parts: dependencies and triggers</p>
+<p>So this is important section, I will try to understand via real example:
+Source: https://github.com/argoproj/argo-events/blob/master/examples/sensors/redis.yaml
+Purpose: This Sensor acts as a bridge between Redis and Argo Workflows.
+- Dependency: It listens for the specific event from the Redis EventSource defined in dependencies.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;header&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123456&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Hello World&quot;</span><span class="w">  </span><span class="err">&lt;</span><span class="mi">--</span><span class="w"> </span><span class="err">I</span><span class="w"> </span><span class="err">wa</span><span class="kc">nt</span><span class="w"> </span><span class="kc">t</span><span class="err">o</span><span class="w"> </span><span class="err">ge</span><span class="kc">t</span><span class="w"> </span><span class="kc">t</span><span class="err">his!!!</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<ul>
+<li>Parameterization: It dynamically extracts the body.message from the Redis event payload (src) and injects it into the Workflow's arguments (dest). You can understand it as concept "Find &amp; Replace" data from event into Workflow</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">src</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-dep</span><span class="w">   </span><span class="c1"># 1. Get from where?</span>
+<span class="w">            </span><span class="nt">dataKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">body.message</span><span class="w">      </span><span class="c1"># 2. Get what?</span>
+<span class="w">          </span><span class="nt">dest</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">spec.arguments.parameters.0.value</span><span class="w">  </span><span class="c1"># 3. Put where? </span>
+</code></pre></div>
+
+<ul>
+<li>Trigger: Once the dependency is met, it creates the Argo Workflow resource in the cluster.</li>
+</ul>
+<h3>Tell me about AnalysisRun in Argo Rollouts</h3>
+<p>AnalysisRun is the initialization of AnalysisTemplate. It is responsible for querying the metrics provider and deciding whether the deployment should continue or be rolled back.</p>
+<h3>What is Sync Phases and Waves in ArgoCD?</h3>
+<p>Document: <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#sync-phases-and-waves">https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#sync-phases-and-waves</a></p>
+<ol>
+<li>Sync Waves (The "Order")</li>
+<li>Purpose: Controls the sequence of deployment between resources.</li>
+<li>Mechanism: Uses integers (e.g., sync-wave: "1"). Lower numbers apply first. (Accepted number lower than 0 also xD)</li>
+<li>Key Rule: Argo CD waits for the current wave to be Healthy before starting the next wave.</li>
+<li>
+<p>Use Case: Start Database (Wave 0) -&gt; Start Backend (Wave 1).</p>
+</li>
+<li>
+<p>Sync Phases (The "Timing/Hooks")</p>
+</li>
+<li>Purpose: Controls the lifecycle steps of the synchronization.</li>
+<li>Mechanism: Three main buckets: PreSync -&gt; Sync (Main) -&gt; PostSync.</li>
+<li>Key Rule: If a hook (like PreSync) fails, the sync stops.</li>
+<li>Use Case: Run DB Migration Job (PreSync) -&gt; Deploy App (Sync) -&gt; Send Slack Notification (PostSync).</li>
+</ol>
+<p>Summary Relationship:</p>
+<div class="highlight"><pre><span></span><code>Phases define the Strategy (When), and Waves define the Order (Who goes first) within those phases. (Note: You can even have Waves inside a Phase, e.g., multiple PreSync jobs running in order).
+</code></pre></div>
+
+<p>Example with sync waves</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-backend</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">argocd.argoproj.io/sync-wave</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span><span class="w">  </span><span class="c1"># &lt;--- wait for wave 0 finished then run</span>
+</code></pre></div>
+
+<p>Example with sync phases: database migration
+1. PreSync: Database Migration Job</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">db-migration-job</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># This is how phase definition</span>
+<span class="w">    </span><span class="nt">argocd.argoproj.io/hook</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PreSync</span>
+
+<span class="w">    </span><span class="c1"># important for CAPA: delete this fucking job job after run to avoid trash</span>
+<span class="w">    </span><span class="nt">argocd.argoproj.io/hook-delete-policy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HookSucceeded</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">migrate</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-app:v2</span>
+<span class="w">        </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;./migrate-db.sh&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span>
+</code></pre></div>
+
+<ol>
+<li>Sync (Main): Application Deployment</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-backend-app</span>
+<span class="w">  </span><span class="c1"># Without annotation hook, default is Sync phase</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-app:v2</span><span class="w"> </span><span class="c1"># new code need new DB structure</span>
+</code></pre></div>
+
+<ol>
+<li>PostSync: Notification Job
+This only run after second step is Healthy</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">slack-notification</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">argocd.argoproj.io/hook</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PostSync</span>
+<span class="w">    </span><span class="nt">argocd.argoproj.io/hook-delete-policy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HookSucceeded</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">slack-curl</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">curlimages/curl</span>
+<span class="w">        </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;curl&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-X&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;POST&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;https://hooks.slack.com/...&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-d&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;&#39;Deploy</span><span class="nv"> </span><span class="s">Success!&#39;&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span>
+</code></pre></div>
+
+<p>CAPA exam tip: remember annotation <code>argocd.argoproj.io/hook-delete-policy</code>. Without this line, next deploy will error because duplicated job name. So there are some policies for <code>hook-delete-policy</code>
+- <code>HookSucceeded</code>: Delete after success (Recommend)
+- <code>BeforeHookCreation</code>: Delete old before create new one
+- <code>HookFailed</code>: Delete hook if fails</p>
+<h3>Argo Workflows - DAG templates</h3>
+<p>As an alternative to specifying sequences of steps, you can define a workflow as a directed-acyclic graph (DAG) by specifying the dependencies of each task. DAGs can be simpler to maintain for complex workflows and allow for maximum parallelism when running tasks.</p>
+<p>Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/">https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/</a></p>
+<h3>Which CLI tool is used for Argo Rollouts?</h3>
+<p>Document: <a href="https://argo-rollouts.readthedocs.io/en/stable/features/kubectl-plugin/">https://argo-rollouts.readthedocs.io/en/stable/features/kubectl-plugin/</a>
+Answer: <code>kubectl argo rollouts</code></p>
+<h3>What is the 'Executor' in Argo Workflows?</h3>
+<p>Document: <a href="https://argo-workflows.readthedocs.io/en/latest/workflow-executors/">https://argo-workflows.readthedocs.io/en/latest/workflow-executors/</a></p>
+<p>The executor is a process that conforms to a specific interface that allows Argo to perform certain actions like capturing artifacts, logs, etc... Emissary is the default executor (From version 3.3+, before was Docker!)</p>
+<h3>Which CLI tool is used for Argo Workflows?</h3>
+<p>Answer: <code>argo</code>
+Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/argo-cli/">https://argo-workflows.readthedocs.io/en/latest/walk-through/argo-cli/</a></p>
+<h3>Which command deletes all completed workflows?</h3>
+<div class="highlight"><pre><span></span><code>argo delete --completed
+</code></pre></div>
+
+<p>Related Document: <a href="https://github.com/argoproj/argo-workflows/blob/main/docs/cli/argo_delete.md">https://github.com/argoproj/argo-workflows/blob/main/docs/cli/argo_delete.md</a></p>
+<h3>How do you run a script (e.g., Python) directly inside a workflow step without building a custom image?</h3>
+<p>Short Answer: Use the <code>script</code> template type instead of <code>container</code></p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
+<span class="n">kind</span><span class="p">:</span><span class="w"> </span><span class="n">Workflow</span>
+<span class="n">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="n">generateName</span><span class="p">:</span><span class="w"> </span><span class="n">scripts</span><span class="o">-</span><span class="n">python</span><span class="o">-</span>
+<span class="n">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="n">entrypoint</span><span class="p">:</span><span class="w"> </span><span class="n">python</span><span class="o">-</span><span class="n">script</span><span class="o">-</span><span class="n">example</span>
+<span class="w">  </span><span class="n">templates</span><span class="p">:</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">python</span><span class="o">-</span><span class="n">script</span><span class="o">-</span><span class="n">example</span>
+<span class="w">    </span><span class="n">steps</span><span class="p">:</span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">generate</span>
+<span class="w">        </span><span class="n">template</span><span class="p">:</span><span class="w"> </span><span class="n">gen</span><span class="o">-</span><span class="n">random</span><span class="o">-</span><span class="nb">int</span>
+
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">gen</span><span class="o">-</span><span class="n">random</span><span class="o">-</span><span class="nb">int</span>
+<span class="w">    </span><span class="n">script</span><span class="p">:</span><span class="w">    </span><span class="c1"># &lt;--- use &#39;script&#39; instead of &#39;container&#39;</span>
+<span class="w">      </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">python</span><span class="p">:</span><span class="n">alpine3</span><span class="mf">.6</span>
+<span class="w">      </span><span class="n">command</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">python</span><span class="p">]</span>
+<span class="w">      </span><span class="n">source</span><span class="p">:</span><span class="w"> </span><span class="o">|</span>
+<span class="w">        </span><span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="w">        </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+<span class="w">        </span><span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Document where I copy code xD: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/">https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/</a></p>
+<h3>Which annotation allows you to delete a resource from the cluster but keep it in Git without Argo CD recreating it immediately?</h3>
+<ul>
+<li>Resource Exclusion or annotation</li>
+</ul>
+<div class="highlight"><pre><span></span><code>argocd.argoproj.io/compare-options: IgnoreExtraneous
+</code></pre></div>
+
+<p>Document: <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/compare-options/">https://argo-cd.readthedocs.io/en/stable/user-guide/compare-options/</a></p>
+<h3>What is argocd-image-updater?</h3>
+<p>Another "WoW, what is this?"</p>
+<p>So basically it is a tool to automatically update the container images of Kubernetes workloads that are managed by Argo CD as the name of it "ArgoCD image updater" xD</p>
+<p>Document: <a href="https://argocd-image-updater.readthedocs.io/en/stable/">https://argocd-image-updater.readthedocs.io/en/stable/</a></p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Application</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># 1. Enable feature for image &#39;my-image&#39;</span>
+<span class="w">    </span><span class="nt">argocd-image-updater.argoproj.io/image-list</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-image=my-registry/my-app</span>
+
+<span class="w">    </span><span class="c1"># 2. Select strategy to update (ex: only update latest version)</span>
+<span class="w">    </span><span class="c1"># semver: update to highest allowed version according to given image constraint</span>
+<span class="w">    </span><span class="c1"># More strategy: https://argocd-image-updater.readthedocs.io/en/stable/#features</span>
+<span class="w">    </span><span class="nt">argocd-image-updater.argoproj.io/my-image.update-strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">semver</span>
+
+<span class="w">    </span><span class="c1"># 3. Write back into Git (Fuck yeah)</span>
+<span class="w">    </span><span class="nt">argocd-image-updater.argoproj.io/write-back-method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># ...</span>
+</code></pre></div>
+
+<p>Note for CAPA Exam:
+- Git Write-back: it commits into gitops repo (create new commit with message like: "Update image to v1.1")
+- Argo CD API (Imperative): It updates the Application resource directly in the cluster via Argo CD API, without modifying Git.</p>
+<h3>ArgoCD Notifications</h3>
+<p>Argo CD Notifications is a controller that continuously monitors Argo CD applications and sends alerts to external services (like Slack, Email, Telegram, Discord, or Webhooks) when specific events occur.</p>
+<p>It relies on three main concepts:
+1.  <strong>Triggers:</strong> Defines <strong>when</strong> to send a notification (e.g., <code>on-sync-failed</code>, <code>on-health-degraded</code>).
+2.  <strong>Templates:</strong> Defines <strong>what</strong> to say (the message content/format).
+3.  <strong>Services:</strong> Defines <strong>where</strong> to send it (the destination credentials).</p>
+<p>Document: <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/">Argo CD Docs - Notifications</a></p>
+<h3>What are Application URLs (External URLs)?</h3>
+<p>This feature allows you to <strong>access your deployed application</strong> directly from the Argo CD UI (via a small "launch" icon on the Service or Ingress resource).</p>
+<p>How it works
+- Auto-Discovery: By default, Argo CD tries to automatically find the URL by looking at the <code>host</code> field in your Ingress.
+- Manual Configuration: If auto-discovery fails (or if you use <code>NodePort</code>), you can manually specify the URL by adding this specific annotation to your Ingress, Service, or Route:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="nt">link.argocd.argoproj.io/external-link</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://my-app.example.com</span>
+</code></pre></div>
+
+<p>Document: <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/external-url/">External URL</a></p>
+<h3>Argo Workflows: Artifacts - Passing Files/Folders between Steps</h3>
+<p>Different from Parameters (string), Artifacts used to pass files/folders between steps.</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">create-file</span>
+<span class="w">  </span><span class="nt">container</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpine:latest</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">sh</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">-c</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;echo</span><span class="nv"> </span><span class="s">&#39;hello&#39;</span><span class="nv"> </span><span class="s">&gt;</span><span class="nv"> </span><span class="s">/tmp/message.txt&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">outputs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">message-file</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp/message.txt</span><span class="w">      </span><span class="c1"># Argo grabs this file</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">print-file</span>
+<span class="w">  </span><span class="nt">inputs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">artifacts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">message-file</span><span class="w">          </span><span class="c1"># Same name to receive</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp/received.txt</span><span class="w">     </span><span class="c1"># Where to put in this container</span>
+<span class="w">  </span><span class="nt">container</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alpine:latest</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">cat</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">/tmp/received.txt</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+
+<p>CAPA exam note:</p>
+<ul>
+<li>Parameters = small strings, use <code>{{steps.xxx.outputs.parameters.yyy}}</code></li>
+<li>Artifacts = files/folders, stored in S3/GCS/Minio (configurable)</li>
+<li>Artifact storage options: s3, gcs, azure, oss, hdfs, artifactory</li>
+</ul>
+<h3>Argo Workflows: WorkflowTemplate vs ClusterWorkflowTemplate</h3>
+<p>Same concept as ConfigMap vs ClusterRole!</p>
+<ul>
+<li>WorkflowTemplate: Namespaced, only usable within same namespace</li>
+<li>ClusterWorkflowTemplate: Cluster-wide, usable from any namespace</li>
+</ul>
+<p>How to reference:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">steps</span>:
+<span class="o">-</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">name</span>:<span class="w"> </span><span class="nv">call</span><span class="o">-</span><span class="nv">template</span>
+<span class="w">    </span><span class="nv">templateRef</span>:
+<span class="w">      </span><span class="nv">name</span>:<span class="w"> </span><span class="nv">my</span><span class="o">-</span><span class="nv">template</span><span class="w">           </span>#<span class="w"> </span><span class="nv">Template</span><span class="w"> </span><span class="nv">name</span>
+<span class="w">      </span><span class="nv">template</span>:<span class="w"> </span><span class="nv">main</span><span class="w">              </span>#<span class="w"> </span><span class="nv">Which</span><span class="w"> </span><span class="nv">template</span><span class="w"> </span><span class="nv">inside</span>
+<span class="w">      </span>#<span class="w"> </span><span class="nv">clusterScope</span>:<span class="w"> </span><span class="nv">true</span><span class="w">        </span>#<span class="w"> </span><span class="nv">Add</span><span class="w"> </span><span class="nv">this</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">ClusterWorkflowTemplate</span>
+</code></pre></div>
+
+<h3>Argo Workflows: CronWorkflow - Scheduled Workflows</h3>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CronWorkflow</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nightly-backup</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">2</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">           </span><span class="c1"># Cron syntax</span>
+<span class="w">  </span><span class="nt">timezone</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Asia/Ho_Chi_Minh&quot;</span>
+<span class="w">  </span><span class="nt">concurrencyPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Replace</span><span class="w">      </span><span class="c1"># What if previous still running?</span>
+<span class="w">  </span><span class="nt">workflowSpec</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">entrypoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-job</span>
+<span class="w">    </span><span class="nt">templates</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-job</span>
+<span class="w">      </span><span class="nt">container</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backup-tool:latest</span>
+</code></pre></div>
+
+<p>concurrencyPolicy options (CAPA exam!):</p>
+<ul>
+<li>Allow: Run concurrent (default)</li>
+<li>Forbid: Skip if previous still running</li>
+<li>Replace: Kill previous, start new</li>
+</ul>
+<h3>Argo Workflows: Retry Strategy &amp; Timeout</h3>
+<div class="highlight"><pre><span></span><code><span class="n">templates</span><span class="o">:</span>
+<span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">flaky</span><span class="o">-</span><span class="n">step</span>
+<span class="w">  </span><span class="n">retryStrategy</span><span class="o">:</span>
+<span class="w">    </span><span class="kr">limit</span><span class="o">:</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">    </span><span class="n">retryPolicy</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;OnFailure&quot;</span><span class="w">      </span><span class="err">#</span><span class="w"> </span><span class="kr">Only</span><span class="w"> </span><span class="n">retry</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">non</span><span class="o">-</span><span class="n">zero</span><span class="w"> </span><span class="n">exit</span>
+<span class="w">    </span><span class="n">backoff</span><span class="o">:</span>
+<span class="w">      </span><span class="n">duration</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;5s&quot;</span>
+<span class="w">      </span><span class="n">factor</span><span class="o">:</span><span class="w"> </span><span class="mi">2</span><span class="w">                   </span><span class="err">#</span><span class="w"> </span><span class="mi">5</span><span class="n">s</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">10</span><span class="n">s</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="mi">20</span><span class="n">s</span>
+<span class="w">  </span><span class="n">container</span><span class="o">:</span>
+<span class="w">    </span><span class="n">image</span><span class="o">:</span><span class="w"> </span><span class="n">my</span><span class="o">-</span><span class="n">app</span>
+</code></pre></div>
+
+<p>retryPolicy options:</p>
+<ul>
+<li>Always: Any failure</li>
+<li>OnFailure: Non-zero exit code only</li>
+<li>OnError: Argo errors only (not container failures)</li>
+<li>OnTransientError: Network issues</li>
+</ul>
+<p>Timeout:</p>
+<div class="highlight"><pre><span></span><code><span class="n">spec</span><span class="o">:</span>
+<span class="w">  </span><span class="n">activeDeadlineSeconds</span><span class="o">:</span><span class="w"> </span><span class="mi">3600</span><span class="w">     </span><span class="err">#</span><span class="w"> </span><span class="n">Workflow</span><span class="w"> </span><span class="n">level</span><span class="o">:</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">hour</span><span class="w"> </span><span class="n">max</span>
+<span class="w">  </span><span class="n">templates</span><span class="o">:</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">task</span>
+<span class="w">    </span><span class="n">activeDeadlineSeconds</span><span class="o">:</span><span class="w"> </span><span class="mi">600</span><span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">Template</span><span class="w"> </span><span class="n">level</span><span class="o">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="n">min</span><span class="w"> </span><span class="n">max</span>
+</code></pre></div>
+
+<h3>Argo Workflows: Parallelism - withItems, withParam, withSequence</h3>
+<div class="highlight"><pre><span></span><code><span class="x"># Static list</span>
+<span class="x">- name: process</span>
+<span class="x">  template: process-file</span>
+<span class="x">  withItems: [&quot;file1.csv&quot;, &quot;file2.csv&quot;, &quot;file3.csv&quot;]</span>
+
+<span class="x"># Dynamic list from previous step (JSON array)</span>
+<span class="x">- name: process</span>
+<span class="x">  template: process-file</span>
+<span class="x">  withParam: &quot;</span><span class="cp">{{</span><span class="nv">steps.get</span><span class="o">-</span><span class="nv">files.outputs.result</span><span class="cp">}}</span><span class="x">&quot;</span>
+
+<span class="x"># Generate sequence</span>
+<span class="x">- name: process</span>
+<span class="x">  template: work</span>
+<span class="x">  withSequence:</span>
+<span class="x">    count: 5          # 0,1,2,3,4</span>
+<span class="x">    # OR start: 1, end: 10</span>
+</code></pre></div>
+
+<p>CAPA exam note:
+- withItems: Static list in YAML
+- withParam: Dynamic JSON array from previous step
+- withSequence: Generate numbers</p>
+<h3>Argo Workflows: Exit Handler - Finally block</h3>
+<div class="highlight"><pre><span></span><code><span class="n">spec</span><span class="o">:</span>
+<span class="w">  </span><span class="n">entrypoint</span><span class="o">:</span><span class="w"> </span><span class="n">main</span>
+<span class="w">  </span><span class="n">onExit</span><span class="o">:</span><span class="w"> </span><span class="n">cleanup</span><span class="o">-</span><span class="n">handler</span><span class="w">         </span><span class="err">#</span><span class="w"> </span><span class="n">Always</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">end</span><span class="o">!</span>
+
+<span class="w">  </span><span class="n">templates</span><span class="o">:</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">cleanup</span><span class="o">-</span><span class="n">handler</span>
+<span class="w">    </span><span class="n">container</span><span class="o">:</span>
+<span class="w">      </span><span class="n">image</span><span class="o">:</span><span class="w"> </span><span class="n">alpine</span>
+<span class="w">      </span><span class="n">command</span><span class="o">:</span><span class="w"> </span><span class="o">[</span><span class="n">echo</span><span class="o">,</span><span class="w"> </span><span class="s2">&quot;Cleaning up...&quot;</span><span class="o">]</span>
+</code></pre></div>
+
+<p>CAPA exam note: onExit runs regardless of success/failure - like finally in code.</p>
+<h3>ArgoCD: Application Source Types</h3>
+<p>ArgoCD supports multiple source types. When no <code>Chart.yaml</code> or <code>kustomization.yaml</code> found, it defaults to Directory (plain YAML).</p>
+<div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/my-org/my-repo</span>
+<span class="w">    </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HEAD</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manifests/</span>
+
+<span class="w">    </span><span class="c1"># For Helm</span>
+<span class="w">    </span><span class="nt">helm</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">valueFiles</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">values-prod.yaml</span>
+<span class="w">      </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">replicas</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span>
+
+<span class="w">    </span><span class="c1"># For Kustomize</span>
+<span class="w">    </span><span class="nt">kustomize</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">namePrefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod-</span>
+<span class="w">      </span><span class="nt">images</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-app:v2.0</span>
+</code></pre></div>
+
+<p>CAPA exam note: Know the difference between helm.values (inline) vs helm.valueFiles (from file)</p>
+<h3>ArgoCD: Sync Options</h3>
+<p>Common sync options via annotation or Application spec:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">argocd.argoproj.io/sync-options</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">      </span><span class="no">Prune=true</span>
+<span class="w">      </span><span class="no">SelfHeal=true</span>
+<span class="w">      </span><span class="no">CreateNamespace=true</span>
+</code></pre></div>
+
+<p>CAPA exam note: SelfHeal + Prune = fully automated GitOps (no manual intervention)</p>
+<h3>ArgoCD: Health Status vs Sync Status</h3>
+<p>Two different things!</p>
+<ul>
+<li>Sync Status: Is cluster state = Git state? (Synced, OutOfSync)</li>
+<li>Health Status: Is application actually working? (Healthy, Progressing, Degraded, Suspended)</li>
+</ul>
+<p>Example: App can be Synced but Degraded (manifests applied but pods crashing)</p>
+<p>CAPA exam note: Refresh = check, Sync = apply</p>
+<h3>ArgoCD: AppProject - RBAC for Applications</h3>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AppProject</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Production apps only</span>
+
+<span class="w">  </span><span class="c1"># Allowed Git sources</span>
+<span class="w">  </span><span class="nt">sourceRepos</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;https://github.com/my-org/*&#39;</span>
+
+<span class="w">  </span><span class="c1"># Allowed destinations</span>
+<span class="w">  </span><span class="nt">destinations</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;prod-*&#39;</span>
+<span class="w">      </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://kubernetes.default.svc</span>
+
+<span class="w">  </span><span class="c1"># Allowed/Denied resources</span>
+<span class="w">  </span><span class="nt">clusterResourceWhitelist</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
+<span class="w">      </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Namespace</span>
+<span class="w">  </span><span class="nt">namespaceResourceBlacklist</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
+<span class="w">      </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Secret</span>
+</code></pre></div>
+
+<p>CAPA exam note: default project allows everything. Create custom projects to restrict source repos, destinations, and resource types.</p>
+<h3>ArgoCD: ApplicationSet - Generate Multiple Apps</h3>
+<p>Instead of creating 10 Applications manually, use ApplicationSet:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ApplicationSet</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-apps</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">generators</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># List generator - static list</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">list</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">elements</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev</span>
+<span class="w">            </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod</span>
+<span class="w">            </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod</span>
+
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;myapp-{{env}}&#39;</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">      </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/org/repo</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;envs/{{env}}&#39;</span>
+<span class="w">      </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://kubernetes.default.svc</span>
+<span class="w">        </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{namespace}}&#39;</span>
+</code></pre></div>
+
+<p>Common generators (CAPA exam!):
+- <code>list</code>: Static list of values
+- <code>clusters</code>: Generate app per cluster
+- <code>git</code>: Generate from directories/files in Git
+- <code>matrix</code>: Combine multiple generators</p>
+<p>CAPA exam note: App of Apps = manual setup, ApplicationSet = dynamic/automated generation</p>
+<h3>Argo Rollouts: AnalysisTemplate vs ClusterAnalysisTemplate</h3>
+<p>Same pattern again - namespaced vs cluster-wide:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AnalysisTemplate</span><span class="w">          </span><span class="c1"># or ClusterAnalysisTemplate</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">success-rate</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">args</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">service-name</span>
+<span class="w">  </span><span class="nt">metrics</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">success-rate</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1m</span>
+<span class="w">      </span><span class="nt">count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">                   </span><span class="c1"># Run 3 times</span>
+<span class="w">      </span><span class="nt">successCondition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">result[0] &gt;= 0.95</span>
+<span class="w">      </span><span class="nt">failureLimit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">            </span><span class="c1"># Fail after 1 bad result</span>
+<span class="w">      </span><span class="nt">provider</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">prometheus</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://prometheus:9090</span>
+<span class="w">          </span><span class="nt">query</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">            </span><span class="no">sum(rate(http_requests_total{status=~&quot;2.*&quot;, app=&quot;{{args.service-name}}&quot;}[5m])) </span>
+<span class="w">            </span><span class="no">/ </span>
+<span class="w">            </span><span class="no">sum(rate(http_requests_total{app=&quot;{{args.service-name}}&quot;}[5m]))</span>
+</code></pre></div>
+
+<p>CAPA exam note:</p>
+<ul>
+<li>successCondition: Expression must be true to pass</li>
+<li>failureLimit: How many failures before rollback</li>
+<li>count: How many times to run the measurement</li>
+<li>interval: Time between measurements</li>
+</ul>
+<h3>Argo Events: EventBus - Transport Layer</h3>
+<p>EventBus is the backbone that connects EventSources to Sensors. Think of it as message queue.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventBus</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Option 1: NATS (default, simplest)</span>
+<span class="w">  </span><span class="nt">nats</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">native</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">      </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token</span>
+
+<span class="w">  </span><span class="c1"># Option 2: Jetstream (NATS with persistence)</span>
+<span class="w">  </span><span class="c1"># jetstream:</span>
+<span class="w">  </span><span class="c1">#   version: latest</span>
+
+<span class="w">  </span><span class="c1"># Option 3: Kafka</span>
+<span class="w">  </span><span class="c1"># kafka:</span>
+<span class="w">  </span><span class="c1">#   url: kafka-broker:9092</span>
+</code></pre></div>
+
+<p>CAPA exam note:
+- EventBus must exist before EventSource and Sensor work
+- Default name is default - if you name it differently, must reference in EventSource/Sensor
+- NATS = simple, Jetstream = persistent, Kafka = enterprise scale</p>
+<h3>Argo Events: Common EventSource Types</h3>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventSource</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-sources</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Webhook - receive HTTP POST</span>
+<span class="w">  </span><span class="nt">webhook</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">github-webhook</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;12000&quot;</span>
+<span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/github</span>
+<span class="w">      </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POST</span>
+
+<span class="w">  </span><span class="c1"># Calendar/Cron - scheduled events</span>
+<span class="w">  </span><span class="nt">calendar</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">daily-trigger</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">9</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span><span class="w">      </span><span class="c1"># 9 AM daily</span>
+<span class="w">      </span><span class="nt">timezone</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Asia/Ho_Chi_Minh&quot;</span>
+
+<span class="w">  </span><span class="c1"># AWS SNS</span>
+<span class="w">  </span><span class="nt">sns</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my-sns</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">topicArn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:sns:us-east-1:123456789:my-topic</span>
+<span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">us-east-1</span>
+
+<span class="w">  </span><span class="c1"># AWS SQS</span>
+<span class="w">  </span><span class="nt">sqs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my-sqs</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">queue</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-queue</span>
+<span class="w">      </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">us-east-1</span>
+
+<span class="w">  </span><span class="c1"># GitHub (native integration)</span>
+<span class="w">  </span><span class="nt">github</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">repo-events</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">repositories</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-org</span>
+<span class="w">          </span><span class="nt">names</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">my-repo</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">events</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">webhook</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/github</span>
+<span class="w">        </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;13000&quot;</span>
+</code></pre></div>
+
+<p>CAPA exam note: One EventSource can have multiple sources of same or different types.</p>
+<h3>Argo Events: Sensor - Trigger Conditions &amp; Filters</h3>
+<p>Filter events before triggering:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sensor</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-sensor</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">dependencies</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github-dep</span>
+<span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-sources</span>
+<span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github-webhook</span>
+<span class="w">      </span><span class="nt">filters</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">data</span><span class="p">:</span>
+<span class="w">          </span><span class="c1"># Only trigger for &#39;main&#39; branch</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">body.ref</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;refs/heads/main&quot;</span>
+
+<span class="w">        </span><span class="c1"># Time filter - only during work hours</span>
+<span class="w">        </span><span class="nt">time</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;09:00:00&quot;</span>
+<span class="w">          </span><span class="nt">stop</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;18:00:00&quot;</span>
+
+<span class="w">  </span><span class="nt">triggers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">run-workflow</span>
+<span class="w">        </span><span class="nt">k8s</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">operation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">create</span>
+<span class="w">          </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">resource</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="w">              </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Workflow</span>
+<span class="w">              </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">generateName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ci-build-</span>
+<span class="w">              </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">entrypoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build</span>
+<span class="w">                </span><span class="c1"># ... workflow spec</span>
+</code></pre></div>
+
+<p>Filter types (CAPA exam!):</p>
+<ul>
+<li>data: Filter by event payload content</li>
+<li>time: Filter by time of day</li>
+<li>context: Filter by event metadata</li>
+<li>exprs: CEL expressions for complex logic</li>
+</ul>
+<h3>Argo Events: Multiple Dependencies - AND/OR Logic</h3>
+<div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">dependencies</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-dep</span>
+<span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-source</span>
+<span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-webhook</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">calendar-dep</span>
+<span class="w">      </span><span class="nt">eventSourceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">calendar-source</span>
+<span class="w">      </span><span class="nt">eventName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">daily</span>
+
+<span class="w">  </span><span class="nt">triggers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-trigger</span>
+<span class="w">        </span><span class="nt">conditions</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;webhook-dep</span><span class="nv"> </span><span class="s">&amp;&amp;</span><span class="nv"> </span><span class="s">calendar-dep&quot;</span><span class="w">  </span><span class="c1"># AND - both must fire</span>
+<span class="w">        </span><span class="c1"># conditions: &quot;webhook-dep || calendar-dep&quot;  # OR - either one</span>
+</code></pre></div>
+
+<p>CAPA exam note: Default behavior (no conditions) = AND logic (all dependencies must be satisfied)</p>
+<h3>Argo Events: Trigger Types</h3>
+<p>Sensor can trigger different resources:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">triggers</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># 1. Create Argo Workflow</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workflow-trigger</span>
+<span class="w">      </span><span class="nt">k8s</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">operation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">create</span>
+<span class="w">        </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">resource</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="w">            </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Workflow</span>
+
+<span class="w">  </span><span class="c1"># 2. Create any K8s resource</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">job-trigger</span>
+<span class="w">      </span><span class="nt">k8s</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">operation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">create</span>
+<span class="w">        </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">resource</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span>
+<span class="w">            </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span>
+
+<span class="w">  </span><span class="c1"># 3. HTTP request (webhook out)</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http-trigger</span>
+<span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://api.example.com/webhook</span>
+<span class="w">        </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POST</span>
+
+<span class="w">  </span><span class="c1"># 4. AWS Lambda</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda-trigger</span>
+<span class="w">      </span><span class="nt">awsLambda</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">functionName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-function</span>
+<span class="w">        </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">us-east-1</span>
+</code></pre></div>
+
+<p>CAPA exam note: Most common trigger = Argo Workflow, but can trigger <strong>any K8s resource</strong> or external services.</p>
+<h3>Argo Events: Complete Flow Diagram</h3>
+<div class="highlight"><pre><span></span><code><span class="err">┌─────────────┐</span><span class="w">     </span><span class="err">┌──────────┐</span><span class="w">     </span><span class="err">┌─────────┐</span><span class="w">     </span><span class="err">┌──────────┐</span>
+<span class="err">│</span><span class="w"> </span><span class="n">EventSource</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="n">EventBus</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="n">Sensor</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="n">Workflow</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="n">webhook</span><span class="p">,</span><span class="w">   </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="n">NATS</span><span class="o">/</span><span class="w">   </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="n">filter</span><span class="w"> </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="kr">or</span><span class="w"> </span><span class="kr">any</span><span class="w">  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">calendar</span><span class="p">,</span><span class="w">  </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">  </span><span class="n">Kafka</span><span class="p">)</span><span class="w">  </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">  </span><span class="o">+</span><span class="n">match</span><span class="p">)</span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">  </span><span class="n">K8s</span><span class="w"> </span><span class="n">res</span><span class="p">)</span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">SNS</span><span class="p">,</span><span class="w"> </span><span class="n">etc</span><span class="p">)</span><span class="w">  </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">          </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">          </span><span class="err">│</span>
+<span class="err">└─────────────┘</span><span class="w">     </span><span class="err">└──────────┘</span><span class="w">     </span><span class="err">└─────────┘</span><span class="w">     </span><span class="err">└──────────┘</span>
+</code></pre></div>
+
+<p>CAPA exam note summary:</p>
+<ul>
+<li>EventSource: WHERE events come from</li>
+<li>EventBus: HOW events are transported</li>
+<li>Sensor: WHAT to do when events match (filter + trigger)</li>
+</ul>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2025-12-17T00:00:00+07:00">Wed 17 December 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#argocd-ref">argocd
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#capa-ref">capa
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#certification-ref">certification
+                    <span class="superscript">4</span>
+</a></li>
+                <li><a href="/tags.html#linux-foundation-ref">linux-foundation
+                    <span class="superscript">4</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
