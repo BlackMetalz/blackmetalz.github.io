@@ -87,7 +87,7 @@
 <li>Role: It acts as a "Gatekeeper" (Admission Controller) sitting right at the API Server door.</li>
 </ul>
 <h3>2. Core Logic (How it works)</h3>
-<p>When you execute kubectl apply -f pod.yaml, the flow is as follows:</p>
+<p>When you execute <code>kubectl apply -f pod.yaml</code>, the flow is as follows:</p>
 <ul>
 <li>The request hits the API Server.</li>
 <li>Kyverno (acting as a Webhook) intercepts the request.</li>
@@ -95,42 +95,26 @@
 <li>If matched, it executes one of the 4 main actions (this is the backbone of the KCA exam):</li>
 </ul>
 <h3>3. Key Capabilities (The 4 Pillars)</h3>
-<ol>
-<li>
 <p>Validation (Most Common)</p>
-</li>
-<li>
-<p>Goal: "Allowed" or "Denied".</p>
-</li>
-<li>
-<p>Example: A Pod must have the label team: dev. If missing -&gt; Block (Enforce) or Warn (Audit).</p>
-</li>
-<li>
+<ul>
+<li>Goal: "Allowed" or "Denied".</li>
+<li>Example: A Pod must have the label team: dev. If missing -&gt; Block (Enforce) or Warn (Audit).</li>
+</ul>
 <p>Mutation (Modify)</p>
-</li>
-<li>
-<p>Goal: Modify the YAML content before it is persisted to the database (etcd).</p>
-</li>
-<li>
-<p>Example: A user creates a Pod but forgets the imagePullPolicy. Kyverno automatically injects imagePullPolicy: Always.</p>
-</li>
-<li>
+<ul>
+<li>Goal: Modify the YAML content before it is persisted to the database (etcd).</li>
+<li>Example: A user creates a Pod but forgets the imagePullPolicy. Kyverno automatically injects imagePullPolicy: Always.</li>
+</ul>
 <p>Generation (Create New) - The "Killer Feature"</p>
-</li>
-<li>
-<p>Goal: Automatically generate additional resources based on a trigger.</p>
-</li>
-<li>
-<p>Example: When a new Namespace is created -&gt; Kyverno automatically generates a default NetworkPolicy and ResourceQuota inside that Namespace.</p>
-</li>
-<li>
+<ul>
+<li>Goal: Automatically generate additional resources based on a trigger.</li>
+<li>Example: When a new Namespace is created -&gt; Kyverno automatically generates a default NetworkPolicy and ResourceQuota inside that Namespace.</li>
+</ul>
 <p>Verify Images (Supply Chain Security)</p>
-</li>
-<li>
-<p>Goal: Check container image signatures.</p>
-</li>
+<ul>
+<li>Goal: Check container image signatures.</li>
 <li>Example: Only allow images signed by the company's private key (integrates with Cosign/Sigstore)</li>
-</ol>
+</ul>
 <h3>4. Anatomy of a Policy</h3>
 <p>A basic Policy file follows this nested structure:</p>
 <ul>
