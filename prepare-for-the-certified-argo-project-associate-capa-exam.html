@@ -114,7 +114,8 @@
 <li>Parameters (Variable, string)</li>
 <li>Artifacts (File, Folder)</li>
 </ul>
-<p>So let take an example from here for better understanding <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/output-parameters/">https://argo-workflows.readthedocs.io/en/latest/walk-through/output-parameters/</a></p>
+<p>So let take an example from here for better understanding 
+<a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/output-parameters/">https://argo-workflows.readthedocs.io/en/latest/walk-through/output-parameters/</a></p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Workflow</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -170,15 +171,15 @@
 <span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{steps.generate-parameter.outputs.parameters.hello-param}}&quot;</span>
 </code></pre></div>
 
-<p>In this step call the template <code>print-message</code>, but it said I need to load data for the fucking variable <code>message</code>.
-Syntax: <code>{{steps.&lt;step_name&gt;.outputs.parameters.&lt;variable_name&gt;}}</code></p>
+<p>In this step call the template <code>print-message</code>, but it said I need to load data for the fucking variable <code>message</code>.</p>
+<p>Syntax: <code>{{steps.&lt;step_name&gt;.outputs.parameters.&lt;variable_name&gt;}}</code></p>
 <ul>
 <li>It pointed to step <code>generate-parameter</code></li>
 <li>It gets the <code>hello-param</code></li>
 <li>Then it put into input <code>message</code> of current step</li>
 </ul>
-<p>Third, look at template <code>print-message</code>
-Define: I need the fucking input called <code>message</code> to run!</p>
+<p>Third, look at template <code>print-message</code></p>
+<p>Define: I need the fucking input called <code>message</code> to run!</p>
 <div class="highlight"><pre><span></span><code><span class="nt">inputs</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">parameters</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">message</span>
