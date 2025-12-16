@@ -86,13 +86,17 @@
 <h1>Section need to understand</h1>
 <h3>What is the purpose of the <code>argocd-repo-server</code> component?</h3>
 <p>Short answer: <code>git clone</code> and <code>generate manifests</code></p>
-<p>The <code>argocd-repo-server</code> has two main responsibilities:
-- Repository Management: It clones and maintains a local cache of the Git repository.
-- Manifest Generation: It renders the application manifests (YAML) from the source code using configuration management tools (e.g., Helm, Kustomize).</p>
-<p>So in context <code>Rendered Manifests Pattern</code> (I generated manifest and push to GitOps repo) how it will work?.
-1. Clone/Fetch
-2. Detect &amp; Parse: without <code>Chart.yaml</code> or <code>kustomization.yaml</code>, <code>repo-server</code> will trigger logic of <code>Directory Application</code>.
-3. Return Manifests: <code>repo-server</code> will read content of manifests then return it to <code>Application Controller</code> (argocd-application-controller)</p>
+<p>The <code>argocd-repo-server</code> has two main responsibilities:</p>
+<ul>
+<li>Repository Management: It clones and maintains a local cache of the Git repository.</li>
+<li>Manifest Generation: It renders the application manifests (YAML) from the source code using configuration management tools (e.g., Helm, Kustomize).</li>
+</ul>
+<p>So in context <code>Rendered Manifests Pattern</code> (I generated manifest and push to GitOps repo) how it will work?.</p>
+<ol>
+<li>Clone/Fetch</li>
+<li>Detect &amp; Parse: without <code>Chart.yaml</code> or <code>kustomization.yaml</code>, <code>repo-server</code> will trigger logic of <code>Directory Application</code>.</li>
+<li>Return Manifests: <code>repo-server</code> will read content of manifests then return it to <code>Application Controller</code> (argocd-application-controller)</li>
+</ol>
 <p>Document here: <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/directory/">https://argo-cd.readthedocs.io/en/stable/user-guide/directory/</a></p>
 <h3>What is Argo Workflows?</h3>
 <p>Wow, I never heard about Argo Workflows before, only 2 component that I know before were ArgoCD and Argo Rollouts. So let get into work!</p>
@@ -146,9 +150,11 @@
 <span class="w">      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;{{inputs.parameters.message}}&quot;</span><span class="p p-Indicator">]</span>
 </code></pre></div>
 
-<p>First, look at <code>hello-world-to-file</code> template
-- Action: Container run command <code>echo -n hello world &gt; /tmp/hello_world.txt</code>
-- After container finished, but not deleted, Argo Agent will read content of file <code>/tmp/hello_world.txt</code> then set that content into variable called <code>hello-param</code>. And look at that <code>valueFrom</code> is where it's data comes from!</p>
+<p>First, look at <code>hello-world-to-file</code> template</p>
+<ul>
+<li>Action: Container run command <code>echo -n hello world &gt; /tmp/hello_world.txt</code></li>
+<li>After container finished, but not deleted, Argo Agent will read content of file <code>/tmp/hello_world.txt</code> then set that content into variable called <code>hello-param</code>. And look at that <code>valueFrom</code> is where it's data comes from!</li>
+</ul>
 <p>Second, pass data, look at main template <code>output-parameter</code> in <code>steps</code>, this is where it passes data from outputs to steps</p>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">consume-parameter</span>
 <span class="w">        </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">print-message</span>
@@ -160,10 +166,12 @@
 </code></pre></div>
 
 <p>In this step call the template <code>print-message</code>, but it said I need to load data for the fucking variable <code>message</code>.
-Syntax: <code>{{steps.&lt;step_name&gt;.outputs.parameters.&lt;variable_name&gt;}}</code>
-- It pointed to step <code>generate-parameter</code>
-- It gets the <code>hello-param</code>
-- Then it put into input <code>message</code> of current step</p>
+Syntax: <code>{{steps.&lt;step_name&gt;.outputs.parameters.&lt;variable_name&gt;}}</code></p>
+<ul>
+<li>It pointed to step <code>generate-parameter</code></li>
+<li>It gets the <code>hello-param</code></li>
+<li>Then it put into input <code>message</code> of current step</li>
+</ul>
 <p>Third, look at template <code>print-message</code>
 Define: I need the fucking input called <code>message</code> to run!</p>
 <div class="highlight"><pre><span></span><code><span class="nt">inputs</span><span class="p">:</span>
@@ -179,13 +187,16 @@ Define: I need the fucking input called <code>message</code> to run!</p>
 <li>At this moment: <code>{{inputs.parameters.message}}</code> will be replaced with "hello world"</li>
 <li>Command will be <code>echo "hello world"</code></li>
 </ul>
-<p>So note for the CAPA exam:
-Where is <code>outputs</code> located? 
-- <code>outputs</code> defined in template of who created that data.
-- Must use <code>valueFrom: path: ...</code> to tell Argo Workflow read from which file.</p>
-<p>Reference?
-- In <code>steps</code>, when we want to get data, we must use prefix <code>steps</code>. Example: <code>steps.generate-parameter...</code>
-- If you write with word <code>steps</code>, ex: <code>outputs.parameters</code> it will be resulted as invalid syntax.</p>
+<p>So note for the CAPA exam: Where is <code>outputs</code> located? </p>
+<ul>
+<li><code>outputs</code> defined in template of who created that data.</li>
+<li>Must use <code>valueFrom: path: ...</code> to tell Argo Workflow read from which file.</li>
+</ul>
+<p>Reference?</p>
+<ul>
+<li>In <code>steps</code>, when we want to get data, we must use prefix <code>steps</code>. Example: <code>steps.generate-parameter...</code></li>
+<li>If you write with word <code>steps</code>, ex: <code>outputs.parameters</code> it will be resulted as invalid syntax.</li>
+</ul>
 <p>Almost 90 lines for simple explanation xD. But its worth!</p>
 <h3>What is the primary CRD for Argo Workflows?</h3>
 <p>As for the name and what we have go through, it is <code>Workflow</code>.</p>
@@ -201,11 +212,13 @@ Where is <code>outputs</code> located?
 <div class="highlight"><pre><span></span><code><span class="n">Argo</span><span class="w"> </span><span class="n">Events</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">event</span><span class="o">-</span><span class="n">based</span><span class="w"> </span><span class="n">dependency</span><span class="w"> </span><span class="n">manager</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Kubernetes</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">helps</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">define</span><span class="w"> </span><span class="n">multiple</span><span class="w"> </span><span class="n">dependencies</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">variety</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="n">sources</span><span class="w"> </span><span class="n">like</span><span class="w"> </span><span class="n">webhook</span><span class="p">,</span><span class="w"> </span><span class="n">s3</span><span class="p">,</span><span class="w"> </span><span class="n">schedules</span><span class="p">,</span><span class="w"> </span><span class="n">streams</span><span class="w"> </span><span class="n">etc</span><span class="o">.</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">trigger</span><span class="w"> </span><span class="n">Kubernetes</span><span class="w"> </span><span class="n">objects</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="n">successful</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="n">dependencies</span><span class="w"> </span><span class="n">resolution</span>
 </code></pre></div>
 
-<p>So for exam note:
-- Argo Events = Event-Driven / Dependency Manager.
-- Source = where events raised (GitHub, Slack, SNS, Cron...)
-- Trigger = Trigger something, commonly trigger Argo Workflows
-- Sensor = Dependency Manager. Always have 2 parts: dependencies and triggers</p>
+<p>So for exam note:</p>
+<ul>
+<li>Argo Events = Event-Driven / Dependency Manager.</li>
+<li>Source = where events raised (GitHub, Slack, SNS, Cron...)</li>
+<li>Trigger = Trigger something, commonly trigger Argo Workflows</li>
+<li>Sensor = Dependency Manager. Always have 2 parts: dependencies and triggers</li>
+</ul>
 <p>So this is important section, I will try to understand via real example:
 Source: https://github.com/argoproj/argo-events/blob/master/examples/sensors/redis.yaml
 Purpose: This Sensor acts as a bridge between Redis and Argo Workflows.
@@ -237,8 +250,12 @@ Purpose: This Sensor acts as a bridge between Redis and Argo Workflows.
 <h3>What is Sync Phases and Waves in ArgoCD?</h3>
 <p>Document: <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#sync-phases-and-waves">https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#sync-phases-and-waves</a></p>
 <ol>
-<li>Sync Waves (The "Order")</li>
-<li>Purpose: Controls the sequence of deployment between resources.</li>
+<li>
+<p>Sync Waves (The "Order")</p>
+</li>
+<li>
+<p>Purpose: Controls the sequence of deployment between resources.</p>
+</li>
 <li>Mechanism: Uses integers (e.g., sync-wave: "1"). Lower numbers apply first. (Accepted number lower than 0 also xD)</li>
 <li>Key Rule: Argo CD waits for the current wave to be Healthy before starting the next wave.</li>
 <li>
@@ -247,7 +264,9 @@ Purpose: This Sensor acts as a bridge between Redis and Argo Workflows.
 <li>
 <p>Sync Phases (The "Timing/Hooks")</p>
 </li>
-<li>Purpose: Controls the lifecycle steps of the synchronization.</li>
+<li>
+<p>Purpose: Controls the lifecycle steps of the synchronization.</p>
+</li>
 <li>Mechanism: Three main buckets: PreSync -&gt; Sync (Main) -&gt; PostSync.</li>
 <li>Key Rule: If a hook (like PreSync) fails, the sync stops.</li>
 <li>Use Case: Run DB Migration Job (PreSync) -&gt; Deploy App (Sync) -&gt; Send Slack Notification (PostSync).</li>
@@ -325,10 +344,12 @@ This only run after second step is Healthy</li>
 <span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span>
 </code></pre></div>
 
-<p>CAPA exam tip: remember annotation <code>argocd.argoproj.io/hook-delete-policy</code>. Without this line, next deploy will error because duplicated job name. So there are some policies for <code>hook-delete-policy</code>
-- <code>HookSucceeded</code>: Delete after success (Recommend)
-- <code>BeforeHookCreation</code>: Delete old before create new one
-- <code>HookFailed</code>: Delete hook if fails</p>
+<p>CAPA exam tip: remember annotation <code>argocd.argoproj.io/hook-delete-policy</code>. Without this line, next deploy will error because duplicated job name. So there are some policies for <code>hook-delete-policy</code></p>
+<ul>
+<li><code>HookSucceeded</code>: Delete after success (Recommend)</li>
+<li><code>BeforeHookCreation</code>: Delete old before create new one</li>
+<li><code>HookFailed</code>: Delete hook if fails</li>
+</ul>
 <h3>Argo Workflows - DAG templates</h3>
 <p>As an alternative to specifying sequences of steps, you can define a workflow as a directed-acyclic graph (DAG) by specifying the dependencies of each task. DAGs can be simpler to maintain for complex workflows and allow for maximum parallelism when running tasks.</p>
 <p>Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/">https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/</a></p>
@@ -408,16 +429,20 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 - Argo CD API (Imperative): It updates the Application resource directly in the cluster via Argo CD API, without modifying Git.</p>
 <h3>ArgoCD Notifications</h3>
 <p>Argo CD Notifications is a controller that continuously monitors Argo CD applications and sends alerts to external services (like Slack, Email, Telegram, Discord, or Webhooks) when specific events occur.</p>
-<p>It relies on three main concepts:
-1.  <strong>Triggers:</strong> Defines <strong>when</strong> to send a notification (e.g., <code>on-sync-failed</code>, <code>on-health-degraded</code>).
-2.  <strong>Templates:</strong> Defines <strong>what</strong> to say (the message content/format).
-3.  <strong>Services:</strong> Defines <strong>where</strong> to send it (the destination credentials).</p>
+<p>It relies on three main concepts:</p>
+<ol>
+<li><strong>Triggers:</strong> Defines <strong>when</strong> to send a notification (e.g., <code>on-sync-failed</code>, <code>on-health-degraded</code>).</li>
+<li><strong>Templates:</strong> Defines <strong>what</strong> to say (the message content/format).</li>
+<li><strong>Services:</strong> Defines <strong>where</strong> to send it (the destination credentials).</li>
+</ol>
 <p>Document: <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/">Argo CD Docs - Notifications</a></p>
 <h3>What are Application URLs (External URLs)?</h3>
 <p>This feature allows you to <strong>access your deployed application</strong> directly from the Argo CD UI (via a small "launch" icon on the Service or Ingress resource).</p>
-<p>How it works
-- Auto-Discovery: By default, Argo CD tries to automatically find the URL by looking at the <code>host</code> field in your Ingress.
-- Manual Configuration: If auto-discovery fails (or if you use <code>NodePort</code>), you can manually specify the URL by adding this specific annotation to your Ingress, Service, or Route:</p>
+<p>How it works:</p>
+<ul>
+<li>Auto-Discovery: By default, Argo CD tries to automatically find the URL by looking at the <code>host</code> field in your Ingress.</li>
+<li>Manual Configuration: If auto-discovery fails (or if you use <code>NodePort</code>), you can manually specify the URL by adding this specific annotation to your Ingress, Service, or Route:</li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="nt">link.argocd.argoproj.io/external-link</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://my-app.example.com</span>
 </code></pre></div>
 
@@ -535,10 +560,12 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <span class="x">    # OR start: 1, end: 10</span>
 </code></pre></div>
 
-<p>CAPA exam note:
-- withItems: Static list in YAML
-- withParam: Dynamic JSON array from previous step
-- withSequence: Generate numbers</p>
+<p>CAPA exam note:</p>
+<ul>
+<li>withItems: Static list in YAML</li>
+<li>withParam: Dynamic JSON array from previous step</li>
+<li>withSequence: Generate numbers</li>
+</ul>
 <h3>Argo Workflows: Exit Handler - Finally block</h3>
 <div class="highlight"><pre><span></span><code><span class="n">spec</span><span class="o">:</span>
 <span class="w">  </span><span class="n">entrypoint</span><span class="o">:</span><span class="w"> </span><span class="n">main</span>
