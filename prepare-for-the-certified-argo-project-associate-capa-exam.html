@@ -394,8 +394,8 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <span class="w">        </span><span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 </code></pre></div>
 
-<p>Document where I copy code xD: 
-<a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/">https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/</a></p>
+<p>Document where I copy code xD: </p>
+<p><a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/">https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/</a></p>
 <h3>Which annotation allows you to delete a resource from the cluster but keep it in Git without Argo CD recreating it immediately?</h3>
 <p>Resource Exclusion or annotation</p>
 <div class="highlight"><pre><span></span><code>argocd.argoproj.io/compare-options: IgnoreExtraneous
@@ -681,11 +681,13 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <span class="w">        </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{namespace}}&#39;</span>
 </code></pre></div>
 
-<p>Common generators (CAPA exam!):
-- <code>list</code>: Static list of values
-- <code>clusters</code>: Generate app per cluster
-- <code>git</code>: Generate from directories/files in Git
-- <code>matrix</code>: Combine multiple generators</p>
+<p>Common generators (CAPA exam!):</p>
+<ul>
+<li><code>list</code>: Static list of values</li>
+<li><code>clusters</code>: Generate app per cluster</li>
+<li><code>git</code>: Generate from directories/files in Git</li>
+<li><code>matrix</code>: Combine multiple generators</li>
+</ul>
 <p>CAPA exam note: App of Apps = manual setup, ApplicationSet = dynamic/automated generation</p>
 <h3>Argo Rollouts: AnalysisTemplate vs ClusterAnalysisTemplate</h3>
 <p>Same pattern again - namespaced vs cluster-wide:</p>
@@ -740,10 +742,12 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <span class="w">  </span><span class="c1">#   url: kafka-broker:9092</span>
 </code></pre></div>
 
-<p>CAPA exam note:
-- EventBus must exist before EventSource and Sensor work
-- Default name is default - if you name it differently, must reference in EventSource/Sensor
-- NATS = simple, Jetstream = persistent, Kafka = enterprise scale</p>
+<p>CAPA exam note:</p>
+<ul>
+<li>EventBus must exist before EventSource and Sensor work</li>
+<li>Default name is default - if you name it differently, must reference in EventSource/Sensor</li>
+<li>NATS = simple, Jetstream = persistent, Kafka = enterprise scale</li>
+</ul>
 <h3>Argo Events: Common EventSource Types</h3>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventSource</span>
