@@ -101,14 +101,19 @@
 <h3>What is Argo Workflows?</h3>
 <p>Wow, I never heard about Argo Workflows before, only 2 component that I know before were ArgoCD and Argo Rollouts. So let get into work!</p>
 <p>Argo Workflows is an open source container-native workflow engine for orchestrating parallel jobs on Kubernetes, native for K8S, Argo Workflows is implemented as a Kubernetes CRD. </p>
-<p>Each step in the workflow is a container. Hmm, this seems not correct. Let me correct it: <code>Each step calls a template. Templates of type container/script create pods for execution, while other types (dag, steps, resource, suspend) handle orchestration without creating pods</code>.</p>
+<p>Each step in the workflow is a container. Hmm, this seems not correct. Let me correct it: </p>
+<div class="highlight"><pre><span></span><code><span class="nx">Each</span><span class="w"> </span><span class="nx">step</span><span class="w"> </span><span class="nx">calls</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">template</span><span class="p">.</span><span class="w"> </span><span class="nx">Templates</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="k">type</span><span class="w"> </span><span class="nx">container</span><span class="o">/</span><span class="nx">script</span><span class="w"> </span><span class="nx">create</span><span class="w"> </span><span class="nx">pods</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">execution</span><span class="p">,</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nx">other</span><span class="w"> </span><span class="nx">types</span><span class="w"> </span><span class="p">(</span><span class="nx">dag</span><span class="p">,</span><span class="w"> </span><span class="nx">steps</span><span class="p">,</span><span class="w"> </span><span class="nx">resource</span><span class="p">,</span><span class="w"> </span><span class="nx">suspend</span><span class="p">)</span><span class="w"> </span><span class="nx">handle</span><span class="w"> </span><span class="nx">orchestration</span><span class="w"> </span><span class="nx">without</span><span class="w"> </span><span class="nx">creating</span><span class="w"> </span><span class="nx">pods</span>
+</code></pre></div>
+
 <p>Example: It works same as Jenkins, GitHub Actions, or GitLab CI. It does Checkout code -&gt; Build Docker Image -&gt; Run Test -&gt; Push into Registry.</p>
 <p>Document: <a href="https://argoproj.github.io/workflows/">https://argoproj.github.io/workflows/</a></p>
 <h3>How do steps in a workflow pass data to each other?</h3>
 <p>The section above is for this question!</p>
-<p>Short answer: There are 2 types of data you can pass to each other
-- Parameters (Variable, string)
-- Artifacts (File, Folder)</p>
+<p>Short answer: There are 2 types of data you can pass to each other</p>
+<ul>
+<li>Parameters (Variable, string)</li>
+<li>Artifacts (File, Folder)</li>
+</ul>
 <p>So let take an example from here for better understanding <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/output-parameters/">https://argo-workflows.readthedocs.io/en/latest/walk-through/output-parameters/</a></p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Workflow</span>
@@ -219,10 +224,12 @@ Define: I need the fucking input called <code>message</code> to run!</p>
 <li>Trigger = Trigger something, commonly trigger Argo Workflows</li>
 <li>Sensor = Dependency Manager. Always have 2 parts: dependencies and triggers</li>
 </ul>
-<p>So this is important section, I will try to understand via real example:
-Source: https://github.com/argoproj/argo-events/blob/master/examples/sensors/redis.yaml
-Purpose: This Sensor acts as a bridge between Redis and Argo Workflows.
-- Dependency: It listens for the specific event from the Redis EventSource defined in dependencies.</p>
+<p>So this is important section, I will try to understand via real example:</p>
+<p>Source: https://github.com/argoproj/argo-events/blob/master/examples/sensors/redis.yaml</p>
+<p>Purpose: This Sensor acts as a bridge between Redis and Argo Workflows.</p>
+<ul>
+<li>Dependency: It listens for the specific event from the Redis EventSource defined in dependencies.</li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;header&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123456&quot;</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -249,28 +256,20 @@ Purpose: This Sensor acts as a bridge between Redis and Argo Workflows.
 <p>AnalysisRun is the initialization of AnalysisTemplate. It is responsible for querying the metrics provider and deciding whether the deployment should continue or be rolled back.</p>
 <h3>What is Sync Phases and Waves in ArgoCD?</h3>
 <p>Document: <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#sync-phases-and-waves">https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#sync-phases-and-waves</a></p>
-<ol>
-<li>
-<p>Sync Waves (The "Order")</p>
-</li>
-<li>
-<p>Purpose: Controls the sequence of deployment between resources.</p>
-</li>
+<p>Sync Waves (The "Order"):</p>
+<ul>
+<li>Purpose: Controls the sequence of deployment between resources.</li>
 <li>Mechanism: Uses integers (e.g., sync-wave: "1"). Lower numbers apply first. (Accepted number lower than 0 also xD)</li>
 <li>Key Rule: Argo CD waits for the current wave to be Healthy before starting the next wave.</li>
-<li>
-<p>Use Case: Start Database (Wave 0) -&gt; Start Backend (Wave 1).</p>
-</li>
-<li>
-<p>Sync Phases (The "Timing/Hooks")</p>
-</li>
-<li>
-<p>Purpose: Controls the lifecycle steps of the synchronization.</p>
-</li>
+<li>Use Case: Start Database (Wave 0) -&gt; Start Backend (Wave 1).</li>
+</ul>
+<p>Sync Phases (The "Timing/Hooks"):</p>
+<ul>
+<li>Purpose: Controls the lifecycle steps of the synchronization.</li>
 <li>Mechanism: Three main buckets: PreSync -&gt; Sync (Main) -&gt; PostSync.</li>
 <li>Key Rule: If a hook (like PreSync) fails, the sync stops.</li>
 <li>Use Case: Run DB Migration Job (PreSync) -&gt; Deploy App (Sync) -&gt; Send Slack Notification (PostSync).</li>
-</ol>
+</ul>
 <p>Summary Relationship:</p>
 <div class="highlight"><pre><span></span><code>Phases define the Strategy (When), and Waves define the Order (Who goes first) within those phases. (Note: You can even have Waves inside a Phase, e.g., multiple PreSync jobs running in order).
 </code></pre></div>
@@ -284,8 +283,10 @@ Purpose: This Sensor acts as a bridge between Redis and Argo Workflows.
 <span class="w">    </span><span class="nt">argocd.argoproj.io/sync-wave</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span><span class="w">  </span><span class="c1"># &lt;--- wait for wave 0 finished then run</span>
 </code></pre></div>
 
-<p>Example with sync phases: database migration
-1. PreSync: Database Migration Job</p>
+<p>Example with sync phases: database migration</p>
+<ul>
+<li>PreSync: Database Migration Job</li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -306,9 +307,9 @@ Purpose: This Sensor acts as a bridge between Redis and Argo Workflows.
 <span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span>
 </code></pre></div>
 
-<ol>
+<ul>
 <li>Sync (Main): Application Deployment</li>
-</ol>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -323,10 +324,10 @@ Purpose: This Sensor acts as a bridge between Redis and Argo Workflows.
 <span class="w">        </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-app:v2</span><span class="w"> </span><span class="c1"># new code need new DB structure</span>
 </code></pre></div>
 
-<ol>
+<ul>
 <li>PostSync: Notification Job
 This only run after second step is Healthy</li>
-</ol>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -354,8 +355,8 @@ This only run after second step is Healthy</li>
 <p>As an alternative to specifying sequences of steps, you can define a workflow as a directed-acyclic graph (DAG) by specifying the dependencies of each task. DAGs can be simpler to maintain for complex workflows and allow for maximum parallelism when running tasks.</p>
 <p>Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/">https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/</a></p>
 <h3>Which CLI tool is used for Argo Rollouts?</h3>
-<p>Document: <a href="https://argo-rollouts.readthedocs.io/en/stable/features/kubectl-plugin/">https://argo-rollouts.readthedocs.io/en/stable/features/kubectl-plugin/</a>
-Answer: <code>kubectl argo rollouts</code></p>
+<p>Document: <a href="https://argo-rollouts.readthedocs.io/en/stable/features/kubectl-plugin/">https://argo-rollouts.readthedocs.io/en/stable/features/kubectl-plugin/</a></p>
+<p>Answer: <code>kubectl argo rollouts</code></p>
 <h3>What is the 'Executor' in Argo Workflows?</h3>
 <p>Document: <a href="https://argo-workflows.readthedocs.io/en/latest/workflow-executors/">https://argo-workflows.readthedocs.io/en/latest/workflow-executors/</a></p>
 <p>The executor is a process that conforms to a specific interface that allows Argo to perform certain actions like capturing artifacts, logs, etc... Emissary is the default executor (From version 3.3+, before was Docker!)</p>
@@ -392,11 +393,10 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <span class="w">        </span><span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 </code></pre></div>
 
-<p>Document where I copy code xD: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/">https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/</a></p>
+<p>Document where I copy code xD: 
+<a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/">https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/</a></p>
 <h3>Which annotation allows you to delete a resource from the cluster but keep it in Git without Argo CD recreating it immediately?</h3>
-<ul>
-<li>Resource Exclusion or annotation</li>
-</ul>
+<p>Resource Exclusion or annotation</p>
 <div class="highlight"><pre><span></span><code>argocd.argoproj.io/compare-options: IgnoreExtraneous
 </code></pre></div>
 
@@ -424,9 +424,11 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <span class="w">  </span><span class="c1"># ...</span>
 </code></pre></div>
 
-<p>Note for CAPA Exam:
-- Git Write-back: it commits into gitops repo (create new commit with message like: "Update image to v1.1")
-- Argo CD API (Imperative): It updates the Application resource directly in the cluster via Argo CD API, without modifying Git.</p>
+<p>Note for CAPA Exam:</p>
+<ul>
+<li>Git Write-back: it commits into gitops repo (create new commit with message like: "Update image to v1.1")</li>
+<li>Argo CD API (Imperative): It updates the Application resource directly in the cluster via Argo CD API, without modifying Git.</li>
+</ul>
 <h3>ArgoCD Notifications</h3>
 <p>Argo CD Notifications is a controller that continuously monitors Argo CD applications and sends alerts to external services (like Slack, Email, Telegram, Discord, or Webhooks) when specific events occur.</p>
 <p>It relies on three main concepts:</p>
