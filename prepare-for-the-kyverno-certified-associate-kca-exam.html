@@ -1156,6 +1156,43 @@ kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> <
 <span class="c1"># Output: true</span>
 </code></pre></div>
 
+<h1>My secret weapons - Mock Exam</h1>
+<p>Here is the link Udemy Practice Test: </p>
+<p><a href="https://www.udemy.com/course/complete-certified-kyverno-associate-kca-exam-prep/">https://www.udemy.com/course/complete-certified-kyverno-associate-kca-exam-prep/</a></p>
+<h1>Exam Note</h1>
+<ul>
+<li>Exam duration: 90 minutes</li>
+<li>Exam questions: 60 questions</li>
+<li>The exam required 75/100 to pass, and I scored 80/100!</li>
+</ul>
+<h3>Some extra section that appeared in exam!</h3>
+<ul>
+<li>Need to remember correct flow: Authn/Authz --&gt; Mutating --&gt; Schema Validation -&gt; Validate --&gt; ETCD</li>
+<li>Auto Gen feature, remember annotation xD: https://release-1-8-0.kyverno.io/docs/writing-policies/autogen/</li>
+<li>TTL Default of Certification in Kyverno: https://pkg.go.dev/github.com/kyverno/kyverno/pkg/tls</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="nx">CAValidityDuration</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">365</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">24</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Hour</span><span class="w">      </span><span class="c1">// 365 days</span>
+<span class="w">    </span><span class="nx">TLSValidityDuration</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">150</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">24</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Hour</span><span class="w">     </span><span class="c1">// 150 days</span>
+<span class="w">    </span><span class="nx">CertRenewalInterval</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">12</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Hour</span><span class="w">           </span><span class="c1">// 12 hours</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<ul>
+<li>Concurrent Policies Generation Number Default!</li>
+<li>PolicyException CRD</li>
+<li>CEL</li>
+<li>CLI Commands with parameter, yes the fucking parameter you don't heard it wrong! </li>
+</ul>
+<p>It is pretty hard to get perfect number even in scenario I take another test for Kyverno since some question is really advanced for me! I only scored 82/100!</p>
+<h1>Conclusion</h1>
+<ul>
+<li>Understand everything in this article</li>
+<li>Take exam notes</li>
+<li>Scored &gt;80 in Mock exams. 4 Exams in totals</li>
+</ul>
+<p>Good luck!!!</p>
+
 
              
  
