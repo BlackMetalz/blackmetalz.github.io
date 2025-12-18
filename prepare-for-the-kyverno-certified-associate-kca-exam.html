@@ -1167,10 +1167,19 @@ kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> <
 </ul>
 <h3>Some extra section that appeared in exam!</h3>
 <ul>
-<li>Need to remember correct flow: Authn/Authz --&gt; Mutating --&gt; Schema Validation -&gt; Validate --&gt; ETCD</li>
-<li>Auto Gen feature, remember annotation xD: https://release-1-8-0.kyverno.io/docs/writing-policies/autogen/</li>
-<li>TTL Default of Certification in Kyverno: https://pkg.go.dev/github.com/kyverno/kyverno/pkg/tls</li>
+<li>Need to remember correct flow: </li>
 </ul>
+<div class="highlight"><pre><span></span><code><span class="n">Authn</span><span class="o">/</span><span class="n">Authz</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Mutating</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Schema</span><span class="w"> </span><span class="n">Validation</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kr">Validate</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">ETCD</span>
+</code></pre></div>
+
+<ul>
+<li>Auto Gen feature, remember annotation xD: </li>
+</ul>
+<p>https://release-1-8-0.kyverno.io/docs/writing-policies/autogen/</p>
+<ul>
+<li>TTL Default of Certification in Kyverno: </li>
+</ul>
+<p>https://pkg.go.dev/github.com/kyverno/kyverno/pkg/tls</p>
 <div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="p">(</span>
 <span class="w">    </span><span class="nx">CAValidityDuration</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">365</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">24</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Hour</span><span class="w">      </span><span class="c1">// 365 days</span>
 <span class="w">    </span><span class="nx">TLSValidityDuration</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">150</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">24</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Hour</span><span class="w">     </span><span class="c1">// 150 days</span>
