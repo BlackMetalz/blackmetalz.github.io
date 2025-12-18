@@ -348,6 +348,8 @@ To check if a label exists, you might use a JMESPath expression like:
 <span class="w">          </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Equals</span>
 <span class="w">          </span><span class="c1"># Note: In JMESPath, `contains` returns true/false. </span>
 <span class="w">          </span><span class="c1"># We check if the &#39;env&#39; label value contains the string &#39;production&#39;.</span>
+<span class="w">          </span><span class="c1"># || &#39;&#39; is the fucking fallback, because contains(null, &#39;production&#39;) will error</span>
+<span class="w">          </span><span class="c1"># But contains(&#39;&#39;, &#39;production&#39;) will not!!!</span>
 <span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">contains(request.object.metadata.labels.env</span><span class="nv"> </span><span class="s">||</span><span class="nv"> </span><span class="s">&#39;&#39;,</span><span class="nv"> </span><span class="s">&#39;production&#39;)</span><span class="nv"> </span><span class="s">}}&quot;</span>
 
 <span class="w">      </span><span class="c1"># 2. VALIDATION: The actual check to enforce</span>
@@ -359,7 +361,7 @@ To check if a label exists, you might use a JMESPath expression like:
 <span class="w">              </span><span class="nt">contact-email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;?*&quot;</span>
 </code></pre></div>
 
-<p>This will be blocked</p>
+<p>This will be blocked duo to missing <code>contact-email</code> annotation.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -372,7 +374,7 @@ To check if a label exists, you might use a JMESPath expression like:
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
 </code></pre></div>
 
-<p>This will be allowed</p>
+<p>This will be allowed because env is not <code>production</code> haha</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -553,6 +555,14 @@ You will need Cleanup policy: https://kyverno.io/docs/policy-types/cleanup-polic
 <span class="w">      </span><span class="c1"># Logic: If the &#39;team&#39; label is missing (empty), it matches this rule -&gt; DELETE.</span>
 </code></pre></div>
 
+<p>When not to use Background Scan or <code>background: false</code>. When policy use following variables</p>
+<ul>
+<li><code>request.userInfo.*</code></li>
+<li><code>request.operation</code></li>
+<li><code>request.dryRun</code></li>
+<li><code>serviceAccountName</code> in admission context</li>
+</ul>
+<p>Because background scan doesn't has admission request context, only resource data!</p>
 <h3>What is failurePolicy?</h3>
 <p>This setting defines how Kubernetes should react if the Kyverno controller is DOWN (crashed, timed out, or unreachable).</p>
 <p>It determines whether the cluster should "Fail Closed" (Block everything) or "Fail Open" (Let everything pass) during a system outage.</p>
@@ -806,6 +816,37 @@ validate-role-from-configmap:
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Egress</span>
 </code></pre></div>
 
+<p>Explain for flows:</p>
+<ul>
+<li>User create Namespace "kienlt-vip-pro"</li>
+<li>Kyverno trigger match and generate NetworkPolicy</li>
+</ul>
+<div class="highlight"><pre><span></span><code>  - name: default-deny
+  - namespace: dev-team-a  ← lấy từ request.object.metadata.name
+  - Block all Ingress/Egress
+</code></pre></div>
+
+<ul>
+<li>Result: New namespace will have NetworkPolicy <code>deny-all</code>. Actual resource created</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default-deny</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kienlt-vip-pro</span><span class="w">    </span><span class="c1"># from request</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span><span class="w">          </span><span class="c1"># all pods</span>
+<span class="w">  </span><span class="nt">policyTypes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span><span class="w">              </span><span class="c1"># block incoming</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Egress</span><span class="w">               </span><span class="c1"># block outgoing</span>
+</code></pre></div>
+
+<p>Explain for synchronize:</p>
+<ul>
+<li><code>synchronize: true</code>: Kyverno complete managed lifecycle</li>
+<li><code>synchronize: false</code>: Kyverno created for the first time then user can edit it manually without getting revert back like <code>synchronize: true</code></li>
+</ul>
+<p>This is example for pattern <code>zero-trust by default!</code></p>
 <h3>VerifyImages Example</h3>
 <div class="highlight"><pre><span></span><code><span class="nt">verifyImages</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">imageReferences</span><span class="p">:</span>
@@ -968,6 +1009,151 @@ validate-role-from-configmap:
 <span class="mf">4.</span><span class="w"> </span><span class="err">[?</span><span class="n">emptyDir</span><span class="w"> </span><span class="err">!</span><span class="o">=</span><span class="w"> </span><span class="n">null</span><span class="err">]</span><span class="w"> </span><span class="n">filters</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="kr">list</span><span class="w"> </span><span class="kr">to</span><span class="w"> </span><span class="n">keep</span><span class="w"> </span><span class="kr">on</span><span class="n">ly</span><span class="w"> </span><span class="n">volumes</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">field</span><span class="mf">.</span>
 <span class="mf">5.</span><span class="w"> </span><span class="mf">.</span><span class="n">name</span><span class="w"> </span><span class="n">extracts</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="c1">remaining items.</span>
 <span class="mf">6.</span><span class="w"> </span><span class="n">Some</span><span class="w"> </span><span class="n">JMESPath</span><span class="w"> </span><span class="n">implementations</span><span class="w"> </span><span class="n">allow</span><span class="w"> </span><span class="err">[?</span><span class="n">emptyDir</span><span class="err">]</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">shorthand</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="s">&quot;not null&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">but</span><span class="w"> </span><span class="err">!</span><span class="o">=</span><span class="w"> </span><span class="n">null</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">strict</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">many</span><span class="w"> </span><span class="n">exams</span><span class="mf">.</span>
+</code></pre></div>
+
+<h3>Kyverno JP CLI examples xD</h3>
+<div class="highlight"><pre><span></span><code><span class="err">#</span><span class="w"> </span><span class="err">objec</span><span class="kc">t</span><span class="err">.jso</span><span class="kc">n</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;apiVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Pod&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;web-app&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;namespace&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;labels&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;app&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nginx&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;team&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;platform&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;annotations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;contact-email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;team@example.com&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;spec&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;containers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nginx&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;image&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nginx:1.25&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;ports&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;containerPort&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TCP&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;containerPort&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">443</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;protocol&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TCP&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;limits&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;memory&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;256Mi&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;cpu&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;500m&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sidecar&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;image&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fluentd:latest&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;ports&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;volumes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;config&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;configMap&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;app-config&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;data&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;emptyDir&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;secret&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;secret&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;secretName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;app-secret&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Basic Selection:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Get Pod Name</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s1">&#39;metadata.name&#39;</span>
+<span class="c1"># Output: &quot;web-app&quot;</span>
+
+<span class="c1"># Get namespace</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s1">&#39;metadata.namespace&#39;</span>
+<span class="c1"># Output: &quot;production&quot;</span>
+
+<span class="c1"># Get all labels</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s1">&#39;metadata.labels&#39;</span>
+<span class="c1"># Output: {&quot;app&quot;:&quot;nginx&quot;,&quot;env&quot;:&quot;production&quot;,&quot;team&quot;:&quot;platform&quot;}</span>
+
+<span class="c1"># Get specific label </span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s1">&#39;metadata.labels.env&#39;</span>
+<span class="c1"># Output: &quot;production&quot;</span>
+</code></pre></div>
+
+<p>Array Access:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Get first container</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s1">&#39;spec.containers[0]&#39;</span>
+<span class="c1"># Output: {&quot;name&quot;:&quot;nginx&quot;,&quot;image&quot;:&quot;nginx:1.25&quot;,...}</span>
+
+<span class="c1"># get first container name</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s1">&#39;spec.containers[0].name&#39;</span>
+<span class="c1"># Output: &quot;nginx&quot;</span>
+
+<span class="c1"># Get all containers name</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s1">&#39;spec.containers[].name&#39;</span>
+<span class="c1"># Output: [&quot;nginx&quot;,&quot;sidecar&quot;]</span>
+
+<span class="c1"># Get all images</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s1">&#39;spec.containers[].image&#39;</span>
+<span class="c1"># Output: [&quot;nginx:1.25&quot;,&quot;fluentd:latest&quot;]</span>
+</code></pre></div>
+
+<p>Filtering with <code>[? ]</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Find container image contains &quot;latest&quot;</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s2">&quot;spec.containers[?contains(image, &#39;latest&#39;)]&quot;</span>
+<span class="c1"># Output: [{&quot;name&quot;:&quot;sidecar&quot;,&quot;image&quot;:&quot;fluentd:latest&quot;,...}]</span>
+
+<span class="c1"># Find container named &quot;nginx&quot;</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s2">&quot;spec.containers[?name == &#39;nginx&#39;]&quot;</span>
+<span class="c1"># Output: [{&quot;name&quot;:&quot;nginx&quot;,&quot;image&quot;:&quot;nginx:1.25&quot;,...}]</span>
+
+<span class="c1"># find volumes has emptyDir</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s2">&quot;spec.volumes[?emptyDir != null]&quot;</span>
+<span class="c1"># Output: [{&quot;name&quot;:&quot;data&quot;,&quot;emptyDir&quot;:{}}]</span>
+
+<span class="c1"># find volumes has configMap</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s2">&quot;spec.volumes[?configMap != null].name&quot;</span>
+<span class="c1"># Output: [&quot;config&quot;]</span>
+</code></pre></div>
+
+<p>Counting with <code>length()</code></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># count containers</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s1">&#39;spec.containers | length(@)&#39;</span>
+<span class="c1"># Output: 2</span>
+
+<span class="c1"># count volumes</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s1">&#39;spec.volumes | length(@)&#39;</span>
+<span class="c1"># Output: 3</span>
+
+<span class="c1"># count containers using &quot;latest&quot; tag</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s2">&quot;spec.containers[?contains(image, &#39;latest&#39;)] | length(@)&quot;</span>
+<span class="c1"># Output: 1</span>
+</code></pre></div>
+
+<p>Null Handling with <code>||</code></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Label exists</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s2">&quot;metadata.labels.env || &#39;not-set&#39;&quot;</span>
+<span class="c1"># Output: &quot;production&quot;</span>
+
+<span class="c1"># Label not exists - fallback to default</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s2">&quot;metadata.labels.tier || &#39;not-set&#39;&quot;</span>
+<span class="c1"># Output: &quot;not-set&quot;</span>
+
+<span class="c1"># Check annotation exists or not!</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s2">&quot;metadata.annotations.description || &#39;no-description&#39;&quot;</span>
+<span class="c1"># Output: &quot;no-description&quot;</span>
+</code></pre></div>
+
+<p>Combined Examples (Exam-style)</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Get all containerPort of container &quot;nginx&quot;</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s2">&quot;spec.containers[?name == &#39;nginx&#39;].ports[].containerPort&quot;</span>
+<span class="c1"># Output: [80,443]</span>
+
+<span class="c1"># Check if container missing resources.limits!</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s2">&quot;spec.containers[?resources.limits == null].name&quot;</span>
+<span class="c1"># Output: [&quot;sidecar&quot;]</span>
+
+<span class="c1"># Get memory limit of the first container</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s2">&quot;spec.containers[0].resources.limits.memory || &#39;not-set&#39;&quot;</span>
+<span class="c1"># Output: &quot;256Mi&quot;</span>
+
+<span class="c1"># Check label &quot;env&quot; ccontains &quot;prod&quot;</span>
+kyverno<span class="w"> </span>jp<span class="w"> </span>query<span class="w"> </span>-i<span class="w"> </span>object.json<span class="w"> </span><span class="s2">&quot;contains(metadata.labels.env || &#39;&#39;, &#39;prod&#39;)&quot;</span>
+<span class="c1"># Output: true</span>
 </code></pre></div>
 
 
