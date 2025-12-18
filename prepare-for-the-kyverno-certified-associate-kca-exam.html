@@ -822,7 +822,7 @@ validate-role-from-configmap:
 <li>Kyverno trigger match and generate NetworkPolicy</li>
 </ul>
 <div class="highlight"><pre><span></span><code>  - name: default-deny
-  - namespace: dev-team-a  ← lấy từ request.object.metadata.name
+  - namespace: dev-team-a  ← get from request.object.metadata.name
   - Block all Ingress/Egress
 </code></pre></div>
 
