@@ -260,7 +260,8 @@
 <p>Documentation: https://kyverno.io/docs/policy-types/cluster-policy/variables/</p>
 <p>What is request.object? </p>
 <p><code>request.object</code> is the incoming resource configuration (the new state) that is being submitted to Kubernetes API server.</p>
-<p>Practical Example 1 - Access resource name: If you create namespace <code>prod</code> -&gt; <code>{{request.object.metadata.name}}</code> = <code>"prod"</code></p>
+<p>Practical Example 1 - Access resource name: If you create namespace </p>
+<p><code>prod</code> -&gt; <code>{{request.object.metadata.name}}</code> = <code>"prod"</code></p>
 <div class="highlight"><pre><span></span><code><span class="nt">validate</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Creating</span><span class="nv"> </span><span class="s">namespace:</span><span class="nv"> </span><span class="s">{{request.object.metadata.name}}&quot;</span>
 <span class="w">  </span><span class="nt">pattern</span><span class="p">:</span>
@@ -716,18 +717,26 @@ validate-role-from-configmap:
 
 <h3>Default Port in Kyverno</h3>
 <p>Here is the list of default ports used by Kyverno:</p>
-<p>Webhook Server Port 9443 (HTTPS/TCP):
-- <strong>Purpose:</strong> This is the secure port where the Kubernetes API Server sends Admission Requests to Kyverno.
-- <strong>Usage:</strong> It handles policy validation and mutation logic.</p>
-<p>Metrics Port 8000 (HTTP/TCP):
-- <strong>Purpose:</strong> Exposes Prometheus metrics.
-- <strong>Usage:</strong> Scraped by Prometheus at <code>/metrics</code> to monitor policy execution counts, latency, and rule results.</p>
-<p>Probes / Health Check Port 8080 (HTTP/TCP): 
-- <strong>Purpose:</strong> Used for Liveness and Readiness probes.
-- <strong>Usage:</strong> The Kubelet checks <code>/health/liveness</code> and <code>/health/readiness</code> on this port to ensure the Pod is healthy.</p>
-<p>Pprof (Profiler) Port 6060 (HTTP/TCP): (Optional):
-- <strong>Purpose:</strong> Used for debugging and profiling Go performance.
-- <strong>Usage:</strong> Disabled by default. Only open if you specifically enable profiling flags for debugging.</p>
+<p>Webhook Server Port 9443 (HTTPS/TCP):</p>
+<ul>
+<li><strong>Purpose:</strong> This is the secure port where the Kubernetes API Server sends Admission Requests to Kyverno.</li>
+<li><strong>Usage:</strong> It handles policy validation and mutation logic.</li>
+</ul>
+<p>Metrics Port 8000 (HTTP/TCP):</p>
+<ul>
+<li><strong>Purpose:</strong> Exposes Prometheus metrics.</li>
+<li><strong>Usage:</strong> Scraped by Prometheus at <code>/metrics</code> to monitor policy execution counts, latency, and rule results.</li>
+</ul>
+<p>Probes / Health Check Port 8080 (HTTP/TCP): </p>
+<ul>
+<li><strong>Purpose:</strong> Used for Liveness and Readiness probes.</li>
+<li><strong>Usage:</strong> The Kubelet checks <code>/health/liveness</code> and <code>/health/readiness</code> on this port to ensure the Pod is healthy.</li>
+</ul>
+<p>Pprof (Profiler) Port 6060 (HTTP/TCP): (Optional):</p>
+<ul>
+<li><strong>Purpose:</strong> Used for debugging and profiling Go performance.</li>
+<li><strong>Usage:</strong> Disabled by default. Only open if you specifically enable profiling flags for debugging.</li>
+</ul>
 <p><strong>Summary:</strong> The most critical port is <strong>9443</strong>, as that is the main communication line between Kubernetes and Kyverno.</p>
 <h3>Kyverno Mutate - JSON Patch</h3>
 <p><strong>patchesJson6902</strong> is a mutation method used when you need <strong>surgical precision</strong> to modify a resource.</p>
@@ -772,6 +781,144 @@ validate-role-from-configmap:
 <ul>
 <li><strong>Official Docs:</strong> <a href="https://main.kyverno.io/docs/policy-types/cluster-policy/mutate/#rfc-6902-jsonpatch">Kyverno Mutate - JSON Patch</a></li>
 </ul>
+<hr>
+<h1>More for JMESPath which will appear a lot in exam xD</h1>
+<h3>Filtering (Critical)</h3>
+<p>The exam often asks: "Block the Pod if ANY container uses an image with the 'latest' tag" or "Find containers that do not have memory limits set".</p>
+<p>You must use the <code>[?expression]</code> syntax.</p>
+<p>Syntax: <code>request.object.spec.containers[? filter_condition ]</code></p>
+<p>Example: Find all containers where the image starts with "nginx":</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Returns a list of container objects that match the condition</span>
+<span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">request.object.spec.containers</span><span class="p p-Indicator">[?</span><span class="nv">starts_with(image</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;nginx&#39;</span><span class="nv">)</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+</code></pre></div>
+
+<p>Kyverno Application (Deny if found):</p>
+<div class="highlight"><pre><span></span><code><span class="nt">validate</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Nginx</span><span class="nv"> </span><span class="s">images</span><span class="nv"> </span><span class="s">are</span><span class="nv"> </span><span class="s">not</span><span class="nv"> </span><span class="s">allowed!&quot;</span>
+<span class="w">  </span><span class="nt">deny</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">conditions</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">all</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># Filter the list. Use length() to count. </span>
+<span class="w">      </span><span class="c1"># If count &gt; 0, it means a violation exists -&gt; Block.</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">request.object.spec.containers[?starts_with(image,</span><span class="nv"> </span><span class="s">&#39;nginx&#39;)]</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">length(@)</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">        </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GreaterThan</span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+</code></pre></div>
+
+<h3>Pipe Operator | (Projection)</h3>
+<p>Used to extract a specific field from a complex object into a flat list.</p>
+<p>Example: You don't want the whole container object; you just want a list of image names.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Input: List of container objects</span>
+<span class="c1"># Output: [&quot;nginx:latest&quot;, &quot;redis:alpine&quot;, &quot;busybox&quot;]</span>
+<span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">request.object.spec.containers[].image</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</code></pre></div>
+
+<p>Exam Combo (Filter + Pipe): "Get the containerPort of the container named 'app'" <code>request.object.spec.containers[?name == 'app'].ports[].containerPort</code></p>
+<h3>Null Handling (The Exam Trap)</h3>
+<p>This is where many people fail. If a field does not exist in the YAML, JMESPath returns null, causing the Policy to crash or behave unexpectedly.</p>
+<p>Use the || (OR) operator to set a default value.</p>
+<p>Example: Check the team label. What if the Pod has no labels at all?</p>
+<ul>
+<li>Risk: <code>{{ request.object.metadata.labels.team }}</code> (If null -&gt; Error).</li>
+<li>Safe: <code>{{ request.object.metadata.labels.team || '' }}</code> (If null -&gt; treat as empty string).</li>
+</ul>
+<p>Kyverno Application:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">preconditions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">all</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">request.object.metadata.labels.team</span><span class="nv"> </span><span class="s">||</span><span class="nv"> </span><span class="s">&#39;no-team&#39;</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">    </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Equals</span>
+<span class="w">    </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;production&quot;</span>
+</code></pre></div>
+
+<h3>The length() function</h3>
+<p>Used to limit the quantity of a resource.</p>
+<p>Example: "A Pod must not have more than 3 containers."</p>
+<div class="highlight"><pre><span></span><code><span class="nt">validate</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">deny</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">conditions</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">all</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">request.object.spec.containers</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">length(@)</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">        </span><span class="nt">operator</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GreaterThan</span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</code></pre></div>
+
+<h3>Sample JMESPath question #1</h3>
+<p>Scenario: You are writing a policy against the following Pod JSON. Analyze this JSON and answer the 3 questions below.</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">{</span>
+<span class="w">  </span><span class="s">&quot;apiVersion&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;v1&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">  </span><span class="s">&quot;kind&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;Pod&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">  </span><span class="s">&quot;metadata&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">    </span><span class="s">&quot;name&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;backend-app&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">    </span><span class="s">&quot;labels&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">      </span><span class="s">&quot;app&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;backend&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">      </span><span class="s">&quot;env&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;production&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="p p-Indicator">},</span>
+<span class="w">  </span><span class="s">&quot;spec&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span>
+<span class="w">    </span><span class="s">&quot;containers&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">[</span>
+<span class="w">      </span><span class="p p-Indicator">{</span>
+<span class="w">        </span><span class="s">&quot;name&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;main-app&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">        </span><span class="s">&quot;image&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;my-org/app:v1&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">        </span><span class="s">&quot;ports&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">[</span>
+<span class="w">          </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="s">&quot;containerPort&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">8080</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;protocol&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;TCP&quot;</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">        </span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="p p-Indicator">},</span>
+<span class="w">      </span><span class="p p-Indicator">{</span>
+<span class="w">        </span><span class="s">&quot;name&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;sidecar-logger&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">        </span><span class="s">&quot;image&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;fluentd:latest&quot;</span><span class="p p-Indicator">,</span>
+<span class="w">        </span><span class="s">&quot;ports&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">      </span><span class="p p-Indicator">}</span>
+<span class="w">    </span><span class="p p-Indicator">],</span>
+<span class="w">    </span><span class="s">&quot;volumes&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">[</span>
+<span class="w">      </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="s">&quot;name&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;config&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;configMap&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="s">&quot;name&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;app-conf&quot;</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"> </span><span class="p p-Indicator">},</span>
+<span class="w">      </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="s">&quot;name&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;data&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;emptyDir&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{}</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<span class="w">    </span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="p p-Indicator">}</span>
+<span class="p p-Indicator">}</span>
+</code></pre></div>
+
+<p>Question Basic Selection: You need to extract the name of the first container in the list</p>
+<ul>
+<li>Answer:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>spec.containers[0].name
+</code></pre></div>
+
+<ul>
+<li>Explanation: In JMESPath, you access array items by index using brackets [0].</li>
+</ul>
+<p>Question Filtering &amp; Counting: You want to check how many containers are using the latest tag. Which JMESPath expression returns the <code>count (integer)</code>?</p>
+<ul>
+<li>Answer:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>spec.containers[?contains(image, &#39;latest&#39;)] | length(@)
+</code></pre></div>
+
+<ul>
+<li>Explanation:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>- spec.containers[...]: Access the list
+- [?contains(image, &#39;latest&#39;)]: Filter the list to keep only objects where the image string contains &quot;latest&quot;.
+- | length(@): Pipe the result to the length function to count them.
+</code></pre></div>
+
+<p>Complex Projection: You want to find the names of all volumes that are of type <code>emptyDir</code>. Which expression returns <code>["data"]</code>?</p>
+<ul>
+<li>Answer: </li>
+</ul>
+<div class="highlight"><pre><span></span><code>spec.volumes[?emptyDir != null].name
+</code></pre></div>
+
+<ul>
+<li>Explanation:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="mf">1.</span><span class="w"> </span><span class="n">We</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="kr">to</span><span class="w"> </span><span class="n">check</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">field</span><span class="w"> </span><span class="n">emptyDir</span><span class="w"> </span><span class="n">exists</span><span class="mf">.</span>
+<span class="mf">2.</span><span class="w"> </span><span class="n">In</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">first</span><span class="w"> </span><span class="n">volume</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;config&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">emptyDir</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">missing</span><span class="w"> </span><span class="p">(</span><span class="n">null</span><span class="p">)</span><span class="mf">.</span>
+<span class="mf">3.</span><span class="w"> </span><span class="n">In</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">second</span><span class="w"> </span><span class="n">volume</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;data&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">emptyDir</span><span class="w"> </span><span class="n">exists</span><span class="w"> </span><span class="p">(</span><span class="n">it</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">object</span><span class="w"> </span><span class="err">{}</span><span class="p">)</span><span class="mf">.</span>
+<span class="mf">4.</span><span class="w"> </span><span class="err">[?</span><span class="n">emptyDir</span><span class="w"> </span><span class="err">!</span><span class="o">=</span><span class="w"> </span><span class="n">null</span><span class="err">]</span><span class="w"> </span><span class="n">filters</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="kr">list</span><span class="w"> </span><span class="kr">to</span><span class="w"> </span><span class="n">keep</span><span class="w"> </span><span class="kr">on</span><span class="n">ly</span><span class="w"> </span><span class="n">volumes</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">field</span><span class="mf">.</span>
+<span class="mf">5.</span><span class="w"> </span><span class="mf">.</span><span class="n">name</span><span class="w"> </span><span class="n">extracts</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="c1">remaining items.</span>
+<span class="mf">6.</span><span class="w"> </span><span class="n">Some</span><span class="w"> </span><span class="n">JMESPath</span><span class="w"> </span><span class="n">implementations</span><span class="w"> </span><span class="n">allow</span><span class="w"> </span><span class="err">[?</span><span class="n">emptyDir</span><span class="err">]</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">shorthand</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="s">&quot;not null&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">but</span><span class="w"> </span><span class="err">!</span><span class="o">=</span><span class="w"> </span><span class="n">null</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">strict</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">many</span><span class="w"> </span><span class="n">exams</span><span class="mf">.</span>
+</code></pre></div>
 
 
              
