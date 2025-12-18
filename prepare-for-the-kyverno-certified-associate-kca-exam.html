@@ -541,7 +541,7 @@ You will need Cleanup policy: https://kyverno.io/docs/policy-types/cleanup-polic
 <span class="w">        </span><span class="nt">kinds</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
 <span class="w">        </span><span class="nt">namespaces</span><span class="p">:</span>
-<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w">  </span><span class="c1"># SAFETGUARD: Only delete pods in &#39;default&#39; for now</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w">  </span><span class="c1"># SAFEGUARD: Only delete pods in &#39;default&#39; for now</span>
 
 <span class="w">  </span><span class="c1"># 3. DELETE LOGIC (JMESPath)</span>
 <span class="w">  </span><span class="c1"># &quot;If this condition is TRUE, then DELETE the resource.&quot;</span>
@@ -741,6 +741,17 @@ validate-role-from-configmap:
 <h3>Kyverno Mutate - JSON Patch</h3>
 <p><strong>patchesJson6902</strong> is a mutation method used when you need <strong>surgical precision</strong> to modify a resource.</p>
 <p>Unlike the standard <code>patchStrategicMerge</code> (which merges YAMLs together), this uses <strong>specific operations</strong> (RFC 6902 standard) to tell Kyverno exactly <em>how</em> to change the data.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">mutate</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">patchStrategicMerge</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">(name)</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+<span class="w">          </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">limits</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;256Mi&quot;</span>
+</code></pre></div>
+
 <p>When to use it?</p>
 <p>Use it when <code>patchStrategicMerge</code> cannot do the job, specifically for:</p>
 <ul>
@@ -781,6 +792,45 @@ validate-role-from-configmap:
 <ul>
 <li><strong>Official Docs:</strong> <a href="https://main.kyverno.io/docs/policy-types/cluster-policy/mutate/#rfc-6902-jsonpatch">Kyverno Mutate - JSON Patch</a></li>
 </ul>
+<h3>Generate Rules Example</h3>
+<div class="highlight"><pre><span></span><code><span class="nt">generate</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">synchronize</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># Auto-update when source changed</span>
+<span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkPolicy</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default-deny</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{request.object.metadata.name}}&quot;</span>
+<span class="w">  </span><span class="nt">data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">podSelector</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span>
+<span class="w">      </span><span class="nt">policyTypes</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Egress</span>
+</code></pre></div>
+
+<h3>VerifyImages Example</h3>
+<div class="highlight"><pre><span></span><code><span class="nt">verifyImages</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">imageReferences</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;ghcr.io/myorg/*&quot;</span>
+<span class="w">    </span><span class="nt">attestors</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">entries</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">keys</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">publicKeys</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|-</span>
+<span class="w">                </span><span class="no">-----BEGIN PUBLIC KEY-----</span>
+<span class="w">                </span><span class="no">...</span>
+<span class="w">                </span><span class="no">-----END PUBLIC KEY-----</span>
+</code></pre></div>
+
+<h3>Foreach - Advanced Mutation</h3>
+<div class="highlight"><pre><span></span><code><span class="nt">mutate</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">foreach</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">list</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;request.object.spec.containers&quot;</span>
+<span class="w">      </span><span class="nt">patchStrategicMerge</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">element.name</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">              </span><span class="nt">securityContext</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">readOnlyRootFilesystem</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+
 <hr>
 <h1>More for JMESPath which will appear a lot in exam xD</h1>
 <h3>Filtering (Critical)</h3>
@@ -842,7 +892,7 @@ validate-role-from-configmap:
 <span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
 </code></pre></div>
 
-<h3>Sample JMESPath question #1</h3>
+<h3>Sample JMESPath questions</h3>
 <p>Scenario: You are writing a policy against the following Pod JSON. Analyze this JSON and answer the 3 questions below.</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">{</span>
 <span class="w">  </span><span class="s">&quot;apiVersion&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;v1&quot;</span><span class="p p-Indicator">,</span>
