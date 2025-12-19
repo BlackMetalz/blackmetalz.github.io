@@ -123,7 +123,194 @@
 <li><strong>Semantic Conventions:</strong> The importance of standardized naming for attributes across different technologies.</li>
 </ul>
 <hr>
-<h1>Section need to be undertood</h1>
+<h1>Section need to be understood</h1>
+<h3>1. Context Propagation (The "Glue" of Tracing)</h3>
+<p><em>Domain: OpenTelemetry API and SDK</em></p>
+<p>Distributed tracing cannot work without <strong>Context Propagation</strong>. This is the mechanism that transfers metadata (Trace ID, Span ID) from service A to service B to connect spans into a complete trace.</p>
+<ul>
+<li><strong>Trace Context (W3C Standard):</strong> OpenTelemetry uses the W3C <code>traceparent</code> header standard to transmit information.<ul>
+<li>Format: <code>version-traceid-parentid-traceflags</code></li>
+<li>Example: <code>00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01</code></li>
+</ul>
+</li>
+<li><strong>Baggage:</strong> Used to transmit custom key-value pairs (like <code>userid=123</code>, <code>env=prod</code>) throughout services <strong>without</strong> creating new spans. This data can be used for filtering or sampling in later steps.</li>
+<li><strong>Propagators:</strong> Objects responsible for injecting (attaching to request) and extracting (retrieving from request) context.</li>
+</ul>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://opentelemetry.io/docs/concepts/context-propagation/">OTel Docs: Context Propagation</a>
+- <a href="https://www.w3.org/TR/trace-context/">W3C Trace Context Specification</a></p>
+</blockquote>
+<h3>2. OTel Metrics Instruments (vs. Prometheus)</h3>
+<p><em>Domain: OpenTelemetry API and SDK</em></p>
+<p>Unlike Prometheus which has only 4 basic metric types, OpenTelemetry divides them further to map accurately to various backends. It is crucial to distinguish when to use which.</p>
+<ul>
+<li><strong>Synchronous Instruments (Called by user when event occurs):</strong><ul>
+<li><code>Counter</code>: Only increases (Monotonic). Example: <code>http_requests_total</code>.</li>
+<li><code>UpDownCounter</code>: Increases or decreases. Example: <code>queue_size</code> (similar to Prometheus Gauge).</li>
+<li><code>Histogram</code>: Records value distribution. Example: <code>http_response_time</code>.</li>
+</ul>
+</li>
+<li><strong>Asynchronous Instruments (Observer - Only collected when invoked):</strong><ul>
+<li><code>ObservableCounter</code>, <code>ObservableUpDownCounter</code>, <code>ObservableGauge</code>: Used to read values from the system (like CPU usage, Memory usage) periodically (scrape interval) instead of per request.</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://opentelemetry.io/docs/concepts/signals/metrics/">OTel Docs: Metrics Concepts</a>
+- <a href="https://opentelemetry.io/docs/specs/otel/metrics/data-model/">OTel Specification: Metrics Data Model</a></p>
+</blockquote>
+<h3>3. Sampling Strategies (Head vs. Tail)</h3>
+<p><em>Domain: The OpenTelemetry Collector &amp; API/SDK</em></p>
+<p>To save storage costs and bandwidth, we cannot store 100% of traces. Sampling is the technique to decide whether to keep or drop a trace.</p>
+<ul>
+<li><strong>Head Sampling (At SDK/Client):</strong> Decided immediately when the trace starts (root span).<ul>
+<li><em>Pros:</em> Saves the most resources as dropped traces are not processed further.</li>
+<li><em>Cons:</em> May miss critical error traces (since errors are unknown at the start).</li>
+<li><em>Strategies:</em> <code>ParentBased</code> (follows parent), <code>TraceIDRatioBased</code> (% ratio), <code>AlwaysOn</code>, <code>AlwaysOff</code>.</li>
+</ul>
+</li>
+<li><strong>Tail Sampling (At Collector):</strong> Decided after the trace is complete (or mostly complete).<ul>
+<li><em>Pros:</em> Keeps exactly the interesting traces (High Latency, Status code = 500).</li>
+<li><em>Cons:</em> Consumes RAM/CPU at the Collector as it must temporarily store all spans before deciding.</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://opentelemetry.io/docs/concepts/sampling/">OTel Docs: Sampling</a>
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/README.md">Tail Sampling Processor (Collector Contrib)</a></p>
+</blockquote>
+<h3>4. Collector Deployment Patterns</h3>
+<p><em>Domain: The OpenTelemetry Collector</em></p>
+<p>The Collector is the "heart" of the OTel architecture. There are 3 main deployment models to master for the exam:</p>
+<ol>
+<li><strong>Agent (Sidecar/DaemonSet):</strong> Runs right next to the application (on the same Pod or Node).<ul>
+<li><em>Role:</em> Receives data from App -&gt; Adds metadata (k8s pod name, host ip) -&gt; Sends to Gateway. Helps reduce connection management load for the App.</li>
+</ul>
+</li>
+<li><strong>Gateway (Standalone Service):</strong> An independent Collector cluster (Deployment).<ul>
+<li><em>Role:</em> Receives data from Agent -&gt; Heavy processing (Tail Sampling, Batching, Filtering, Credential management) -&gt; Sends to Backend (Jaeger, Prometheus).</li>
+</ul>
+</li>
+<li><strong>No Collector (Direct):</strong> App sends directly to Backend. Rarely used in large productions due to lack of flexibility.</li>
+</ol>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://opentelemetry.io/docs/collector/deployment/">OTel Docs: Collector Deployment</a>
+- <a href="https://github.com/open-telemetry/opentelemetry-operator#deployment-modes">OTel Operator Patterns</a></p>
+</blockquote>
+<h3>5. Semantic Conventions (Standardization)</h3>
+<p><em>Domain: OpenTelemetry API and SDK</em></p>
+<p>OTel defines how attributes are named to ensure consistency across systems. Backends need this standard to draw charts automatically.</p>
+<ul>
+<li><strong>Resource Attributes (Immutable):</strong> Describes "What" is producing the telemetry.<ul>
+<li>Example: <code>service.name</code>, <code>service.version</code>, <code>k8s.pod.name</code>, <code>cloud.region</code>.</li>
+</ul>
+</li>
+<li><strong>Span Attributes (Dynamic):</strong> Describes "What action" is happening.<ul>
+<li>HTTP: <code>http.method</code> (GET), <code>http.status_code</code> (200), <code>http.route</code> (/api/v1/users).</li>
+<li>Database: <code>db.system</code> (mysql), <code>db.statement</code> (SELECT * FROM users).</li>
+<li><em>Note:</em> From OTel v1.20+, some old conventions (like <code>http.method</code>) are gradually moving to <code>http.request.method</code>. Need to update according to the latest version.</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://opentelemetry.io/docs/concepts/semantic-conventions/">OTel Docs: Semantic Conventions</a>
+- <a href="https://opentelemetry.io/docs/specs/semconv/general/trace/">Existing Registry</a></p>
+</blockquote>
+<h3>6. Telemetry Signal Status</h3>
+<p><em>Domain: Fundamentals of Observability</em></p>
+<p>Not everything in OTel is "Production Ready" (Stable). The exam may ask about the status of signals to know the reliability level when using them.</p>
+<ul>
+<li><strong>Tracing:</strong> <strong>Stable</strong>. Mature and widely supported.</li>
+<li><strong>Metrics:</strong> <strong>Stable</strong>. Fully featured to replace Prometheus.</li>
+<li><strong>Logs:</strong> <strong>Stable</strong> (Bridge API &amp; Data Model). However, full replacement of Fluentbit/Vector is still being perfected.</li>
+<li><strong>Profiling (eBPF):</strong> <strong>Experimental/Development</strong>. Developing fast but should not be used for core production without deep understanding.</li>
+</ul>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://opentelemetry.io/status/">OTel Feature Status</a></p>
+</blockquote>
+<h3>7. SDK Mechanics: Processors &amp; Exporters</h3>
+<p><em>Domain: The OpenTelemetry API and SDK (SDK Pipelines)</em></p>
+<p>Just knowing "how to send data" is not enough; the exam asks <em>how</em> data flows inside the application before going out.</p>
+<ul>
+<li><strong>Span Processors:</strong> Decide when spans are sent.<ul>
+<li><code>SimpleSpanProcessor</code>: Sends immediately when span ends (1-1). <strong>Use only for development/debugging</strong>. Using for prod will severely slow down the app.</li>
+<li><code>BatchSpanProcessor</code>: Batches spans and sends periodically or when buffer is full. <strong>Mandatory for Production</strong> to optimize performance.</li>
+</ul>
+</li>
+<li><strong>Exporters:</strong> Interfaces responsible for sending data out (OTLP, Zipkin, Console).<ul>
+<li><em>Timeout:</em> Appropriate timeouts need to be configured to avoid hanging the app if the backend (Collector) is slow.</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://opentelemetry.io/docs/specs/otel/trace/sdk/#span-processor">OTel Docs: Trace SDK</a>
+- <a href="https://opentelemetry.io/docs/languages/java/instrumentation/#span-processors">Java SDK Examples</a></p>
+</blockquote>
+<h3>8. Collector Scaling &amp; Data Transformation</h3>
+<p><em>Domain: The OpenTelemetry Collector (Scaling, Transforming Data)</em></p>
+<p>Deploying 1 Collector is easy, but scaling a Collector cluster to handle millions of spans/s is different.</p>
+<ul>
+<li><strong>Load Balancing:</strong> When running Gateway mode with multiple replicas, a Load Balancer is needed in front (like Nginx/K8s Service) to distribute trace load to collectors.</li>
+<li><strong>Trace ID Awareness:</strong> With <em>Tail Sampling</em>, all spans of the same Trace ID <strong>must</strong> arrive at the same Collector instance. Need to use <strong>Load Balancing Exporter</strong> with hash ring (based on TraceID) at the Agent layer to push to the right place.</li>
+<li><strong>Transform Processor (OTTLE):</strong> Query/Data transformation language right inside the Collector.<ul>
+<li>Example: Delete sensitive attributes (<code>set(attributes["password"], "****")</code>), rename metrics, or filter garbage logs.</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://opentelemetry.io/docs/collector/scaling/">Collector Scaling</a>
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/loadbalancingexporter">Load Balancing Exporter</a>
+- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor">Transform Processor (OTTLE)</a></p>
+</blockquote>
+<h3>9. Debugging &amp; Observability of the Pipeline</h3>
+<p><em>Domain: Maintaining and Debugging Observability Pipelines</em></p>
+<p>How to monitor the Monitor (OTel Collector) itself?</p>
+<ul>
+<li><strong>Extensions:</strong> Auxiliary components that do not process telemetry data but help manage the Collector.<ul>
+<li><code>health_check</code>: Endpoint <code>/health</code> for K8s liveness/readiness probe.</li>
+<li><code>pprof</code>: CPU/RAM Profiling of the Collector (to debug when Collector consumes too much RAM).</li>
+<li><code>zpages</code>: Simple web interface displaying real-time status of receiver/exporter (received/sent counts, errors).</li>
+</ul>
+</li>
+<li><strong>Self-Monitoring:</strong> Collector exposes its own metrics (usually on port <code>8888</code>) for Prometheus to scrape (e.g., <code>otelcol_process_uptime</code>, <code>otelcol_receiver_refused_spans</code>).</li>
+</ul>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://opentelemetry.io/docs/collector/troubleshooting/">Collector Troubleshooting</a>
+- <a href="https://opentelemetry.io/docs/collector/configuration/#extensions">Management (Extensions)</a></p>
+</blockquote>
+<h3>10. Handling Backpressure &amp; Reliability</h3>
+<p><em>Domain: Maintaining and Debugging Observability Pipelines (Error Handling)</em></p>
+<p>When the backend (Jaeger/Elasticsearch) is dead or overloaded, what does the Collector do?</p>
+<ul>
+<li><strong>Memory Limiter Processor:</strong> <strong>Mandatory</strong> and must be placed at the beginning of the pipeline (right after receiver). It prevents Collector OOM (Out of Memory) crash by dropping data or refusing new data when RAM hits the threshold.</li>
+<li><strong>Batch Processor:</strong> Helps compress and bundle data to reduce network request count.</li>
+<li><strong>Retry Mechanism:</strong> Exporters usually have retry mechanisms (with backoff policy) when sending fails. However, if using <code>QueuedRetry</code> (persistent queue), file storage config needs attention.</li>
+</ul>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/memorylimiterprocessor/README.md">Memory Limiter Processor</a>
+- <a href="https://opentelemetry.io/docs/collector/configuration/#processors">Recommended Processors Config</a></p>
+</blockquote>
+<h3>11. Schema Management</h3>
+<p><em>Domain: Maintaining and Debugging Observability Pipelines (Schema Management)</em></p>
+<p>When Semantic Conventions change (e.g., rename <code>http.method</code> -&gt; <code>http.request.method</code>), how to ensure the system doesn't break?</p>
+<ul>
+<li><strong>Schema URL:</strong> Each Resource or Scope in OTel data has an accompanying <code>schema_url</code>, pointing to the version of Semantic Convention it follows (e.g., <code>https://opentelemetry.io/schemas/1.4.0</code>).</li>
+<li><strong>Schema Transformation:</strong> Helps convert data from old schema to new (or vice versa) to be compatible with old backends or dashboards.</li>
+</ul>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://opentelemetry.io/docs/specs/otel/schemas/">Telemetry Schemas</a></p>
+</blockquote>
 <h1>My Secret Weapon: Mock Exam</h1>
 <h1>Exam Notes</h1>
 
