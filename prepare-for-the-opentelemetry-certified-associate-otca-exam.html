@@ -137,9 +137,11 @@
 <li><strong>Propagators:</strong> Objects responsible for injecting (attaching to request) and extracting (retrieving from request) context.</li>
 </ul>
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://opentelemetry.io/docs/concepts/context-propagation/">OTel Docs: Context Propagation</a>
-- <a href="https://www.w3.org/TR/trace-context/">W3C Trace Context Specification</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://opentelemetry.io/docs/concepts/context-propagation/">OTel Docs: Context Propagation</a></li>
+<li><a href="https://www.w3.org/TR/trace-context/">W3C Trace Context Specification</a></li>
+</ul>
 </blockquote>
 <h3>2. OTel Metrics Instruments (vs. Prometheus)</h3>
 <p><em>Domain: OpenTelemetry API and SDK</em></p>
@@ -157,9 +159,11 @@
 </li>
 </ul>
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://opentelemetry.io/docs/concepts/signals/metrics/">OTel Docs: Metrics Concepts</a>
-- <a href="https://opentelemetry.io/docs/specs/otel/metrics/data-model/">OTel Specification: Metrics Data Model</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://opentelemetry.io/docs/concepts/signals/metrics/">OTel Docs: Metrics Concepts</a></li>
+<li><a href="https://opentelemetry.io/docs/specs/otel/metrics/data-model/">OTel Specification: Metrics Data Model</a></li>
+</ul>
 </blockquote>
 <h3>3. Sampling Strategies (Head vs. Tail)</h3>
 <p><em>Domain: The OpenTelemetry Collector &amp; API/SDK</em></p>
@@ -178,9 +182,11 @@
 </li>
 </ul>
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://opentelemetry.io/docs/concepts/sampling/">OTel Docs: Sampling</a>
-- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/README.md">Tail Sampling Processor (Collector Contrib)</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://opentelemetry.io/docs/concepts/sampling/">OTel Docs: Sampling</a></li>
+<li><a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/README.md">Tail Sampling Processor (Collector Contrib)</a></li>
+</ul>
 </blockquote>
 <h3>4. Collector Deployment Patterns</h3>
 <p><em>Domain: The OpenTelemetry Collector</em></p>
@@ -197,9 +203,11 @@
 <li><strong>No Collector (Direct):</strong> App sends directly to Backend. Rarely used in large productions due to lack of flexibility.</li>
 </ol>
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://opentelemetry.io/docs/collector/deployment/">OTel Docs: Collector Deployment</a>
-- <a href="https://github.com/open-telemetry/opentelemetry-operator#deployment-modes">OTel Operator Patterns</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://opentelemetry.io/docs/collector/deployment/">OTel Docs: Collector Deployment</a></li>
+<li><a href="https://github.com/open-telemetry/opentelemetry-operator#deployment-modes">OTel Operator Patterns</a></li>
+</ul>
 </blockquote>
 <h3>5. Semantic Conventions (Standardization)</h3>
 <p><em>Domain: OpenTelemetry API and SDK</em></p>
@@ -217,9 +225,11 @@
 </li>
 </ul>
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://opentelemetry.io/docs/concepts/semantic-conventions/">OTel Docs: Semantic Conventions</a>
-- <a href="https://opentelemetry.io/docs/specs/semconv/general/trace/">Existing Registry</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://opentelemetry.io/docs/concepts/semantic-conventions/">OTel Docs: Semantic Conventions</a></li>
+<li><a href="https://opentelemetry.io/docs/specs/semconv/general/trace/">Existing Registry</a></li>
+</ul>
 </blockquote>
 <h3>6. Telemetry Signal Status</h3>
 <p><em>Domain: Fundamentals of Observability</em></p>
@@ -231,8 +241,10 @@
 <li><strong>Profiling (eBPF):</strong> <strong>Experimental/Development</strong>. Developing fast but should not be used for core production without deep understanding.</li>
 </ul>
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://opentelemetry.io/status/">OTel Feature Status</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://opentelemetry.io/status/">OTel Feature Status</a></li>
+</ul>
 </blockquote>
 <h3>7. SDK Mechanics: Processors &amp; Exporters</h3>
 <p><em>Domain: The OpenTelemetry API and SDK (SDK Pipelines)</em></p>
@@ -249,9 +261,11 @@
 </li>
 </ul>
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://opentelemetry.io/docs/specs/otel/trace/sdk/#span-processor">OTel Docs: Trace SDK</a>
-- <a href="https://opentelemetry.io/docs/languages/java/instrumentation/#span-processors">Java SDK Examples</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://opentelemetry.io/docs/specs/otel/trace/sdk/#span-processor">OTel Docs: Trace SDK</a></li>
+<li><a href="https://opentelemetry.io/docs/languages/java/instrumentation/#span-processors">Java SDK Examples</a></li>
+</ul>
 </blockquote>
 <h3>8. Collector Scaling &amp; Data Transformation</h3>
 <p><em>Domain: The OpenTelemetry Collector (Scaling, Transforming Data)</em></p>
@@ -265,10 +279,12 @@
 </li>
 </ul>
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://opentelemetry.io/docs/collector/scaling/">Collector Scaling</a>
-- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/loadbalancingexporter">Load Balancing Exporter</a>
-- <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor">Transform Processor (OTTLE)</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://opentelemetry.io/docs/collector/scaling/">Collector Scaling</a></li>
+<li><a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/loadbalancingexporter">Load Balancing Exporter</a></li>
+<li><a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor">Transform Processor (OTTLE)</a></li>
+</ul>
 </blockquote>
 <h3>9. Debugging &amp; Observability of the Pipeline</h3>
 <p><em>Domain: Maintaining and Debugging Observability Pipelines</em></p>
@@ -283,9 +299,11 @@
 <li><strong>Self-Monitoring:</strong> Collector exposes its own metrics (usually on port <code>8888</code>) for Prometheus to scrape (e.g., <code>otelcol_process_uptime</code>, <code>otelcol_receiver_refused_spans</code>).</li>
 </ul>
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://opentelemetry.io/docs/collector/troubleshooting/">Collector Troubleshooting</a>
-- <a href="https://opentelemetry.io/docs/collector/configuration/#extensions">Management (Extensions)</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://opentelemetry.io/docs/collector/troubleshooting/">Collector Troubleshooting</a></li>
+<li><a href="https://opentelemetry.io/docs/collector/configuration/#extensions">Management (Extensions)</a></li>
+</ul>
 </blockquote>
 <h3>10. Handling Backpressure &amp; Reliability</h3>
 <p><em>Domain: Maintaining and Debugging Observability Pipelines (Error Handling)</em></p>
