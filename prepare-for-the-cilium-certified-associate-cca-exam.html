@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="cilium, certification, linux-foundation, cca, ebpf, kubernetes, networking, Knowledge Base, " />
+
+<meta property="og:title" content="Prepare for the Cilium Certified Associate (CCA) Exam "/>
+<meta property="og:url" content="/prepare-for-the-cilium-certified-associate-cca-exam.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2025-12-21T00:00:00+07:00" />
+<meta name="twitter:title" content="Prepare for the Cilium Certified Associate (CCA) Exam ">
+<meta name="twitter:description" content="">
+
+        <title>Prepare for the Cilium Certified Associate (CCA) Exam  · Kienlt&#39;s notebook
+</title>
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       "/"
+                                    >Home</a>
+                                </li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="/prepare-for-the-cilium-certified-associate-cca-exam.html">
+                Prepare for the Cilium Certified Associate (CCA) Exam
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p><img alt="alt text" src="images/2025/12/21.png"></p>
+<hr>
+<h1>Cilium Certified Associate (CCA) Overview</h1>
+<h3>1. eBPF Fundamentals</h3>
+<p>Understanding the "Why" before the "How."</p>
+<ul>
+<li><strong>What is eBPF:</strong> Extended Berkeley Packet Filter — a revolutionary technology that allows running sandboxed programs in the Linux kernel without changing kernel source code.</li>
+<li><strong>Why eBPF Matters:</strong> Enables high-performance networking, security, and observability without the overhead of traditional approaches (iptables, kernel modules).</li>
+<li><strong>eBPF vs iptables:</strong> eBPF operates at lower levels with better performance, while iptables uses sequential rule matching that doesn't scale well.</li>
+</ul>
+<h3>2. Cilium Architecture</h3>
+<p>The backbone of cloud-native networking.</p>
+<ul>
+<li><strong>What is Cilium:</strong> An open-source, eBPF-based networking, security, and observability solution for Kubernetes and other container orchestration platforms.</li>
+<li><strong>Core Components:</strong> Cilium Agent, Cilium Operator, Cilium CNI Plugin, and Hubble.</li>
+<li><strong>CNCF Project:</strong> Cilium is a CNCF graduated project, widely adopted in production environments.</li>
+</ul>
+<p>Example of <strong>Cilium Data Flow</strong>:</p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│                      Linux Kernel                           │
+│  ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐  │
+│  │   XDP   │───►│   TC    │───►│ Socket  │───►│ cgroups │  │
+│  │ (ingress)│    │(ingress/│    │  Ops    │    │  (pod)  │  │
+│  │         │    │ egress) │    │         │    │         │  │
+│  └─────────┘    └─────────┘    └─────────┘    └─────────┘  │
+│       │              │              │              │        │
+│       └──────────────┴──────────────┴──────────────┘        │
+│                    eBPF Programs                            │
+└─────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3>3. Network Policy (18%)</h3>
+<p>Securing workloads with identity-based policies.</p>
+<ul>
+<li><strong>CiliumNetworkPolicy:</strong> Extended network policies with L3/L4/L7 filtering capabilities.</li>
+<li><strong>Identity-based Security:</strong> Cilium assigns identities to endpoints based on labels, not IP addresses.</li>
+<li><strong>Policy Enforcement Modes:</strong> Default, Always, and Never modes for controlling policy behavior.</li>
+<li><strong>K8s NetworkPolicy vs CiliumNetworkPolicy:</strong> Understanding compatibility and extended features.</li>
+</ul>
+<h3>4. Service Mesh (16%)</h3>
+<p>Modern traffic management without sidecars.</p>
+<ul>
+<li><strong>Sidecarless Architecture:</strong> Cilium provides service mesh capabilities using eBPF without sidecar proxies.</li>
+<li><strong>Gateway API:</strong> The next-generation Kubernetes Ingress API with more expressive routing.</li>
+<li><strong>Ingress Controller:</strong> Cilium can act as an Ingress controller for external traffic.</li>
+<li><strong>mTLS Encryption:</strong> Transparent encryption of traffic between services.</li>
+</ul>
+<h3>5. Network Observability (10%)</h3>
+<p>Visibility into network flows with Hubble.</p>
+<ul>
+<li><strong>Hubble:</strong> Cilium's observability layer built on top of eBPF.</li>
+<li><strong>Flow Visibility:</strong> L3/L4/L7 network flow logs and metrics.</li>
+<li><strong>Hubble CLI &amp; UI:</strong> Command-line and graphical interfaces for observing traffic.</li>
+<li><strong>Integration:</strong> Export to Prometheus, Grafana, and other monitoring systems.</li>
+</ul>
+<h3>6. Installation &amp; Configuration (10%)</h3>
+<p>Getting Cilium up and running.</p>
+<ul>
+<li><strong>Cilium CLI:</strong> The primary tool for installing and managing Cilium.</li>
+<li><strong>Installation Methods:</strong> Cilium CLI, Helm, or manual manifests.</li>
+<li><strong>Connectivity Tests:</strong> Built-in tests to validate Cilium installation.</li>
+<li><strong>Configuration Options:</strong> Datapath modes, IPAM, encryption, and more.</li>
+</ul>
+<h3>7. Cluster Mesh (10%)</h3>
+<p>Multi-cluster connectivity.</p>
+<ul>
+<li><strong>What is Cluster Mesh:</strong> Connects multiple Kubernetes clusters into a unified network.</li>
+<li><strong>Service Discovery:</strong> Services can be discovered and accessed across clusters.</li>
+<li><strong>Global Load Balancing:</strong> Distribute traffic across clusters for high availability.</li>
+<li><strong>Requirements:</strong> Unique Pod CIDRs, cluster IDs, and shared CA.</li>
+</ul>
+<h3>8. BGP &amp; External Networking (6%)</h3>
+<p>Connecting to the outside world.</p>
+<ul>
+<li><strong>BGP Integration:</strong> Cilium can peer with external routers using BGP.</li>
+<li><strong>LB IPAM:</strong> Automatic IP address management for LoadBalancer services.</li>
+<li><strong>Egress Gateway:</strong> Control and monitor egress traffic from the cluster.</li>
+<li><strong>External Workloads:</strong> Connect non-Kubernetes workloads to the Cilium network.</li>
+</ul>
+<hr>
+<h1>Sections That Need to Be Understood</h1>
+<h3>1. eBPF vs iptables — Why eBPF Matters</h3>
+<p><em>Domain: eBPF (10%)</em></p>
+<p>Understanding why Cilium chose eBPF over traditional approaches is fundamental.</p>
+<p><strong>iptables Limitations:</strong></p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│                    iptables Flow                            │
+│                                                             │
+│   Packet ──► Rule 1 ──► Rule 2 ──► Rule 3 ──► ... ──► Rule N│
+│              (match?)   (match?)   (match?)       (match?)  │
+│                                                             │
+│   Problems:                                                 │
+│   - O(n) complexity — linear rule matching                  │
+│   - Performance degrades with more rules                    │
+│   - No visibility into packet flow                          │
+│   - Rules are IP-based, not identity-based                  │
+└─────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<p><strong>eBPF Advantages:</strong></p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│                      eBPF Flow                              │
+│                                                             │
+│   Packet ──► eBPF Program ──► Decision (O(1) hash lookup)   │
+│                   │                                         │
+│                   ▼                                         │
+│              eBPF Maps                                      │
+│              (hash tables)                                  │
+│                                                             │
+│   Benefits:                                                 │
+│   - O(1) complexity — hash-based lookups                    │
+│   - Scales to millions of rules                             │
+│   - Deep packet inspection (L7)                             │
+│   - Rich observability built-in                             │
+└─────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<p><strong>Comparison Table:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>iptables</th>
+<th>eBPF (Cilium)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rule matching</td>
+<td>O(n) linear</td>
+<td>O(1) hash lookup</td>
+</tr>
+<tr>
+<td>Scalability</td>
+<td>Degrades with rules</td>
+<td>Millions of endpoints</td>
+</tr>
+<tr>
+<td>L7 filtering</td>
+<td>Limited (with helpers)</td>
+<td>Native support</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>Counters only</td>
+<td>Full flow visibility</td>
+</tr>
+<tr>
+<td>Dynamic updates</td>
+<td>Full chain reload</td>
+<td>Atomic map updates</td>
+</tr>
+<tr>
+<td>Identity-based</td>
+<td>No (IP-based)</td>
+<td>Yes (label-based)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>eBPF Hook Points:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>Location</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>XDP</strong></td>
+<td>Network driver (earliest)</td>
+<td>DDoS mitigation, load balancing</td>
+</tr>
+<tr>
+<td><strong>TC</strong></td>
+<td>Traffic Control (ingress/egress)</td>
+<td>Network policy, NAT</td>
+</tr>
+<tr>
+<td><strong>Socket Ops</strong></td>
+<td>Socket level</td>
+<td>Connection tracking, redirection</td>
+</tr>
+<tr>
+<td><strong>cgroups</strong></td>
+<td>Process group</td>
+<td>Pod-level policies</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://ebpf.io/">eBPF.io</a>
+- <a href="https://docs.cilium.io/en/stable/bpf/">Cilium eBPF Documentation</a></p>
+</blockquote>
+<hr>
+<h3>2. Cilium Architecture &amp; Components</h3>
+<p><em>Domain: Architecture (20%)</em></p>
+<p>Understanding each component's role is essential.</p>
+<p><strong>Architecture Overview:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">┌─────────────────────────────────────────────────────────────────────┐</span>
+<span class="err">│</span><span class="w">                         </span><span class="n">Kubernetes</span><span class="w"> </span><span class="n">Cluster</span><span class="w">                          </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">┌─────────────────────────────────────────────────────────────┐</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                      </span><span class="n">Control</span><span class="w"> </span><span class="n">Plane</span><span class="w">                           </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">┌─────────────────┐</span><span class="w">         </span><span class="err">┌─────────────────────────┐</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="n">Cilium</span><span class="w"> </span><span class="n">Operator</span><span class="w"> </span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w">      </span><span class="n">Hubble</span><span class="w"> </span><span class="n">Relay</span><span class="w">       </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="p">(</span><span class="n">Deployment</span><span class="p">)</span><span class="w">   </span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w">     </span><span class="p">(</span><span class="n">Deployment</span><span class="p">)</span><span class="w">        </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                 </span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w">                         </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">CRD</span><span class="w"> </span><span class="n">management</span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Aggregates</span><span class="w"> </span><span class="n">flows</span><span class="w">      </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">IPAM</span><span class="w">          </span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Serves</span><span class="w"> </span><span class="n">Hubble</span><span class="w"> </span><span class="n">UI</span><span class="o">/</span><span class="n">CLI</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Cluster</span><span class="w"> </span><span class="n">Mesh</span><span class="w">  </span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w">                         </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">└─────────────────┘</span><span class="w">         </span><span class="err">└─────────────────────────┘</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">└─────────────────────────────────────────────────────────────┘</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">┌─────────────────────────────────────────────────────────────┐</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                    </span><span class="n">Worker</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="mh">1</span><span class="w">                             </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">┌─────────────────────────────────────────────────────┐</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                  </span><span class="n">Cilium</span><span class="w"> </span><span class="n">Agent</span><span class="w">                        </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                  </span><span class="p">(</span><span class="n">DaemonSet</span><span class="p">)</span><span class="w">                         </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                                                      </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">┌──────────────┐</span><span class="w">  </span><span class="err">┌──────────────┐</span><span class="w">  </span><span class="err">┌───────────┐</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">eBPF</span><span class="w">        </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">   </span><span class="n">Hubble</span><span class="w">     </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">Envoy</span><span class="w">    </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">Datapath</span><span class="w">    </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">   </span><span class="n">Observer</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="p">(</span><span class="n">L7</span><span class="p">)</span><span class="w">     </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">└──────────────┘</span><span class="w">  </span><span class="err">└──────────────┘</span><span class="w">  </span><span class="err">└───────────┘</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">└─────────────────────────────────────────────────────┘</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                                                              </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">┌─────────┐</span><span class="w">  </span><span class="err">┌─────────┐</span><span class="w">  </span><span class="err">┌─────────┐</span><span class="w">                      </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">Pod</span><span class="w"> </span><span class="n">A</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">Pod</span><span class="w"> </span><span class="n">B</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">Pod</span><span class="w"> </span><span class="n">C</span><span class="w">  </span><span class="err">│</span><span class="w">                      </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">└─────────┘</span><span class="w">  </span><span class="err">└─────────┘</span><span class="w">  </span><span class="err">└─────────┘</span><span class="w">                      </span><span class="err">│</span><span class="w">   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">└─────────────────────────────────────────────────────────────┘</span><span class="w">   </span><span class="err">│</span>
+<span class="err">└─────────────────────────────────────────────────────────────────────┘</span>
+</code></pre></div>
+
+<p><strong>Component Details:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Type</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cilium Agent</strong></td>
+<td>DaemonSet</td>
+<td>Runs on every node, manages eBPF programs, enforces policies</td>
+</tr>
+<tr>
+<td><strong>Cilium Operator</strong></td>
+<td>Deployment</td>
+<td>Cluster-wide operations, IPAM, CRD management</td>
+</tr>
+<tr>
+<td><strong>Cilium CNI</strong></td>
+<td>Binary</td>
+<td>CNI plugin invoked by kubelet for pod networking</td>
+</tr>
+<tr>
+<td><strong>Hubble Server</strong></td>
+<td>Part of Agent</td>
+<td>Collects and exports network flow data</td>
+</tr>
+<tr>
+<td><strong>Hubble Relay</strong></td>
+<td>Deployment</td>
+<td>Aggregates Hubble data from all nodes</td>
+</tr>
+<tr>
+<td><strong>Hubble UI</strong></td>
+<td>Deployment</td>
+<td>Web interface for flow visualization</td>
+</tr>
+<tr>
+<td><strong>Cilium Envoy</strong></td>
+<td>Part of Agent</td>
+<td>L7 proxy for HTTP/gRPC/Kafka policies</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cilium Agent Responsibilities:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># What Cilium Agent does on each node:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Compiles and loads eBPF programs into kernel</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Manages endpoint (pod) identities</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Enforces network policies</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Handles service load balancing (kube-proxy replacement)</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Provides Hubble flow data</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Manages encryption (IPsec/WireGuard)</span>
+</code></pre></div>
+
+<p><strong>Cilium Operator Responsibilities:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># What Cilium Operator does cluster-wide:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Manages CiliumNode resources</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Handles IPAM (IP allocation)</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Garbage collects stale resources</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Manages Cluster Mesh</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Synchronizes Kubernetes services</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://docs.cilium.io/en/stable/overview/component-overview/">Cilium Architecture</a>
+- <a href="https://docs.cilium.io/en/stable/cmdref/cilium-agent/">Cilium Agent Reference</a></p>
+</blockquote>
+<hr>
+<h3>3. Datapath Models</h3>
+<p><em>Domain: Architecture (20%)</em></p>
+<p>Cilium supports multiple datapath modes for different environments.</p>
+<p><strong>Encapsulation Mode (VXLAN/Geneve):</strong></p>
+<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────────────────┐
+│                     Encapsulation (Overlay)                      │
+│                                                                  │
+│   Node 1                              Node 2                     │
+│   ┌─────────────┐                     ┌─────────────┐           │
+│   │   Pod A     │                     │   Pod B     │           │
+│   │ 10.0.1.10   │                     │ 10.0.2.20   │           │
+│   └──────┬──────┘                     └──────┬──────┘           │
+│          │                                   │                   │
+│          ▼                                   ▼                   │
+│   ┌─────────────┐                     ┌─────────────┐           │
+│   │   Cilium    │     VXLAN/Geneve    │   Cilium    │           │
+│   │   Agent     │◄═══════════════════►│   Agent     │           │
+│   │ 192.168.1.1 │      Tunnel         │ 192.168.1.2 │           │
+│   └─────────────┘                     └─────────────┘           │
+│                                                                  │
+│   Pros: Works anywhere (any network)                            │
+│   Cons: MTU overhead (~50 bytes), slight latency                │
+└──────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<p><strong>Native Routing (Direct Routing):</strong></p>
+<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────────────────┐
+│                     Native Routing (No Overlay)                  │
+│                                                                  │
+│   Node 1                              Node 2                     │
+│   ┌─────────────┐                     ┌─────────────┐           │
+│   │   Pod A     │                     │   Pod B     │           │
+│   │ 10.0.1.10   │                     │ 10.0.2.20   │           │
+│   └──────┬──────┘                     └──────┬──────┘           │
+│          │                                   │                   │
+│          ▼                                   ▼                   │
+│   ┌─────────────┐    Native IP routing ┌─────────────┐          │
+│   │   Cilium    │◄────────────────────►│   Cilium    │          │
+│   │   Agent     │    (BGP, VPC routes) │   Agent     │          │
+│   └─────────────┘                      └─────────────┘          │
+│                                                                  │
+│   Pros: Better performance, no MTU overhead                     │
+│   Cons: Requires network support (BGP, cloud VPC)               │
+└──────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<p><strong>Datapath Mode Comparison:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Tunnel Type</th>
+<th>Use Case</th>
+<th>Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tunnel=vxlan</code></td>
+<td>VXLAN</td>
+<td>Default, works anywhere</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>tunnel=geneve</code></td>
+<td>Geneve</td>
+<td>Better metadata support</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>tunnel=disabled</code></td>
+<td>None (native)</td>
+<td>Cloud/BGP environments</td>
+<td>Network routing</td>
+</tr>
+<tr>
+<td><code>tunnel=disabled</code> + <code>autoDirectNodeRoutes=true</code></td>
+<td>None</td>
+<td>Same L2 network</td>
+<td>Nodes on same subnet</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Helm values for encapsulation</span>
+<span class="nt">tunnel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vxlan</span><span class="w">  </span><span class="c1"># or geneve</span>
+
+<span class="c1"># Helm values for native routing</span>
+<span class="nt">tunnel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span>
+<span class="nt">autoDirectNodeRoutes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># For same L2 network</span>
+<span class="c1"># OR use BGP for cross-subnet routing</span>
+</code></pre></div>
+
+<p><strong>kube-proxy Replacement:</strong></p>
+<p>Cilium can fully replace kube-proxy for better performance:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Helm values</span>
+<span class="nt">kubeProxyReplacement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="c1"># Benefits:</span>
+<span class="c1"># - eBPF-based service load balancing</span>
+<span class="c1"># - DSR (Direct Server Return) support</span>
+<span class="c1"># - Maglev consistent hashing</span>
+<span class="c1"># - Socket-level load balancing (bypass netfilter)</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://docs.cilium.io/en/stable/network/concepts/routing/">Cilium Datapath</a>
+- <a href="https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/">kube-proxy Replacement</a></p>
+</blockquote>
+<hr>
+<h3>4. IPAM Modes</h3>
+<p><em>Domain: Architecture (20%)</em></p>
+<p>Cilium supports multiple IP Address Management modes.</p>
+<table>
+<thead>
+<tr>
+<th>IPAM Mode</th>
+<th>Description</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cluster-pool</code></td>
+<td>Cilium manages pod CIDRs</td>
+<td>Default, any environment</td>
+</tr>
+<tr>
+<td><code>kubernetes</code></td>
+<td>Use K8s node.spec.podCIDR</td>
+<td>Managed K8s (GKE, EKS, AKS)</td>
+</tr>
+<tr>
+<td><code>crd</code></td>
+<td>CiliumNode CRD defines CIDRs</td>
+<td>Custom IPAM integration</td>
+</tr>
+<tr>
+<td><code>eni</code></td>
+<td>AWS ENI integration</td>
+<td>AWS EKS</td>
+</tr>
+<tr>
+<td><code>azure</code></td>
+<td>Azure IPAM integration</td>
+<td>Azure AKS</td>
+</tr>
+<tr>
+<td><code>alibabacloud</code></td>
+<td>Alibaba Cloud integration</td>
+<td>Alibaba Cloud</td>
+</tr>
+<tr>
+<td><code>multi-pool</code></td>
+<td>Multiple IP pools</td>
+<td>Advanced multi-tenant</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cluster Pool Mode (Default):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Helm values</span>
+<span class="nt">ipam</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cluster-pool</span>
+<span class="w">  </span><span class="nt">operator</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">clusterPoolIPv4PodCIDRList</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0.0.0/8</span>
+<span class="w">    </span><span class="nt">clusterPoolIPv4MaskSize</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">24</span><span class="w">  </span><span class="c1"># /24 per node</span>
+</code></pre></div>
+
+<p><strong>AWS ENI Mode:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Helm values for AWS EKS</span>
+<span class="nt">ipam</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eni</span>
+<span class="nt">eni</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">awsReleaseExcessIPs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">subnetTagsFilter</span><span class="p">:</span>
+<span class="w">    </span><span class="s">&quot;kubernetes.io/role/cni&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;1&quot;</span>
+</code></pre></div>
+
+<p><strong>Kubernetes Mode:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Helm values (uses node.spec.podCIDR)</span>
+<span class="nt">ipam</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://docs.cilium.io/en/stable/network/concepts/ipam/">Cilium IPAM</a></p>
+</blockquote>
+<hr>
+<h3>5. CiliumNetworkPolicy vs Kubernetes NetworkPolicy</h3>
+<p><em>Domain: Network Policy (18%)</em></p>
+<p>Cilium supports both standard Kubernetes NetworkPolicy and its extended CiliumNetworkPolicy.</p>
+<p><strong>Kubernetes NetworkPolicy (Standard):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NetworkPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allow-frontend</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">podSelector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backend</span>
+<span class="w">  </span><span class="nt">policyTypes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">podSelector</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">frontend</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+</code></pre></div>
+
+<p><strong>CiliumNetworkPolicy (Extended):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cilium.io/v2</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CiliumNetworkPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allow-frontend-l7</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">endpointSelector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backend</span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">fromEndpoints</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">frontend</span>
+<span class="w">      </span><span class="nt">toPorts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;8080&quot;</span>
+<span class="w">              </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+<span class="w">          </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">http</span><span class="p">:</span><span class="w">                        </span><span class="c1"># L7 rules!</span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GET</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api/v1/.*&quot;</span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POST</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/api/v1/users&quot;</span>
+</code></pre></div>
+
+<p><strong>Feature Comparison:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>K8s NetworkPolicy</th>
+<th>CiliumNetworkPolicy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L3/L4 filtering</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>L7 filtering (HTTP, gRPC, Kafka)</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>DNS-based policies</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>CIDR-based egress</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>FQDN-based egress</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Identity-based</td>
+<td>❌ (IP-based)</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Node selector</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Service selector</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CiliumNetworkPolicy Unique Features:</strong></p>
+<p><strong>L7 HTTP Rules:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">toPorts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;80&quot;</span>
+<span class="w">          </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GET</span>
+<span class="w">                </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/public/.*&quot;</span>
+<span class="w">                </span><span class="nt">headers</span><span class="p">:</span>
+<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;X-Api-Key:</span><span class="nv"> </span><span class="s">secret&quot;</span>
+</code></pre></div>
+
+<p><strong>DNS-based Egress (FQDN):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">egress</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">toFQDNs</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matchName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;api.github.com&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matchPattern</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*.amazonaws.com&quot;</span>
+<span class="w">      </span><span class="nt">toPorts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;443&quot;</span>
+</code></pre></div>
+
+<p><strong>toServices (Service-based):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">egress</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">toServices</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">k8sService</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">serviceName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redis</span>
+<span class="w">            </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">database</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://docs.cilium.io/en/stable/security/policy/">CiliumNetworkPolicy</a>
+- <a href="https://docs.cilium.io/en/stable/security/policy/language/">Policy Examples</a></p>
+</blockquote>
+<hr>
+<h3>6. Identity-based Security Model</h3>
+<p><em>Domain: Network Policy (18%)</em></p>
+<p>Cilium's security model is fundamentally different from IP-based approaches.</p>
+<p><strong>Traditional IP-based Security:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">┌─────────────────────────────────────────────────────────────┐</span>
+<span class="err">│</span><span class="w">                  </span><span class="n">IP</span><span class="o">-</span><span class="n">based</span><span class="w"> </span><span class="n">Security</span><span class="w">                          </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                             </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">Pod</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">(</span><span class="mf">10.0</span><span class="o">.</span><span class="mf">1.5</span><span class="p">)</span><span class="w"> </span><span class="err">───────►</span><span class="w"> </span><span class="n">Firewall</span><span class="w"> </span><span class="err">───────►</span><span class="w"> </span><span class="n">Pod</span><span class="w"> </span><span class="n">B</span><span class="w">        </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                              </span><span class="n">Rule</span><span class="p">:</span><span class="w">                          </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                          </span><span class="s2">&quot;Allow 10.0.1.5&quot;</span><span class="w">                   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                             </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">Problems</span><span class="p">:</span><span class="w">                                                 </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="n">Pod</span><span class="w"> </span><span class="n">IPs</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">ephemeral</span><span class="w"> </span><span class="p">(</span><span class="n">change</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">restart</span><span class="p">)</span><span class="w">              </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="n">Rules</span><span class="w"> </span><span class="n">must</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">updated</span><span class="w"> </span><span class="n">constantly</span><span class="w">                        </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="n">Doesn</span><span class="s1">&#39;t scale with dynamic workloads                    │</span>
+<span class="err">└─────────────────────────────────────────────────────────────┘</span>
+</code></pre></div>
+
+<p><strong>Cilium Identity-based Security:</strong></p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│                Identity-based Security                      │
+│                                                             │
+│   Pod A                                                     │
+│   Labels: app=frontend    ──────► Cilium ──────► Pod B     │
+│   Identity: 12345                  Rule:        Labels:     │
+│                              &quot;Allow identity              app=backend │
+│                               with app=frontend&quot;          Identity: 67890│
+│                                                             │
+│   Benefits:                                                 │
+│   - Identity based on labels, not IPs                       │
+│   - Survives pod restarts/reschedules                       │
+│   - Scales automatically                                    │
+└─────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<p><strong>How Cilium Identity Works:</strong></p>
+<ol>
+<li><strong>Label Assignment:</strong> Pods are assigned labels in their spec.</li>
+<li><strong>Identity Calculation:</strong> Cilium computes a unique numeric identity from labels.</li>
+<li><strong>Identity Propagation:</strong> Identity is embedded in packets via eBPF.</li>
+<li><strong>Policy Enforcement:</strong> Policies reference labels, resolved to identities.</li>
+</ol>
+<p><strong>View Identities:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># List all identities</span>
+cilium<span class="w"> </span>identity<span class="w"> </span>list
+
+<span class="c1"># Example output:</span>
+<span class="c1"># ID      LABELS</span>
+<span class="c1"># 1       reserved:host</span>
+<span class="c1"># 2       reserved:world</span>
+<span class="c1"># 3       reserved:unmanaged</span>
+<span class="c1"># 4       reserved:health</span>
+<span class="c1"># 12345   k8s:app=frontend</span>
+<span class="c1"># 67890   k8s:app=backend</span>
+</code></pre></div>
+
+<p><strong>Reserved Identities:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Identity</th>
+<th>Numeric ID</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>reserved:host</code></td>
+<td>1</td>
+<td>Node/host traffic</td>
+</tr>
+<tr>
+<td><code>reserved:world</code></td>
+<td>2</td>
+<td>External traffic (outside cluster)</td>
+</tr>
+<tr>
+<td><code>reserved:unmanaged</code></td>
+<td>3</td>
+<td>Unmanaged endpoints</td>
+</tr>
+<tr>
+<td><code>reserved:health</code></td>
+<td>4</td>
+<td>Health check traffic</td>
+</tr>
+<tr>
+<td><code>reserved:init</code></td>
+<td>5</td>
+<td>Init containers</td>
+</tr>
+<tr>
+<td><code>reserved:remote-node</code></td>
+<td>6</td>
+<td>Other cluster nodes</td>
+</tr>
+<tr>
+<td><code>reserved:kube-apiserver</code></td>
+<td>7</td>
+<td>Kubernetes API server</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://docs.cilium.io/en/stable/security/identity/">Identity-based Security</a></p>
+</blockquote>
+<hr>
+<h3>7. Policy Enforcement Modes</h3>
+<p><em>Domain: Network Policy (18%)</em></p>
+<p>Cilium supports different enforcement modes for policies.</p>
+<p><strong>Enforcement Modes:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default</code></td>
+<td>Endpoint-specific</td>
+<td>Allow all until policy is applied</td>
+</tr>
+<tr>
+<td><code>always</code></td>
+<td>Always enforce</td>
+<td>Deny all unless explicitly allowed</td>
+</tr>
+<tr>
+<td><code>never</code></td>
+<td>Never enforce</td>
+<td>Policies are ignored (monitoring only)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Default Mode (Recommended):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Helm values</span>
+<span class="nt">policyEnforcementMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+
+<span class="c1"># Behavior:</span>
+<span class="c1"># - Endpoints WITHOUT policies: Allow all traffic</span>
+<span class="c1"># - Endpoints WITH policies: Only allowed traffic passes</span>
+</code></pre></div>
+
+<p><strong>Always Mode (Zero Trust):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Helm values</span>
+<span class="nt">policyEnforcementMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always</span>
+
+<span class="c1"># Behavior:</span>
+<span class="c1"># - ALL endpoints: Deny by default</span>
+<span class="c1"># - Must explicitly allow all traffic</span>
+<span class="c1"># - Most secure, but requires complete policy coverage</span>
+</code></pre></div>
+
+<p><strong>Never Mode (Monitoring):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Helm values</span>
+<span class="nt">policyEnforcementMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">never</span>
+
+<span class="c1"># Behavior:</span>
+<span class="c1"># - Policies are loaded but not enforced</span>
+<span class="c1"># - Useful for auditing/testing policies</span>
+<span class="c1"># - Hubble still shows policy verdicts</span>
+</code></pre></div>
+
+<p><strong>Per-Endpoint Annotation Override:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-pod</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Force policy enforcement for this pod</span>
+<span class="w">    </span><span class="nt">policy.cilium.io/policy-enforcement</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;always&quot;</span>
+</code></pre></div>
+
+<p><strong>Check Current Mode:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check policy enforcement mode</span>
+cilium<span class="w"> </span>config<span class="w"> </span>view<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>PolicyEnforcement
+
+<span class="c1"># Check endpoint policy status</span>
+cilium<span class="w"> </span>endpoint<span class="w"> </span>list
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://docs.cilium.io/en/stable/security/policy/intro/#policy-enforcement-modes">Policy Enforcement</a></p>
+</blockquote>
+<hr>
+<h3>8. Gateway API vs Ingress</h3>
+<p><em>Domain: Service Mesh (16%)</em></p>
+<p>Cilium supports both traditional Ingress and the newer Gateway API.</p>
+<p><strong>Ingress (Legacy):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-ingress</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">kubernetes.io/ingress.class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cilium</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app.example.com</span>
+<span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">            </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">            </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-service</span>
+<span class="w">                </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+
+<p><strong>Gateway API (Modern):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Gateway - defines the listener</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gateway</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-gateway</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">gatewayClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cilium</span>
+<span class="w">  </span><span class="nt">listeners</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTP</span>
+<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">      </span><span class="nt">allowedRoutes</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">namespaces</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Same</span>
+<span class="nn">---</span>
+<span class="c1"># HTTPRoute - defines routing rules</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTPRoute</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-route</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">parentRefs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-gateway</span>
+<span class="w">  </span><span class="nt">hostnames</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;app.example.com&quot;</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matches</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PathPrefix</span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/api</span>
+<span class="w">      </span><span class="nt">backendRefs</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api-service</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matches</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PathPrefix</span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">      </span><span class="nt">backendRefs</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-service</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+
+<p><strong>Gateway API Advantages:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Ingress</th>
+<th>Gateway API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Role separation</td>
+<td>Single resource</td>
+<td>Gateway (infra) + Route (dev)</td>
+</tr>
+<tr>
+<td>Cross-namespace</td>
+<td>Limited</td>
+<td>Native support</td>
+</tr>
+<tr>
+<td>Traffic splitting</td>
+<td>Annotations</td>
+<td>Native weighted routing</td>
+</tr>
+<tr>
+<td>Header matching</td>
+<td>Annotation-dependent</td>
+<td>Native support</td>
+</tr>
+<tr>
+<td>Protocol support</td>
+<td>HTTP/HTTPS</td>
+<td>HTTP, gRPC, TCP, TLS</td>
+</tr>
+<tr>
+<td>Extensibility</td>
+<td>Annotations</td>
+<td>Typed extension points</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Traffic Splitting with Gateway API:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTPRoute</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">canary-route</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">parentRefs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-gateway</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">backendRefs</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app-v1</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">          </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90</span><span class="w">          </span><span class="c1"># 90% to v1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app-v2</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">          </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">          </span><span class="c1"># 10% to v2</span>
+</code></pre></div>
+
+<p><strong>Header-based Routing:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway.networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTPRoute</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">header-route</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">parentRefs</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-gateway</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matches</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">headers</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x-canary</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+<span class="w">      </span><span class="nt">backendRefs</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app-canary</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">backendRefs</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app-stable</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://docs.cilium.io/en/stable/network/servicemesh/gateway-api/gateway-api/">Cilium Gateway API</a>
+- <a href="https://gateway-api.sigs.k8s.io/">Gateway API Specification</a></p>
+</blockquote>
+<hr>
+<h3>9. Cilium Service Mesh</h3>
+<p><em>Domain: Service Mesh (16%)</em></p>
+<p>Cilium provides service mesh capabilities without sidecar proxies.</p>
+<p><strong>Sidecar vs Sidecarless Architecture:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="err">│</span><span class="w">              </span><span class="n">Traditional</span><span class="w"> </span><span class="n">Sidecar</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="n">Mesh</span><span class="w">                   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                 </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">┌─────────────────────┐</span><span class="w">    </span><span class="err">┌─────────────────────┐</span><span class="w">           </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">        </span><span class="n">Pod</span><span class="w">          </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">        </span><span class="n">Pod</span><span class="w">          </span><span class="err">│</span><span class="w">           </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">┌─────┐</span><span class="w">  </span><span class="err">┌──────┐</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">  </span><span class="err">┌─────┐</span><span class="w">  </span><span class="err">┌──────┐</span><span class="w">  </span><span class="err">│</span><span class="w">           </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="n">App</span><span class="w"> </span><span class="err">│◄─┤</span><span class="n">Sidecar</span><span class="err">│◄─┼────┼─►│</span><span class="n">Sidecar</span><span class="err">├─►│</span><span class="w"> </span><span class="n">App</span><span class="w"> </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">           </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">└─────┘</span><span class="w">  </span><span class="err">│</span><span class="n">Proxy</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="n">Proxy</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">└─────┘</span><span class="w">  </span><span class="err">│</span><span class="w">           </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">           </span><span class="err">└──────┘</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">  </span><span class="err">└──────┘</span><span class="w">            </span><span class="err">│</span><span class="w">           </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└─────────────────────┘</span><span class="w">    </span><span class="err">└─────────────────────┘</span><span class="w">           </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                 </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">Cons</span><span class="p">:</span><span class="w"> </span><span class="n">Resource</span><span class="w"> </span><span class="n">overhead</span><span class="p">,</span><span class="w"> </span><span class="n">latency</span><span class="p">,</span><span class="w"> </span><span class="n">operational</span><span class="w"> </span><span class="n">complexity</span><span class="w">     </span><span class="err">│</span>
+<span class="err">└─────────────────────────────────────────────────────────────────┘</span>
+
+<span class="err">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="err">│</span><span class="w">              </span><span class="n">Cilium</span><span class="w"> </span><span class="n">Sidecarless</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="n">Mesh</span><span class="w">                    </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                 </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">┌───────────┐</span><span class="w">              </span><span class="err">┌───────────┐</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">    </span><span class="n">Pod</span><span class="w">    </span><span class="err">│</span><span class="w">              </span><span class="err">│</span><span class="w">    </span><span class="n">Pod</span><span class="w">    </span><span class="err">│</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">┌─────┐</span><span class="w">  </span><span class="err">│</span><span class="w">              </span><span class="err">│</span><span class="w">  </span><span class="err">┌─────┐</span><span class="w">  </span><span class="err">│</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="n">App</span><span class="w"> </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">              </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="n">App</span><span class="w"> </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">└──┬──┘</span><span class="w">  </span><span class="err">│</span><span class="w">              </span><span class="err">│</span><span class="w">  </span><span class="err">└──┬──┘</span><span class="w">  </span><span class="err">│</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└─────┼─────┘</span><span class="w">              </span><span class="err">└─────┼─────┘</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w">                          </span><span class="err">│</span><span class="w">                            </span><span class="err">│</span>
+<span class="err">│</span><span class="w">         </span><span class="err">▼</span><span class="w">                          </span><span class="err">▼</span><span class="w">                            </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">┌─────────────────────────────────────────────────────┐</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">              </span><span class="n">Cilium</span><span class="w"> </span><span class="n">eBPF</span><span class="w"> </span><span class="p">(</span><span class="n">kernel</span><span class="w"> </span><span class="n">level</span><span class="p">)</span><span class="w">             </span><span class="err">│</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">         </span><span class="n">L4</span><span class="w"> </span><span class="nb">load</span><span class="w"> </span><span class="n">balancing</span><span class="p">,</span><span class="w"> </span><span class="n">mTLS</span><span class="p">,</span><span class="w"> </span><span class="n">policy</span><span class="w">             </span><span class="err">│</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└─────────────────────────────────────────────────────┘</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                            </span><span class="err">│</span><span class="w">                                    </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                            </span><span class="err">▼</span><span class="w">                                    </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">┌─────────────────────────────────────────────────────┐</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">         </span><span class="n">Cilium</span><span class="w"> </span><span class="n">Envoy</span><span class="w"> </span><span class="p">(</span><span class="n">per</span><span class="o">-</span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="n">shared</span><span class="p">)</span><span class="w">             </span><span class="err">│</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">              </span><span class="n">L7</span><span class="w"> </span><span class="n">policies</span><span class="w"> </span><span class="p">(</span><span class="n">HTTP</span><span class="p">,</span><span class="w"> </span><span class="n">gRPC</span><span class="p">)</span><span class="w">               </span><span class="err">│</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└─────────────────────────────────────────────────────┘</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                 </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">Pros</span><span class="p">:</span><span class="w"> </span><span class="n">Lower</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="n">usage</span><span class="p">,</span><span class="w"> </span><span class="n">better</span><span class="w"> </span><span class="n">performance</span><span class="w">               </span><span class="err">│</span>
+<span class="err">└─────────────────────────────────────────────────────────────────┘</span>
+</code></pre></div>
+
+<p><strong>Enabling Cilium Service Mesh:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Helm values</span>
+<span class="nt">ingressController</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">loadbalancerMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shared</span><span class="w">  </span><span class="c1"># or dedicated</span>
+<span class="nt">gatewayAPI</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">envoy</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+
+<p><strong>mTLS with Cilium:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Helm values for transparent encryption</span>
+<span class="nt">encryption</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">wireguard</span><span class="w">  </span><span class="c1"># or ipsec</span>
+
+<span class="c1"># WireGuard is recommended for performance</span>
+<span class="c1"># Automatically encrypts pod-to-pod traffic</span>
+</code></pre></div>
+
+<p><strong>Check Encryption Status:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Verify encryption is enabled</span>
+cilium<span class="w"> </span>status<span class="w"> </span>--verbose<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>Encryption
+
+<span class="c1"># Check encrypted connections</span>
+cilium<span class="w"> </span>encrypt<span class="w"> </span>status
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://docs.cilium.io/en/stable/network/servicemesh/">Cilium Service Mesh</a>
+- <a href="https://docs.cilium.io/en/stable/security/network/encryption/">Encryption</a></p>
+</blockquote>
+<hr>
+<h3>10. Hubble Observability</h3>
+<p><em>Domain: Network Observability (10%)</em></p>
+<p>Hubble provides deep network visibility powered by eBPF.</p>
+<p><strong>Hubble Architecture:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="err">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="err">│</span><span class="w">                       </span><span class="nx">Hubble</span><span class="w"> </span><span class="nx">Architecture</span><span class="w">                       </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                 </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">┌─────────────────┐</span><span class="w">                                          </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="nx">Hubble</span><span class="w"> </span><span class="nx">UI</span><span class="w">     </span><span class="err">│◄─────────┐</span><span class="w">                               </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="p">(</span><span class="nx">Web</span><span class="w"> </span><span class="nx">UI</span><span class="p">)</span><span class="w">      </span><span class="err">│</span><span class="w">          </span><span class="err">│</span><span class="w">                               </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└─────────────────┘</span><span class="w">          </span><span class="err">│</span><span class="w">                               </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                </span><span class="err">│</span><span class="w">                               </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">┌─────────────────┐</span><span class="w">    </span><span class="err">┌─────┴─────────┐</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="nx">Hubble</span><span class="w"> </span><span class="nx">CLI</span><span class="w">     </span><span class="err">│───►│</span><span class="w"> </span><span class="nx">Hubble</span><span class="w"> </span><span class="nx">Relay</span><span class="w">  </span><span class="err">│</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="nx">hubble</span><span class="w"> </span><span class="k">observe</span><span class="p">)</span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">  </span><span class="p">(</span><span class="nx">aggregator</span><span class="p">)</span><span class="w"> </span><span class="err">│</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└─────────────────┘</span><span class="w">    </span><span class="err">└───────┬───────┘</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                  </span><span class="err">│</span><span class="w">                              </span><span class="err">│</span>
+<span class="err">│</span><span class="w">           </span><span class="err">┌──────────────────────┼──────────────────────┐</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">           </span><span class="err">│</span><span class="w">                      </span><span class="err">│</span><span class="w">                      </span><span class="err">│</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">           </span><span class="err">▼</span><span class="w">                      </span><span class="err">▼</span><span class="w">                      </span><span class="err">▼</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">┌───────────────┐</span><span class="w">    </span><span class="err">┌───────────────┐</span><span class="w">    </span><span class="err">┌───────────────┐</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w"> </span><span class="nx">Cilium</span><span class="w"> </span><span class="nx">Agent</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w"> </span><span class="nx">Cilium</span><span class="w"> </span><span class="nx">Agent</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w"> </span><span class="nx">Cilium</span><span class="w"> </span><span class="nx">Agent</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="nx">Hubble</span><span class="w"> </span><span class="nx">Server</span><span class="p">)</span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="nx">Hubble</span><span class="w"> </span><span class="nx">Server</span><span class="p">)</span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="nx">Hubble</span><span class="w"> </span><span class="nx">Server</span><span class="p">)</span><span class="err">│</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="nx">Node</span><span class="w"> </span><span class="mi">1</span><span class="w">      </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="nx">Node</span><span class="w"> </span><span class="mi">2</span><span class="w">      </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">   </span><span class="nx">Node</span><span class="w"> </span><span class="mi">3</span><span class="w">      </span><span class="err">│</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└───────────────┘</span><span class="w">    </span><span class="err">└───────────────┘</span><span class="w">    </span><span class="err">└───────────────┘</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                 </span><span class="err">│</span>
+<span class="err">└─────────────────────────────────────────────────────────────────┘</span>
+</code></pre></div>
+
+<p><strong>Enable Hubble:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Helm values</span>
+<span class="nt">hubble</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">relay</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">ui</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">metrics</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dns</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">drop</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tcp</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flow</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">icmp</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+</code></pre></div>
+
+<p><strong>Hubble CLI Commands:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Observe all flows</span>
+hubble<span class="w"> </span>observe
+
+<span class="c1"># Filter by namespace</span>
+hubble<span class="w"> </span>observe<span class="w"> </span>--namespace<span class="w"> </span>production
+
+<span class="c1"># Filter by pod</span>
+hubble<span class="w"> </span>observe<span class="w"> </span>--pod<span class="w"> </span>production/frontend
+
+<span class="c1"># Filter by verdict (FORWARDED, DROPPED, AUDIT)</span>
+hubble<span class="w"> </span>observe<span class="w"> </span>--verdict<span class="w"> </span>DROPPED
+
+<span class="c1"># Filter by protocol</span>
+hubble<span class="w"> </span>observe<span class="w"> </span>--protocol<span class="w"> </span>TCP
+
+<span class="c1"># Filter by L7 type</span>
+hubble<span class="w"> </span>observe<span class="w"> </span>--type<span class="w"> </span>l7
+
+<span class="c1"># Filter by HTTP status</span>
+hubble<span class="w"> </span>observe<span class="w"> </span>--http-status<span class="w"> </span><span class="m">500</span>
+
+<span class="c1"># Follow real-time flows</span>
+hubble<span class="w"> </span>observe<span class="w"> </span>-f
+
+<span class="c1"># Output as JSON</span>
+hubble<span class="w"> </span>observe<span class="w"> </span>-o<span class="w"> </span>json
+
+<span class="c1"># Show DNS queries</span>
+hubble<span class="w"> </span>observe<span class="w"> </span>--protocol<span class="w"> </span>DNS
+</code></pre></div>
+
+<p><strong>Hubble Flow Fields:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-12-21T10:30:00.000Z&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;verdict&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FORWARDED&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;ethernet&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;destination&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;IP&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.0.1.5&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;destination&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.0.2.10&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;l4&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;TCP&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;source_port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">45678</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;destination_port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8080</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;namespace&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;labels&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;k8s:app=frontend&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;pod_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;frontend-abc123&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;destination&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">67890</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;namespace&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;production&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;labels&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;k8s:app=backend&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;pod_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;backend-xyz789&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;Type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;L3_L4&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;l7&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HTTP&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;http&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GET&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/api/users&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;traffic_direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INGRESS&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>L7 Visibility:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Enable L7 visibility with annotation</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-pod</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">policy.cilium.io/proxy-visibility</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;Ingress/80/TCP/HTTP&gt;&quot;</span>
+</code></pre></div>
+
+<p>Or via CiliumNetworkPolicy:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cilium.io/v2</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CiliumNetworkPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">l7-visibility</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">endpointSelector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">backend</span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">toPorts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;80&quot;</span>
+<span class="w">          </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">http</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span><span class="w">           </span><span class="c1"># Empty rules enable visibility without filtering</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://docs.cilium.io/en/stable/observability/hubble/">Hubble Documentation</a>
+- <a href="https://docs.cilium.io/en/stable/observability/hubble/hubble-cli/">Hubble CLI Reference</a></p>
+</blockquote>
+<hr>
+<h3>11. Cluster Mesh</h3>
+<p><em>Domain: Cluster Mesh (10%)</em></p>
+<p>Connect multiple Kubernetes clusters into a unified network.</p>
+<p><strong>Cluster Mesh Architecture:</strong></p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────────────┐
+│                        Cluster Mesh                                 │
+│                                                                     │
+│   Cluster A                              Cluster B                  │
+│   ┌─────────────────────┐               ┌─────────────────────┐    │
+│   │  Pod CIDR: 10.1.0.0/16│               │  Pod CIDR: 10.2.0.0/16│    │
+│   │  Cluster ID: 1       │               │  Cluster ID: 2       │    │
+│   │                      │               │                      │    │
+│   │  ┌───────────────┐  │               │  ┌───────────────┐   │    │
+│   │  │ clustermesh-  │  │◄─────────────►│  │ clustermesh-  │   │    │
+│   │  │ apiserver     │  │    mTLS       │  │ apiserver     │   │    │
+│   │  └───────────────┘  │               │  └───────────────┘   │    │
+│   │                      │               │                      │    │
+│   │  ┌───────┐ ┌───────┐│               │┌───────┐ ┌───────┐  │    │
+│   │  │Pod A  │ │Pod B  ││               ││Pod C  │ │Pod D  │  │    │
+│   │  │       │ │       ││               ││       │ │       │  │    │
+│   │  └───────┘ └───────┘│               │└───────┘ └───────┘  │    │
+│   └─────────────────────┘               └─────────────────────┘    │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<p><strong>Requirements:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unique Pod CIDRs</td>
+<td>Each cluster must have non-overlapping pod CIDRs</td>
+</tr>
+<tr>
+<td>Unique Cluster IDs</td>
+<td>Each cluster needs a unique numeric ID (1-255)</td>
+</tr>
+<tr>
+<td>Network Connectivity</td>
+<td>Clusters must be able to reach each other</td>
+</tr>
+<tr>
+<td>Shared CA</td>
+<td>All clusters must use the same CA for mTLS</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Enable Cluster Mesh:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Enable cluster mesh on each cluster</span>
+cilium<span class="w"> </span>clustermesh<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--service-type<span class="w"> </span>LoadBalancer
+
+<span class="c1"># Connect clusters</span>
+cilium<span class="w"> </span>clustermesh<span class="w"> </span>connect<span class="w"> </span>--destination-context<span class="w"> </span>cluster2
+
+<span class="c1"># Check status</span>
+cilium<span class="w"> </span>clustermesh<span class="w"> </span>status
+</code></pre></div>
+
+<p><strong>Helm Configuration:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Cluster 1</span>
+<span class="nt">cluster</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cluster1</span>
+<span class="w">  </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="nt">clustermesh</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">useAPIServer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">apiserver</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span>
+
+<span class="c1"># Cluster 2</span>
+<span class="nt">cluster</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cluster2</span>
+<span class="w">  </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="nt">clustermesh</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">useAPIServer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">apiserver</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span>
+</code></pre></div>
+
+<p><strong>Global Services:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Service accessible from all clusters</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global-api</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">service.cilium.io/global</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="w">      </span><span class="c1"># Enable global service</span>
+<span class="w">    </span><span class="nt">service.cilium.io/shared</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="w">      </span><span class="c1"># Share this service</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+
+<p><strong>Service Affinity:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global-api</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">service.cilium.io/global</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+<span class="w">    </span><span class="nt">service.cilium.io/affinity</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;local&quot;</span><span class="w">   </span><span class="c1"># Prefer local cluster</span>
+<span class="w">    </span><span class="c1"># Options: local, remote, none</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://docs.cilium.io/en/stable/network/clustermesh/">Cluster Mesh</a></p>
+</blockquote>
+<hr>
+<h3>12. Cilium CLI Commands Cheat Sheet</h3>
+<p><em>Domain: Installation and Configuration (10%)</em></p>
+<p>Essential <code>cilium</code> CLI commands for the exam.</p>
+<p><strong>Installation &amp; Status:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install Cilium</span>
+cilium<span class="w"> </span>install
+
+<span class="c1"># Install with specific version</span>
+cilium<span class="w"> </span>install<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.15.0
+
+<span class="c1"># Install with custom Helm values</span>
+cilium<span class="w"> </span>install<span class="w"> </span>--helm-values<span class="w"> </span>values.yaml
+
+<span class="c1"># Check Cilium status</span>
+cilium<span class="w"> </span>status
+
+<span class="c1"># Detailed status</span>
+cilium<span class="w"> </span>status<span class="w"> </span>--verbose
+
+<span class="c1"># Wait for Cilium to be ready</span>
+cilium<span class="w"> </span>status<span class="w"> </span>--wait
+</code></pre></div>
+
+<p><strong>Connectivity Tests:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run connectivity tests</span>
+cilium<span class="w"> </span>connectivity<span class="w"> </span><span class="nb">test</span>
+
+<span class="c1"># Run specific test</span>
+cilium<span class="w"> </span>connectivity<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--test<span class="w"> </span>pod-to-pod
+
+<span class="c1"># Run tests with Hubble enabled</span>
+cilium<span class="w"> </span>connectivity<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--hubble<span class="o">=</span><span class="nb">true</span>
+
+<span class="c1"># Cleanup test resources</span>
+cilium<span class="w"> </span>connectivity<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--cleanup
+</code></pre></div>
+
+<p><strong>Configuration:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># View current config</span>
+cilium<span class="w"> </span>config<span class="w"> </span>view
+
+<span class="c1"># Get specific config value</span>
+cilium<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>tunnel
+
+<span class="c1"># Set config value (requires agent restart)</span>
+cilium<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>debug<span class="w"> </span><span class="nb">true</span>
+</code></pre></div>
+
+<p><strong>Endpoints &amp; Identity:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># List endpoints</span>
+cilium<span class="w"> </span>endpoint<span class="w"> </span>list
+
+<span class="c1"># Get endpoint details</span>
+cilium<span class="w"> </span>endpoint<span class="w"> </span>get<span class="w"> </span>&lt;endpoint-id&gt;
+
+<span class="c1"># List identities</span>
+cilium<span class="w"> </span>identity<span class="w"> </span>list
+
+<span class="c1"># Get identity details</span>
+cilium<span class="w"> </span>identity<span class="w"> </span>get<span class="w"> </span>&lt;identity-id&gt;
+</code></pre></div>
+
+<p><strong>Network Policy:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># List policies</span>
+cilium<span class="w"> </span>policy<span class="w"> </span>get
+
+<span class="c1"># Import policy</span>
+cilium<span class="w"> </span>policy<span class="w"> </span>import<span class="w"> </span>policy.yaml
+
+<span class="c1"># Delete policy</span>
+cilium<span class="w"> </span>policy<span class="w"> </span>delete<span class="w"> </span>&lt;policy-name&gt;
+
+<span class="c1"># Trace policy decision</span>
+cilium<span class="w"> </span>policy<span class="w"> </span>trace<span class="w"> </span>--src-identity<span class="w"> </span>&lt;id&gt;<span class="w"> </span>--dst-identity<span class="w"> </span>&lt;id&gt;<span class="w"> </span>--dport<span class="w"> </span><span class="m">80</span>
+</code></pre></div>
+
+<p><strong>Hubble:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Enable Hubble</span>
+cilium<span class="w"> </span>hubble<span class="w"> </span><span class="nb">enable</span>
+
+<span class="c1"># Enable Hubble UI</span>
+cilium<span class="w"> </span>hubble<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--ui
+
+<span class="c1"># Port-forward Hubble UI</span>
+cilium<span class="w"> </span>hubble<span class="w"> </span>ui
+
+<span class="c1"># Port-forward Hubble Relay</span>
+cilium<span class="w"> </span>hubble<span class="w"> </span>port-forward<span class="w"> </span><span class="p">&amp;</span>
+hubble<span class="w"> </span>observe
+</code></pre></div>
+
+<p><strong>BPF &amp; Debugging:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># List BPF maps</span>
+cilium<span class="w"> </span>bpf<span class="w"> </span>endpoint<span class="w"> </span>list
+
+<span class="c1"># Show BPF policy maps</span>
+cilium<span class="w"> </span>bpf<span class="w"> </span>policy<span class="w"> </span>get<span class="w"> </span>&lt;endpoint-id&gt;
+
+<span class="c1"># Show NAT table</span>
+cilium<span class="w"> </span>bpf<span class="w"> </span>nat<span class="w"> </span>list
+
+<span class="c1"># Show connection tracking</span>
+cilium<span class="w"> </span>bpf<span class="w"> </span>ct<span class="w"> </span>list<span class="w"> </span>global
+
+<span class="c1"># Debug datapath</span>
+cilium<span class="w"> </span>monitor
+
+<span class="c1"># Verbose monitoring</span>
+cilium<span class="w"> </span>monitor<span class="w"> </span>-v
+
+<span class="c1"># Monitor dropped packets only</span>
+cilium<span class="w"> </span>monitor<span class="w"> </span>--type<span class="w"> </span>drop
+</code></pre></div>
+
+<p><strong>Encryption:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check encryption status</span>
+cilium<span class="w"> </span>encrypt<span class="w"> </span>status
+
+<span class="c1"># View encryption keys (IPsec)</span>
+cilium<span class="w"> </span>encrypt<span class="w"> </span>key<span class="w"> </span>list
+</code></pre></div>
+
+<p><strong>Cluster Mesh:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Enable cluster mesh</span>
+cilium<span class="w"> </span>clustermesh<span class="w"> </span><span class="nb">enable</span>
+
+<span class="c1"># Connect to another cluster</span>
+cilium<span class="w"> </span>clustermesh<span class="w"> </span>connect<span class="w"> </span>--destination-context<span class="w"> </span>&lt;context&gt;
+
+<span class="c1"># Check cluster mesh status</span>
+cilium<span class="w"> </span>clustermesh<span class="w"> </span>status
+
+<span class="c1"># Disconnect cluster</span>
+cilium<span class="w"> </span>clustermesh<span class="w"> </span>disconnect<span class="w"> </span>&lt;cluster-name&gt;
+</code></pre></div>
+
+<p><strong>Upgrade:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Upgrade Cilium</span>
+cilium<span class="w"> </span>upgrade
+
+<span class="c1"># Upgrade with specific version</span>
+cilium<span class="w"> </span>upgrade<span class="w"> </span>--version<span class="w"> </span><span class="m">1</span>.15.0
+
+<span class="c1"># Upgrade with custom values</span>
+cilium<span class="w"> </span>upgrade<span class="w"> </span>--helm-values<span class="w"> </span>values.yaml
+</code></pre></div>
+
+<p><strong>Troubleshooting:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate support bundle</span>
+cilium<span class="w"> </span>sysdump
+
+<span class="c1"># Check agent logs</span>
+kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>-l<span class="w"> </span>k8s-app<span class="o">=</span>cilium
+
+<span class="c1"># Check operator logs</span>
+kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>-l<span class="w"> </span><span class="nv">name</span><span class="o">=</span>cilium-operator
+
+<span class="c1"># Verify BPF filesystem</span>
+cilium<span class="w"> </span>bpf<span class="w"> </span>fs<span class="w"> </span>show
+</code></pre></div>
+
+<hr>
+<h1>Cilium Resource Quick Reference</h1>
+<div class="highlight"><pre><span></span><code><span class="err">┌─────────────────────────────────────────────────────────────────────┐</span>
+<span class="err">│</span><span class="w">                     </span><span class="nx">CILIUM</span><span class="w"> </span><span class="nx">ARCHITECTURE</span><span class="w">                             </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">┌─────────────────┐</span><span class="w">    </span><span class="err">┌─────────────────┐</span><span class="w">                       </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w"> </span><span class="nx">Cilium</span><span class="w"> </span><span class="nx">Operator</span><span class="w"> </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">  </span><span class="nx">Hubble</span><span class="w"> </span><span class="nx">Relay</span><span class="w">   </span><span class="err">│</span><span class="w">                       </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="p">(</span><span class="nx">Deployment</span><span class="p">)</span><span class="w">   </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">  </span><span class="p">(</span><span class="nx">Deployment</span><span class="p">)</span><span class="w">   </span><span class="err">│</span><span class="w">                       </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└────────┬────────┘</span><span class="w">    </span><span class="err">└────────┬────────┘</span><span class="w">                       </span><span class="err">│</span>
+<span class="err">│</span><span class="w">            </span><span class="err">│</span><span class="w">                      </span><span class="err">│</span><span class="w">                                 </span><span class="err">│</span>
+<span class="err">│</span><span class="w">            </span><span class="err">▼</span><span class="w">                      </span><span class="err">▼</span><span class="w">                                 </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">┌─────────────────────────────────────────────────────────┐</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">              </span><span class="nx">Cilium</span><span class="w"> </span><span class="nx">Agent</span><span class="w"> </span><span class="p">(</span><span class="nx">DaemonSet</span><span class="p">)</span><span class="w">                   </span><span class="err">│</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">┌─────────────┐</span><span class="w">  </span><span class="err">┌─────────────┐</span><span class="w">  </span><span class="err">┌─────────────────┐</span><span class="w"> </span><span class="err">│</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="nx">eBPF</span><span class="w"> </span><span class="nx">Progs</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">   </span><span class="nx">Hubble</span><span class="w">    </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">      </span><span class="nx">Envoy</span><span class="w">      </span><span class="err">│</span><span class="w"> </span><span class="err">│</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="nx">Datapath</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">   </span><span class="nx">Server</span><span class="w">    </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="p">(</span><span class="nx">L7</span><span class="w"> </span><span class="nx">Proxy</span><span class="p">)</span><span class="w">   </span><span class="err">│</span><span class="w"> </span><span class="err">│</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">└─────────────┘</span><span class="w">  </span><span class="err">└─────────────┘</span><span class="w">  </span><span class="err">└─────────────────┘</span><span class="w"> </span><span class="err">│</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└─────────────────────────────────────────────────────────┘</span><span class="w">      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">                      </span><span class="nx">NETWORK</span><span class="w"> </span><span class="nx">POLICY</span><span class="w">                                 </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="nx">CiliumNetworkPolicy</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="nx">L3</span><span class="o">/</span><span class="nx">L4</span><span class="o">/</span><span class="nx">L7</span><span class="w"> </span><span class="nx">filtering</span><span class="w">                   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="nx">CiliumClusterwideNetworkPolicy</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="nx">Cluster</span><span class="o">-</span><span class="nx">wide</span><span class="w"> </span><span class="nx">policies</span><span class="w">     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="nx">Key</span><span class="w"> </span><span class="nx">Selectors</span><span class="p">:</span><span class="w">                                                    </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="nx">endpointSelector</span><span class="w"> </span><span class="p">(</span><span class="nx">target</span><span class="w"> </span><span class="nx">pods</span><span class="p">)</span><span class="w">                                  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="nx">fromEndpoints</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">toEndpoints</span><span class="w"> </span><span class="p">(</span><span class="nx">L3</span><span class="p">)</span><span class="w">                                </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="nx">toPorts</span><span class="w"> </span><span class="p">(</span><span class="nx">L4</span><span class="p">)</span><span class="w">                                                    </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="nx">rules</span><span class="p">.</span><span class="nx">http</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">rules</span><span class="p">.</span><span class="nx">dns</span><span class="w"> </span><span class="p">(</span><span class="nx">L7</span><span class="p">)</span><span class="w">                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="nx">toFQDNs</span><span class="w"> </span><span class="p">(</span><span class="nx">DNS</span><span class="o">-</span><span class="nx">based</span><span class="w"> </span><span class="nx">egress</span><span class="p">)</span><span class="w">                                      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="nx">toServices</span><span class="w"> </span><span class="p">(</span><span class="nx">service</span><span class="o">-</span><span class="nx">based</span><span class="p">)</span><span class="w">                                      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">                      </span><span class="nx">SERVICE</span><span class="w"> </span><span class="nx">MESH</span><span class="w">                                   </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="nx">Gateway</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="nx">GatewayClass</span><span class="p">:</span><span class="w"> </span><span class="nx">cilium</span><span class="w">                             </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="nx">HTTPRoute</span><span class="w"> </span><span class="err">────►</span><span class="w"> </span><span class="nx">Routing</span><span class="w"> </span><span class="nx">rules</span><span class="p">,</span><span class="w"> </span><span class="nx">traffic</span><span class="w"> </span><span class="nx">splitting</span><span class="w">                  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="nx">TLSRoute</span><span class="w"> </span><span class="err">─────►</span><span class="w"> </span><span class="nx">TLS</span><span class="w"> </span><span class="nx">passthrough</span><span class="w">                                   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="nx">Encryption</span><span class="p">:</span><span class="w"> </span><span class="nx">WireGuard</span><span class="w"> </span><span class="p">(</span><span class="nx">recommended</span><span class="p">)</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="nx">IPsec</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">                     </span><span class="nx">OBSERVABILITY</span><span class="w">                                   </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="nx">hubble</span><span class="w"> </span><span class="k">observe</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="nx">Flow</span><span class="w"> </span><span class="nx">visibility</span><span class="w">                           </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="nx">hubble</span><span class="w"> </span><span class="k">observe</span><span class="w"> </span><span class="o">--</span><span class="nx">verdict</span><span class="w"> </span><span class="nx">DROPPED</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="nx">Dropped</span><span class="w"> </span><span class="nx">packets</span><span class="w">         </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="nx">hubble</span><span class="w"> </span><span class="k">observe</span><span class="w"> </span><span class="o">--</span><span class="k">type</span><span class="w"> </span><span class="nx">l7</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="nx">L7</span><span class="w"> </span><span class="nx">flows</span><span class="w"> </span><span class="p">(</span><span class="nx">HTTP</span><span class="p">,</span><span class="w"> </span><span class="nx">DNS</span><span class="p">)</span><span class="w">            </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="nx">cilium</span><span class="w"> </span><span class="nx">monitor</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="nx">Real</span><span class="o">-</span><span class="nx">time</span><span class="w"> </span><span class="nx">BPF</span><span class="w"> </span><span class="nx">events</span><span class="w">                      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">└─────────────────────────────────────────────────────────────────────┘</span>
+</code></pre></div>
+
+<hr>
+<h1>Key Resources</h1>
+<ul>
+<li><a href="https://docs.cilium.io/">Cilium Official Documentation</a></li>
+<li><a href="https://training.linuxfoundation.org/certification/cilium-certified-associate-cca/">CCA Exam Curriculum</a></li>
+<li><a href="https://github.com/cilium/cilium">Cilium GitHub</a></li>
+<li><a href="https://ebpf.io/">eBPF.io</a></li>
+<li><a href="https://isovalent.com/labs/">Isovalent Labs (Free Tutorials)</a></li>
+</ul>
+<hr>
+<h1>Exam Details</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Format</strong></td>
+<td>Multiple-choice</td>
+</tr>
+<tr>
+<td><strong>Duration</strong></td>
+<td>90 minutes</td>
+</tr>
+<tr>
+<td><strong>Questions</strong></td>
+<td>~60 questions</td>
+</tr>
+<tr>
+<td><strong>Passing Score</strong></td>
+<td>75%</td>
+</tr>
+<tr>
+<td><strong>Validity</strong></td>
+<td>2 years</td>
+</tr>
+<tr>
+<td><strong>Retakes</strong></td>
+<td>1 free retake included</td>
+</tr>
+<tr>
+<td><strong>Price</strong></td>
+<td>$250 (exam only)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1>Honest Recommendation</h1>
+<ul>
+<li>The CCA exam is <strong>multiple-choice</strong>, not hands-on. Focus on understanding concepts, architecture, and the "why" behind features.</li>
+<li><strong>eBPF fundamentals (10%)</strong> are crucial — understand why Cilium uses eBPF over iptables.</li>
+<li><strong>Network Policy (18%)</strong> — know the difference between K8s NetworkPolicy and CiliumNetworkPolicy, especially L7 and FQDN features.</li>
+<li><strong>Architecture (20%)</strong> — understand all components (Agent, Operator, Hubble) and their roles.</li>
+<li>Practice with the <strong>Isovalent Labs</strong> — they offer free hands-on tutorials that cover most exam topics.</li>
+<li>Read the official docs multiple times. The exam questions are often directly from documentation.</li>
+</ul>
+<p><a href="https://docs.cilium.io/">https://docs.cilium.io/</a></p>
+<hr>
+<h1>My Secret Weapon: Mock Exam</h1>
+<p>After absorbing all the concepts above, there's one more crucial step before you're truly exam-ready: <strong>practice with mock exams</strong>.</p>
+<p>Reading documentation and understanding concepts is essential, but the real test comes when you face actual exam-style questions under time pressure. Mock exams help you:</p>
+<ul>
+<li><strong>Identify knowledge gaps:</strong> You might think you understand a topic until a tricky question proves otherwise.</li>
+<li><strong>Get familiar with question patterns:</strong> The CCA exam has its own style of wording and question structure.</li>
+<li><strong>Build time management skills:</strong> Knowing the content is one thing; answering ~60 questions in 90 minutes is another.</li>
+<li><strong>Boost confidence:</strong> Walking into the exam having already "passed" a similar test reduces anxiety significantly.</li>
+</ul>
+<h3>Recommended Resource</h3>
+<p>👉 <em>[Mock exam link - TBD]</em></p>
+<p>I'd recommend taking each mock exam at least twice:</p>
+<ol>
+<li><strong>First attempt:</strong> Simulate real exam conditions (timed, no references).</li>
+<li><strong>Review:</strong> Go through every wrong answer and understand <em>why</em> it's wrong.</li>
+<li><strong>Second attempt:</strong> Aim for 90%+ before scheduling your real exam.</li>
+</ol>
+<blockquote>
+<p><strong>Pro tip:</strong> If you're consistently scoring above 85% on mock exams, you're ready for the real thing. If not, revisit the sections where you're struggling and try again.</p>
+</blockquote>
+<hr>
+<h1>Final Wrap-Up</h1>
+<p><em>[To be updated after passing the exam]</em></p>
+<hr>
+<h1>Exam Notes</h1>
+<p><em>[To be updated with exam experience]</em></p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2025-12-21T00:00:00+07:00">Sun 21 December 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#cca-ref">cca
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#certification-ref">certification
+                    <span class="superscript">8</span>
+</a></li>
+                <li><a href="/tags.html#cilium-ref">cilium
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#ebpf-ref">ebpf
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#kubernetes-ref">kubernetes
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#linux-foundation-ref">linux-foundation
+                    <span class="superscript">8</span>
+</a></li>
+                <li><a href="/tags.html#networking-ref">networking
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

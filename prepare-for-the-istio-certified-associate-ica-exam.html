@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="istio, certification, linux-foundation, ica, service-mesh, Knowledge Base, " />
+
+<meta property="og:title" content="Prepare for the Istio Certified Associate (ICA) Exam "/>
+<meta property="og:url" content="/prepare-for-the-istio-certified-associate-ica-exam.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2025-12-21T00:00:00+07:00" />
+<meta name="twitter:title" content="Prepare for the Istio Certified Associate (ICA) Exam ">
+<meta name="twitter:description" content="">
+
+        <title>Prepare for the Istio Certified Associate (ICA) Exam  · Kienlt&#39;s notebook
+</title>
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       "/"
+                                    >Home</a>
+                                </li>
+                                <li ><a href="/categories.html">Categories</a></li>
+                                <li ><a href="/tags.html">Tags</a></li>
+                                <li ><a href="/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="/prepare-for-the-istio-certified-associate-ica-exam.html">
+                Prepare for the Istio Certified Associate (ICA) Exam
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p><img alt="alt text" src="images/2025/12/20.png"></p>
+<hr>
+<h1>Istio Certified Associate (ICA) Overview</h1>
+<h3>1. Service Mesh Fundamentals</h3>
+<p>Understanding the "Why" before the "How."</p>
+<ul>
+<li><strong>What is a Service Mesh:</strong> A dedicated infrastructure layer for managing service-to-service communication in microservices architectures.</li>
+<li><strong>The Need for Istio:</strong> Solving challenges like traffic management, security, and observability without modifying application code.</li>
+<li><strong>Sidecar vs. Ambient Mode:</strong> Understanding the two deployment models — Sidecar (Envoy proxy per pod) vs. Ambient (ztunnel + waypoint proxies).</li>
+</ul>
+<h3>2. Istio Core Architecture</h3>
+<p>The backbone of the service mesh.</p>
+<ul>
+<li><strong>Control Plane (istiod):</strong> The brain of Istio — handles configuration, certificate management, and service discovery.</li>
+<li><strong>Data Plane:</strong> Envoy proxies that intercept and manage all network traffic between services.</li>
+<li><strong>Key Components:</strong> Pilot (traffic management), Citadel (security/mTLS), and Galley (configuration validation).</li>
+</ul>
+<p>Example of <strong>Traffic Flow</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Client</span><span class="w"> </span><span class="n">Request</span>
+<span class="err">├─</span><span class="w"> </span><span class="n">Ingress</span><span class="w"> </span><span class="n">Gateway</span><span class="w"> </span><span class="p">(</span><span class="n">edge</span><span class="w"> </span><span class="n">traffic</span><span class="p">)</span>
+<span class="w">   </span><span class="err">├─</span><span class="w"> </span><span class="n">VirtualService</span><span class="w"> </span><span class="p">(</span><span class="n">routing</span><span class="w"> </span><span class="n">rules</span><span class="p">)</span>
+<span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">└─</span><span class="w"> </span><span class="n">DestinationRule</span><span class="w"> </span><span class="p">(</span><span class="nb">load</span><span class="w"> </span><span class="n">balancing</span><span class="p">,</span><span class="w"> </span><span class="n">TLS</span><span class="w"> </span><span class="n">settings</span><span class="p">)</span>
+<span class="w">   </span><span class="err">└─</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">(</span><span class="n">with</span><span class="w"> </span><span class="n">Envoy</span><span class="w"> </span><span class="n">sidecar</span><span class="p">)</span>
+<span class="w">      </span><span class="err">└─</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="p">(</span><span class="n">with</span><span class="w"> </span><span class="n">Envoy</span><span class="w"> </span><span class="n">sidecar</span><span class="p">)</span>
+</code></pre></div>
+
+<h3>3. Installation, Upgrade &amp; Configuration (20%)</h3>
+<p>Getting Istio up and running.</p>
+<ul>
+<li><strong>Installation Methods:</strong> Using <code>istioctl install</code> or Helm charts.</li>
+<li><strong>Installation Profiles:</strong> Understanding <code>default</code>, <code>demo</code>, <code>minimal</code>, and <code>ambient</code> profiles.</li>
+<li><strong>Customizing Installation:</strong> Using IstioOperator resource for advanced configurations.</li>
+<li><strong>Upgrade Strategies:</strong> Canary upgrades (run two control planes) vs. In-place upgrades.</li>
+</ul>
+<h3>4. Traffic Management (35%)</h3>
+<p>The largest exam domain — master this well.</p>
+<ul>
+<li><strong>Ingress &amp; Egress:</strong> Configuring Gateway resources for north-south traffic.</li>
+<li><strong>VirtualService:</strong> Defining routing rules (host-based, header-based, URI matching).</li>
+<li><strong>DestinationRule:</strong> Configuring load balancing policies, connection pools, and outlier detection.</li>
+<li><strong>Traffic Shifting:</strong> Canary deployments and A/B testing with weighted routing.</li>
+<li><strong>Resilience Features:</strong> Circuit breaking, retries, timeouts, and failover.</li>
+<li><strong>Fault Injection:</strong> Testing resilience by injecting delays or HTTP errors.</li>
+<li><strong>ServiceEntry:</strong> Connecting in-mesh workloads to external services.</li>
+</ul>
+<h3>5. Securing Workloads (25%)</h3>
+<p>Zero-trust security model.</p>
+<ul>
+<li><strong>Mutual TLS (mTLS):</strong> Automatic encryption between services using PeerAuthentication.</li>
+<li><strong>Authorization Policies:</strong> Fine-grained access control (allow/deny based on source, operation, conditions).</li>
+<li><strong>RequestAuthentication:</strong> Validating JWT tokens at the mesh edge.</li>
+<li><strong>Securing Edge Traffic:</strong> Configuring TLS termination and passthrough at the Ingress Gateway.</li>
+</ul>
+<h3>6. Troubleshooting (20%)</h3>
+<p>Debugging when things go wrong.</p>
+<ul>
+<li><strong>Configuration Issues:</strong> Using <code>istioctl analyze</code> to detect misconfigurations.</li>
+<li><strong>Control Plane Debugging:</strong> Checking istiod logs, sync status, and xDS configuration.</li>
+<li><strong>Data Plane Debugging:</strong> Using <code>istioctl proxy-status</code>, <code>proxy-config</code>, and Envoy admin interface.</li>
+<li><strong>Common Issues:</strong> 503 errors, mTLS conflicts, missing sidecars, and routing mismatches.</li>
+</ul>
+<hr>
+<h1>Sections That Need to Be Understood</h1>
+<h3>1. Sidecar vs. Ambient Mode</h3>
+<p><em>Domain: Installation, Upgrade &amp; Configuration</em></p>
+<p>Istio offers two data plane modes. Understanding the differences is crucial for the exam.</p>
+<p><strong>Sidecar Mode (Traditional):</strong></p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────┐
+│ Pod                             │
+│  ┌───────────┐  ┌─────────────┐ │
+│  │    App    │◄─┤Envoy Sidecar│ │
+│  │ Container │  │   Proxy     │ │
+│  └───────────┘  └─────────────┘ │
+└─────────────────────────────────┘
+</code></pre></div>
+
+<ul>
+<li>Every pod gets its own Envoy proxy injected as a sidecar container.</li>
+<li><strong>Pros:</strong> Full L7 features, mature and battle-tested.</li>
+<li><strong>Cons:</strong> High resource overhead (memory/CPU per pod), increased latency.</li>
+</ul>
+<p><strong>Ambient Mode (Sidecar-less):</strong></p>
+<div class="highlight"><pre><span></span><code>┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│    Pod A    │     │    Pod B    │     │    Pod C    │
+│  (no sidecar)│     │  (no sidecar)│     │  (no sidecar)│
+└──────┬──────┘     └──────┬──────┘     └──────┬──────┘
+       │                   │                   │
+       └───────────┬───────┴───────────────────┘
+                   ▼
+          ┌───────────────┐
+          │   ztunnel     │  ◄── L4 processing (mTLS, basic routing)
+          │  (per node)   │
+          └───────┬───────┘
+                  ▼
+          ┌───────────────┐
+          │   Waypoint    │  ◄── L7 processing (optional, per namespace/service)
+          │    Proxy      │
+          └───────────────┘
+</code></pre></div>
+
+<ul>
+<li><strong>ztunnel:</strong> Node-level proxy handling L4 (TCP, mTLS).</li>
+<li><strong>Waypoint Proxy:</strong> Optional L7 proxy deployed per namespace or service.</li>
+<li><strong>Pros:</strong> Lower resource usage, simpler operations, no sidecar injection needed.</li>
+<li><strong>Cons:</strong> Newer, some L7 features require waypoint deployment.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Sidecar Mode</th>
+<th>Ambient Mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resource overhead</td>
+<td>High (per pod)</td>
+<td>Low (per node)</td>
+</tr>
+<tr>
+<td>L4 mTLS</td>
+<td>✅</td>
+<td>✅ (ztunnel)</td>
+</tr>
+<tr>
+<td>L7 features</td>
+<td>✅ (always)</td>
+<td>✅ (needs waypoint)</td>
+</tr>
+<tr>
+<td>Injection required</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Maturity</td>
+<td>Stable</td>
+<td>Newer (GA in 1.22+)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://istio.io/latest/docs/ambient/">Istio Ambient Mode</a>
+- <a href="https://istio.io/latest/docs/overview/dataplane-modes/">Sidecar vs Ambient Comparison</a></p>
+</blockquote>
+<hr>
+<h3>2. VirtualService &amp; DestinationRule Relationship</h3>
+<p><em>Domain: Traffic Management</em></p>
+<p>These two resources work together and are the <strong>most important concepts</strong> for the exam.</p>
+<p><strong>Resource Relationship:</strong></p>
+<div class="highlight"><pre><span></span><code>┌──────────────┐      ┌─────────────────┐      ┌──────────────────┐
+│   Gateway    │─────►│  VirtualService │─────►│ DestinationRule  │
+│  (entry point)│      │ (WHERE to route)│      │ (HOW to route)   │
+└──────────────┘      └─────────────────┘      └──────────────────┘
+                              │                         │
+                              ▼                         ▼
+                       - Host matching           - Subsets (versions)
+                       - URI matching            - Load balancing
+                       - Header matching         - Connection pool
+                       - Traffic splitting       - Outlier detection
+                       - Redirects/Rewrites      - TLS settings
+</code></pre></div>
+
+<p><strong>VirtualService — Defines WHERE traffic goes:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews-routing</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span><span class="w">                          </span><span class="c1"># Target service</span>
+<span class="w">  </span><span class="nt">gateways</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mesh</span><span class="w">                             </span><span class="c1"># For internal mesh traffic</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bookinfo-gateway</span><span class="w">                 </span><span class="c1"># For external traffic</span>
+<span class="w">  </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">match</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">headers</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">end-user</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">exact</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jason</span><span class="w">             </span><span class="c1"># Header-based routing</span>
+<span class="w">      </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">            </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v2</span><span class="w">                 </span><span class="c1"># Route to v2 for user &quot;jason&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">            </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="w">          </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span><span class="w">                   </span><span class="c1"># 80% to v1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">            </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v3</span>
+<span class="w">          </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w">                   </span><span class="c1"># 20% to v3</span>
+</code></pre></div>
+
+<p><strong>DestinationRule — Defines HOW traffic is handled:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DestinationRule</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews-destination</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span><span class="w">                        </span><span class="c1"># Must match VirtualService destination</span>
+<span class="w">  </span><span class="nt">trafficPolicy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">connectionPool</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">tcp</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">maxConnections</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">h2UpgradePolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UPGRADE</span>
+<span class="w">        </span><span class="nt">http1MaxPendingRequests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">    </span><span class="nt">loadBalancer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">simple</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ROUND_ROBIN</span><span class="w">              </span><span class="c1"># ROUND_ROBIN, LEAST_CONN, RANDOM, PASSTHROUGH</span>
+<span class="w">    </span><span class="nt">outlierDetection</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">consecutive5xxErrors</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+<span class="w">      </span><span class="nt">baseEjectionTime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
+<span class="w">  </span><span class="nt">subsets</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w">                    </span><span class="c1"># Pod selector</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v2</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v2</span>
+<span class="w">      </span><span class="nt">trafficPolicy</span><span class="p">:</span><span class="w">                   </span><span class="c1"># Subset-specific policy</span>
+<span class="w">        </span><span class="nt">loadBalancer</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">simple</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LEAST_CONN</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v3</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v3</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>Key Point:</strong> VirtualService references subsets defined in DestinationRule. Always create DestinationRule <strong>before</strong> or <strong>together with</strong> VirtualService.</p>
+<p><strong>References:</strong>
+- <a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/">VirtualService</a>
+- <a href="https://istio.io/latest/docs/reference/config/networking/destination-rule/">DestinationRule</a></p>
+</blockquote>
+<hr>
+<h3>3. Gateway Configuration</h3>
+<p><em>Domain: Traffic Management</em></p>
+<p>Gateway defines the entry/exit points for traffic entering or leaving the mesh.</p>
+<p><strong>Ingress Gateway (North-South Traffic IN):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gateway</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bookinfo-gateway</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">istio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingressgateway</span><span class="w">              </span><span class="c1"># Use Istio&#39;s default ingress gateway</span>
+<span class="w">  </span><span class="nt">servers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTP</span>
+<span class="w">      </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bookinfo.example.com&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https</span>
+<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTPS</span>
+<span class="w">      </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bookinfo.example.com&quot;</span>
+<span class="w">      </span><span class="nt">tls</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SIMPLE</span><span class="w">                   </span><span class="c1"># TLS termination</span>
+<span class="w">        </span><span class="nt">credentialName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bookinfo-cert</span><span class="w">  </span><span class="c1"># K8s secret with TLS cert</span>
+</code></pre></div>
+
+<p><strong>TLS Modes:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SIMPLE</code></td>
+<td>TLS termination at gateway</td>
+<td>Standard HTTPS</td>
+</tr>
+<tr>
+<td><code>MUTUAL</code></td>
+<td>mTLS - client cert required</td>
+<td>High security</td>
+</tr>
+<tr>
+<td><code>PASSTHROUGH</code></td>
+<td>TLS passed to backend</td>
+<td>Backend handles TLS</td>
+</tr>
+<tr>
+<td><code>AUTO_PASSTHROUGH</code></td>
+<td>SNI-based passthrough</td>
+<td>Multi-cluster</td>
+</tr>
+<tr>
+<td><code>ISTIO_MUTUAL</code></td>
+<td>Istio mTLS</td>
+<td>Internal mesh traffic</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Egress Gateway (North-South Traffic OUT):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gateway</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">istio-egressgateway</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">istio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">egressgateway</span>
+<span class="w">  </span><span class="nt">servers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tls</span>
+<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TLS</span>
+<span class="w">      </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;external-api.example.com&quot;</span>
+<span class="w">      </span><span class="nt">tls</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PASSTHROUGH</span>
+</code></pre></div>
+
+<p><strong>Connect Gateway to VirtualService:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bookinfo-vs</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bookinfo.example.com&quot;</span>
+<span class="w">  </span><span class="nt">gateways</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bookinfo-gateway</span><span class="w">                 </span><span class="c1"># Reference the Gateway</span>
+<span class="w">  </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">productpage</span>
+<span class="w">            </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9080</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://istio.io/latest/docs/reference/config/networking/gateway/">Istio Gateway</a>
+- <a href="https://istio.io/latest/docs/tasks/traffic-management/ingress/">Ingress Gateway</a></p>
+</blockquote>
+<hr>
+<h3>4. Traffic Shifting &amp; Canary Deployments</h3>
+<p><em>Domain: Traffic Management</em></p>
+<p>Gradually shift traffic between service versions for safe deployments.</p>
+<p><strong>Weighted Routing (Canary):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">  </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">            </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="w">          </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">90</span><span class="w">                   </span><span class="c1"># 90% to stable version</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">            </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v2</span>
+<span class="w">          </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">                   </span><span class="c1"># 10% to canary version</span>
+</code></pre></div>
+
+<p><strong>Header-Based Routing (A/B Testing):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">  </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">match</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">headers</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">x-canary</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">exact</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="w">            </span><span class="c1"># Route if header present</span>
+<span class="w">      </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">            </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v2</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">            </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w">                 </span><span class="c1"># Default route</span>
+</code></pre></div>
+
+<p><strong>Traffic Mirroring (Shadow Traffic):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">  </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">            </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="w">      </span><span class="nt">mirror</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">        </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v2</span><span class="w">                     </span><span class="c1"># Mirror traffic to v2</span>
+<span class="w">      </span><span class="nt">mirrorPercentage</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100.0</span><span class="w">                   </span><span class="c1"># Mirror 100% of traffic</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>Key Point:</strong> Mirrored traffic is "fire and forget" — responses from the mirror are discarded.</p>
+<p><strong>References:</strong>
+- <a href="https://istio.io/latest/docs/tasks/traffic-management/traffic-shifting/">Traffic Shifting</a>
+- <a href="https://istio.io/latest/docs/tasks/traffic-management/mirroring/">Mirroring</a></p>
+</blockquote>
+<hr>
+<h3>5. mTLS &amp; PeerAuthentication</h3>
+<p><em>Domain: Securing Workloads</em></p>
+<p>Istio can automatically encrypt all service-to-service traffic using mutual TLS.</p>
+<p><strong>PeerAuthentication Modes:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>STRICT</code></td>
+<td>Only mTLS traffic allowed (reject plaintext)</td>
+</tr>
+<tr>
+<td><code>PERMISSIVE</code></td>
+<td>Accept both mTLS and plaintext (migration mode)</td>
+</tr>
+<tr>
+<td><code>DISABLE</code></td>
+<td>Disable mTLS</td>
+</tr>
+<tr>
+<td><code>UNSET</code></td>
+<td>Inherit from parent scope</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Scope Hierarchy:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">Mesh</span><span class="o">-</span><span class="n">wide</span><span class="w"> </span><span class="p">(</span><span class="n">MeshPolicy</span><span class="p">)</span>
+<span class="w">    </span><span class="err">└─►</span><span class="w"> </span><span class="n">Namespace</span><span class="o">-</span><span class="n">level</span>
+<span class="w">          </span><span class="err">└─►</span><span class="w"> </span><span class="n">Workload</span><span class="o">-</span><span class="n">level</span><span class="w"> </span><span class="p">(</span><span class="n">most</span><span class="w"> </span><span class="n">specific</span><span class="w"> </span><span class="n">wins</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>Mesh-wide STRICT mTLS:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PeerAuthentication</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">istio-system</span><span class="w">              </span><span class="c1"># istio-system = mesh-wide</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mtls</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">STRICT</span>
+</code></pre></div>
+
+<p><strong>Namespace-level mTLS:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PeerAuthentication</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span><span class="w">                </span><span class="c1"># Applies to production namespace</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mtls</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">STRICT</span>
+</code></pre></div>
+
+<p><strong>Workload-level mTLS:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PeerAuthentication</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews-mtls</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span><span class="w">                     </span><span class="c1"># Only applies to reviews service</span>
+<span class="w">  </span><span class="nt">mtls</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">STRICT</span>
+<span class="w">  </span><span class="nt">portLevelMtls</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">8080</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PERMISSIVE</span><span class="w">                 </span><span class="c1"># Port-specific override</span>
+</code></pre></div>
+
+<p><strong>DestinationRule TLS Settings (Client-side):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DestinationRule</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews-mtls</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">  </span><span class="nt">trafficPolicy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">tls</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ISTIO_MUTUAL</span><span class="w">               </span><span class="c1"># Use Istio&#39;s mTLS</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>Key Point:</strong> PeerAuthentication = server-side (what traffic to accept). DestinationRule tls = client-side (how to connect).</p>
+<p><strong>References:</strong>
+- <a href="https://istio.io/latest/docs/reference/config/security/peer_authentication/">PeerAuthentication</a>
+- <a href="https://istio.io/latest/docs/tasks/security/authentication/mtls-migration/">Mutual TLS Migration</a></p>
+</blockquote>
+<hr>
+<h3>6. AuthorizationPolicy</h3>
+<p><em>Domain: Securing Workloads</em></p>
+<p>Fine-grained access control for workloads.</p>
+<p><strong>Policy Actions:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ALLOW</code></td>
+<td>Allow matching requests (default deny all others)</td>
+</tr>
+<tr>
+<td><code>DENY</code></td>
+<td>Deny matching requests</td>
+</tr>
+<tr>
+<td><code>CUSTOM</code></td>
+<td>Delegate to external authorizer</td>
+</tr>
+<tr>
+<td><code>AUDIT</code></td>
+<td>Audit matching requests (logging only)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Deny-All Policy (Zero Trust Baseline):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AuthorizationPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deny-all</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">{}</span><span class="w">                                   </span><span class="c1"># Empty spec = deny all</span>
+</code></pre></div>
+
+<p><strong>Allow Specific Traffic:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AuthorizationPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">allow-productpage</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">productpage</span>
+<span class="w">  </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALLOW</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">principals</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;cluster.local/ns/production/sa/frontend&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">to</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">operation</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">methods</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;GET&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">            </span><span class="nt">paths</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;/api/*&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">when</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">request.headers[x-token]</span>
+<span class="w">          </span><span class="nt">values</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;valid-token&quot;</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+
+<p><strong>Deny Specific Traffic:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AuthorizationPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deny-bad-ips</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DENY</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">ipBlocks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;10.0.0.0/8&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">            </span><span class="nt">notIpBlocks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;10.0.1.0/24&quot;</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+
+<p><strong>Policy Evaluation Order:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="mf">1.</span><span class="w"> </span><span class="n">CUSTOM</span><span class="w"> </span><span class="n">policies</span><span class="w"> </span><span class="p">(</span><span class="kr">if</span><span class="w"> </span><span class="n">any</span><span class="p">)</span>
+<span class="mf">2.</span><span class="w"> </span><span class="n">DENY</span><span class="w"> </span><span class="n">policies</span><span class="w"> </span><span class="p">(</span><span class="kr">if</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">reject</span><span class="p">)</span>
+<span class="mf">3.</span><span class="w"> </span><span class="n">ALLOW</span><span class="w"> </span><span class="n">policies</span><span class="w"> </span><span class="p">(</span><span class="kr">if</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">allow</span><span class="p">)</span>
+<span class="mf">4.</span><span class="w"> </span><span class="n">No</span><span class="w"> </span><span class="n">match</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">depends</span><span class="w"> </span><span class="kr">on</span><span class="w"> </span><span class="n">whether</span><span class="w"> </span><span class="n">ALLOW</span><span class="w"> </span><span class="n">policies</span><span class="w"> </span><span class="n">exist</span>
+<span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="kr">If</span><span class="w"> </span><span class="n">ALLOW</span><span class="w"> </span><span class="n">policies</span><span class="w"> </span><span class="n">exist</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">deny</span><span class="w"> </span><span class="p">(</span><span class="n">allowlist</span><span class="w"> </span><span class="n">mode</span><span class="p">)</span>
+<span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="kr">If</span><span class="w"> </span><span class="n">no</span><span class="w"> </span><span class="n">ALLOW</span><span class="w"> </span><span class="n">policies</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">allow</span><span class="w"> </span><span class="p">(</span><span class="n">no</span><span class="w"> </span><span class="n">restriction</span><span class="p">)</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://istio.io/latest/docs/reference/config/security/authorization-policy/">Authorization Policy</a>
+- <a href="https://istio.io/latest/docs/concepts/security/#authorization">Authorization Concepts</a></p>
+</blockquote>
+<hr>
+<h3>7. RequestAuthentication (JWT Validation)</h3>
+<p><em>Domain: Securing Workloads</em></p>
+<p>Validate JWT tokens at the mesh edge.</p>
+<p><strong>Basic JWT Validation:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RequestAuthentication</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jwt-auth</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">productpage</span>
+<span class="w">  </span><span class="nt">jwtRules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">issuer</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth.example.com&quot;</span>
+<span class="w">      </span><span class="nt">jwksUri</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth.example.com/.well-known/jwks.json&quot;</span>
+<span class="w">      </span><span class="nt">audiences</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bookinfo-app&quot;</span>
+<span class="w">      </span><span class="nt">forwardOriginalToken</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">       </span><span class="c1"># Forward JWT to upstream</span>
+<span class="w">      </span><span class="nt">outputPayloadToHeader</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x-jwt-payload</span>
+</code></pre></div>
+
+<p><strong>Multiple Issuers:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RequestAuthentication</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">multi-jwt</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">jwtRules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">issuer</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://accounts.google.com&quot;</span>
+<span class="w">      </span><span class="nt">jwksUri</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://www.googleapis.com/oauth2/v3/certs&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">issuer</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth0.example.com/&quot;</span>
+<span class="w">      </span><span class="nt">jwksUri</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth0.example.com/.well-known/jwks.json&quot;</span>
+</code></pre></div>
+
+<p><strong>Combine with AuthorizationPolicy:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># First: Validate JWT</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RequestAuthentication</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jwt-auth</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">productpage</span>
+<span class="w">  </span><span class="nt">jwtRules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">issuer</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth.example.com&quot;</span>
+<span class="w">      </span><span class="nt">jwksUri</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth.example.com/.well-known/jwks.json&quot;</span>
+<span class="nn">---</span>
+<span class="c1"># Then: Require valid JWT</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AuthorizationPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">require-jwt</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">productpage</span>
+<span class="w">  </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALLOW</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">requestPrincipals</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;https://auth.example.com/*&quot;</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>Key Point:</strong> RequestAuthentication only <strong>validates</strong> tokens. To <strong>require</strong> tokens, combine with AuthorizationPolicy.</p>
+<p><strong>References:</strong>
+- <a href="https://istio.io/latest/docs/reference/config/security/request_authentication/">RequestAuthentication</a>
+- <a href="https://istio.io/latest/docs/tasks/security/authentication/authn-policy/#end-user-authentication">JWT Auth</a></p>
+</blockquote>
+<hr>
+<h3>8. Resilience Features</h3>
+<p><em>Domain: Traffic Management</em></p>
+<p>Build fault-tolerant services with Istio's resilience features.</p>
+<p><strong>Circuit Breaker (Connection Pool + Outlier Detection):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DestinationRule</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews-cb</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">  </span><span class="nt">trafficPolicy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">connectionPool</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">tcp</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">maxConnections</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w">            </span><span class="c1"># Max TCP connections</span>
+<span class="w">      </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">http1MaxPendingRequests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span><span class="w">   </span><span class="c1"># Max pending HTTP/1.1 requests</span>
+<span class="w">        </span><span class="nt">http2MaxRequests</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span><span class="w">         </span><span class="c1"># Max HTTP/2 requests</span>
+<span class="w">        </span><span class="nt">maxRequestsPerConnection</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">   </span><span class="c1"># Requests per connection</span>
+<span class="w">        </span><span class="nt">maxRetries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">                  </span><span class="c1"># Max concurrent retries</span>
+<span class="w">    </span><span class="nt">outlierDetection</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">consecutive5xxErrors</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w">          </span><span class="c1"># Eject after 5 consecutive 5xx</span>
+<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span><span class="w">                    </span><span class="c1"># Analysis interval</span>
+<span class="w">      </span><span class="nt">baseEjectionTime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span><span class="w">            </span><span class="c1"># Min ejection time</span>
+<span class="w">      </span><span class="nt">maxEjectionPercent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w">           </span><span class="c1"># Max % of hosts to eject</span>
+<span class="w">      </span><span class="nt">minHealthPercent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w">             </span><span class="c1"># Min healthy hosts required</span>
+</code></pre></div>
+
+<p><strong>Retries:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">  </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">      </span><span class="nt">retries</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">attempts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">                    </span><span class="c1"># Max retry attempts</span>
+<span class="w">        </span><span class="nt">perTryTimeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2s</span><span class="w">              </span><span class="c1"># Timeout per attempt</span>
+<span class="w">        </span><span class="nt">retryOn</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5xx,reset,connect-failure,retriable-4xx&quot;</span>
+<span class="w">        </span><span class="nt">retryRemoteLocalities</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">    </span><span class="c1"># Retry on different locality</span>
+</code></pre></div>
+
+<p><strong>Timeouts:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">  </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span><span class="w">                     </span><span class="c1"># Total request timeout</span>
+</code></pre></div>
+
+<p><strong>Fault Injection (Testing Resilience):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+<span class="w">  </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">fault</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">delay</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">percentage</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">                  </span><span class="c1"># 10% of requests</span>
+<span class="w">          </span><span class="nt">fixedDelay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5s</span><span class="w">               </span><span class="c1"># 5 second delay</span>
+<span class="w">        </span><span class="nt">abort</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">percentage</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w">                   </span><span class="c1"># 5% of requests</span>
+<span class="w">          </span><span class="nt">httpStatus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">503</span><span class="w">              </span><span class="c1"># Return 503</span>
+<span class="w">      </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/">Circuit Breaking</a>
+- <a href="https://istio.io/latest/docs/tasks/traffic-management/fault-injection/">Fault Injection</a></p>
+</blockquote>
+<hr>
+<h3>9. ServiceEntry &amp; WorkloadEntry</h3>
+<p><em>Domain: Traffic Management</em></p>
+<p>Connect mesh services to external services or VMs.</p>
+<p><strong>ServiceEntry — Register External Services:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceEntry</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-api</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api.external.com</span>
+<span class="w">  </span><span class="nt">location</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MESH_EXTERNAL</span><span class="w">              </span><span class="c1"># Outside the mesh</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https</span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TLS</span>
+<span class="w">  </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DNS</span><span class="w">                      </span><span class="c1"># DNS, STATIC, or NONE</span>
+</code></pre></div>
+
+<p><strong>ServiceEntry with Egress Gateway:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceEntry</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-api</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api.external.com</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tls</span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TLS</span>
+<span class="w">  </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DNS</span>
+<span class="w">  </span><span class="nt">location</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MESH_EXTERNAL</span>
+<span class="nn">---</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-api-route</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api.external.com</span>
+<span class="w">  </span><span class="nt">gateways</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mesh</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">istio-egressgateway</span>
+<span class="w">  </span><span class="nt">tls</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">match</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">gateways</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mesh</span>
+<span class="w">          </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+<span class="w">          </span><span class="nt">sniHosts</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">api.external.com</span>
+<span class="w">      </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">istio-egressgateway.istio-system.svc.cluster.local</span>
+<span class="w">            </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+</code></pre></div>
+
+<p><strong>WorkloadEntry — Add VMs to Mesh:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">WorkloadEntry</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vm-workload</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.1.100</span><span class="w">               </span><span class="c1"># VM IP address</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">legacy-app</span>
+<span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="w">  </span><span class="nt">serviceAccount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">legacy-app-sa</span>
+<span class="nn">---</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceEntry</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">legacy-app</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">legacy-app.example.com</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HTTP</span>
+<span class="w">  </span><span class="nt">location</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MESH_INTERNAL</span>
+<span class="w">  </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">STATIC</span>
+<span class="w">  </span><span class="nt">workloadSelector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">legacy-app</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://istio.io/latest/docs/reference/config/networking/service-entry/">ServiceEntry</a>
+- <a href="https://istio.io/latest/docs/reference/config/networking/workload-entry/">WorkloadEntry</a></p>
+</blockquote>
+<hr>
+<h3>10. Troubleshooting Commands</h3>
+<p><em>Domain: Troubleshooting</em></p>
+<p>Essential <code>istioctl</code> commands for the exam.</p>
+<p><strong>Installation &amp; Verification:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install Istio</span>
+istioctl<span class="w"> </span>install<span class="w"> </span>--set<span class="w"> </span><span class="nv">profile</span><span class="o">=</span>demo<span class="w"> </span>-y
+
+<span class="c1"># Verify installation</span>
+istioctl<span class="w"> </span>verify-install
+
+<span class="c1"># Check Istio version</span>
+istioctl<span class="w"> </span>version
+
+<span class="c1"># View installation profile</span>
+istioctl<span class="w"> </span>profile<span class="w"> </span>dump<span class="w"> </span>demo
+istioctl<span class="w"> </span>profile<span class="w"> </span>diff<span class="w"> </span>default<span class="w"> </span>demo
+</code></pre></div>
+
+<p><strong>Analyze Configuration:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Analyze entire mesh for issues</span>
+istioctl<span class="w"> </span>analyze
+
+<span class="c1"># Analyze specific namespace</span>
+istioctl<span class="w"> </span>analyze<span class="w"> </span>-n<span class="w"> </span>production
+
+<span class="c1"># Analyze specific file</span>
+istioctl<span class="w"> </span>analyze<span class="w"> </span>my-config.yaml
+
+<span class="c1"># Common issues detected:</span>
+<span class="c1"># - IST0101: Referenced gateway not found</span>
+<span class="c1"># - IST0102: Referenced host not found</span>
+<span class="c1"># - IST0106: Schema validation error</span>
+</code></pre></div>
+
+<p><strong>Proxy Status &amp; Sync:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check proxy sync status with control plane</span>
+istioctl<span class="w"> </span>proxy-status
+<span class="c1"># Output columns: NAME, CDS, LDS, EDS, RDS, ECDS, ISTIOD</span>
+
+<span class="c1"># Status meanings:</span>
+<span class="c1"># SYNCED - Config synced with control plane</span>
+<span class="c1"># NOT SENT - Config not sent (usually no listeners)</span>
+<span class="c1"># STALE - Config outdated</span>
+
+<span class="c1"># Debug specific proxy</span>
+istioctl<span class="w"> </span>proxy-status<span class="w"> </span>&lt;pod-name&gt;.&lt;namespace&gt;
+</code></pre></div>
+
+<p><strong>Proxy Configuration:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># View proxy configuration summary</span>
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>all<span class="w"> </span>&lt;pod-name&gt;<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+
+<span class="c1"># View specific config types</span>
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>routes<span class="w"> </span>&lt;pod-name&gt;<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>clusters<span class="w"> </span>&lt;pod-name&gt;<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>listeners<span class="w"> </span>&lt;pod-name&gt;<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>endpoints<span class="w"> </span>&lt;pod-name&gt;<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>secrets<span class="w"> </span>&lt;pod-name&gt;<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+
+<span class="c1"># Output as JSON for detailed analysis</span>
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>routes<span class="w"> </span>&lt;pod-name&gt;<span class="w"> </span>-o<span class="w"> </span>json
+
+<span class="c1"># Filter by service</span>
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>clusters<span class="w"> </span>&lt;pod-name&gt;<span class="w"> </span>--fqdn<span class="w"> </span>reviews.default.svc.cluster.local
+</code></pre></div>
+
+<p><strong>Debug &amp; Logging:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Enable debug logging on proxy</span>
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>log<span class="w"> </span>&lt;pod-name&gt;<span class="w"> </span>--level<span class="w"> </span>debug
+
+<span class="c1"># Enable specific component logging</span>
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>log<span class="w"> </span>&lt;pod-name&gt;<span class="w"> </span>--level<span class="w"> </span>connection:debug,http:debug
+
+<span class="c1"># View Envoy access logs (in pod)</span>
+kubectl<span class="w"> </span>logs<span class="w"> </span>&lt;pod-name&gt;<span class="w"> </span>-c<span class="w"> </span>istio-proxy<span class="w"> </span>-f
+
+<span class="c1"># Describe proxy (detailed info)</span>
+istioctl<span class="w"> </span>experimental<span class="w"> </span>describe<span class="w"> </span>pod<span class="w"> </span>&lt;pod-name&gt;
+</code></pre></div>
+
+<p><strong>Dashboard &amp; Visualization:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Open Kiali dashboard</span>
+istioctl<span class="w"> </span>dashboard<span class="w"> </span>kiali
+
+<span class="c1"># Open Grafana</span>
+istioctl<span class="w"> </span>dashboard<span class="w"> </span>grafana
+
+<span class="c1"># Open Jaeger (tracing)</span>
+istioctl<span class="w"> </span>dashboard<span class="w"> </span>jaeger
+
+<span class="c1"># Open Envoy admin interface</span>
+istioctl<span class="w"> </span>dashboard<span class="w"> </span>envoy<span class="w"> </span>&lt;pod-name&gt;
+
+<span class="c1"># Open Prometheus</span>
+istioctl<span class="w"> </span>dashboard<span class="w"> </span>prometheus
+
+<span class="c1"># Open istiod control plane</span>
+istioctl<span class="w"> </span>dashboard<span class="w"> </span>controlz<span class="w"> </span>&lt;istiod-pod&gt;
+</code></pre></div>
+
+<p><strong>Injection &amp; Labeling:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check if namespace has auto-injection enabled</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>namespace<span class="w"> </span>-L<span class="w"> </span>istio-injection
+
+<span class="c1"># Enable auto-injection</span>
+kubectl<span class="w"> </span>label<span class="w"> </span>namespace<span class="w"> </span>&lt;ns&gt;<span class="w"> </span>istio-injection<span class="o">=</span>enabled
+
+<span class="c1"># Disable auto-injection</span>
+kubectl<span class="w"> </span>label<span class="w"> </span>namespace<span class="w"> </span>&lt;ns&gt;<span class="w"> </span>istio-injection-
+
+<span class="c1"># Manual injection</span>
+istioctl<span class="w"> </span>kube-inject<span class="w"> </span>-f<span class="w"> </span>deployment.yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-
+
+<span class="c1"># Check injection status</span>
+istioctl<span class="w"> </span>experimental<span class="w"> </span>check-inject<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+</code></pre></div>
+
+<p><strong>Common Troubleshooting Scenarios:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Command</th>
+<th>What to Check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>503 errors</td>
+<td><code>istioctl proxy-config clusters</code></td>
+<td>Cluster health, endpoints</td>
+</tr>
+<tr>
+<td>No mTLS</td>
+<td><code>istioctl authn tls-check</code></td>
+<td>TLS mode mismatches</td>
+</tr>
+<tr>
+<td>Routing not working</td>
+<td><code>istioctl proxy-config routes</code></td>
+<td>VirtualService applied correctly</td>
+</tr>
+<tr>
+<td>Config not applied</td>
+<td><code>istioctl analyze</code></td>
+<td>Configuration errors</td>
+</tr>
+<tr>
+<td>Sidecar not injected</td>
+<td><code>kubectl get pod -o yaml</code></td>
+<td>Injection labels</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://istio.io/latest/docs/reference/commands/istioctl/">istioctl Reference</a>
+- <a href="https://istio.io/latest/docs/ops/diagnostic-tools/">Troubleshooting Guide</a></p>
+</blockquote>
+<hr>
+<h3>11. Installation &amp; Upgrade</h3>
+<p><em>Domain: Installation, Upgrade &amp; Configuration</em></p>
+<p><strong>Installation Profiles:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>Use Case</th>
+<th>Components</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default</code></td>
+<td>Production</td>
+<td>istiod, ingress gateway</td>
+</tr>
+<tr>
+<td><code>demo</code></td>
+<td>Learning/Testing</td>
+<td>All components, high tracing</td>
+</tr>
+<tr>
+<td><code>minimal</code></td>
+<td>Control plane only</td>
+<td>istiod only</td>
+</tr>
+<tr>
+<td><code>ambient</code></td>
+<td>Ambient mode</td>
+<td>ztunnel, CNI</td>
+</tr>
+<tr>
+<td><code>empty</code></td>
+<td>Custom builds</td>
+<td>Nothing (start from scratch)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="c1"># List available profiles</span>
+istioctl<span class="w"> </span>profile<span class="w"> </span>list
+
+<span class="c1"># Show profile configuration</span>
+istioctl<span class="w"> </span>profile<span class="w"> </span>dump<span class="w"> </span>demo
+
+<span class="c1"># Compare profiles</span>
+istioctl<span class="w"> </span>profile<span class="w"> </span>diff<span class="w"> </span>default<span class="w"> </span>demo
+</code></pre></div>
+
+<p><strong>Installation Methods:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Method 1: istioctl (recommended)</span>
+istioctl<span class="w"> </span>install<span class="w"> </span>--set<span class="w"> </span><span class="nv">profile</span><span class="o">=</span>demo<span class="w"> </span>-y
+
+<span class="c1"># Method 2: IstioOperator manifest</span>
+istioctl<span class="w"> </span>install<span class="w"> </span>-f<span class="w"> </span>my-istio-config.yaml
+
+<span class="c1"># Method 3: Helm</span>
+helm<span class="w"> </span>repo<span class="w"> </span>add<span class="w"> </span>istio<span class="w"> </span>https://istio-release.storage.googleapis.com/charts
+helm<span class="w"> </span>install<span class="w"> </span>istio-base<span class="w"> </span>istio/base<span class="w"> </span>-n<span class="w"> </span>istio-system<span class="w"> </span>--create-namespace
+helm<span class="w"> </span>install<span class="w"> </span>istiod<span class="w"> </span>istio/istiod<span class="w"> </span>-n<span class="w"> </span>istio-system
+helm<span class="w"> </span>install<span class="w"> </span>istio-ingress<span class="w"> </span>istio/gateway<span class="w"> </span>-n<span class="w"> </span>istio-ingress<span class="w"> </span>--create-namespace
+</code></pre></div>
+
+<p><strong>IstioOperator Custom Configuration:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">install.istio.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IstioOperator</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">istio-control-plane</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">  </span><span class="nt">meshConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">accessLogFile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/dev/stdout</span><span class="w">         </span><span class="c1"># Enable access logs</span>
+<span class="w">    </span><span class="nt">enableTracing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">defaultConfig</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">tracing</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">sampling</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100.0</span><span class="w">                </span><span class="c1"># 100% trace sampling</span>
+<span class="w">  </span><span class="nt">components</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ingressGateways</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">istio-ingressgateway</span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">k8s</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span>
+<span class="w">          </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100m</span>
+<span class="w">              </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128Mi</span>
+<span class="w">    </span><span class="nt">egressGateways</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">istio-egressgateway</span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">values</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">global</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">proxy</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">requests</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">cpu</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50m</span>
+<span class="w">            </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">64Mi</span>
+</code></pre></div>
+
+<p><strong>Upgrade Strategies:</strong></p>
+<p><strong>In-Place Upgrade:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Download new version</span>
+curl<span class="w"> </span>-L<span class="w"> </span>https://istio.io/downloadIstio<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nv">ISTIO_VERSION</span><span class="o">=</span><span class="m">1</span>.22.0<span class="w"> </span>sh<span class="w"> </span>-
+
+<span class="c1"># Upgrade</span>
+istioctl<span class="w"> </span>upgrade<span class="w"> </span>--set<span class="w"> </span><span class="nv">profile</span><span class="o">=</span>default
+
+<span class="c1"># Restart workloads to get new sidecar</span>
+kubectl<span class="w"> </span>rollout<span class="w"> </span>restart<span class="w"> </span>deployment<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+</code></pre></div>
+
+<p><strong>Canary Upgrade (Recommended for Production):</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install new control plane with revision</span>
+istioctl<span class="w"> </span>install<span class="w"> </span>--set<span class="w"> </span><span class="nv">revision</span><span class="o">=</span><span class="m">1</span>-22-0<span class="w"> </span>--set<span class="w"> </span><span class="nv">profile</span><span class="o">=</span>default
+
+<span class="c1"># Label namespace to use new revision</span>
+kubectl<span class="w"> </span>label<span class="w"> </span>namespace<span class="w"> </span>production<span class="w"> </span>istio.io/rev<span class="o">=</span><span class="m">1</span>-22-0<span class="w"> </span>--overwrite
+
+<span class="c1"># Restart workloads</span>
+kubectl<span class="w"> </span>rollout<span class="w"> </span>restart<span class="w"> </span>deployment<span class="w"> </span>-n<span class="w"> </span>production
+
+<span class="c1"># After validation, remove old control plane</span>
+istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span class="w"> </span><span class="m">1</span>-21-0
+</code></pre></div>
+
+<blockquote>
+<p><strong>References:</strong>
+- <a href="https://istio.io/latest/docs/setup/install/">Installation Guide</a>
+- <a href="https://istio.io/latest/docs/setup/upgrade/">Upgrade Guide</a></p>
+</blockquote>
+<hr>
+<h1>Istio Resource Quick Reference</h1>
+<div class="highlight"><pre><span></span><code><span class="err">┌─────────────────────────────────────────────────────────────────────┐</span>
+<span class="err">│</span><span class="w">                        </span><span class="n">TRAFFIC</span><span class="w"> </span><span class="n">MANAGEMENT</span><span class="w">                          </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">Gateway</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="n">VirtualService</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="n">DestinationRule</span><span class="w">            </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="p">(</span><span class="n">entry</span><span class="w"> </span><span class="n">point</span><span class="p">)</span><span class="w">   </span><span class="p">(</span><span class="n">routing</span><span class="w"> </span><span class="n">rules</span><span class="p">)</span><span class="w">        </span><span class="p">(</span><span class="n">traffic</span><span class="w"> </span><span class="n">policy</span><span class="p">)</span><span class="w">           </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                         </span><span class="err">│</span><span class="w">                       </span><span class="err">│</span><span class="w">                   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                         </span><span class="err">▼</span><span class="w">                       </span><span class="err">▼</span><span class="w">                   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                   </span><span class="o">-</span><span class="w"> </span><span class="n">host</span><span class="w"> </span><span class="n">matching</span><span class="w">         </span><span class="o">-</span><span class="w"> </span><span class="n">subsets</span><span class="w">                 </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                   </span><span class="o">-</span><span class="w"> </span><span class="n">URI</span><span class="w"> </span><span class="n">matching</span><span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="nb">load</span><span class="w"> </span><span class="n">balancing</span><span class="w">          </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                   </span><span class="o">-</span><span class="w"> </span><span class="n">header</span><span class="w"> </span><span class="n">matching</span><span class="w">       </span><span class="o">-</span><span class="w"> </span><span class="n">circuit</span><span class="w"> </span><span class="n">breaker</span><span class="w">         </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                   </span><span class="o">-</span><span class="w"> </span><span class="n">traffic</span><span class="w"> </span><span class="n">split</span><span class="w">         </span><span class="o">-</span><span class="w"> </span><span class="n">connection</span><span class="w"> </span><span class="n">pool</span><span class="w">         </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                   </span><span class="o">-</span><span class="w"> </span><span class="n">fault</span><span class="w"> </span><span class="n">injection</span><span class="w">       </span><span class="o">-</span><span class="w"> </span><span class="n">outlier</span><span class="w"> </span><span class="n">detection</span><span class="w">       </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">ServiceEntry</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="n">External</span><span class="w"> </span><span class="n">Services</span><span class="w">                            </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">WorkloadEntry</span><span class="w"> </span><span class="err">─────►</span><span class="w"> </span><span class="n">VMs</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">Non</span><span class="o">-</span><span class="n">K8s</span><span class="w"> </span><span class="n">Workloads</span><span class="w">                      </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">                           </span><span class="n">SECURITY</span><span class="w">                                  </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">PeerAuthentication</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="n">mTLS</span><span class="w"> </span><span class="n">Settings</span><span class="w"> </span><span class="p">(</span><span class="n">server</span><span class="o">-</span><span class="n">side</span><span class="p">)</span><span class="w">            </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="p">(</span><span class="n">STRICT</span><span class="o">/</span><span class="n">PERMISSIVE</span><span class="p">)</span><span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">mesh</span><span class="o">-</span><span class="n">wide</span><span class="w">                            </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                              </span><span class="o">-</span><span class="w"> </span><span class="n">namespace</span><span class="w">                            </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                              </span><span class="o">-</span><span class="w"> </span><span class="n">workload</span><span class="w">                             </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">RequestAuthentication</span><span class="w"> </span><span class="err">───►</span><span class="w"> </span><span class="n">JWT</span><span class="w"> </span><span class="n">Validation</span><span class="w">                         </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="p">(</span><span class="n">issuer</span><span class="p">,</span><span class="w"> </span><span class="n">jwksUri</span><span class="p">)</span><span class="w">          </span><span class="o">-</span><span class="w"> </span><span class="n">token</span><span class="w"> </span><span class="n">validation</span><span class="w"> </span><span class="n">only</span><span class="w">                </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">AuthorizationPolicy</span><span class="w"> </span><span class="err">─────►</span><span class="w"> </span><span class="n">Access</span><span class="w"> </span><span class="n">Control</span><span class="w">                         </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="p">(</span><span class="n">ALLOW</span><span class="o">/</span><span class="n">DENY</span><span class="o">/</span><span class="n">CUSTOM</span><span class="p">)</span><span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="n">source</span><span class="w"> </span><span class="p">(</span><span class="n">who</span><span class="p">)</span><span class="w">                         </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                              </span><span class="o">-</span><span class="w"> </span><span class="n">operation</span><span class="w"> </span><span class="p">(</span><span class="n">what</span><span class="p">)</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                              </span><span class="o">-</span><span class="w"> </span><span class="n">condition</span><span class="w"> </span><span class="p">(</span><span class="n">when</span><span class="p">)</span><span class="w">                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">                        </span><span class="n">TROUBLESHOOTING</span><span class="w">                              </span><span class="err">│</span>
+<span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">istioctl</span><span class="w"> </span><span class="n">analyze</span><span class="w"> </span><span class="err">─────────►</span><span class="w"> </span><span class="n">Configuration</span><span class="w"> </span><span class="n">validation</span><span class="w">              </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">istioctl</span><span class="w"> </span><span class="n">proxy</span><span class="o">-</span><span class="n">status</span><span class="w"> </span><span class="err">────►</span><span class="w"> </span><span class="n">Sync</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">control</span><span class="w"> </span><span class="n">plane</span><span class="w">        </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">istioctl</span><span class="w"> </span><span class="n">proxy</span><span class="o">-</span><span class="n">config</span><span class="w"> </span><span class="err">────►</span><span class="w"> </span><span class="n">Envoy</span><span class="w"> </span><span class="n">configuration</span><span class="w">                   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">istioctl</span><span class="w"> </span><span class="n">dashboard</span><span class="w"> </span><span class="err">───────►</span><span class="w"> </span><span class="n">Observability</span><span class="w"> </span><span class="n">tools</span><span class="w">                   </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
+<span class="err">└─────────────────────────────────────────────────────────────────────┘</span>
+</code></pre></div>
+
+<hr>
+<h1>Common istioctl Commands Cheat Sheet</h1>
+<div class="highlight"><pre><span></span><code><span class="c1"># ============ INSTALLATION ============</span>
+istioctl<span class="w"> </span>install<span class="w"> </span>--set<span class="w"> </span><span class="nv">profile</span><span class="o">=</span>demo
+istioctl<span class="w"> </span>verify-install
+istioctl<span class="w"> </span>version
+istioctl<span class="w"> </span>profile<span class="w"> </span>list
+istioctl<span class="w"> </span>profile<span class="w"> </span>dump<span class="w"> </span>&lt;profile&gt;
+
+<span class="c1"># ============ ANALYSIS ============</span>
+istioctl<span class="w"> </span>analyze
+istioctl<span class="w"> </span>analyze<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
+istioctl<span class="w"> </span>analyze<span class="w"> </span>&lt;file.yaml&gt;
+
+<span class="c1"># ============ PROXY DEBUG ============</span>
+istioctl<span class="w"> </span>proxy-status
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>all<span class="w"> </span>&lt;pod&gt;
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>routes<span class="w"> </span>&lt;pod&gt;
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>clusters<span class="w"> </span>&lt;pod&gt;
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>listeners<span class="w"> </span>&lt;pod&gt;
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>endpoints<span class="w"> </span>&lt;pod&gt;
+istioctl<span class="w"> </span>proxy-config<span class="w"> </span>log<span class="w"> </span>&lt;pod&gt;<span class="w"> </span>--level<span class="w"> </span>debug
+
+<span class="c1"># ============ DASHBOARDS ============</span>
+istioctl<span class="w"> </span>dashboard<span class="w"> </span>kiali
+istioctl<span class="w"> </span>dashboard<span class="w"> </span>grafana
+istioctl<span class="w"> </span>dashboard<span class="w"> </span>jaeger
+istioctl<span class="w"> </span>dashboard<span class="w"> </span>envoy<span class="w"> </span>&lt;pod&gt;
+
+<span class="c1"># ============ INJECTION ============</span>
+kubectl<span class="w"> </span>label<span class="w"> </span>ns<span class="w"> </span>&lt;ns&gt;<span class="w"> </span>istio-injection<span class="o">=</span>enabled
+istioctl<span class="w"> </span>kube-inject<span class="w"> </span>-f<span class="w"> </span>&lt;file.yaml&gt;<span class="w"> </span><span class="p">|</span><span class="w"> </span>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-
+
+<span class="c1"># ============ UPGRADE ============</span>
+istioctl<span class="w"> </span>upgrade
+istioctl<span class="w"> </span>install<span class="w"> </span>--set<span class="w"> </span><span class="nv">revision</span><span class="o">=</span>&lt;rev&gt;
+istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span class="w"> </span>&lt;rev&gt;
+</code></pre></div>
+
+<hr>
+<h1>Key Resources</h1>
+<ul>
+<li><a href="https://istio.io/latest/docs/">Istio Official Documentation</a></li>
+<li><a href="https://training.linuxfoundation.org/certification/istio-certified-associate-ica/">ICA Exam Curriculum</a></li>
+<li><a href="https://github.com/istio/istio/tree/master/samples">Istio GitHub Examples</a></li>
+</ul>
+<hr>
+<h1>Exam Details</h1>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Format</strong></td>
+<td>Performance-based + Multiple-choice</td>
+</tr>
+<tr>
+<td><strong>Duration</strong></td>
+<td>2 hours</td>
+</tr>
+<tr>
+<td><strong>Passing Score</strong></td>
+<td>75%</td>
+</tr>
+<tr>
+<td><strong>Validity</strong></td>
+<td>2 years</td>
+</tr>
+<tr>
+<td><strong>Retakes</strong></td>
+<td>1 free retake included</td>
+</tr>
+<tr>
+<td><strong>Price</strong></td>
+<td>$250 (exam only)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1>Honest Recommendation</h1>
+<ul>
+<li>The ICA exam is <strong>performance-based</strong>, meaning you'll work on a real Kubernetes cluster with Istio installed. Hands-on practice is essential.</li>
+<li>Focus heavily on <strong>Traffic Management (35%)</strong> — it's the largest domain and covers VirtualService, DestinationRule, and Gateway configurations.</li>
+<li>Use <code>istioctl</code> commands extensively during practice — they're your best friend for both installation and troubleshooting.</li>
+<li>Read the official Istio docs multiple times. The exam questions are often directly based on concepts explained there.</li>
+<li>Practice the relationship between resources: Gateway → VirtualService → DestinationRule.</li>
+</ul>
+<p><a href="https://istio.io/latest/docs/">https://istio.io/latest/docs/</a></p>
+<hr>
+<h1>My Secret Weapon: Mock Exam</h1>
+<p>After absorbing all the concepts above, there's one more crucial step before you're truly exam-ready: <strong>practice with mock exams</strong>.</p>
+<p>Reading documentation and understanding concepts is essential, but the real test comes when you face actual exam-style questions under time pressure. Mock exams help you:</p>
+<ul>
+<li><strong>Identify knowledge gaps:</strong> You might think you understand a topic until a tricky question proves otherwise.</li>
+<li><strong>Get familiar with question patterns:</strong> The ICA exam has its own style of wording and question structure.</li>
+<li><strong>Build time management skills:</strong> Knowing the content is one thing; answering questions while configuring resources in 2 hours is another.</li>
+<li><strong>Boost confidence:</strong> Walking into the exam having already "passed" a similar test reduces anxiety significantly.</li>
+</ul>
+<h3>Recommended Resource</h3>
+<p>👉 <em>[Mock exam link - TBD]</em></p>
+<p>I'd recommend taking each mock exam at least twice:</p>
+<ol>
+<li><strong>First attempt:</strong> Simulate real exam conditions (timed, no references).</li>
+<li><strong>Review:</strong> Go through every wrong answer and understand <em>why</em> it's wrong.</li>
+<li><strong>Second attempt:</strong> Aim for 90%+ before scheduling your real exam.</li>
+</ol>
+<blockquote>
+<p><strong>Pro tip:</strong> If you're consistently scoring above 85% on mock exams, you're ready for the real thing. If not, revisit the sections where you're struggling and try again.</p>
+</blockquote>
+<hr>
+<h1>Final Wrap-Up</h1>
+<p><em>[To be updated after passing the exam]</em></p>
+<hr>
+<h1>Exam Notes</h1>
+<p><em>[To be updated with exam experience]</em></p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2025-12-21T00:00:00+07:00">Sun 21 December 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="/tags.html#certification-ref">certification
+                    <span class="superscript">8</span>
+</a></li>
+                <li><a href="/tags.html#ica-ref">ica
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#istio-ref">istio
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="/tags.html#linux-foundation-ref">linux-foundation
+                    <span class="superscript">8</span>
+</a></li>
+                <li><a href="/tags.html#service-mesh-ref">service-mesh
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
