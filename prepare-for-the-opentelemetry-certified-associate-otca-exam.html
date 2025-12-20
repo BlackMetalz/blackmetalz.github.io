@@ -94,12 +94,20 @@
 <li><strong>OTLP (OpenTelemetry Protocol):</strong> The unified protocol for delivering telemetry data.</li>
 <li><strong>Context Propagation:</strong> How OTel maintains the "trace context" as requests move across different microservices (Baggage and Traceparent).</li>
 </ul>
+<p>Example for <strong>Context Propagation</strong>:</p>
+<div class="highlight"><pre><span></span><code>Request to service A
+├─ Span A (trace_id: 123, span_id: A1, parent: null)
+   ├─ Span B - call service B (trace_id: 123, span_id: B1, parent: A1)
+   │  └─ Span C - query DB (trace_id: 123, span_id: C1, parent: B1)
+   └─ Span D - call service C (trace_id: 123, span_id: D1, parent: A1)
+</code></pre></div>
+
 <h3>3. OpenTelemetry Specification</h3>
 <p>Key concepts and data models.</p>
 <ul>
 <li><strong>Resources:</strong> Metadata describing the entity producing the telemetry (e.g., <code>service.name</code>, <code>host.id</code>).</li>
 <li><strong>Traces &amp; Spans:</strong> Understanding Span hierarchy, Span Events, and Span Attributes.</li>
-<li><strong>Metrics:</strong> Learning about different instrument types: <strong>Counter, Gauge, Histogram, and Summary</strong>.</li>
+<li><strong>Metrics:</strong> Learning about different instrument types: <strong>Counter, UpDownCounter, Histogram, and Gauge</strong>.</li>
 <li><strong>Logs:</strong> How OTel bridges the gap with legacy logging systems.</li>
 </ul>
 <h3>4. Instrumentation Approaches</h3>
@@ -123,7 +131,7 @@
 <li><strong>Semantic Conventions:</strong> The importance of standardized naming for attributes across different technologies.</li>
 </ul>
 <hr>
-<h1>Section need to be understood</h1>
+<h1>Sections That Need to Be Understood</h1>
 <h3>1. Context Propagation (The "Glue" of Tracing)</h3>
 <p><em>Domain: OpenTelemetry API and SDK</em></p>
 <p>Distributed tracing cannot work without <strong>Context Propagation</strong>. This is the mechanism that transfers metadata (Trace ID, Span ID) from service A to service B to connect spans into a complete trace.</p>
@@ -159,6 +167,7 @@
 </li>
 </ul>
 <blockquote>
+<p><strong>Note:</strong> OTel does NOT have <code>Summary</code> type. Summary is Prometheus-specific. OTel uses <code>Histogram</code> with explicit buckets or exponential histograms instead.</p>
 <p><strong>References:</strong></p>
 <ul>
 <li><a href="https://opentelemetry.io/docs/concepts/signals/metrics/">OTel Docs: Metrics Concepts</a></li>
@@ -211,7 +220,7 @@
 </blockquote>
 <h3>5. Semantic Conventions (Standardization)</h3>
 <p><em>Domain: OpenTelemetry API and SDK</em></p>
-<p>OTel defines how attributes are named to ensure consistency across systems. Backends need this standard to draw charts automatically.</p>
+<p>OTel defines how attributes are named to ensure consistency across systems. Backends rely on this standard to render charts automatically.</p>
 <ul>
 <li><strong>Resource Attributes (Immutable):</strong> Describes "What" is producing the telemetry.<ul>
 <li>Example: <code>service.name</code>, <code>service.version</code>, <code>k8s.pod.name</code>, <code>cloud.region</code>.</li>
@@ -237,8 +246,8 @@
 <ul>
 <li><strong>Tracing:</strong> <strong>Stable</strong>. Mature and widely supported.</li>
 <li><strong>Metrics:</strong> <strong>Stable</strong>. Fully featured to replace Prometheus.</li>
-<li><strong>Logs:</strong> <strong>Stable</strong> (Bridge API &amp; Data Model). However, full replacement of Fluentbit/Vector is still being perfected.</li>
-<li><strong>Profiling (eBPF):</strong> <strong>Experimental/Development</strong>. Developing fast but should not be used for core production without deep understanding.</li>
+<li><strong>Logs:</strong> <strong>Stable</strong> (as of 2024). Logs Bridge API, SDK, and OTLP are stable.</li>
+<li><strong>Profiling:</strong> <strong>Development</strong>. The profiling signal was accepted into OTel in 2024, with initial support being developed. Not eBPF-specific - OTel profiling is format-agnostic.</li>
 </ul>
 <blockquote>
 <p><strong>References:</strong></p>
@@ -269,11 +278,11 @@
 </blockquote>
 <h3>8. Collector Scaling &amp; Data Transformation</h3>
 <p><em>Domain: The OpenTelemetry Collector (Scaling, Transforming Data)</em></p>
-<p>Deploying 1 Collector is easy, but scaling a Collector cluster to handle millions of spans/s is different.</p>
+<p>Deploying a single Collector is easy, but scaling a Collector cluster to handle millions of spans per second is a different challenge.</p>
 <ul>
 <li><strong>Load Balancing:</strong> When running Gateway mode with multiple replicas, a Load Balancer is needed in front (like Nginx/K8s Service) to distribute trace load to collectors.</li>
 <li><strong>Trace ID Awareness:</strong> With <em>Tail Sampling</em>, all spans of the same Trace ID <strong>must</strong> arrive at the same Collector instance. Need to use <strong>Load Balancing Exporter</strong> with hash ring (based on TraceID) at the Agent layer to push to the right place.</li>
-<li><strong>Transform Processor (OTTLE):</strong> Query/Data transformation language right inside the Collector.<ul>
+<li><strong>Transform Processor (OTTL)</strong> - OpenTelemetry Transformation Language<ul>
 <li>Example: Delete sensitive attributes (<code>set(attributes["password"], "****")</code>), rename metrics, or filter garbage logs.</li>
 </ul>
 </li>
@@ -283,12 +292,12 @@
 <ul>
 <li><a href="https://opentelemetry.io/docs/collector/scaling/">Collector Scaling</a></li>
 <li><a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/loadbalancingexporter">Load Balancing Exporter</a></li>
-<li><a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor">Transform Processor (OTTLE)</a></li>
+<li><a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor">Transform Processor (OTTL)</a></li>
 </ul>
 </blockquote>
 <h3>9. Debugging &amp; Observability of the Pipeline</h3>
 <p><em>Domain: Maintaining and Debugging Observability Pipelines</em></p>
-<p>How to monitor the Monitor (OTel Collector) itself?</p>
+<p>How do you monitor the monitor (the OTel Collector) itself?</p>
 <ul>
 <li><strong>Extensions:</strong> Auxiliary components that do not process telemetry data but help manage the Collector.<ul>
 <li><code>health_check</code>: Endpoint <code>/health</code> for K8s liveness/readiness probe.</li>
@@ -324,7 +333,7 @@
 <p><em>Domain: Maintaining and Debugging Observability Pipelines (Schema Management)</em></p>
 <p>When Semantic Conventions change (e.g., rename <code>http.method</code> -&gt; <code>http.request.method</code>), how to ensure the system doesn't break?</p>
 <ul>
-<li><strong>Schema URL:</strong> Each Resource or Scope in OTel data has an accompanying <code>schema_url</code>, pointing to the version of Semantic Convention it follows (e.g., <code>https://opentelemetry.io/schemas/1.4.0</code>).</li>
+<li><strong>Schema URL:</strong> Each Resource or Scope in OTel data has an accompanying <code>schema_url</code>, pointing to the version of Semantic Convention it follows (e.g., <code>https://opentelemetry.io/schemas/1.21.0</code>).</li>
 <li><strong>Schema Transformation:</strong> Helps convert data from old schema to new (or vice versa) to be compatible with old backends or dashboards.</li>
 </ul>
 <blockquote>
@@ -333,13 +342,74 @@
 <li><a href="https://opentelemetry.io/docs/specs/otel/schemas/">Telemetry Schemas</a></li>
 </ul>
 </blockquote>
+<h3>12. MeterProvider and Metric Exporter</h3>
+<ul>
+<li>
+<p><strong>MeterProvider:</strong> The entry point for the Metrics API. It provides <code>Meter</code> instances, 
+  which are used to create metric instruments (Counter, Histogram, etc.).</p>
+</li>
+<li>
+<p><strong>Metric Exporter:</strong> Component responsible for sending aggregated metric data to backends. 
+  Common exporters: OTLP, Prometheus, Console.</p>
+</li>
+<li>
+<p><strong>Flow:</strong> MeterProvider → Meter → Instruments → MetricReader → MetricExporter → Backend</p>
+</li>
+</ul>
+<p>This concept is required to know! xD (You can guess the reason!)</p>
+<h3>13. API vs SDK Distinction</h3>
+<ul>
+<li>
+<p><strong>API:</strong> Defines interfaces for instrumentation (creating spans, metrics). 
+  Library authors use API only - zero dependencies, safe to include.</p>
+</li>
+<li>
+<p><strong>SDK:</strong> Implements the API. Provides configuration, processing, and export. 
+  Application owners configure SDK at startup.</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>Key Point:</strong> Libraries should only depend on API. Applications configure SDK.</p>
+</blockquote>
+<h3>14. Instrumentation Scope</h3>
+<p>Each telemetry source is identified by an Instrumentation Scope:
+- <code>name</code>: Instrumentation library name (e.g., <code>@opentelemetry/instrumentation-http</code>)
+- <code>version</code>: Library version
+- <code>schema_url</code>: Semantic convention version</p>
+<p>This helps identify which library generated which telemetry.</p>
+<h3>15. Collector Config Structure (Order matters!)</h3>
+<div class="highlight"><pre><span></span><code><span class="nt">extensions</span><span class="p">:</span><span class="w">    </span><span class="c1"># Health check, zpages, auth</span>
+<span class="nt">receivers</span><span class="p">:</span><span class="w">     </span><span class="c1"># Data ingestion (OTLP, Jaeger, Prometheus)</span>
+<span class="nt">processors</span><span class="p">:</span><span class="w">    </span><span class="c1"># Data transformation (batch, filter, transform)</span>
+<span class="nt">exporters</span><span class="p">:</span><span class="w">     </span><span class="c1"># Data output (OTLP, Jaeger, Prometheus)</span>
+<span class="nt">connectors</span><span class="p">:</span><span class="w">    </span><span class="c1"># Pipeline-to-pipeline (spanmetrics)</span>
+<span class="nt">service</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">extensions</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">pipelines</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">traces</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">receivers</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">processors</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># Order matters! memory_limiter first, batch last</span>
+<span class="w">      </span><span class="nt">exporters</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+
+<hr>
 <h1>Honest recommend</h1>
 <ul>
-<li>Before taking mock exam: read all pages about 4-5 times. I know it takes a lot of time, but it is my recommend, since I don't want another 1000 lines ++ in single article xD</li>
+<li>Before taking mock exam: read all pages about 4-5 times. I know it takes a lot of time, but it is my recommendation, since I don't want to write another 1000+ lines in a single article xD</li>
+<li>And yeah, the exam OTCA is about concept, how component work or their relationship. Not much detail for configuration.</li>
 </ul>
 <p><a href="https://opentelemetry.io/docs/what-is-opentelemetry/">https://opentelemetry.io/docs/what-is-opentelemetry/</a></p>
 <h1>My Secret Weapon: Mock Exam</h1>
-<h1>Exam Notes</h1>
+<p>After absorbing all the concepts above, there's one more crucial step before you're truly exam-ready: <strong>practice with mock exams</strong>.</p>
+<p>I used this Udemy course to prepare, and it made a real difference:</p>
+<p><a href="https://www.udemy.com/course/complete-opentelemetry-certified-associate-otca-exam-prep">Complete OpenTelemetry Certified Associate (OTCA) Exam Prep</a></p>
+<h1>Final Wrap</h1>
+<ul>
+<li>I passed the OTCA exam with a score of <strong>77/100</strong> — not a perfect score, but enough to get the job done.</li>
+<li>This article contains everything I wish I had when I started preparing.</li>
+<li>If you've made it this far, you're already ahead of most candidates. Now go schedule that exam and get certified!</li>
+</ul>
+<p>Good luck bro!</p>
 
 
              
