@@ -396,20 +396,20 @@
 │                     Encapsulation (Overlay)                      │
 │                                                                  │
 │   Node 1                              Node 2                     │
-│   ┌─────────────┐                     ┌─────────────┐           │
-│   │   Pod A     │                     │   Pod B     │           │
-│   │ 10.0.1.10   │                     │ 10.0.2.20   │           │
-│   └──────┬──────┘                     └──────┬──────┘           │
+│   ┌─────────────┐                     ┌─────────────┐            │
+│   │   Pod A     │                     │   Pod B     │            │
+│   │ 10.0.1.10   │                     │ 10.0.2.20   │            │
+│   └──────┬──────┘                     └──────┬──────┘            │
 │          │                                   │                   │
 │          ▼                                   ▼                   │
-│   ┌─────────────┐                     ┌─────────────┐           │
-│   │   Cilium    │     VXLAN/Geneve    │   Cilium    │           │
-│   │   Agent     │◄═══════════════════►│   Agent     │           │
-│   │ 192.168.1.1 │      Tunnel         │ 192.168.1.2 │           │
-│   └─────────────┘                     └─────────────┘           │
+│   ┌─────────────┐                     ┌─────────────┐            │
+│   │   Cilium    │     VXLAN/Geneve    │   Cilium    │            │
+│   │   Agent     │◄═══════════════════►│   Agent     │            │
+│   │ 192.168.1.1 │      Tunnel         │ 192.168.1.2 │            │
+│   └─────────────┘                     └─────────────┘            │
 │                                                                  │
-│   Pros: Works anywhere (any network)                            │
-│   Cons: MTU overhead (~50 bytes), slight latency                │
+│   Pros: Works anywhere (any network)                             │
+│   Cons: MTU overhead (~50 bytes), slight latency                 │
 └──────────────────────────────────────────────────────────────────┘
 </code></pre></div>
 
@@ -418,19 +418,19 @@
 │                     Native Routing (No Overlay)                  │
 │                                                                  │
 │   Node 1                              Node 2                     │
-│   ┌─────────────┐                     ┌─────────────┐           │
-│   │   Pod A     │                     │   Pod B     │           │
-│   │ 10.0.1.10   │                     │ 10.0.2.20   │           │
-│   └──────┬──────┘                     └──────┬──────┘           │
+│   ┌─────────────┐                     ┌─────────────┐            │
+│   │   Pod A     │                     │   Pod B     │            │
+│   │ 10.0.1.10   │                     │ 10.0.2.20   │            │
+│   └──────┬──────┘                     └──────┬──────┘            │
 │          │                                   │                   │
 │          ▼                                   ▼                   │
-│   ┌─────────────┐    Native IP routing ┌─────────────┐          │
-│   │   Cilium    │◄────────────────────►│   Cilium    │          │
-│   │   Agent     │    (BGP, VPC routes) │   Agent     │          │
-│   └─────────────┘                      └─────────────┘          │
+│   ┌─────────────┐    Native IP routing ┌─────────────┐           │
+│   │   Cilium    │◄────────────────────►│   Cilium    │           │
+│   │   Agent     │    (BGP, VPC routes) │   Agent     │           │
+│   └─────────────┘                      └─────────────┘           │
 │                                                                  │
-│   Pros: Better performance, no MTU overhead                     │
-│   Cons: Requires network support (BGP, cloud VPC)               │
+│   Pros: Better performance, no MTU overhead                      │
+│   Cons: Requires network support (BGP, cloud VPC)                │
 └──────────────────────────────────────────────────────────────────┘
 </code></pre></div>
 
@@ -448,7 +448,7 @@
 <tr>
 <td><code>tunnel=vxlan</code></td>
 <td>VXLAN</td>
-<td>Default, works anywhere</td>
+<td>Default and works anywhere</td>
 <td>None</td>
 </tr>
 <tr>
@@ -737,32 +737,32 @@
 <div class="highlight"><pre><span></span><code><span class="err">┌─────────────────────────────────────────────────────────────┐</span>
 <span class="err">│</span><span class="w">                  </span><span class="n">IP</span><span class="o">-</span><span class="n">based</span><span class="w"> </span><span class="n">Security</span><span class="w">                          </span><span class="err">│</span>
 <span class="err">│</span><span class="w">                                                             </span><span class="err">│</span>
-<span class="err">│</span><span class="w">   </span><span class="n">Pod</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">(</span><span class="mf">10.0</span><span class="o">.</span><span class="mf">1.5</span><span class="p">)</span><span class="w"> </span><span class="err">───────►</span><span class="w"> </span><span class="n">Firewall</span><span class="w"> </span><span class="err">───────►</span><span class="w"> </span><span class="n">Pod</span><span class="w"> </span><span class="n">B</span><span class="w">        </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="n">Pod</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">(</span><span class="mf">10.0</span><span class="o">.</span><span class="mf">1.5</span><span class="p">)</span><span class="w"> </span><span class="err">───────►</span><span class="w"> </span><span class="n">Firewall</span><span class="w"> </span><span class="err">───────►</span><span class="w"> </span><span class="n">Pod</span><span class="w"> </span><span class="n">B</span><span class="w">         </span><span class="err">│</span>
 <span class="err">│</span><span class="w">                              </span><span class="n">Rule</span><span class="p">:</span><span class="w">                          </span><span class="err">│</span>
 <span class="err">│</span><span class="w">                          </span><span class="s2">&quot;Allow 10.0.1.5&quot;</span><span class="w">                   </span><span class="err">│</span>
 <span class="err">│</span><span class="w">                                                             </span><span class="err">│</span>
 <span class="err">│</span><span class="w">   </span><span class="n">Problems</span><span class="p">:</span><span class="w">                                                 </span><span class="err">│</span>
-<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="n">Pod</span><span class="w"> </span><span class="n">IPs</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">ephemeral</span><span class="w"> </span><span class="p">(</span><span class="n">change</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">restart</span><span class="p">)</span><span class="w">              </span><span class="err">│</span>
+<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="n">Pod</span><span class="w"> </span><span class="n">IPs</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">ephemeral</span><span class="w"> </span><span class="p">(</span><span class="n">change</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">restart</span><span class="p">)</span><span class="w">               </span><span class="err">│</span>
 <span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="n">Rules</span><span class="w"> </span><span class="n">must</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">updated</span><span class="w"> </span><span class="n">constantly</span><span class="w">                        </span><span class="err">│</span>
 <span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="n">Doesn</span><span class="s1">&#39;t scale with dynamic workloads                    │</span>
 <span class="err">└─────────────────────────────────────────────────────────────┘</span>
 </code></pre></div>
 
 <p><strong>Cilium Identity-based Security:</strong></p>
-<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
-│                Identity-based Security                      │
-│                                                             │
-│   Pod A                                                     │
-│   Labels: app=frontend    ──────► Cilium ──────► Pod B     │
-│   Identity: 12345                  Rule:        Labels:     │
-│                              &quot;Allow identity              app=backend │
-│                               with app=frontend&quot;          Identity: 67890│
-│                                                             │
-│   Benefits:                                                 │
-│   - Identity based on labels, not IPs                       │
-│   - Survives pod restarts/reschedules                       │
-│   - Scales automatically                                    │
-└─────────────────────────────────────────────────────────────┘
+<div class="highlight"><pre><span></span><code>┌───────────────────────────────────────────────────────────--------------──┐
+│                Identity-based Security                                    │
+│                                                                           │
+│   Pod A                                                                   │
+│   Labels: app=frontend    ──────► Cilium ──────--------------► Pod B      │
+│   Identity: 12345                  Rule:                      Labels:     │
+│                              &quot;Allow identity              app=backend     │
+│                               with app=frontend&quot;          Identity: 67890 │
+│                                                                           │
+│   Benefits:                                                               │
+│   - Identity based on labels, not IPs                                     │
+│   - Survives pod restarts/reschedules                                     │
+│   - Scales automatically                                                  │
+└─────────────────────────────────────────────────────────────--------------┘
 </code></pre></div>
 
 <p><strong>How Cilium Identity Works:</strong></p>
@@ -1310,21 +1310,21 @@ hubble<span class="w"> </span>observe<span class="w"> </span>--protocol<span cla
 <div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────────────┐
 │                        Cluster Mesh                                 │
 │                                                                     │
-│   Cluster A                              Cluster B                  │
-│   ┌─────────────────────┐               ┌─────────────────────┐    │
-│   │  Pod CIDR: 10.1.0.0/16│               │  Pod CIDR: 10.2.0.0/16│    │
-│   │  Cluster ID: 1       │               │  Cluster ID: 2       │    │
-│   │                      │               │                      │    │
-│   │  ┌───────────────┐  │               │  ┌───────────────┐   │    │
-│   │  │ clustermesh-  │  │◄─────────────►│  │ clustermesh-  │   │    │
-│   │  │ apiserver     │  │    mTLS       │  │ apiserver     │   │    │
-│   │  └───────────────┘  │               │  └───────────────┘   │    │
-│   │                      │               │                      │    │
-│   │  ┌───────┐ ┌───────┐│               │┌───────┐ ┌───────┐  │    │
-│   │  │Pod A  │ │Pod B  ││               ││Pod C  │ │Pod D  │  │    │
-│   │  │       │ │       ││               ││       │ │       │  │    │
-│   │  └───────┘ └───────┘│               │└───────┘ └───────┘  │    │
-│   └─────────────────────┘               └─────────────────────┘    │
+│   Cluster A                                     Cluster B           │
+│   ┌────────────────────--─┐               ┌─────────────────────--┐ │
+│   │  Pod CIDR: 10.1.0.0/16│               │  Pod CIDR: 10.2.0.0/16│ │
+│   │  Cluster ID: 1        │               │  Cluster ID: 2        │ │
+│   │                       │               │                       │ │
+│   │  ┌───────────────┐    │               │  ┌───────────────┐    │ │
+│   │  │ clustermesh-  │    │◄─────────────►│  │ clustermesh-  │    │ │
+│   │  │ apiserver     │    │    mTLS       │  │ apiserver     │    │ │
+│   │  └───────────────┘    │               │  └───────────────┘    │ │
+│   │                       │               │                       │ │
+│   │  ┌───────┐ ┌───────┐  │               │┌───────┐ ┌───────┐    │ │
+│   │  │Pod A  │ │Pod B  │  │               ││Pod C  │ │Pod D  │    │ │
+│   │  │       │ │       │  │               ││       │ │       │    │ │
+│   │  └───────┘ └───────┘  │               │└───────┘ └───────┘    │ │
+│   └─────────────────────--┘               └─────────────────────--┘ │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 </code></pre></div>
