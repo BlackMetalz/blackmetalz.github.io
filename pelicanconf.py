@@ -29,7 +29,7 @@ SOCIAL = (
     ("Another social link", "#"),
 )
 
-DEFAULT_PAGINATION = True
+DEFAULT_PAGINATION = 10
 RECENT_ARTICLES_COUNT = 20
 THEME = 'themes/elegant'  # https://github.com/Pelican-Elegant/elegant
 # Show only titles on the index page
