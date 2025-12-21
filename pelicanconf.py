@@ -29,9 +29,18 @@ SOCIAL = (
     ("Another social link", "#"),
 )
 
-DEFAULT_PAGINATION = 10
-RECENT_ARTICLES_COUNT = 20
+DEFAULT_PAGINATION = 20
+# Reduce recent articles to match pagination
+RECENT_ARTICLES_COUNT = 20  
 THEME = 'themes/elegant'  # https://github.com/Pelican-Elegant/elegant
 # Show only titles on the index page
 SUMMARY_MAX_LENGTH = 0
 STATIC_PATHS = ['static', 'images']
+
+# Enable pagination patterns
+PAGINATED_TEMPLATES = {
+    'index': None,  # Use DEFAULT_PAGINATION
+    'tag': None,
+    'category': None,
+    'author': None,
+}
