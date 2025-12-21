@@ -220,9 +220,11 @@
 </tbody>
 </table>
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://istio.io/latest/docs/ambient/">Istio Ambient Mode</a>
-- <a href="https://istio.io/latest/docs/overview/dataplane-modes/">Sidecar vs Ambient Comparison</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://istio.io/latest/docs/ambient/">Istio Ambient Mode</a></li>
+<li><a href="https://istio.io/latest/docs/overview/dataplane-modes/">Sidecar vs Ambient Comparison</a></li>
+</ul>
 </blockquote>
 <hr>
 <h3>2. VirtualService &amp; DestinationRule Relationship</h3>
@@ -231,7 +233,7 @@
 <p><strong>Resource Relationship:</strong></p>
 <div class="highlight"><pre><span></span><code>┌──────────────┐      ┌─────────────────┐      ┌──────────────────┐
 │   Gateway    │─────►│  VirtualService │─────►│ DestinationRule  │
-│  (entry point)│      │ (WHERE to route)│      │ (HOW to route)   │
+│  (entry point)│     │ (WHERE to route)│      │ (HOW to route)   │
 └──────────────┘      └─────────────────┘      └──────────────────┘
                               │                         │
                               ▼                         ▼
@@ -310,9 +312,11 @@
 
 <blockquote>
 <p><strong>Key Point:</strong> VirtualService references subsets defined in DestinationRule. Always create DestinationRule <strong>before</strong> or <strong>together with</strong> VirtualService.</p>
-<p><strong>References:</strong>
-- <a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/">VirtualService</a>
-- <a href="https://istio.io/latest/docs/reference/config/networking/destination-rule/">DestinationRule</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/">VirtualService</a></li>
+<li><a href="https://istio.io/latest/docs/reference/config/networking/destination-rule/">DestinationRule</a></li>
+</ul>
 </blockquote>
 <hr>
 <h3>3. Gateway Configuration</h3>
@@ -419,9 +423,11 @@
 </code></pre></div>
 
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://istio.io/latest/docs/reference/config/networking/gateway/">Istio Gateway</a>
-- <a href="https://istio.io/latest/docs/tasks/traffic-management/ingress/">Ingress Gateway</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://istio.io/latest/docs/reference/config/networking/gateway/">Istio Gateway</a></li>
+<li><a href="https://istio.io/latest/docs/tasks/traffic-management/ingress/">Ingress Gateway</a></li>
+</ul>
 </blockquote>
 <hr>
 <h3>4. Traffic Shifting &amp; Canary Deployments</h3>
@@ -492,9 +498,11 @@
 
 <blockquote>
 <p><strong>Key Point:</strong> Mirrored traffic is "fire and forget" — responses from the mirror are discarded.</p>
-<p><strong>References:</strong>
-- <a href="https://istio.io/latest/docs/tasks/traffic-management/traffic-shifting/">Traffic Shifting</a>
-- <a href="https://istio.io/latest/docs/tasks/traffic-management/mirroring/">Mirroring</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://istio.io/latest/docs/tasks/traffic-management/traffic-shifting/">Traffic Shifting</a></li>
+<li><a href="https://istio.io/latest/docs/tasks/traffic-management/mirroring/">Mirroring</a></li>
+</ul>
 </blockquote>
 <hr>
 <h3>5. mTLS &amp; PeerAuthentication</h3>
@@ -586,9 +594,11 @@
 
 <blockquote>
 <p><strong>Key Point:</strong> PeerAuthentication = server-side (what traffic to accept). DestinationRule tls = client-side (how to connect).</p>
-<p><strong>References:</strong>
-- <a href="https://istio.io/latest/docs/reference/config/security/peer_authentication/">PeerAuthentication</a>
-- <a href="https://istio.io/latest/docs/tasks/security/authentication/mtls-migration/">Mutual TLS Migration</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://istio.io/latest/docs/reference/config/security/peer_authentication/">PeerAuthentication</a></li>
+<li><a href="https://istio.io/latest/docs/tasks/security/authentication/mtls-migration/">Mutual TLS Migration</a></li>
+</ul>
 </blockquote>
 <hr>
 <h3>6. AuthorizationPolicy</h3>
@@ -680,9 +690,11 @@
 </code></pre></div>
 
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://istio.io/latest/docs/reference/config/security/authorization-policy/">Authorization Policy</a>
-- <a href="https://istio.io/latest/docs/concepts/security/#authorization">Authorization Concepts</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://istio.io/latest/docs/reference/config/security/authorization-policy/">Authorization Policy</a></li>
+<li><a href="https://istio.io/latest/docs/concepts/security/#authorization">Authorization Concepts</a></li>
+</ul>
 </blockquote>
 <hr>
 <h3>7. RequestAuthentication (JWT Validation)</h3>
@@ -752,9 +764,11 @@
 
 <blockquote>
 <p><strong>Key Point:</strong> RequestAuthentication only <strong>validates</strong> tokens. To <strong>require</strong> tokens, combine with AuthorizationPolicy.</p>
-<p><strong>References:</strong>
-- <a href="https://istio.io/latest/docs/reference/config/security/request_authentication/">RequestAuthentication</a>
-- <a href="https://istio.io/latest/docs/tasks/security/authentication/authn-policy/#end-user-authentication">JWT Auth</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://istio.io/latest/docs/reference/config/security/request_authentication/">RequestAuthentication</a></li>
+<li><a href="https://istio.io/latest/docs/tasks/security/authentication/authn-policy/#end-user-authentication">JWT Auth</a></li>
+</ul>
 </blockquote>
 <hr>
 <h3>8. Resilience Features</h3>
@@ -842,9 +856,11 @@
 </code></pre></div>
 
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/">Circuit Breaking</a>
-- <a href="https://istio.io/latest/docs/tasks/traffic-management/fault-injection/">Fault Injection</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/">Circuit Breaking</a></li>
+<li><a href="https://istio.io/latest/docs/tasks/traffic-management/fault-injection/">Fault Injection</a></li>
+</ul>
 </blockquote>
 <hr>
 <h3>9. ServiceEntry &amp; WorkloadEntry</h3>
@@ -936,9 +952,11 @@
 </code></pre></div>
 
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://istio.io/latest/docs/reference/config/networking/service-entry/">ServiceEntry</a>
-- <a href="https://istio.io/latest/docs/reference/config/networking/workload-entry/">WorkloadEntry</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://istio.io/latest/docs/reference/config/networking/service-entry/">ServiceEntry</a></li>
+<li><a href="https://istio.io/latest/docs/reference/config/networking/workload-entry/">WorkloadEntry</a></li>
+</ul>
 </blockquote>
 <hr>
 <h3>10. Troubleshooting Commands</h3>
@@ -1096,9 +1114,11 @@ istioctl<span class="w"> </span>experimental<span class="w"> </span>check-inject
 </tbody>
 </table>
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://istio.io/latest/docs/reference/commands/istioctl/">istioctl Reference</a>
-- <a href="https://istio.io/latest/docs/ops/diagnostic-tools/">Troubleshooting Guide</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://istio.io/latest/docs/reference/commands/istioctl/">istioctl Reference</a></li>
+<li><a href="https://istio.io/latest/docs/ops/diagnostic-tools/">Troubleshooting Guide</a></li>
+</ul>
 </blockquote>
 <hr>
 <h3>11. Installation &amp; Upgrade</h3>
@@ -1227,14 +1247,16 @@ istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span
 </code></pre></div>
 
 <blockquote>
-<p><strong>References:</strong>
-- <a href="https://istio.io/latest/docs/setup/install/">Installation Guide</a>
-- <a href="https://istio.io/latest/docs/setup/upgrade/">Upgrade Guide</a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://istio.io/latest/docs/setup/install/">Installation Guide</a></li>
+<li><a href="https://istio.io/latest/docs/setup/upgrade/">Upgrade Guide</a></li>
+</ul>
 </blockquote>
 <hr>
 <h1>Istio Resource Quick Reference</h1>
 <div class="highlight"><pre><span></span><code><span class="err">┌─────────────────────────────────────────────────────────────────────┐</span>
-<span class="err">│</span><span class="w">                        </span><span class="n">TRAFFIC</span><span class="w"> </span><span class="n">MANAGEMENT</span><span class="w">                          </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                        </span><span class="n">TRAFFIC</span><span class="w"> </span><span class="n">MANAGEMENT</span><span class="w">                           </span><span class="err">│</span>
 <span class="err">├─────────────────────────────────────────────────────────────────────┤</span>
 <span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
 <span class="err">│</span><span class="w">   </span><span class="n">Gateway</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="n">VirtualService</span><span class="w"> </span><span class="err">──────►</span><span class="w"> </span><span class="n">DestinationRule</span><span class="w">            </span><span class="err">│</span>
