@@ -96,17 +96,39 @@
 <li><strong>CNCF Project:</strong> Cilium is a CNCF graduated project, widely adopted in production environments.</li>
 </ul>
 <p>Example of <strong>Cilium Data Flow</strong>:</p>
-<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
-│                      Linux Kernel                           │
-│  ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐   │
-│  │   XDP   │───►│   TC    │───►│ Socket  │───►│ cgroups │   │
-│  │ (ingress)│    │(ingress/│   │  Ops    │    │  (pod)  │   │
-│  │         │    │ egress) │    │         │    │         │   │
-│  └─────────┘    └─────────┘    └─────────┘    └─────────┘   │
-│       │              │              │              │        │
-│       └──────────────┴──────────────┴──────────────┘        │
-│                    eBPF Programs                            │
-└─────────────────────────────────────────────────────────────┘
+<p><img alt="alt text" src="images/2025/12/23.png"></p>
+<details>
+  <summary>Mermaid Chart</summary>
+  flowchart TB
+  subgraph Linux_Kernel["Linux Kernel"]
+          TC["TC - Ingress/Egress"]
+          XDP["XDP - Ingress"]
+          SO["Socket Ops"]
+          CG["cgroups - Pod"]
+    end
+      XDP --> TC
+      TC --> SO
+      SO --> CG
+      BPF(("eBPF Programs")) -.-> XDP & TC & SO & CG
+
+      style BPF fill:#f96,stroke:#333,stroke-width:2px
+      style Linux_Kernel fill:#f5f5f5,stroke:#666
+</details>
+
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="n">flowchart</span><span class="w"> </span><span class="n">TB</span>
+<span class="w">  </span><span class="n">subgraph</span><span class="w"> </span><span class="n">Linux_Kernel</span><span class="p">[</span><span class="s">&quot;Linux Kernel&quot;</span><span class="p">]</span>
+<span class="w">          </span><span class="n">TC</span><span class="p">[</span><span class="s">&quot;TC - Ingress/Egress&quot;</span><span class="p">]</span>
+<span class="w">          </span><span class="n">XDP</span><span class="p">[</span><span class="s">&quot;XDP - Ingress&quot;</span><span class="p">]</span>
+<span class="w">          </span><span class="n">SO</span><span class="p">[</span><span class="s">&quot;Socket Ops&quot;</span><span class="p">]</span>
+<span class="w">          </span><span class="n">CG</span><span class="p">[</span><span class="s">&quot;cgroups - Pod&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="kd">end</span>
+<span class="w">      </span><span class="n">XDP</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">TC</span>
+<span class="w">      </span><span class="n">TC</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">SO</span>
+<span class="w">      </span><span class="n">SO</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">CG</span>
+<span class="w">      </span><span class="n">BPF</span><span class="p">((</span><span class="s">&quot;eBPF Programs&quot;</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="p">.</span><span class="o">-&gt;</span><span class="w"> </span><span class="n">XDP</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">TC</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">SO</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">CG</span>
+
+<span class="w">      </span><span class="n">style</span><span class="w"> </span><span class="n">BPF</span><span class="w"> </span><span class="n">fill</span><span class="o">:</span><span class="err">#</span><span class="n">f96</span><span class="p">,</span><span class="n">stroke</span><span class="o">:</span><span class="err">#</span><span class="mi">333</span><span class="p">,</span><span class="n">stroke</span><span class="o">-</span><span class="n">width</span><span class="o">:</span><span class="mi">2</span><span class="n">px</span>
+<span class="w">      </span><span class="n">style</span><span class="w"> </span><span class="n">Linux_Kernel</span><span class="w"> </span><span class="n">fill</span><span class="o">:</span><span class="err">#</span><span class="n">f5f5f5</span><span class="p">,</span><span class="n">stroke</span><span class="o">:</span><span class="err">#</span><span class="mi">666</span>
 </code></pre></div>
 
 <h3>3. Network Policy (18%)</h3>
@@ -637,57 +659,8 @@
 </code></pre></div>
 
 <p><strong>Feature Comparison:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>K8s NetworkPolicy</th>
-<th>CiliumNetworkPolicy</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>L3/L4 filtering</td>
-<td>✅</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>L7 filtering (HTTP, gRPC, Kafka)</td>
-<td>❌</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>DNS-based policies</td>
-<td>❌</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>CIDR-based egress</td>
-<td>✅</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>FQDN-based egress</td>
-<td>❌</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>Identity-based</td>
-<td>❌ (IP-based)</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>Node selector</td>
-<td>❌</td>
-<td>✅</td>
-</tr>
-<tr>
-<td>Service selector</td>
-<td>❌</td>
-<td>✅</td>
-</tr>
-</tbody>
-</table>
+<p>Credit: <a href="https://isovalent.com/blog/post/intro-to-cilium-network-policies/">Isovalent</a></p>
+<p><img alt="alt text" src="images/2025/12/22.png"></p>
 <p><strong>CiliumNetworkPolicy Unique Features:</strong></p>
 <p><strong>L7 HTTP Rules:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
