@@ -1402,9 +1402,12 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;h1&gt;Not related to exam but I want to put here anyway&lt;/h1&gt;
 &lt;p&gt;While &lt;strike&gt;searching content&lt;/strike&gt; copying content, I found this xD&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://www.reddit.com/r/kubernetes/comments/1pg2dfh/migration_from_ingressnginx_to_cilium_ingress/"&gt;https://www.reddit.com/r/kubernetes/comments/1pg2dfh/migration_from_ingressnginx_to_cilium_ingress/&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;TLDR: 
-- Cilium can not replace the ingress nginx yet, and we should not migrate from ingress nginx to Cilium.
-- It could be replaced with some specific scenario only, not widely.&lt;/p&gt;
+&lt;p&gt;TLDR: &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Cilium can not replace the ingress nginx yet, and we should not migrate from ingress nginx to Cilium.&lt;/li&gt;
+&lt;li&gt;It could be replaced with a specific scenario only, not widely.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
 &lt;h1&gt;Key Resources&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://docs.cilium.io/"&gt;Cilium Official Documentation&lt;/a&gt;&lt;/li&gt;
