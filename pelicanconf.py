@@ -29,9 +29,9 @@ SOCIAL = (
     ("Another social link", "#"),
 )
 
-DEFAULT_PAGINATION = 20
+DEFAULT_PAGINATION = 100
 # Reduce recent articles to match pagination
-RECENT_ARTICLES_COUNT = 20  
+RECENT_ARTICLES_COUNT = 100  
 THEME = 'themes/elegant'  # https://github.com/Pelican-Elegant/elegant
 # Show only titles on the index page
 SUMMARY_MAX_LENGTH = 0
