@@ -1442,14 +1442,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;li&gt;&lt;strong&gt;Key Components:&lt;/strong&gt; Pilot (traffic management), Citadel (security/mTLS), and Galley (configuration validation).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Example of &lt;strong&gt;Traffic Flow&lt;/strong&gt;:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Client&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Request&lt;/span&gt;
-&lt;span class="err"&gt;├─&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Ingress&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Gateway&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;edge&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;traffic&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="err"&gt;├─&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;VirtualService&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;routing&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;rules&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="err"&gt;└─&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;DestinationRule&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;load&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;balancing&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;TLS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;settings&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="err"&gt;└─&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Service&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;with&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Envoy&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sidecar&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="err"&gt;└─&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Service&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;B&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;with&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Envoy&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sidecar&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
+&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/36.png"&gt;&lt;/p&gt;
 &lt;h3&gt;3. Installation, Upgrade &amp;amp; Configuration (20%)&lt;/h3&gt;
 &lt;p&gt;Getting Istio up and running.&lt;/p&gt;
 &lt;ul&gt;
@@ -1491,39 +1484,14 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;p&gt;&lt;em&gt;Domain: Installation, Upgrade &amp;amp; Configuration&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Istio offers two data plane modes. Understanding the differences is crucial for the exam.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Sidecar Mode (Traditional):&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;┌─────────────────────────────────┐
-│ Pod                             │
-│  ┌───────────┐  ┌─────────────┐ │
-│  │    App    │◄─┤Envoy Sidecar│ │
-│  │ Container │  │   Proxy     │ │
-│  └───────────┘  └─────────────┘ │
-└─────────────────────────────────┘
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
+&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/37.png"&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Every pod gets its own Envoy proxy injected as a sidecar container.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Pros:&lt;/strong&gt; Full L7 features, mature and battle-tested.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Cons:&lt;/strong&gt; High resource overhead (memory/CPU per pod), increased latency.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;strong&gt;Ambient Mode (Sidecar-less):&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│    Pod A    │     │    Pod B    │     │    Pod C    │
-│  (no sidecar)│     │  (no sidecar)│     │  (no sidecar)│
-└──────┬──────┘     └──────┬──────┘     └──────┬──────┘
-       │                   │                   │
-       └───────────┬───────┴───────────────────┘
-                   ▼
-          ┌───────────────┐
-          │   ztunnel     │  ◄── L4 processing (mTLS, basic routing)
-          │  (per node)   │
-          └───────┬───────┘
-                  ▼
-          ┌───────────────┐
-          │   Waypoint    │  ◄── L7 processing (optional, per namespace/service)
-          │    Proxy      │
-          └───────────────┘
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
+&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/38.png"&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;ztunnel:&lt;/strong&gt; Node-level proxy handling L4 (TCP, mTLS).&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Waypoint Proxy:&lt;/strong&gt; Optional L7 proxy deployed per namespace or service.&lt;/li&gt;
@@ -1578,19 +1546,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;p&gt;&lt;em&gt;Domain: Traffic Management&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;These two resources work together and are the &lt;strong&gt;most important concepts&lt;/strong&gt; for the exam.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Resource Relationship:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;┌──────────────┐      ┌─────────────────┐      ┌──────────────────┐
-│   Gateway    │─────►│  VirtualService │─────►│ DestinationRule  │
-│  (entry point)│     │ (WHERE to route)│      │ (HOW to route)   │
-└──────────────┘      └─────────────────┘      └──────────────────┘
-                              │                         │
-                              ▼                         ▼
-                       - Host matching           - Subsets (versions)
-                       - URI matching            - Load balancing
-                       - Header matching         - Connection pool
-                       - Traffic splitting       - Outlier detection
-                       - Redirects/Rewrites      - TLS settings
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
+&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/39.png"&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;VirtualService — Defines WHERE traffic goes:&lt;/strong&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;VirtualService&lt;/span&gt;
@@ -1883,11 +1839,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;&lt;strong&gt;Scope Hierarchy:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Mesh&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;wide&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;MeshPolicy&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="err"&gt;└─►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Namespace&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;level&lt;/span&gt;
-&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="err"&gt;└─►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Workload&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;level&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;most&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;specific&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;wins&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
+&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/40.png"&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Mesh-wide STRICT mTLS:&lt;/strong&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;security.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;PeerAuthentication&lt;/span&gt;
@@ -2602,52 +2554,12 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;uninstall&lt;span class="w"&gt; &lt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
 &lt;h1&gt;Istio Resource Quick Reference&lt;/h1&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;┌─────────────────────────────────────────────────────────────────────┐&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                        &lt;/span&gt;&lt;span class="n"&gt;TRAFFIC&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;MANAGEMENT&lt;/span&gt;&lt;span class="w"&gt;                           &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;├─────────────────────────────────────────────────────────────────────┤&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                                                                     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="n"&gt;Gateway&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;──────►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;VirtualService&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;──────►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;DestinationRule&lt;/span&gt;&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;entry&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;point&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;routing&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;rules&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;traffic&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;policy&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                         &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                       &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                   &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                         &lt;/span&gt;&lt;span class="err"&gt;▼&lt;/span&gt;&lt;span class="w"&gt;                       &lt;/span&gt;&lt;span class="err"&gt;▼&lt;/span&gt;&lt;span class="w"&gt;                   &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                   &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;host&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;matching&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;subsets&lt;/span&gt;&lt;span class="w"&gt;                 &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                   &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;URI&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;matching&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;load&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;balancing&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                   &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;header&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;matching&lt;/span&gt;&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;circuit&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;breaker&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                   &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;traffic&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;connection&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;pool&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                   &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;fault&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;injection&lt;/span&gt;&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;outlier&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;detection&lt;/span&gt;&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                                                                     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="n"&gt;ServiceEntry&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;──────►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;External&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Services&lt;/span&gt;&lt;span class="w"&gt;                            &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="n"&gt;WorkloadEntry&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;─────►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;VMs&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Non&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;K8s&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Workloads&lt;/span&gt;&lt;span class="w"&gt;                      &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                                                                     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;├─────────────────────────────────────────────────────────────────────┤&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                           &lt;/span&gt;&lt;span class="n"&gt;SECURITY&lt;/span&gt;&lt;span class="w"&gt;                                  &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;├─────────────────────────────────────────────────────────────────────┤&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                                                                     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="n"&gt;PeerAuthentication&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;──────►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;mTLS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Settings&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;server&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;side&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;STRICT&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;PERMISSIVE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;mesh&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;wide&lt;/span&gt;&lt;span class="w"&gt;                            &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                              &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;namespace&lt;/span&gt;&lt;span class="w"&gt;                            &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                              &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;workload&lt;/span&gt;&lt;span class="w"&gt;                             &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                                                                     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="n"&gt;RequestAuthentication&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;───►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;JWT&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Validation&lt;/span&gt;&lt;span class="w"&gt;                         &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;issuer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;jwksUri&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;token&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;validation&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;only&lt;/span&gt;&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                                                                     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="n"&gt;AuthorizationPolicy&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;─────►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Access&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Control&lt;/span&gt;&lt;span class="w"&gt;                         &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ALLOW&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;DENY&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;CUSTOM&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;who&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;                         &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                              &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;operation&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;what&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;                     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                              &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;condition&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;when&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;                     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                                                                     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;├─────────────────────────────────────────────────────────────────────┤&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                        &lt;/span&gt;&lt;span class="n"&gt;TROUBLESHOOTING&lt;/span&gt;&lt;span class="w"&gt;                              &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;├─────────────────────────────────────────────────────────────────────┤&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                                                                     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="n"&gt;istioctl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;analyze&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;─────────►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Configuration&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;validation&lt;/span&gt;&lt;span class="w"&gt;              &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="n"&gt;istioctl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;proxy&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;────►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Sync&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;with&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;control&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;plane&lt;/span&gt;&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="n"&gt;istioctl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;proxy&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;────►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Envoy&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;configuration&lt;/span&gt;&lt;span class="w"&gt;                   &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="n"&gt;istioctl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;dashboard&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;───────►&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Observability&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;tools&lt;/span&gt;&lt;span class="w"&gt;                   &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                                                                     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
-&lt;span class="err"&gt;└─────────────────────────────────────────────────────────────────────┘&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
+&lt;h3&gt;Traffic Management&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/41.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Security&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/42.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Troubleshooting&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/43.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Common istioctl Commands Cheat Sheet&lt;/h1&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# ============ INSTALLATION ============&lt;/span&gt;
