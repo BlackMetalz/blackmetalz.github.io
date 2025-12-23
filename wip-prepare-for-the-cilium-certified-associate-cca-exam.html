@@ -216,16 +216,6 @@
 <td>Traffic Control (ingress/egress)</td>
 <td>Network policy, NAT</td>
 </tr>
-<tr>
-<td><strong>Socket Ops</strong></td>
-<td>Socket level</td>
-<td>Connection tracking, redirection</td>
-</tr>
-<tr>
-<td><strong>cgroups</strong></td>
-<td>Process group</td>
-<td>Pod-level policies</td>
-</tr>
 </tbody>
 </table>
 <blockquote>
@@ -289,7 +279,7 @@
 </tbody>
 </table>
 <p><strong>Cilium Agent Responsibilities:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># What Cilium Agent does on each node:</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># What Cilium Agent does on each node (understand this for exam)</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Compiles and loads eBPF programs into kernel</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Manages endpoint (pod) identities</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Enforces network policies</span>
@@ -299,7 +289,7 @@
 </code></pre></div>
 
 <p><strong>Cilium Operator Responsibilities:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># What Cilium Operator does cluster-wide:</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># What Cilium Operator does cluster-wide (understand this for exam)</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Manages CiliumNode resources</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Handles IPAM (IP allocation)</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Garbage collects stale resources</span>
@@ -582,23 +572,23 @@
 <p>Cilium's security model is fundamentally different from IP-based approaches.</p>
 <p><strong>Traditional IP-based Security:</strong></p>
 <p><img alt="alt text" src="images/2025/12/29.png"></p>
-<p>Problems:
-- Pod IPs are ephemeral (change on restart)
-- Rules must be updated constantly
-- Doesn't scale with dynamic workloads</p>
+<p>Problems:</p>
+<ul>
+<li>Pod IPs are ephemeral (change on restart)</li>
+<li>Rules must be updated constantly</li>
+<li>Doesn't scale with dynamic workloads</li>
+</ul>
 <p><strong>Cilium Identity-based Security:</strong></p>
 <p><img alt="alt text" src="images/2025/12/30.png"></p>
-<p>Benefits:
-- Identity based on labels, not IPs
-- Survives pod restarts/reschedules
-- Scales automatically</p>
+<p>Benefits:</p>
+<ul>
+<li>Identity based on labels, not IPs</li>
+<li>Survives pod restarts/reschedules</li>
+<li>Scales automatically</li>
+</ul>
 <p><strong>How Cilium Identity Works:</strong></p>
-<ol>
-<li><strong>Label Assignment:</strong> Pods are assigned labels in their spec.</li>
-<li><strong>Identity Calculation:</strong> Cilium computes a unique numeric identity from labels.</li>
-<li><strong>Identity Propagation:</strong> Identity is embedded in packets via eBPF.</li>
-<li><strong>Policy Enforcement:</strong> Policies reference labels, resolved to identities.</li>
-</ol>
+<p>With this picture should be enough explained xD</p>
+<p><img alt="alt text" src="images/2025/12/35.png"></p>
 <p><strong>View Identities:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># List all identities</span>
 cilium<span class="w"> </span>identity<span class="w"> </span>list
@@ -613,57 +603,10 @@ cilium<span class="w"> </span>identity<span class="w"> </span>list
 <span class="c1"># 67890   k8s:app=backend</span>
 </code></pre></div>
 
-<p><strong>Reserved Identities:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Identity</th>
-<th>Numeric ID</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>reserved:host</code></td>
-<td>1</td>
-<td>Node/host traffic</td>
-</tr>
-<tr>
-<td><code>reserved:world</code></td>
-<td>2</td>
-<td>External traffic (outside cluster)</td>
-</tr>
-<tr>
-<td><code>reserved:unmanaged</code></td>
-<td>3</td>
-<td>Unmanaged endpoints</td>
-</tr>
-<tr>
-<td><code>reserved:health</code></td>
-<td>4</td>
-<td>Health check traffic</td>
-</tr>
-<tr>
-<td><code>reserved:init</code></td>
-<td>5</td>
-<td>Init containers</td>
-</tr>
-<tr>
-<td><code>reserved:remote-node</code></td>
-<td>6</td>
-<td>Other cluster nodes</td>
-</tr>
-<tr>
-<td><code>reserved:kube-apiserver</code></td>
-<td>7</td>
-<td>Kubernetes API server</td>
-</tr>
-</tbody>
-</table>
 <blockquote>
 <p><strong>References:</strong></p>
 <ul>
-<li><a href="https://docs.cilium.io/en/stable/security/identity/">Identity-based Security</a></li>
+<li><a href="https://docs.cilium.io/en/stable/security/network/identity/">Identity-based Security</a></li>
 </ul>
 </blockquote>
 <hr>
@@ -1333,6 +1276,12 @@ cilium<span class="w"> </span>bpf<span class="w"> </span>fs<span class="w"> </sp
 </code></pre></div>
 
 <hr>
+<h1>Not related to exam but I want to put here anyway</h1>
+<p>While <strike>searching content</strike> copying content, I found this xD</p>
+<p><a href="https://www.reddit.com/r/kubernetes/comments/1pg2dfh/migration_from_ingressnginx_to_cilium_ingress/">https://www.reddit.com/r/kubernetes/comments/1pg2dfh/migration_from_ingressnginx_to_cilium_ingress/</a></p>
+<p>TLDR: 
+- Cilium can not replace the ingress nginx yet, and we should not migrate from ingress nginx to Cilium.
+- It could be replaced with some specific scenario only, not widely.</p>
 <h1>Key Resources</h1>
 <ul>
 <li><a href="https://docs.cilium.io/">Cilium Official Documentation</a></li>
@@ -1340,58 +1289,8 @@ cilium<span class="w"> </span>bpf<span class="w"> </span>fs<span class="w"> </sp
 <li><a href="https://github.com/cilium/cilium">Cilium GitHub</a></li>
 <li><a href="https://ebpf.io/">eBPF.io</a></li>
 <li><a href="https://isovalent.com/labs/">Isovalent Labs (Free Tutorials)</a></li>
+<li><a href="https://blackmetalz.github.io/sharing-what-ive-learned-about-kubernetes-networking-part-2.html">My resource xD</a></li>
 </ul>
-<hr>
-<h1>Exam Details</h1>
-<table>
-<thead>
-<tr>
-<th>Item</th>
-<th>Details</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Format</strong></td>
-<td>Multiple-choice</td>
-</tr>
-<tr>
-<td><strong>Duration</strong></td>
-<td>90 minutes</td>
-</tr>
-<tr>
-<td><strong>Questions</strong></td>
-<td>~60 questions</td>
-</tr>
-<tr>
-<td><strong>Passing Score</strong></td>
-<td>75%</td>
-</tr>
-<tr>
-<td><strong>Validity</strong></td>
-<td>2 years</td>
-</tr>
-<tr>
-<td><strong>Retakes</strong></td>
-<td>1 free retake included</td>
-</tr>
-<tr>
-<td><strong>Price</strong></td>
-<td>$250 (exam only)</td>
-</tr>
-</tbody>
-</table>
-<hr>
-<h1>Honest Recommendation</h1>
-<ul>
-<li>The CCA exam is <strong>multiple-choice</strong>, not hands-on. Focus on understanding concepts, architecture, and the "why" behind features.</li>
-<li><strong>eBPF fundamentals (10%)</strong> are crucial — understand why Cilium uses eBPF over iptables.</li>
-<li><strong>Network Policy (18%)</strong> — know the difference between K8s NetworkPolicy and CiliumNetworkPolicy, especially L7 and FQDN features.</li>
-<li><strong>Architecture (20%)</strong> — understand all components (Agent, Operator, Hubble) and their roles.</li>
-<li>Practice with the <strong>Isovalent Labs</strong> — they offer free hands-on tutorials that cover most exam topics.</li>
-<li>Read the official docs multiple times. The exam questions are often directly from documentation.</li>
-</ul>
-<p><a href="https://docs.cilium.io/">https://docs.cilium.io/</a></p>
 <hr>
 <h1>My Secret Weapon: Mock Exam</h1>
 <hr>
