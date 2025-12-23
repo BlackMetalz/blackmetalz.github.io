@@ -97,40 +97,6 @@
 </ul>
 <p>Example of <strong>Cilium Data Flow</strong>:</p>
 <p><img alt="alt text" src="images/2025/12/23.png"></p>
-<details>
-  <summary>Mermaid Chart</summary>
-  flowchart TB
-  subgraph Linux_Kernel["Linux Kernel"]
-          TC["TC - Ingress/Egress"]
-          XDP["XDP - Ingress"]
-          SO["Socket Ops"]
-          CG["cgroups - Pod"]
-    end
-      XDP --> TC
-      TC --> SO
-      SO --> CG
-      BPF(("eBPF Programs")) -.-> XDP & TC & SO & CG
-
-      style BPF fill:#f96,stroke:#333,stroke-width:2px
-      style Linux_Kernel fill:#f5f5f5,stroke:#666
-</details>
-
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="n">flowchart</span><span class="w"> </span><span class="n">TB</span>
-<span class="w">  </span><span class="n">subgraph</span><span class="w"> </span><span class="n">Linux_Kernel</span><span class="p">[</span><span class="s">&quot;Linux Kernel&quot;</span><span class="p">]</span>
-<span class="w">          </span><span class="n">TC</span><span class="p">[</span><span class="s">&quot;TC - Ingress/Egress&quot;</span><span class="p">]</span>
-<span class="w">          </span><span class="n">XDP</span><span class="p">[</span><span class="s">&quot;XDP - Ingress&quot;</span><span class="p">]</span>
-<span class="w">          </span><span class="n">SO</span><span class="p">[</span><span class="s">&quot;Socket Ops&quot;</span><span class="p">]</span>
-<span class="w">          </span><span class="n">CG</span><span class="p">[</span><span class="s">&quot;cgroups - Pod&quot;</span><span class="p">]</span>
-<span class="w">    </span><span class="kd">end</span>
-<span class="w">      </span><span class="n">XDP</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">TC</span>
-<span class="w">      </span><span class="n">TC</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">SO</span>
-<span class="w">      </span><span class="n">SO</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">CG</span>
-<span class="w">      </span><span class="n">BPF</span><span class="p">((</span><span class="s">&quot;eBPF Programs&quot;</span><span class="p">))</span><span class="w"> </span><span class="o">-</span><span class="p">.</span><span class="o">-&gt;</span><span class="w"> </span><span class="n">XDP</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">TC</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">SO</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">CG</span>
-
-<span class="w">      </span><span class="n">style</span><span class="w"> </span><span class="n">BPF</span><span class="w"> </span><span class="n">fill</span><span class="o">:</span><span class="err">#</span><span class="n">f96</span><span class="p">,</span><span class="n">stroke</span><span class="o">:</span><span class="err">#</span><span class="mi">333</span><span class="p">,</span><span class="n">stroke</span><span class="o">-</span><span class="n">width</span><span class="o">:</span><span class="mi">2</span><span class="n">px</span>
-<span class="w">      </span><span class="n">style</span><span class="w"> </span><span class="n">Linux_Kernel</span><span class="w"> </span><span class="n">fill</span><span class="o">:</span><span class="err">#</span><span class="n">f5f5f5</span><span class="p">,</span><span class="n">stroke</span><span class="o">:</span><span class="err">#</span><span class="mi">666</span>
-</code></pre></div>
-
 <h3>3. Network Policy (18%)</h3>
 <p>Securing workloads with identity-based policies.</p>
 <ul>
@@ -185,38 +151,9 @@
 <p><em>Domain: eBPF (10%)</em></p>
 <p>Understanding why Cilium chose eBPF over traditional approaches is fundamental.</p>
 <p><strong>iptables Limitations:</strong></p>
-<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
-│                    iptables Flow                            │
-│                                                             │
-│   Packet ──► Rule 1 ──► Rule 2 ──► Rule 3 ──► ... ──► Rule N│
-│              (match?)   (match?)   (match?)       (match?)  │
-│                                                             │
-│   Problems:                                                 │
-│   - O(n) complexity — linear rule matching                  │
-│   - Performance degrades with more rules                    │
-│   - No visibility into packet flow                          │
-│   - Rules are IP-based, not identity-based                  │
-└─────────────────────────────────────────────────────────────┘
-</code></pre></div>
-
+<p><img alt="alt text" src="images/2025/12/24.png"></p>
 <p><strong>eBPF Advantages:</strong></p>
-<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
-│                      eBPF Flow                              │
-│                                                             │
-│   Packet ──► eBPF Program ──► Decision (O(1) hash lookup)   │
-│                   │                                         │
-│                   ▼                                         │
-│              eBPF Maps                                      │
-│              (hash tables)                                  │
-│                                                             │
-│   Benefits:                                                 │
-│   - O(1) complexity — hash-based lookups                    │
-│   - Scales to millions of rules                             │
-│   - Deep packet inspection (L7)                             │
-│   - Rich observability built-in                             │
-└─────────────────────────────────────────────────────────────┘
-</code></pre></div>
-
+<p><img alt="alt text" src="images/2025/12/25.png"></p>
 <p><strong>Comparison Table:</strong></p>
 <table>
 <thead>
@@ -303,40 +240,7 @@
 <p><em>Domain: Architecture (20%)</em></p>
 <p>Understanding each component's role is essential.</p>
 <p><strong>Architecture Overview:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="err">┌─────────────────────────────────────────────────────────────────────┐</span>
-<span class="err">│</span><span class="w">                         </span><span class="n">Kubernetes</span><span class="w"> </span><span class="n">Cluster</span><span class="w">                          </span><span class="err">│</span>
-<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">┌─────────────────────────────────────────────────────────────┐</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                      </span><span class="n">Control</span><span class="w"> </span><span class="n">Plane</span><span class="w">                          </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">┌─────────────────┐</span><span class="w">         </span><span class="err">┌─────────────────────────┐</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="n">Cilium</span><span class="w"> </span><span class="n">Operator</span><span class="w"> </span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w">      </span><span class="n">Hubble</span><span class="w"> </span><span class="n">Relay</span><span class="w">       </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="p">(</span><span class="n">Deployment</span><span class="p">)</span><span class="w">   </span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w">     </span><span class="p">(</span><span class="n">Deployment</span><span class="p">)</span><span class="w">        </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                 </span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w">                         </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">CRD</span><span class="w"> </span><span class="n">management</span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Aggregates</span><span class="w"> </span><span class="n">flows</span><span class="w">      </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">IPAM</span><span class="w">          </span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Serves</span><span class="w"> </span><span class="n">Hubble</span><span class="w"> </span><span class="n">UI</span><span class="o">/</span><span class="n">CLI</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Cluster</span><span class="w"> </span><span class="n">Mesh</span><span class="w">  </span><span class="err">│</span><span class="w">         </span><span class="err">│</span><span class="w">                         </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">└─────────────────┘</span><span class="w">         </span><span class="err">└─────────────────────────┘</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">└─────────────────────────────────────────────────────────────┘</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">                                                                     </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">┌─────────────────────────────────────────────────────────────┐</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                    </span><span class="n">Worker</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="mh">1</span><span class="w">                            </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">┌─────────────────────────────────────────────────────┐</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                  </span><span class="n">Cilium</span><span class="w"> </span><span class="n">Agent</span><span class="w">                       </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                  </span><span class="p">(</span><span class="n">DaemonSet</span><span class="p">)</span><span class="w">                        </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                                                     </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">┌──────────────┐</span><span class="w">  </span><span class="err">┌──────────────┐</span><span class="w">  </span><span class="err">┌───────────┐</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w"> </span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">eBPF</span><span class="w">        </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">   </span><span class="n">Hubble</span><span class="w">     </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">Envoy</span><span class="w">    </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">Datapath</span><span class="w">    </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">   </span><span class="n">Observer</span><span class="w">   </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="p">(</span><span class="n">L7</span><span class="p">)</span><span class="w">     </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">└──────────────┘</span><span class="w">  </span><span class="err">└──────────────┘</span><span class="w">  </span><span class="err">└───────────┘</span><span class="w">  </span><span class="err">│</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">└─────────────────────────────────────────────────────┘</span><span class="w">    </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">                                                             </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">┌─────────┐</span><span class="w">  </span><span class="err">┌─────────┐</span><span class="w">  </span><span class="err">┌─────────┐</span><span class="w">                      </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">Pod</span><span class="w"> </span><span class="n">A</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">Pod</span><span class="w"> </span><span class="n">B</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="n">Pod</span><span class="w"> </span><span class="n">C</span><span class="w">  </span><span class="err">│</span><span class="w">                      </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w">  </span><span class="err">└─────────┘</span><span class="w">  </span><span class="err">└─────────┘</span><span class="w">  </span><span class="err">└─────────┘</span><span class="w">                      </span><span class="err">│</span><span class="w">    </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="err">└─────────────────────────────────────────────────────────────┘</span><span class="w">    </span><span class="err">│</span>
-<span class="err">└─────────────────────────────────────────────────────────────────────┘</span>
-</code></pre></div>
-
+<p><img alt="alt text" src="images/2025/12/26.png"></p>
 <p><strong>Component Details:</strong></p>
 <table>
 <thead>
@@ -415,48 +319,17 @@
 <p><em>Domain: Architecture (20%)</em></p>
 <p>Cilium supports multiple datapath modes for different environments.</p>
 <p><strong>Encapsulation Mode (VXLAN/Geneve):</strong></p>
-<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────────────────┐
-│                     Encapsulation (Overlay)                      │
-│                                                                  │
-│   Node 1                              Node 2                     │
-│   ┌─────────────┐                     ┌─────────────┐            │
-│   │   Pod A     │                     │   Pod B     │            │
-│   │ 10.0.1.10   │                     │ 10.0.2.20   │            │
-│   └──────┬──────┘                     └──────┬──────┘            │
-│          │                                   │                   │
-│          ▼                                   ▼                   │
-│   ┌─────────────┐                     ┌─────────────┐            │
-│   │   Cilium    │     VXLAN/Geneve    │   Cilium    │            │
-│   │   Agent     │◄═══════════════════►│   Agent     │            │
-│   │ 192.168.1.1 │      Tunnel         │ 192.168.1.2 │            │
-│   └─────────────┘                     └─────────────┘            │
-│                                                                  │
-│   Pros: Works anywhere (any network)                             │
-│   Cons: MTU overhead (~50 bytes), slight latency                 │
-└──────────────────────────────────────────────────────────────────┘
-</code></pre></div>
-
+<p><img alt="alt text" src="images/2025/12/27.png"></p>
+<ul>
+<li>Pros: Works anywhere (any network)</li>
+<li>Cons: MTU overhead (~50 bytes), slight latency</li>
+</ul>
 <p><strong>Native Routing (Direct Routing):</strong></p>
-<div class="highlight"><pre><span></span><code>┌──────────────────────────────────────────────────────────────────┐
-│                     Native Routing (No Overlay)                  │
-│                                                                  │
-│   Node 1                              Node 2                     │
-│   ┌─────────────┐                     ┌─────────────┐            │
-│   │   Pod A     │                     │   Pod B     │            │
-│   │ 10.0.1.10   │                     │ 10.0.2.20   │            │
-│   └──────┬──────┘                     └──────┬──────┘            │
-│          │                                   │                   │
-│          ▼                                   ▼                   │
-│   ┌─────────────┐    Native IP routing ┌─────────────┐           │
-│   │   Cilium    │◄────────────────────►│   Cilium    │           │
-│   │   Agent     │    (BGP, VPC routes) │   Agent     │           │
-│   └─────────────┘                      └─────────────┘           │
-│                                                                  │
-│   Pros: Better performance, no MTU overhead                      │
-│   Cons: Requires network support (BGP, cloud VPC)                │
-└──────────────────────────────────────────────────────────────────┘
-</code></pre></div>
-
+<p><img alt="alt text" src="images/2025/12/28.png"></p>
+<ul>
+<li>Pros: Better performance, no MTU overhead</li>
+<li>Cons: Requires network support (BGP, cloud VPC)</li>
+</ul>
 <p><strong>Datapath Mode Comparison:</strong></p>
 <table>
 <thead>
@@ -708,37 +581,17 @@
 <p><em>Domain: Network Policy (18%)</em></p>
 <p>Cilium's security model is fundamentally different from IP-based approaches.</p>
 <p><strong>Traditional IP-based Security:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="err">┌─────────────────────────────────────────────────────────────┐</span>
-<span class="err">│</span><span class="w">                  </span><span class="n">IP</span><span class="o">-</span><span class="n">based</span><span class="w"> </span><span class="n">Security</span><span class="w">                          </span><span class="err">│</span>
-<span class="err">│</span><span class="w">                                                             </span><span class="err">│</span>
-<span class="err">│</span><span class="w">   </span><span class="n">Pod</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="p">(</span><span class="mf">10.0</span><span class="o">.</span><span class="mf">1.5</span><span class="p">)</span><span class="w"> </span><span class="err">───────►</span><span class="w"> </span><span class="n">Firewall</span><span class="w"> </span><span class="err">───────►</span><span class="w"> </span><span class="n">Pod</span><span class="w"> </span><span class="n">B</span><span class="w">         </span><span class="err">│</span>
-<span class="err">│</span><span class="w">                              </span><span class="n">Rule</span><span class="p">:</span><span class="w">                          </span><span class="err">│</span>
-<span class="err">│</span><span class="w">                          </span><span class="s2">&quot;Allow 10.0.1.5&quot;</span><span class="w">                   </span><span class="err">│</span>
-<span class="err">│</span><span class="w">                                                             </span><span class="err">│</span>
-<span class="err">│</span><span class="w">   </span><span class="n">Problems</span><span class="p">:</span><span class="w">                                                 </span><span class="err">│</span>
-<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="n">Pod</span><span class="w"> </span><span class="n">IPs</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">ephemeral</span><span class="w"> </span><span class="p">(</span><span class="n">change</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">restart</span><span class="p">)</span><span class="w">               </span><span class="err">│</span>
-<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="n">Rules</span><span class="w"> </span><span class="n">must</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">updated</span><span class="w"> </span><span class="n">constantly</span><span class="w">                        </span><span class="err">│</span>
-<span class="err">│</span><span class="w">   </span><span class="o">-</span><span class="w"> </span><span class="n">Doesn</span><span class="s1">&#39;t scale with dynamic workloads                    │</span>
-<span class="err">└─────────────────────────────────────────────────────────────┘</span>
-</code></pre></div>
-
+<p><img alt="alt text" src="images/2025/12/29.png"></p>
+<p>Problems:
+- Pod IPs are ephemeral (change on restart)
+- Rules must be updated constantly
+- Doesn't scale with dynamic workloads</p>
 <p><strong>Cilium Identity-based Security:</strong></p>
-<div class="highlight"><pre><span></span><code>┌───────────────────────────────────────────────────────────--------------──┐
-│                Identity-based Security                                    │
-│                                                                           │
-│   Pod A                                                                   │
-│   Labels: app=frontend    ──────► Cilium ──────--------------► Pod B      │
-│   Identity: 12345                  Rule:                      Labels:     │
-│                              &quot;Allow identity              app=backend     │
-│                               with app=frontend&quot;          Identity: 67890 │
-│                                                                           │
-│   Benefits:                                                               │
-│   - Identity based on labels, not IPs                                     │
-│   - Survives pod restarts/reschedules                                     │
-│   - Scales automatically                                                  │
-└─────────────────────────────────────────────────────────────--------------┘
-</code></pre></div>
-
+<p><img alt="alt text" src="images/2025/12/30.png"></p>
+<p>Benefits:
+- Identity based on labels, not IPs
+- Survives pod restarts/reschedules
+- Scales automatically</p>
 <p><strong>How Cilium Identity Works:</strong></p>
 <ol>
 <li><strong>Label Assignment:</strong> Pods are assigned labels in their spec.</li>
