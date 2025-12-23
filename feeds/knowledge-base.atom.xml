@@ -1439,7 +1439,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Control Plane (istiod):&lt;/strong&gt; The brain of Istio — handles configuration, certificate management, and service discovery.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Data Plane:&lt;/strong&gt; Envoy proxies that intercept and manage all network traffic between services.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Key Components:&lt;/strong&gt; Pilot (traffic management), Citadel (security/mTLS), and Galley (configuration validation).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key Components:&lt;/strong&gt; All consolidated into &lt;code&gt;istiod&lt;/code&gt; — handles traffic management (formerly Pilot), security/mTLS (formerly Citadel), and configuration validation (formerly Galley).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Example of &lt;strong&gt;Traffic Flow&lt;/strong&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;img alt="alt text" src="images/2025/12/36.png"&gt;&lt;/p&gt;
@@ -1530,7 +1530,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;tr&gt;
 &lt;td&gt;Maturity&lt;/td&gt;
 &lt;td&gt;Stable&lt;/td&gt;
-&lt;td&gt;Newer (GA in 1.22+)&lt;/td&gt;
+&lt;td&gt;Newer (GA in 1.24+)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -1675,11 +1675,6 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;td&gt;&lt;code&gt;PASSTHROUGH&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;TLS passed to backend&lt;/td&gt;
 &lt;td&gt;Backend handles TLS&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;AUTO_PASSTHROUGH&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;SNI-based passthrough&lt;/td&gt;
-&lt;td&gt;Multi-cluster&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;&lt;code&gt;ISTIO_MUTUAL&lt;/code&gt;&lt;/td&gt;
@@ -2112,7 +2107,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;retries&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;attempts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;3&lt;/span&gt;&lt;span class="w"&gt;                    &lt;/span&gt;&lt;span class="c1"&gt;# Max retry attempts&lt;/span&gt;
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;perTryTimeout&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;2s&lt;/span&gt;&lt;span class="w"&gt;              &lt;/span&gt;&lt;span class="c1"&gt;# Timeout per attempt&lt;/span&gt;
-&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;retryOn&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;5xx,reset,connect-failure,retriable-4xx&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;retryOn&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;5xx,reset,connect-failure&amp;quot;&lt;/span&gt;
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;retryRemoteLocalities&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;true&lt;/span&gt;&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="c1"&gt;# Retry on different locality&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
@@ -2389,11 +2384,6 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &
 &lt;td&gt;503 errors&lt;/td&gt;
 &lt;td&gt;&lt;code&gt;istioctl proxy-config clusters&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;Cluster health, endpoints&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;No mTLS&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;istioctl authn tls-check&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;TLS mode mismatches&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;Routing not working&lt;/td&gt;

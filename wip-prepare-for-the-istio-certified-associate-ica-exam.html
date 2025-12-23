@@ -93,7 +93,7 @@
 <ul>
 <li><strong>Control Plane (istiod):</strong> The brain of Istio — handles configuration, certificate management, and service discovery.</li>
 <li><strong>Data Plane:</strong> Envoy proxies that intercept and manage all network traffic between services.</li>
-<li><strong>Key Components:</strong> Pilot (traffic management), Citadel (security/mTLS), and Galley (configuration validation).</li>
+<li><strong>Key Components:</strong> All consolidated into <code>istiod</code> — handles traffic management (formerly Pilot), security/mTLS (formerly Citadel), and configuration validation (formerly Galley).</li>
 </ul>
 <p>Example of <strong>Traffic Flow</strong>:</p>
 <p><img alt="alt text" src="images/2025/12/36.png"></p>
@@ -184,7 +184,7 @@
 <tr>
 <td>Maturity</td>
 <td>Stable</td>
-<td>Newer (GA in 1.22+)</td>
+<td>Newer (GA in 1.24+)</td>
 </tr>
 </tbody>
 </table>
@@ -329,11 +329,6 @@
 <td><code>PASSTHROUGH</code></td>
 <td>TLS passed to backend</td>
 <td>Backend handles TLS</td>
-</tr>
-<tr>
-<td><code>AUTO_PASSTHROUGH</code></td>
-<td>SNI-based passthrough</td>
-<td>Multi-cluster</td>
 </tr>
 <tr>
 <td><code>ISTIO_MUTUAL</code></td>
@@ -766,7 +761,7 @@
 <span class="w">      </span><span class="nt">retries</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">attempts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">                    </span><span class="c1"># Max retry attempts</span>
 <span class="w">        </span><span class="nt">perTryTimeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2s</span><span class="w">              </span><span class="c1"># Timeout per attempt</span>
-<span class="w">        </span><span class="nt">retryOn</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5xx,reset,connect-failure,retriable-4xx&quot;</span>
+<span class="w">        </span><span class="nt">retryOn</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;5xx,reset,connect-failure&quot;</span>
 <span class="w">        </span><span class="nt">retryRemoteLocalities</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">    </span><span class="c1"># Retry on different locality</span>
 </code></pre></div>
 
@@ -1043,11 +1038,6 @@ istioctl<span class="w"> </span>experimental<span class="w"> </span>check-inject
 <td>503 errors</td>
 <td><code>istioctl proxy-config clusters</code></td>
 <td>Cluster health, endpoints</td>
-</tr>
-<tr>
-<td>No mTLS</td>
-<td><code>istioctl authn tls-check</code></td>
-<td>TLS mode mismatches</td>
 </tr>
 <tr>
 <td>Routing not working</td>
