@@ -78,7 +78,54 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>My favourite commands list</h1>
+            <h1>My favorite list in this Exam</h1>
+<h3>IO Redirection</h3>
+<p>I think this is the most command I often used but never understand correctly, LOL. Yes, it is <code>2&gt;&amp;1</code>. But no more, today I swear I will remember and understand it! So let's take an example:</p>
+<div class="highlight"><pre><span></span><code>./script.sh<span class="w"> </span>&gt;<span class="w"> </span>output.txt<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+</code></pre></div>
+
+<p><code>./script.sh</code> will give to output</p>
+<div class="highlight"><pre><span></span><code>bob@ubuntu-host<span class="w"> </span>~<span class="w"> </span>✖<span class="w"> </span>./script.sh<span class="w"> </span>
+/home/bob
+./script.sh:<span class="w"> </span>line<span class="w"> </span><span class="m">2</span>:<span class="w"> </span>lss:<span class="w"> </span><span class="nb">command</span><span class="w"> </span>not<span class="w"> </span>found
+</code></pre></div>
+
+<p>This part <code>&gt; output.txt</code>: can be understood as redirect <code>stdout</code> (file descriptor 1) into file <code>output.txt</code></p>
+<p>This part <code>2&gt;&amp;1</code>: can be understood as redirect <code>stderr</code> (file descriptor 2) into file descriptor 1 pointed to. At this time file descriptor 1 already getting redirected into <code>output.txt</code>, so file descriptor 2 will go together xD </p>
+<p>And order is important</p>
+<ul>
+<li>It must be <code>&gt; output.txt 2&gt;&amp;1</code>. Example:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>bob@ubuntu-host<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>./script.sh<span class="w"> </span>&gt;<span class="w"> </span>output.txt<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+
+bob@ubuntu-host<span class="w"> </span>~<span class="w"> </span>✖<span class="w"> </span>cat<span class="w"> </span>output.txt<span class="w"> </span>
+/home/bob
+./script.sh:<span class="w"> </span>line<span class="w"> </span><span class="m">2</span>:<span class="w"> </span>lss:<span class="w"> </span><span class="nb">command</span><span class="w"> </span>not<span class="w"> </span>found
+</code></pre></div>
+
+<ul>
+<li>If <code>2&gt;&amp;1 &gt; asd.txt</code>: only stdout getting into file. Example:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>bob@ubuntu-host<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>./script.sh<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span>&gt;<span class="w"> </span>asd.txt
+./script.sh:<span class="w"> </span>line<span class="w"> </span><span class="m">2</span>:<span class="w"> </span>lss:<span class="w"> </span><span class="nb">command</span><span class="w"> </span>not<span class="w"> </span>found
+
+bob@ubuntu-host<span class="w"> </span>~<span class="w"> </span>✖<span class="w"> </span>cat<span class="w"> </span>asd.txt<span class="w"> </span>
+/home/bob
+</code></pre></div>
+
+<p>Shell Redirection Cheat sheet:</p>
+<ul>
+<li><strong><code>&gt; file 2&gt;&amp;1</code></strong> Redirects both <strong>stdout</strong> and <strong>stderr</strong> to a file (the most standard/compatible method).</li>
+<li><strong><code>&amp;&gt; file</code></strong> Shorthand for the above (supported in <strong>bash</strong> and <strong>zsh</strong>).</li>
+<li><strong><code>&gt;&gt; file 2&gt;&amp;1</code></strong> <strong>Appends</strong> both <strong>stdout</strong> and <strong>stderr</strong> to a file.</li>
+<li><strong><code>2&gt;/dev/null</code></strong> Discards error messages (<strong>stderr</strong>); keeps only the standard output.</li>
+</ul>
+<p>Redirection Use Cases:</p>
+<ul>
+<li><strong><code>./script.sh &gt; output.txt 2&gt;&amp;1</code></strong> Captures everything (<strong>logs + errors</strong>) into a single file.</li>
+<li><strong><code>./script.sh &gt; /dev/null 2&gt;&amp;1</code></strong> <strong>Total silence</strong>; suppresses all output and error messages completely.</li>
+<li><strong><code>./script.sh 2&gt; error.txt</code></strong> Redirects <strong>only the errors</strong> to a file; the normal logs will still show up on your terminal.</li>
+</ul>
 
 
              

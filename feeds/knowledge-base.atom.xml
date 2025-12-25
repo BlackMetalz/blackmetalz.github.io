@@ -1,5 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2025-12-31T00:00:00+07:00</updated><entry><title>[WIP] Linux Foundation Certified System Administrator (LFCS)</title><link href="https://blackmetalz.github.io/wip-linux-foundation-certified-system-administrator-lfcs.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-linux-foundation-certified-system-administrator-lfcs.html</id><summary type="html"/><content type="html">&lt;h1&gt;My favourite commands list&lt;/h1&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="certification"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2025-12-31T00:00:00+07:00</updated><entry><title>[WIP] Linux Foundation Certified System Administrator (LFCS)</title><link href="https://blackmetalz.github.io/wip-linux-foundation-certified-system-administrator-lfcs.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-linux-foundation-certified-system-administrator-lfcs.html</id><summary type="html"/><content type="html">&lt;h1&gt;My favorite list in this Exam&lt;/h1&gt;
+&lt;h3&gt;IO Redirection&lt;/h3&gt;
+&lt;p&gt;I think this is the most command I often used but never understand correctly, LOL. Yes, it is &lt;code&gt;2&amp;gt;&amp;amp;1&lt;/code&gt;. But no more, today I swear I will remember and understand it! So let's take an example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;./script.sh&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;output.txt&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;./script.sh&lt;/code&gt; will give to output&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;bob@ubuntu-host&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;✖&lt;span class="w"&gt; &lt;/span&gt;./script.sh&lt;span class="w"&gt; &lt;/span&gt;
+/home/bob
+./script.sh:&lt;span class="w"&gt; &lt;/span&gt;line&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;lss:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;command&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;not&lt;span class="w"&gt; &lt;/span&gt;found
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This part &lt;code&gt;&amp;gt; output.txt&lt;/code&gt;: can be understood as redirect &lt;code&gt;stdout&lt;/code&gt; (file descriptor 1) into file &lt;code&gt;output.txt&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;This part &lt;code&gt;2&amp;gt;&amp;amp;1&lt;/code&gt;: can be understood as redirect &lt;code&gt;stderr&lt;/code&gt; (file descriptor 2) into file descriptor 1 pointed to. At this time file descriptor 1 already getting redirected into &lt;code&gt;output.txt&lt;/code&gt;, so file descriptor 2 will go together xD &lt;/p&gt;
+&lt;p&gt;And order is important&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It must be &lt;code&gt;&amp;gt; output.txt 2&amp;gt;&amp;amp;1&lt;/code&gt;. Example:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;bob@ubuntu-host&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;./script.sh&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;output.txt&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;
+
+bob@ubuntu-host&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;✖&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;output.txt&lt;span class="w"&gt; &lt;/span&gt;
+/home/bob
+./script.sh:&lt;span class="w"&gt; &lt;/span&gt;line&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;lss:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;command&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;not&lt;span class="w"&gt; &lt;/span&gt;found
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;If &lt;code&gt;2&amp;gt;&amp;amp;1 &amp;gt; asd.txt&lt;/code&gt;: only stdout getting into file. Example:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;bob@ubuntu-host&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;./script.sh&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;asd.txt
+./script.sh:&lt;span class="w"&gt; &lt;/span&gt;line&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;lss:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;command&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;not&lt;span class="w"&gt; &lt;/span&gt;found
+
+bob@ubuntu-host&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;✖&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;asd.txt&lt;span class="w"&gt; &lt;/span&gt;
+/home/bob
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Shell Redirection Cheat sheet:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;&amp;gt; file 2&amp;gt;&amp;amp;1&lt;/code&gt;&lt;/strong&gt; Redirects both &lt;strong&gt;stdout&lt;/strong&gt; and &lt;strong&gt;stderr&lt;/strong&gt; to a file (the most standard/compatible method).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;&amp;amp;&amp;gt; file&lt;/code&gt;&lt;/strong&gt; Shorthand for the above (supported in &lt;strong&gt;bash&lt;/strong&gt; and &lt;strong&gt;zsh&lt;/strong&gt;).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;&amp;gt;&amp;gt; file 2&amp;gt;&amp;amp;1&lt;/code&gt;&lt;/strong&gt; &lt;strong&gt;Appends&lt;/strong&gt; both &lt;strong&gt;stdout&lt;/strong&gt; and &lt;strong&gt;stderr&lt;/strong&gt; to a file.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;2&amp;gt;/dev/null&lt;/code&gt;&lt;/strong&gt; Discards error messages (&lt;strong&gt;stderr&lt;/strong&gt;); keeps only the standard output.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Redirection Use Cases:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;./script.sh &amp;gt; output.txt 2&amp;gt;&amp;amp;1&lt;/code&gt;&lt;/strong&gt; Captures everything (&lt;strong&gt;logs + errors&lt;/strong&gt;) into a single file.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;./script.sh &amp;gt; /dev/null 2&amp;gt;&amp;amp;1&lt;/code&gt;&lt;/strong&gt; &lt;strong&gt;Total silence&lt;/strong&gt;; suppresses all output and error messages completely.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;./script.sh 2&amp;gt; error.txt&lt;/code&gt;&lt;/strong&gt; Redirects &lt;strong&gt;only the errors&lt;/strong&gt; to a file; the normal logs will still show up on your terminal.&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="certification"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This document outlines the deployment of a Kubernetes v1.31.9 HA cluster on Ubuntu 24.04 using Kubespray v2.27.1.&lt;/p&gt;
 &lt;p&gt;Objective: Establish a robust lab environment with minimum requirements. It can be upgraded to production later by simply adding more worker nodes and migrating to dedicated master nodes.
 Topology: 3-node HA architecture (Control Plane, Etcd, and Worker roles on all nodes).&lt;/p&gt;
@@ -821,7 +868,8 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;endpoint&lt;span class="w"&gt; &lt;/sp
 &lt;hr&gt;
 &lt;h3&gt;8. Gateway API vs Ingress&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;Domain: Service Mesh (16%)&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;Cilium supports both traditional Ingress and the newer Gateway API.&lt;/p&gt;
+&lt;p&gt;Cilium supports both traditional Ingress and the newer Gateway API.
+Yeah, I don't think Cilium will ask for Gateway API, but it did. So you have to understand Gateway API also!&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Ingress (Legacy):&lt;/strong&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.k8s.io/v1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;Ingress&lt;/span&gt;
