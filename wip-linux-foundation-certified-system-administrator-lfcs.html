@@ -126,6 +126,7 @@ bob@ubuntu-host<span class="w"> </span>~<span class="w"> </span>✖<span class="
 <li><strong><code>./script.sh &gt; /dev/null 2&gt;&amp;1</code></strong> <strong>Total silence</strong>; suppresses all output and error messages completely.</li>
 <li><strong><code>./script.sh 2&gt; error.txt</code></strong> Redirects <strong>only the errors</strong> to a file; the normal logs will still show up on your terminal.</li>
 </ul>
+<p>And the last, we had fd2/fd1 so what is fd0? It is standard input (stdin). Example: <code>mysql database_name &lt; backup.sql</code></p>
 
 
              
