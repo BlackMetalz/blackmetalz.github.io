@@ -249,7 +249,7 @@ ssh&lt;span class="w"&gt; &lt;/span&gt;root@kienlt-lab-machine-1&lt;span class="
 chmod&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;600&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$HOME&lt;/span&gt;/.kube/config
 sed&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;s/127.0.0.1/kienlt-lab-machine-1/g&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$HOME&lt;/span&gt;/.kube/config
 k&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;nodes
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Knowledge Base"/><category term="k8s"/><category term="kubespray"/></entry><entry><title>[WIP] Prepare for the Cilium Certified Associate (CCA) Exam</title><link href="https://blackmetalz.github.io/wip-prepare-for-the-cilium-certified-associate-cca-exam.html" rel="alternate"/><published>2025-12-21T00:00:00+07:00</published><updated>2025-12-21T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-21:/wip-prepare-for-the-cilium-certified-associate-cca-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/21.png"&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Knowledge Base"/><category term="k8s"/><category term="kubespray"/></entry><entry><title>Prepare for the Cilium Certified Associate (CCA) Exam</title><link href="https://blackmetalz.github.io/prepare-for-the-cilium-certified-associate-cca-exam.html" rel="alternate"/><published>2025-12-28T00:00:00+07:00</published><updated>2025-12-28T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-28:/prepare-for-the-cilium-certified-associate-cca-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/21.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Cilium Certified Associate (CCA) Overview&lt;/h1&gt;
 &lt;h3&gt;1. eBPF Fundamentals&lt;/h3&gt;
@@ -1468,12 +1468,19 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;/ul&gt;
 &lt;hr&gt;
 &lt;h1&gt;My Secret Weapon: Mock Exam&lt;/h1&gt;
-&lt;hr&gt;
-&lt;h1&gt;Final Wrap-Up&lt;/h1&gt;
-&lt;p&gt;&lt;em&gt;[To be updated after passing the exam]&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.udemy.com/course/complete-cilium-certified-associate-cca-exam-prep"&gt;&lt;strong&gt;https://www.udemy.com/course/complete-cilium-certified-associate-cca-exam-prep&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Exam Notes&lt;/h1&gt;
-&lt;p&gt;&lt;em&gt;[To be updated with exam experience]&lt;/em&gt;&lt;/p&gt;</content><category term="Knowledge Base"/><category term="cilium"/><category term="certification"/><category term="linux-foundation"/><category term="cca"/><category term="ebpf"/><category term="kubernetes"/><category term="networking"/></entry><entry><title>[WIP] Prepare for the Istio Certified Associate (ICA) Exam</title><link href="https://blackmetalz.github.io/wip-prepare-for-the-istio-certified-associate-ica-exam.html" rel="alternate"/><published>2025-12-21T00:00:00+07:00</published><updated>2025-12-21T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-21:/wip-prepare-for-the-istio-certified-associate-ica-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/20.png"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It is fucking hard.&lt;/li&gt;
+&lt;li&gt;Questions are tricky, really really! You need to read it really carefully.&lt;/li&gt;
+&lt;li&gt;Since English is not native language of mine, I failed to understand 1 question xD&lt;/li&gt;
+&lt;li&gt;Be careful with uncommon question related to topic: &lt;code&gt;BIG TCP&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Some question related to Egress Gateway, you can not have both interface and egress IP together&lt;/li&gt;
+&lt;li&gt;CLI commands I thought it was easy, but it is not.&lt;/li&gt;
+&lt;li&gt;I failed the first time with score 73/100 (pass score is 75), so it is fine when you failed for the first time! &lt;/li&gt;
+&lt;li&gt;Why it is hard? The retake I scored 80/100 and question is not the same as last exam xDDDD&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="cilium"/><category term="certification"/><category term="linux-foundation"/><category term="cca"/><category term="ebpf"/><category term="kubernetes"/><category term="networking"/></entry><entry><title>[WIP] Prepare for the Istio Certified Associate (ICA) Exam</title><link href="https://blackmetalz.github.io/wip-prepare-for-the-istio-certified-associate-ica-exam.html" rel="alternate"/><published>2025-12-21T00:00:00+07:00</published><updated>2025-12-21T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-21:/wip-prepare-for-the-istio-certified-associate-ica-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/20.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Istio Certified Associate (ICA) Overview&lt;/h1&gt;
 &lt;h3&gt;1. Service Mesh Fundamentals&lt;/h3&gt;
