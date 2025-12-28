@@ -370,6 +370,34 @@
 <span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9080</span>
 </code></pre></div>
 
+<p>Small reminder for you and for me, if you have been learning in Cilium or K8S modern technical Gateway API. You will notice and ask if they are the same?</p>
+<p>In fact, they are the same for concept, they are all config, they need a real proxy (Envoy/Cilium/Nginx) behind to handle traffic. Here is a little comparison:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Component</th>
+<th style="text-align: left;">K8s Gateway API</th>
+<th style="text-align: left;">Istio Gateway</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Listener</strong></td>
+<td style="text-align: left;">Gateway</td>
+<td style="text-align: left;">Gateway (included host, TLS)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Routing</strong></td>
+<td style="text-align: left;">HTTPRoute</td>
+<td style="text-align: left;">VirtualService</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Selector</strong></td>
+<td style="text-align: left;"><code>gatewayClassName</code></td>
+<td style="text-align: left;"><code>selector: istio: ingressgateway</code></td>
+</tr>
+</tbody>
+</table>
 <p><strong>Egress Gateway (North-South Traffic OUT):</strong> Just need to memorize syntax, I will have a section explain this below with <code>ServiceEntry</code> and <code>VirtualService</code> with Egress Gateway together to see how it works!</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gateway</span>
@@ -647,7 +675,7 @@
 </ul>
 <p>Those conditions are AND, if one not matching, then it will be denied.</p>
 <p>Why use SPIFFE ID: because mTLS cert of each pod this identity, when traffic arrived, server sidecar extract identity from cert -&gt; match with <code>principals</code></p>
-<p>Check identity của pod:</p>
+<p>Check identity of pod:</p>
 <div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">istioctl proxy-config secret &lt;pod&gt; -o json | grep spiffe</span>
 </code></pre></div>
 
@@ -757,7 +785,7 @@
 <p>Exam Note: <code>RequestAuthentication</code> alone doesn't block requests not having JWT</p>
 <ul>
 <li>Have invalid JWT --&gt; 401!</li>
-<li>Do not have JWT --&gt; Still pass!</li>
+<li>Do not have JWT --&gt; Still pass! (Istio is 'fail-open' regarding authorization. If no policies exist, traffic is allowed)</li>
 </ul>
 <blockquote>
 <p><strong>Key Point:</strong> RequestAuthentication only <strong>validates</strong> tokens. To <strong>require</strong> tokens, combine with AuthorizationPolicy.</p>
@@ -862,7 +890,7 @@
 <hr>
 <h3>9. ServiceEntry &amp; WorkloadEntry</h3>
 <p><em>Domain: Traffic Management</em></p>
-<p>Connect mesh services to external services or VMs.</p>
+<p>Connect mesh services to external services or VMs. So it is pod virtualization for non-K8s workload, to apply mTLS, traffic policies like normal. Treated</p>
 <p><strong>ServiceEntry — Register External Services:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceEntry</span>
@@ -1245,6 +1273,23 @@ istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span
 <li><a href="https://istio.io/latest/docs/setup/upgrade/">Upgrade Guide</a></li>
 </ul>
 </blockquote>
+<h3>12. What is WorkloadGroup?</h3>
+<p>WorkloadGroup = Template to create WorkloadEntry, like Deployment for Pod xD</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">WorkloadGroup</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">legacy-app-group</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">legacy-app</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">serviceAccount</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">legacy-sa</span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">http</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
+</code></pre></div>
+
+<p>Use case: If multiple VMs share the same role (such as auto-scaling VMs), instead of creating each WorkloadEntry individually, the VMs joining the mesh will automatically create WorkloadEntry based on this template. Often used with istio-agent on VMs for auto-registration.</p>
 <hr>
 <h1>Istio Resource Quick Reference</h1>
 <h3>Traffic Management</h3>
@@ -1253,6 +1298,132 @@ istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span
 <p><img alt="alt text" src="images/2025/12/42.png"></p>
 <h3>Troubleshooting</h3>
 <p><img alt="alt text" src="images/2025/12/43.png"></p>
+<hr>
+<h1>Istio Resources Cheat Sheet</h1>
+<h2>Traffic Management</h2>
+<table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>VirtualService</strong></td>
+<td>WHERE - routing rules (host, path, headers → destination, retry, timeout, fault injection)</td>
+</tr>
+<tr>
+<td><strong>DestinationRule</strong></td>
+<td>HOW - policies after routing (subsets, LB algorithm, circuit breaker, connection pool, TLS)</td>
+</tr>
+<tr>
+<td><strong>Gateway</strong></td>
+<td>Entry/exit point for mesh (ingress/egress), define listeners + TLS</td>
+</tr>
+<tr>
+<td><strong>ServiceEntry</strong></td>
+<td>Register external service into mesh registry</td>
+</tr>
+<tr>
+<td><strong>WorkloadEntry</strong></td>
+<td>Register non-K8s workload (VM) into mesh</td>
+</tr>
+<tr>
+<td><strong>WorkloadGroup</strong></td>
+<td>Template for WorkloadEntry (like Deployment for Pod)</td>
+</tr>
+<tr>
+<td><strong>Sidecar</strong></td>
+<td>Config sidecar scope (limit egress hosts, reduce memory)</td>
+</tr>
+<tr>
+<td><strong>ProxyConfig</strong></td>
+<td>Tune Envoy proxy settings (concurrency, tracing)</td>
+</tr>
+</tbody>
+</table>
+<h2>Security</h2>
+<table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PeerAuthentication</strong></td>
+<td>Server-side mTLS policy (STRICT/PERMISSIVE/DISABLE)</td>
+</tr>
+<tr>
+<td><strong>RequestAuthentication</strong></td>
+<td>JWT validation (issuer, jwksUri, audiences)</td>
+</tr>
+<tr>
+<td><strong>AuthorizationPolicy</strong></td>
+<td>Access control (ALLOW/DENY/CUSTOM based on source, operation, conditions)</td>
+</tr>
+</tbody>
+</table>
+<h2>Extensibility</h2>
+<table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>EnvoyFilter</strong></td>
+<td>Low-level Envoy config patching</td>
+</tr>
+<tr>
+<td><strong>WasmPlugin</strong></td>
+<td>Extend Envoy with custom WASM modules</td>
+</tr>
+<tr>
+<td><strong>Telemetry</strong></td>
+<td>Config metrics, logs, tracing behavior</td>
+</tr>
+</tbody>
+</table>
+<h2>Key Combos</h2>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Resources</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ingress</td>
+<td><code>Gateway</code> + <code>VirtualService</code></td>
+</tr>
+<tr>
+<td>Egress</td>
+<td><code>ServiceEntry</code> + <code>Gateway</code> + <code>VirtualService</code></td>
+</tr>
+<tr>
+<td>mTLS enforce</td>
+<td><code>PeerAuthentication</code></td>
+</tr>
+<tr>
+<td>JWT required</td>
+<td><code>RequestAuthentication</code> + <code>AuthorizationPolicy</code></td>
+</tr>
+<tr>
+<td>Traffic splitting</td>
+<td><code>VirtualService</code> + <code>DestinationRule</code> (subsets)</td>
+</tr>
+<tr>
+<td>External VM</td>
+<td><code>WorkloadEntry</code> + <code>ServiceEntry</code></td>
+</tr>
+</tbody>
+</table>
 <hr>
 <h1>Common istioctl Commands Cheat Sheet</h1>
 <div class="highlight"><pre><span></span><code><span class="c1"># ============ INSTALLATION ============</span>
@@ -1299,16 +1470,6 @@ istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span
 <li><a href="https://training.linuxfoundation.org/certification/istio-certified-associate-ica/">ICA Exam Curriculum</a></li>
 <li><a href="https://github.com/istio/istio/tree/master/samples">Istio GitHub Examples</a></li>
 </ul>
-<hr>
-<h1>Honest Recommendation</h1>
-<ul>
-<li>The ICA exam is <strong>performance-based</strong>, meaning you'll work on a real Kubernetes cluster with Istio installed. Hands-on practice is essential.</li>
-<li>Focus heavily on <strong>Traffic Management (35%)</strong> — it's the largest domain and covers VirtualService, DestinationRule, and Gateway configurations.</li>
-<li>Use <code>istioctl</code> commands extensively during practice — they're your best friend for both installation and troubleshooting.</li>
-<li>Read the official Istio docs multiple times. The exam questions are often directly based on concepts explained there.</li>
-<li>Practice the relationship between resources: Gateway → VirtualService → DestinationRule.</li>
-</ul>
-<p><a href="https://istio.io/latest/docs/">https://istio.io/latest/docs/</a></p>
 <hr>
 <h1>My Secret Weapon: Mock Exam</h1>
 <p>After absorbing all the concepts above, there's one more crucial step before you're truly exam-ready: <strong>practice with mock exams</strong>.</p>
