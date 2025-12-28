@@ -267,6 +267,21 @@
 <span class="w">        </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v3</span>
 </code></pre></div>
 
+<p><strong>Summary</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># DestinationRule define subset</span>
+<span class="nt">subsets</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+
+<span class="c1"># VirtualService route to that subset </span>
+<span class="nt">route</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-svc</span>
+<span class="w">    </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w">  </span><span class="c1"># refer to DR</span>
+</code></pre></div>
+
+<p><code>VirtualService</code> and <code>DestinationRule</code> are namespace-scoped. But can be reference cross-namespace by FQDN <code>my-svc.other-namespace.svc.cluster.local</code> in <code>host</code> field!</p>
 <blockquote>
 <p><strong>Key Point:</strong> VirtualService references subsets defined in DestinationRule. Always create DestinationRule <strong>before</strong> or <strong>together with</strong> VirtualService.</p>
 <p><strong>References:</strong></p>
@@ -337,25 +352,6 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Egress Gateway (North-South Traffic OUT):</strong></p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gateway</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">istio-egressgateway</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">istio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">egressgateway</span>
-<span class="w">  </span><span class="nt">servers</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tls</span>
-<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TLS</span>
-<span class="w">      </span><span class="nt">hosts</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;external-api.example.com&quot;</span>
-<span class="w">      </span><span class="nt">tls</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PASSTHROUGH</span>
-</code></pre></div>
-
 <p><strong>Connect Gateway to VirtualService:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
@@ -372,6 +368,25 @@
 <span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">productpage</span>
 <span class="w">            </span><span class="nt">port</span><span class="p">:</span>
 <span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9080</span>
+</code></pre></div>
+
+<p><strong>Egress Gateway (North-South Traffic OUT):</strong> Just need to memorize syntax, I will have a section explain this below with <code>ServiceEntry</code> and <code>VirtualService</code> with Egress Gateway together to see how it works!</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gateway</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">istio-egressgateway</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">istio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">egressgateway</span>
+<span class="w">  </span><span class="nt">servers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tls</span>
+<span class="w">        </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TLS</span>
+<span class="w">      </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;external-api.example.com&quot;</span>
+<span class="w">      </span><span class="nt">tls</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PASSTHROUGH</span>
 </code></pre></div>
 
 <blockquote>
@@ -511,7 +526,7 @@
 <span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">STRICT</span>
 </code></pre></div>
 
-<p><strong>Workload-level mTLS:</strong></p>
+<p><strong>Workload-level mTLS:</strong> The guard decides to accept or reject traffic. With STRICT, it said: I only accept TLS, plaintext will get rejected! Not related to anything client-side!</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PeerAuthentication</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -522,10 +537,10 @@
 <span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span><span class="w">                     </span><span class="c1"># Only applies to reviews service</span>
 <span class="w">  </span><span class="nt">mtls</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">STRICT</span>
+<span class="w">    </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">STRICT</span><span class="w">                       </span><span class="c1"># All port requires mTLS</span>
 <span class="w">  </span><span class="nt">portLevelMtls</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">8080</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PERMISSIVE</span><span class="w">                 </span><span class="c1"># Port-specific override</span>
+<span class="w">      </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PERMISSIVE</span><span class="w">                 </span><span class="c1"># Port-specific override that allow both mTLS and plaintext</span>
 </code></pre></div>
 
 <p><strong>DestinationRule TLS Settings (Client-side):</strong></p>
@@ -613,6 +628,35 @@
 <span class="w">          </span><span class="nt">values</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;valid-token&quot;</span><span class="p p-Indicator">]</span>
 </code></pre></div>
 
+<p>You will be thinking WTF is this? So I will start explain it now xD</p>
+<p><code>principals</code> is SPIFFE ID (A SPIFFE ID is a string that uniquely and specifically identifies a workload)</p>
+<div class="highlight"><pre><span></span><code>cluster.local/ns/production/sa/frontend
+     │          │      │      │    │
+     │          │      │      │    └── ServiceAccount name
+     │          │      │      └── &quot;sa&quot; = service account
+     │          │      └── Namespace name
+     │          └── &quot;ns&quot; = namespace
+     └── Trust domain (default cluster.local)
+</code></pre></div>
+
+<p>Read this rule by this following steps: Only allow request into pod <code>app: productpage</code> when</p>
+<ul>
+<li>from: client use serviceAccount <code>frontend</code> in namespace <code>production</code></li>
+<li>to: Method <code>GET</code>, path <code>/api/*</code></li>
+<li>when: Header <code>x-token: valid-token</code></li>
+</ul>
+<p>Those conditions are AND, if one not matching, then it will be denied.</p>
+<p>Why use SPIFFE ID: because mTLS cert of each pod this identity, when traffic arrived, server sidecar extract identity from cert -&gt; match with <code>principals</code></p>
+<p>Check identity của pod:</p>
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">istioctl proxy-config secret &lt;pod&gt; -o json | grep spiffe</span>
+</code></pre></div>
+
+<p>Short forms for exam:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">principals</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;cluster.local/ns/production/sa/frontend&quot;</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># exact SA</span>
+<span class="nt">principals</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;cluster.local/ns/production/sa/*&quot;</span><span class="p p-Indicator">]</span><span class="w">         </span><span class="c1"># any SA in ns</span>
+<span class="nt">namespaces</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;production&quot;</span><span class="p p-Indicator">]</span><span class="w">                                </span><span class="c1"># simpler, same ns check</span>
+</code></pre></div>
+
 <p><strong>Deny Specific Traffic:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AuthorizationPolicy</span>
@@ -624,8 +668,8 @@
 <span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">ipBlocks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;10.0.0.0/8&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">            </span><span class="nt">notIpBlocks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;10.0.1.0/24&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">            </span><span class="nt">ipBlocks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;10.0.0.0/8&quot;</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># Deny this</span>
+<span class="w">            </span><span class="nt">notIpBlocks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;10.0.1.0/24&quot;</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># But except this xD (whitelist)</span>
 </code></pre></div>
 
 <p><strong>Policy Evaluation Order:</strong></p>
@@ -647,7 +691,7 @@
 <hr>
 <h3>7. RequestAuthentication (JWT Validation)</h3>
 <p><em>Domain: Securing Workloads</em></p>
-<p>Validate JWT tokens at the mesh edge.</p>
+<p>Validate JWT tokens at the mesh edge. <code>RequestAuthentication</code> validate JWT token</p>
 <p><strong>Basic JWT Validation:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RequestAuthentication</span>
@@ -659,12 +703,12 @@
 <span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">productpage</span>
 <span class="w">  </span><span class="nt">jwtRules</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">issuer</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth.example.com&quot;</span>
-<span class="w">      </span><span class="nt">jwksUri</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth.example.com/.well-known/jwks.json&quot;</span>
-<span class="w">      </span><span class="nt">audiences</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">issuer</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth.example.com&quot;</span><span class="w"> </span><span class="c1"># JWT must have iss claim equal to this!</span>
+<span class="w">      </span><span class="nt">jwksUri</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth.example.com/.well-known/jwks.json&quot;</span><span class="w"> </span><span class="c1"># Endpoint get public keys to verify signature</span>
+<span class="w">      </span><span class="nt">audiences</span><span class="p">:</span><span class="w"> </span><span class="c1"># JWT must have `aud` claim match</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;bookinfo-app&quot;</span>
 <span class="w">      </span><span class="nt">forwardOriginalToken</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">       </span><span class="c1"># Forward JWT to upstream</span>
-<span class="w">      </span><span class="nt">outputPayloadToHeader</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x-jwt-payload</span>
+<span class="w">      </span><span class="nt">outputPayloadToHeader</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x-jwt-payload</span><span class="w"> </span><span class="c1"># Decode payload -&gt; send into header x-jwt-payload</span>
 </code></pre></div>
 
 <p><strong>Multiple Issuers:</strong></p>
@@ -680,7 +724,7 @@
 <span class="w">      </span><span class="nt">jwksUri</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://auth0.example.com/.well-known/jwks.json&quot;</span>
 </code></pre></div>
 
-<p><strong>Combine with AuthorizationPolicy:</strong></p>
+<p><strong>Combine with AuthorizationPolicy:</strong> To enforce JWT, it must be combined with <code>AuthorizationPolicy</code></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># First: Validate JWT</span>
 <span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RequestAuthentication</span>
@@ -707,9 +751,14 @@
 <span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">from</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">requestPrincipals</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;https://auth.example.com/*&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">            </span><span class="nt">requestPrincipals</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;https://auth.example.com/*&quot;</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># Must have valid JWT</span>
 </code></pre></div>
 
+<p>Exam Note: <code>RequestAuthentication</code> alone doesn't block requests not having JWT</p>
+<ul>
+<li>Have invalid JWT --&gt; 401!</li>
+<li>Do not have JWT --&gt; Still pass!</li>
+</ul>
 <blockquote>
 <p><strong>Key Point:</strong> RequestAuthentication only <strong>validates</strong> tokens. To <strong>require</strong> tokens, combine with AuthorizationPolicy.</p>
 <p><strong>References:</strong></p>

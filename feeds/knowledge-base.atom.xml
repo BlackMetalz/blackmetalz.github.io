@@ -1673,6 +1673,21 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;v3&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;&lt;strong&gt;Summary&lt;/strong&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# DestinationRule define subset&lt;/span&gt;
+&lt;span class="nt"&gt;subsets&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;v1&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;labels&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;v1&lt;/span&gt;
+
+&lt;span class="c1"&gt;# VirtualService route to that subset &lt;/span&gt;
+&lt;span class="nt"&gt;route&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;destination&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;host&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;my-svc&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;subset&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;v1&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="c1"&gt;# refer to DR&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;VirtualService&lt;/code&gt; and &lt;code&gt;DestinationRule&lt;/code&gt; are namespace-scoped. But can be reference cross-namespace by FQDN &lt;code&gt;my-svc.other-namespace.svc.cluster.local&lt;/code&gt; in &lt;code&gt;host&lt;/code&gt; field!&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;Key Point:&lt;/strong&gt; VirtualService references subsets defined in DestinationRule. Always create DestinationRule &lt;strong&gt;before&lt;/strong&gt; or &lt;strong&gt;together with&lt;/strong&gt; VirtualService.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
@@ -1743,25 +1758,6 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;Egress Gateway (North-South Traffic OUT):&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1beta1&lt;/span&gt;
-&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;Gateway&lt;/span&gt;
-&lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;istio-egressgateway&lt;/span&gt;
-&lt;span class="nt"&gt;spec&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;selector&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;istio&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;egressgateway&lt;/span&gt;
-&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;servers&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;port&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;number&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;443&lt;/span&gt;
-&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;tls&lt;/span&gt;
-&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;protocol&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;TLS&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;hosts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;external-api.example.com&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;tls&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;mode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;PASSTHROUGH&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 &lt;p&gt;&lt;strong&gt;Connect Gateway to VirtualService:&lt;/strong&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;VirtualService&lt;/span&gt;
@@ -1778,6 +1774,25 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;host&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;productpage&lt;/span&gt;
 &lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;port&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;              &lt;/span&gt;&lt;span class="nt"&gt;number&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;9080&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Egress Gateway (North-South Traffic OUT):&lt;/strong&gt; Just need to memorize syntax, I will have a section explain this below with &lt;code&gt;ServiceEntry&lt;/code&gt; and &lt;code&gt;VirtualService&lt;/code&gt; with Egress Gateway together to see how it works!&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1beta1&lt;/span&gt;
+&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;Gateway&lt;/span&gt;
+&lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;istio-egressgateway&lt;/span&gt;
+&lt;span class="nt"&gt;spec&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;selector&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;istio&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;egressgateway&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;servers&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;port&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;number&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;443&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;tls&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;protocol&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;TLS&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;hosts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;external-api.example.com&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;tls&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;mode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;PASSTHROUGH&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;blockquote&gt;
@@ -1917,7 +1932,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;mode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;STRICT&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;strong&gt;Workload-level mTLS:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Workload-level mTLS:&lt;/strong&gt; The guard decides to accept or reject traffic. With STRICT, it said: I only accept TLS, plaintext will get rejected! Not related to anything client-side!&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;security.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;PeerAuthentication&lt;/span&gt;
 &lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -1928,10 +1943,10 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;matchLabels&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;app&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;reviews&lt;/span&gt;&lt;span class="w"&gt;                     &lt;/span&gt;&lt;span class="c1"&gt;# Only applies to reviews service&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;mtls&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;mode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;STRICT&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;mode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;STRICT&lt;/span&gt;&lt;span class="w"&gt;                       &lt;/span&gt;&lt;span class="c1"&gt;# All port requires mTLS&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;portLevelMtls&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;8080&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;mode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;PERMISSIVE&lt;/span&gt;&lt;span class="w"&gt;                 &lt;/span&gt;&lt;span class="c1"&gt;# Port-specific override&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;mode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;PERMISSIVE&lt;/span&gt;&lt;span class="w"&gt;                 &lt;/span&gt;&lt;span class="c1"&gt;# Port-specific override that allow both mTLS and plaintext&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;DestinationRule TLS Settings (Client-side):&lt;/strong&gt;&lt;/p&gt;
@@ -2019,6 +2034,35 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="nt"&gt;values&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;valid-token&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;]&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;You will be thinking WTF is this? So I will start explain it now xD&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;principals&lt;/code&gt; is SPIFFE ID (A SPIFFE ID is a string that uniquely and specifically identifies a workload)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cluster.local/ns/production/sa/frontend
+     │          │      │      │    │
+     │          │      │      │    └── ServiceAccount name
+     │          │      │      └── &amp;quot;sa&amp;quot; = service account
+     │          │      └── Namespace name
+     │          └── &amp;quot;ns&amp;quot; = namespace
+     └── Trust domain (default cluster.local)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Read this rule by this following steps: Only allow request into pod &lt;code&gt;app: productpage&lt;/code&gt; when&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;from: client use serviceAccount &lt;code&gt;frontend&lt;/code&gt; in namespace &lt;code&gt;production&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;to: Method &lt;code&gt;GET&lt;/code&gt;, path &lt;code&gt;/api/*&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;when: Header &lt;code&gt;x-token: valid-token&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Those conditions are AND, if one not matching, then it will be denied.&lt;/p&gt;
+&lt;p&gt;Why use SPIFFE ID: because mTLS cert of each pod this identity, when traffic arrived, server sidecar extract identity from cert -&amp;gt; match with &lt;code&gt;principals&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Check identity của pod:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;istioctl proxy-config secret &amp;lt;pod&amp;gt; -o json | grep spiffe&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Short forms for exam:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;principals&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;cluster.local/ns/production/sa/frontend&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;]&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="c1"&gt;# exact SA&lt;/span&gt;
+&lt;span class="nt"&gt;principals&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;cluster.local/ns/production/sa/*&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;]&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="c1"&gt;# any SA in ns&lt;/span&gt;
+&lt;span class="nt"&gt;namespaces&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;production&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;]&lt;/span&gt;&lt;span class="w"&gt;                                &lt;/span&gt;&lt;span class="c1"&gt;# simpler, same ns check&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;&lt;strong&gt;Deny Specific Traffic:&lt;/strong&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;security.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;AuthorizationPolicy&lt;/span&gt;
@@ -2030,8 +2074,8 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;rules&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;from&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;source&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;ipBlocks&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10.0.0.0/8&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;]&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;notIpBlocks&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10.0.1.0/24&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;]&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;ipBlocks&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10.0.0.0/8&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Deny this&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;notIpBlocks&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10.0.1.0/24&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# But except this xD (whitelist)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;Policy Evaluation Order:&lt;/strong&gt;&lt;/p&gt;
@@ -2053,7 +2097,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;hr&gt;
 &lt;h3&gt;7. RequestAuthentication (JWT Validation)&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;Domain: Securing Workloads&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;Validate JWT tokens at the mesh edge.&lt;/p&gt;
+&lt;p&gt;Validate JWT tokens at the mesh edge. &lt;code&gt;RequestAuthentication&lt;/code&gt; validate JWT token&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Basic JWT Validation:&lt;/strong&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;security.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;RequestAuthentication&lt;/span&gt;
@@ -2065,12 +2109,12 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;matchLabels&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;app&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;productpage&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;jwtRules&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;issuer&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;https://auth.example.com&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;jwksUri&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;https://auth.example.com/.well-known/jwks.json&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;audiences&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;issuer&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;https://auth.example.com&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# JWT must have iss claim equal to this!&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;jwksUri&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;https://auth.example.com/.well-known/jwks.json&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Endpoint get public keys to verify signature&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;audiences&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# JWT must have `aud` claim match&lt;/span&gt;
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;bookinfo-app&amp;quot;&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;forwardOriginalToken&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;true&lt;/span&gt;&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="c1"&gt;# Forward JWT to upstream&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;outputPayloadToHeader&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;x-jwt-payload&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;outputPayloadToHeader&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;x-jwt-payload&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Decode payload -&amp;gt; send into header x-jwt-payload&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;Multiple Issuers:&lt;/strong&gt;&lt;/p&gt;
@@ -2086,7 +2130,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;jwksUri&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;https://auth0.example.com/.well-known/jwks.json&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;strong&gt;Combine with AuthorizationPolicy:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Combine with AuthorizationPolicy:&lt;/strong&gt; To enforce JWT, it must be combined with &lt;code&gt;AuthorizationPolicy&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# First: Validate JWT&lt;/span&gt;
 &lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;security.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;RequestAuthentication&lt;/span&gt;
@@ -2113,9 +2157,14 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;rules&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;from&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;source&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;requestPrincipals&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;https://auth.example.com/*&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;]&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;requestPrincipals&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;https://auth.example.com/*&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Must have valid JWT&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;Exam Note: &lt;code&gt;RequestAuthentication&lt;/code&gt; alone doesn't block requests not having JWT&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Have invalid JWT --&amp;gt; 401!&lt;/li&gt;
+&lt;li&gt;Do not have JWT --&amp;gt; Still pass!&lt;/li&gt;
+&lt;/ul&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;Key Point:&lt;/strong&gt; RequestAuthentication only &lt;strong&gt;validates&lt;/strong&gt; tokens. To &lt;strong&gt;require&lt;/strong&gt; tokens, combine with AuthorizationPolicy.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
