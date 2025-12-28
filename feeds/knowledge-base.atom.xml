@@ -1574,8 +1574,8 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;L4 mTLS&lt;/td&gt;
-&lt;td&gt;Support&lt;/td&gt;
-&lt;td&gt;Support (ztunnel)&lt;/td&gt;
+&lt;td&gt;Supported&lt;/td&gt;
+&lt;td&gt;Supported (ztunnel)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;L7 features&lt;/td&gt;
@@ -2082,7 +2082,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;p&gt;Those conditions are AND, if one not matching, then it will be denied.&lt;/p&gt;
 &lt;p&gt;Why use SPIFFE ID: because mTLS cert of each pod this identity, when traffic arrived, server sidecar extract identity from cert -&amp;gt; match with &lt;code&gt;principals&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;Check identity of pod:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;istioctl proxy-config secret &amp;lt;pod&amp;gt; -o json | grep spiffe&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;istioctl proxy-config secret &amp;lt;pod&amp;gt; -o json -n &amp;lt;namespace&amp;gt; | grep spiffe&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Short forms for exam:&lt;/p&gt;
@@ -2191,7 +2191,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;p&gt;Exam Note: &lt;code&gt;RequestAuthentication&lt;/code&gt; alone doesn't block requests not having JWT&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Have invalid JWT --&amp;gt; 401!&lt;/li&gt;
-&lt;li&gt;Do not have JWT --&amp;gt; Still pass! (Istio is 'fail-open' regarding authorization. If no policies exist, traffic is allowed)&lt;/li&gt;
+&lt;li&gt;Do not have JWT --&amp;gt; Still pass! (RequestAuthentication alone is 'fail-open' - it only validates JWTs that ARE present, doesn't require them)&lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;Key Point:&lt;/strong&gt; RequestAuthentication only &lt;strong&gt;validates&lt;/strong&gt; tokens. To &lt;strong&gt;require&lt;/strong&gt; tokens, combine with AuthorizationPolicy.&lt;/p&gt;
@@ -2296,7 +2296,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt
 &lt;hr&gt;
 &lt;h3&gt;9. ServiceEntry &amp;amp; WorkloadEntry&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;Domain: Traffic Management&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;Connect mesh services to external services or VMs. So it is pod virtualization for non-K8s workload, to apply mTLS, traffic policies like normal. Treated&lt;/p&gt;
+&lt;p&gt;Connect mesh services to external services or VMs. So it is pod virtualization for non-K8s workload, to apply mTLS, traffic policies like normal.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;ServiceEntry — Register External Services:&lt;/strong&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;ServiceEntry&lt;/span&gt;
