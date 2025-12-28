@@ -1300,7 +1300,7 @@ istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span
 <p><img alt="alt text" src="images/2025/12/43.png"></p>
 <hr>
 <h1>Istio Resources Cheat Sheet</h1>
-<h2>Traffic Management</h2>
+<h3>Traffic Management</h3>
 <table>
 <thead>
 <tr>
@@ -1343,7 +1343,7 @@ istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span
 </tr>
 </tbody>
 </table>
-<h2>Security</h2>
+<h3>Security</h3>
 <table>
 <thead>
 <tr>
@@ -1366,7 +1366,7 @@ istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span
 </tr>
 </tbody>
 </table>
-<h2>Extensibility</h2>
+<h3>Extensibility</h3>
 <table>
 <thead>
 <tr>
@@ -1389,7 +1389,7 @@ istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span
 </tr>
 </tbody>
 </table>
-<h2>Key Combos</h2>
+<h3>Key Combos</h3>
 <table>
 <thead>
 <tr>
@@ -1425,44 +1425,173 @@ istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span
 </tbody>
 </table>
 <hr>
-<h1>Common istioctl Commands Cheat Sheet</h1>
-<div class="highlight"><pre><span></span><code><span class="c1"># ============ INSTALLATION ============</span>
-istioctl<span class="w"> </span>install<span class="w"> </span>--set<span class="w"> </span><span class="nv">profile</span><span class="o">=</span>demo
-istioctl<span class="w"> </span>verify-install
-istioctl<span class="w"> </span>version
-istioctl<span class="w"> </span>profile<span class="w"> </span>list
-istioctl<span class="w"> </span>profile<span class="w"> </span>dump<span class="w"> </span>&lt;profile&gt;
-
-<span class="c1"># ============ ANALYSIS ============</span>
-istioctl<span class="w"> </span>analyze
-istioctl<span class="w"> </span>analyze<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;
-istioctl<span class="w"> </span>analyze<span class="w"> </span>&lt;file.yaml&gt;
-
-<span class="c1"># ============ PROXY DEBUG ============</span>
-istioctl<span class="w"> </span>proxy-status
-istioctl<span class="w"> </span>proxy-config<span class="w"> </span>all<span class="w"> </span>&lt;pod&gt;
-istioctl<span class="w"> </span>proxy-config<span class="w"> </span>routes<span class="w"> </span>&lt;pod&gt;
-istioctl<span class="w"> </span>proxy-config<span class="w"> </span>clusters<span class="w"> </span>&lt;pod&gt;
-istioctl<span class="w"> </span>proxy-config<span class="w"> </span>listeners<span class="w"> </span>&lt;pod&gt;
-istioctl<span class="w"> </span>proxy-config<span class="w"> </span>endpoints<span class="w"> </span>&lt;pod&gt;
-istioctl<span class="w"> </span>proxy-config<span class="w"> </span>log<span class="w"> </span>&lt;pod&gt;<span class="w"> </span>--level<span class="w"> </span>debug
-
-<span class="c1"># ============ DASHBOARDS ============</span>
-istioctl<span class="w"> </span>dashboard<span class="w"> </span>kiali
-istioctl<span class="w"> </span>dashboard<span class="w"> </span>grafana
-istioctl<span class="w"> </span>dashboard<span class="w"> </span>jaeger
-istioctl<span class="w"> </span>dashboard<span class="w"> </span>envoy<span class="w"> </span>&lt;pod&gt;
-
-<span class="c1"># ============ INJECTION ============</span>
-kubectl<span class="w"> </span>label<span class="w"> </span>ns<span class="w"> </span>&lt;ns&gt;<span class="w"> </span>istio-injection<span class="o">=</span>enabled
-istioctl<span class="w"> </span>kube-inject<span class="w"> </span>-f<span class="w"> </span>&lt;file.yaml&gt;<span class="w"> </span><span class="p">|</span><span class="w"> </span>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>-
-
-<span class="c1"># ============ UPGRADE ============</span>
-istioctl<span class="w"> </span>upgrade
-istioctl<span class="w"> </span>install<span class="w"> </span>--set<span class="w"> </span><span class="nv">revision</span><span class="o">=</span>&lt;rev&gt;
-istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span class="w"> </span>&lt;rev&gt;
-</code></pre></div>
-
+<h1>Istio CLI Cheat Sheet</h1>
+<h3>Installation</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>istioctl install --set profile=demo</code></td>
+<td>Install Istio with specified profile (demo/default/minimal/ambient)</td>
+</tr>
+<tr>
+<td><code>istioctl verify-install</code></td>
+<td>Verify Istio installation is correct and healthy</td>
+</tr>
+<tr>
+<td><code>istioctl version</code></td>
+<td>Show client and control plane versions</td>
+</tr>
+<tr>
+<td><code>istioctl profile list</code></td>
+<td>List available installation profiles</td>
+</tr>
+<tr>
+<td><code>istioctl profile dump &lt;profile&gt;</code></td>
+<td>Show full configuration of a profile</td>
+</tr>
+</tbody>
+</table>
+<h3>Analysis (Configuration Validation)</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>istioctl analyze</code></td>
+<td>Validate Istio configuration for errors/warnings (misconfigs, missing resources)</td>
+</tr>
+<tr>
+<td><code>istioctl analyze -n &lt;namespace&gt;</code></td>
+<td>Analyze configuration in specific namespace</td>
+</tr>
+<tr>
+<td><code>istioctl analyze &lt;file.yaml&gt;</code></td>
+<td>Validate config file before applying</td>
+</tr>
+</tbody>
+</table>
+<h3>Proxy Debug (Envoy Sidecar Inspection)</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>istioctl proxy-status</code></td>
+<td>Show sync status of all sidecars with control plane (SYNCED/NOT SENT/STALE)</td>
+</tr>
+<tr>
+<td><code>istioctl proxy-config all &lt;pod&gt;</code></td>
+<td>Dump full Envoy config of a pod</td>
+</tr>
+<tr>
+<td><code>istioctl proxy-config routes &lt;pod&gt;</code></td>
+<td>Show route configuration (VirtualService applied)</td>
+</tr>
+<tr>
+<td><code>istioctl proxy-config clusters &lt;pod&gt;</code></td>
+<td>Show upstream clusters (DestinationRule applied)</td>
+</tr>
+<tr>
+<td><code>istioctl proxy-config listeners &lt;pod&gt;</code></td>
+<td>Show listeners (inbound/outbound ports)</td>
+</tr>
+<tr>
+<td><code>istioctl proxy-config endpoints &lt;pod&gt;</code></td>
+<td>Show endpoints Envoy knows about</td>
+</tr>
+<tr>
+<td><code>istioctl proxy-config log &lt;pod&gt; --level debug</code></td>
+<td>Change Envoy log level for debugging</td>
+</tr>
+</tbody>
+</table>
+<h3>Dashboards (Quick Access to Observability UIs)</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>istioctl dashboard kiali</code></td>
+<td>Open Kiali (service graph, mesh observability)</td>
+</tr>
+<tr>
+<td><code>istioctl dashboard grafana</code></td>
+<td>Open Grafana (metrics dashboards)</td>
+</tr>
+<tr>
+<td><code>istioctl dashboard jaeger</code></td>
+<td>Open Jaeger (distributed tracing)</td>
+</tr>
+<tr>
+<td><code>istioctl dashboard envoy &lt;pod&gt;</code></td>
+<td>Open Envoy admin UI for specific pod</td>
+</tr>
+</tbody>
+</table>
+<h3>Injection (Sidecar Management)</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kubectl label ns &lt;ns&gt; istio-injection=enabled</code></td>
+<td>Enable auto sidecar injection for namespace</td>
+</tr>
+<tr>
+<td><code>istioctl kube-inject -f &lt;file.yaml&gt; \| kubectl apply -f -</code></td>
+<td>Manual sidecar injection into manifest</td>
+</tr>
+</tbody>
+</table>
+<h3>Upgrade &amp; Uninstall</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>istioctl upgrade</code></td>
+<td>In-place upgrade Istio to new version</td>
+</tr>
+<tr>
+<td><code>istioctl install --set revision=&lt;rev&gt;</code></td>
+<td>Canary upgrade with revision label (e.g., 1-20-0)</td>
+</tr>
+<tr>
+<td><code>istioctl uninstall --revision &lt;rev&gt;</code></td>
+<td>Remove specific revision</td>
+</tr>
+<tr>
+<td><code>istioctl uninstall --purge</code></td>
+<td>Complete removal of Istio</td>
+</tr>
+</tbody>
+</table>
 <hr>
 <h1>Key Resources</h1>
 <ul>
