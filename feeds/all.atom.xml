@@ -2,6 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2025-12-31T00:00:00+07:00</updated><entry><title>Prepare for Linux Foundation Certified System Administrator (LFCS)</title><link href="https://blackmetalz.github.io/prepare-for-linux-foundation-certified-system-administrator-lfcs.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/prepare-for-linux-foundation-certified-system-administrator-lfcs.html</id><summary type="html"/><content type="html">&lt;h1&gt;Sections&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;Introduction&lt;/li&gt;
+&lt;li&gt;Where to practice&lt;/li&gt;
 &lt;li&gt;IO Redirection&lt;/li&gt;
 &lt;li&gt;LVM&lt;/li&gt;
 &lt;li&gt;Advanced Permissions&lt;/li&gt;
@@ -15,6 +16,11 @@
 &lt;hr&gt;
 &lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;Holy fuck, I lost basic, very, very much!&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1&gt;Where to practice&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://learn.kodekloud.com/user/courses/labs-linux-foundation-certified-system-administrator-lfcs/"&gt;Kodekloud Lab - Manage LVM&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;hr&gt;
 &lt;h1&gt;IO Redirection&lt;/h1&gt;
 &lt;p&gt;I think this is the most command I often used but never understand correctly, LOL. Yes, it is &lt;code&gt;2&amp;gt;&amp;amp;1&lt;/code&gt;. But no more, today I swear I will remember and understand it! So let's take an example:&lt;/p&gt;
@@ -69,11 +75,6 @@ bob@ubuntu-host&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/
 &lt;p&gt;To be honest, I rarely use LVM in OpenStack environments because my managed platforms are Elasticsearch, Kafka, which all support multiple disks. You know in the OpenStack environment, 1 volume 10 GB has 200 IOPS, but 2 volumes 5 GB have 400 IOPS. Same size but double IOPS, that is why I used multi disk.&lt;/p&gt;
 &lt;p&gt;But when it comes to MongoDB, it needs to use LVM since MongoDB doesn't support multi-disk. But It was a lab setup without document write back, so it is like fire and forget mode -.-&lt;/p&gt;
 &lt;p&gt;So that is a story for simple knowledge everyone remembers and understands, but not me xD. So this is "day one" instead of "one day"!&lt;/p&gt;
-&lt;h3&gt;Prerequisite&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Ubuntu 22/24 and package &lt;code&gt;lvm2&lt;/code&gt; installed&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://learn.kodekloud.com/user/courses/labs-linux-foundation-certified-system-administrator-lfcs/"&gt;Kodekloud Lab - Manage LVM&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
 &lt;h3&gt;Physical Volume (PV)&lt;/h3&gt;
 &lt;p&gt;They are physical volumes (P) like &lt;code&gt;/dev/sdb&lt;/code&gt; or disk partition &lt;code&gt;/dev/sda1&lt;/code&gt; you want to put it in LVM system.&lt;/p&gt;
 &lt;ul&gt;
@@ -551,7 +552,8 @@ openssl&lt;span class="w"&gt; &lt;/span&gt;rsa&lt;span class="w"&gt; &lt;/span&g
 &lt;li&gt;Or shortcut: &lt;code&gt;req -x509 -newkey&lt;/code&gt; (generate key + cert at once)&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h1&gt;Conclusion&lt;/h1&gt;
-&lt;p&gt;Passing this exam doesn't make me satisfied, I am satisfied with the progress, what I learned and remembered while preparing for this exam!&lt;/p&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="certification"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;Passing this exam doesn't make me satisfied, I am satisfied with the progress, what I learned and remembered while preparing for this exam!&lt;/p&gt;
+&lt;p&gt;Thanks to KodeKloud for providing good mock exams!&lt;/p&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="certification"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This document outlines the deployment of a Kubernetes v1.31.9 HA cluster on Ubuntu 24.04 using Kubespray v2.27.1.&lt;/p&gt;
 &lt;p&gt;Objective: Establish a robust lab environment with minimum requirements. It can be upgraded to production later by simply adding more worker nodes and migrating to dedicated master nodes.
 Topology: 3-node HA architecture (Control Plane, Etcd, and Worker roles on all nodes).&lt;/p&gt;
