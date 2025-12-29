@@ -432,8 +432,7 @@ sudo<span class="w"> </span>virsh<span class="w"> </span>autostart<span class="w
 </code></pre></div>
 
 <p>Create new VM with New Disk:</p>
-<div class="highlight"><pre><span></span><code><span class="sb">```</span>bash
-sudo<span class="w"> </span>virt-install<span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>virt-install<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--name<span class="w"> </span>myvm<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--memory<span class="w"> </span><span class="m">2048</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--vcpus<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
@@ -445,30 +444,23 @@ sudo<span class="w"> </span>virt-install<span class="w"> </span><span class="se"
 <span class="w">  </span>--noautoconsole
 </code></pre></div>
 
-<div class="highlight"><pre><span></span><code><span class="o">---</span>
-
-<span class="c1"># Others</span>
-
-<span class="c1">### Find process eating high IO</span>
-
-<span class="k">First</span><span class="w"> </span><span class="n">find</span><span class="w"> </span><span class="k">process</span><span class="w"> </span><span class="k">first</span><span class="o">:</span><span class="w"> </span><span class="n n-Quoted">`iotop`</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n n-Quoted">`pidstat -d 1`</span>
-
-<span class="c1">### SELinux</span>
-
-<span class="k">Get</span><span class="w"> </span><span class="k">current</span><span class="w"> </span><span class="n n-Quoted">`SELinux`</span><span class="w"> </span><span class="k">mode</span><span class="o">:</span><span class="w"> </span><span class="n n-Quoted">`getenforce`</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">more</span><span class="w"> </span><span class="n">detail</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n n-Quoted">`sestatus`</span>
-
-<span class="n n-Quoted">`</span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">bash</span>
-<span class="n n-Quoted">sestatus</span>
-<span class="n n-Quoted">SELinux status:                 enabled</span>
-<span class="n n-Quoted">SELinuxfs mount:                /sys/fs/selinux</span>
-<span class="n n-Quoted">SELinux root directory:         /etc/selinux</span>
-<span class="n n-Quoted">Loaded policy name:             default</span>
-<span class="n n-Quoted">Current mode:                   permissive</span>
-<span class="n n-Quoted">Mode from config file:          permissive</span>
-<span class="n n-Quoted">Policy MLS status:              enabled</span>
-<span class="n n-Quoted">Policy deny_unknown status:     allowed</span>
-<span class="n n-Quoted">Memory protection checking:     requested (insecure)</span>
-<span class="n n-Quoted">Max kernel policy version:      33</span>
+<hr>
+<h1>Others</h1>
+<h3>Find process eating high IO</h3>
+<p>First find process first: <code>iotop</code> or <code>pidstat -d 1</code></p>
+<h3>SELinux</h3>
+<p>Get current <code>SELinux</code> mode: <code>getenforce</code> or more detail with <code>sestatus</code></p>
+<div class="highlight"><pre><span></span><code>sestatus
+SELinux<span class="w"> </span>status:<span class="w">                 </span>enabled
+SELinuxfs<span class="w"> </span>mount:<span class="w">                </span>/sys/fs/selinux
+SELinux<span class="w"> </span>root<span class="w"> </span>directory:<span class="w">         </span>/etc/selinux
+Loaded<span class="w"> </span>policy<span class="w"> </span>name:<span class="w">             </span>default
+Current<span class="w"> </span>mode:<span class="w">                   </span>permissive
+Mode<span class="w"> </span>from<span class="w"> </span>config<span class="w"> </span>file:<span class="w">          </span>permissive
+Policy<span class="w"> </span>MLS<span class="w"> </span>status:<span class="w">              </span>enabled
+Policy<span class="w"> </span>deny_unknown<span class="w"> </span>status:<span class="w">     </span>allowed
+Memory<span class="w"> </span>protection<span class="w"> </span>checking:<span class="w">     </span>requested<span class="w"> </span><span class="o">(</span>insecure<span class="o">)</span>
+Max<span class="w"> </span>kernel<span class="w"> </span>policy<span class="w"> </span>version:<span class="w">      </span><span class="m">33</span>
 </code></pre></div>
 
 <p>Check if file that has the wrong SELinux type label: </p>

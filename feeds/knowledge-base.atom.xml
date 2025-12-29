@@ -353,8 +353,7 @@ sudo&lt;span class="w"&gt; &lt;/span&gt;virsh&lt;span class="w"&gt; &lt;/span&gt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Create new VM with New Disk:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="sb"&gt;```&lt;/span&gt;bash
-sudo&lt;span class="w"&gt; &lt;/span&gt;virt-install&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;virt-install&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;myvm&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;--memory&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2048&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;--vcpus&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
@@ -366,30 +365,23 @@ sudo&lt;span class="w"&gt; &lt;/span&gt;virt-install&lt;span class="w"&gt; &lt;/
 &lt;span class="w"&gt;  &lt;/span&gt;--noautoconsole
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="o"&gt;---&lt;/span&gt;
-
-&lt;span class="c1"&gt;# Others&lt;/span&gt;
-
-&lt;span class="c1"&gt;### Find process eating high IO&lt;/span&gt;
-
-&lt;span class="k"&gt;First&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;find&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;process&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;first&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n n-Quoted"&gt;`iotop`&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;or&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n n-Quoted"&gt;`pidstat -d 1`&lt;/span&gt;
-
-&lt;span class="c1"&gt;### SELinux&lt;/span&gt;
-
-&lt;span class="k"&gt;Get&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;current&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n n-Quoted"&gt;`SELinux`&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;mode&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n n-Quoted"&gt;`getenforce`&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;or&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;more&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;detail&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;with&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n n-Quoted"&gt;`sestatus`&lt;/span&gt;
-
-&lt;span class="n n-Quoted"&gt;`&lt;/span&gt;&lt;span class="n n-Quoted n-Quoted-Escape"&gt;``&lt;/span&gt;&lt;span class="n n-Quoted"&gt;bash&lt;/span&gt;
-&lt;span class="n n-Quoted"&gt;sestatus&lt;/span&gt;
-&lt;span class="n n-Quoted"&gt;SELinux status:                 enabled&lt;/span&gt;
-&lt;span class="n n-Quoted"&gt;SELinuxfs mount:                /sys/fs/selinux&lt;/span&gt;
-&lt;span class="n n-Quoted"&gt;SELinux root directory:         /etc/selinux&lt;/span&gt;
-&lt;span class="n n-Quoted"&gt;Loaded policy name:             default&lt;/span&gt;
-&lt;span class="n n-Quoted"&gt;Current mode:                   permissive&lt;/span&gt;
-&lt;span class="n n-Quoted"&gt;Mode from config file:          permissive&lt;/span&gt;
-&lt;span class="n n-Quoted"&gt;Policy MLS status:              enabled&lt;/span&gt;
-&lt;span class="n n-Quoted"&gt;Policy deny_unknown status:     allowed&lt;/span&gt;
-&lt;span class="n n-Quoted"&gt;Memory protection checking:     requested (insecure)&lt;/span&gt;
-&lt;span class="n n-Quoted"&gt;Max kernel policy version:      33&lt;/span&gt;
+&lt;hr&gt;
+&lt;h1&gt;Others&lt;/h1&gt;
+&lt;h3&gt;Find process eating high IO&lt;/h3&gt;
+&lt;p&gt;First find process first: &lt;code&gt;iotop&lt;/code&gt; or &lt;code&gt;pidstat -d 1&lt;/code&gt;&lt;/p&gt;
+&lt;h3&gt;SELinux&lt;/h3&gt;
+&lt;p&gt;Get current &lt;code&gt;SELinux&lt;/code&gt; mode: &lt;code&gt;getenforce&lt;/code&gt; or more detail with &lt;code&gt;sestatus&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sestatus
+SELinux&lt;span class="w"&gt; &lt;/span&gt;status:&lt;span class="w"&gt;                 &lt;/span&gt;enabled
+SELinuxfs&lt;span class="w"&gt; &lt;/span&gt;mount:&lt;span class="w"&gt;                &lt;/span&gt;/sys/fs/selinux
+SELinux&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;directory:&lt;span class="w"&gt;         &lt;/span&gt;/etc/selinux
+Loaded&lt;span class="w"&gt; &lt;/span&gt;policy&lt;span class="w"&gt; &lt;/span&gt;name:&lt;span class="w"&gt;             &lt;/span&gt;default
+Current&lt;span class="w"&gt; &lt;/span&gt;mode:&lt;span class="w"&gt;                   &lt;/span&gt;permissive
+Mode&lt;span class="w"&gt; &lt;/span&gt;from&lt;span class="w"&gt; &lt;/span&gt;config&lt;span class="w"&gt; &lt;/span&gt;file:&lt;span class="w"&gt;          &lt;/span&gt;permissive
+Policy&lt;span class="w"&gt; &lt;/span&gt;MLS&lt;span class="w"&gt; &lt;/span&gt;status:&lt;span class="w"&gt;              &lt;/span&gt;enabled
+Policy&lt;span class="w"&gt; &lt;/span&gt;deny_unknown&lt;span class="w"&gt; &lt;/span&gt;status:&lt;span class="w"&gt;     &lt;/span&gt;allowed
+Memory&lt;span class="w"&gt; &lt;/span&gt;protection&lt;span class="w"&gt; &lt;/span&gt;checking:&lt;span class="w"&gt;     &lt;/span&gt;requested&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;insecure&lt;span class="o"&gt;)&lt;/span&gt;
+Max&lt;span class="w"&gt; &lt;/span&gt;kernel&lt;span class="w"&gt; &lt;/span&gt;policy&lt;span class="w"&gt; &lt;/span&gt;version:&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;33&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Check if file that has the wrong SELinux type label: &lt;/p&gt;
