@@ -486,6 +486,25 @@ root@node01<span class="w"> </span>~<span class="w"> </span>➜<span class="w"> 
 </code></pre></div>
 
 <p>For Exam: <code>man netplan</code></p>
+<h3>Iptables ...</h3>
+<ul>
+<li>Redirect rule: redirects any IPv4 packet from the 10.5.5.0/24 CIDR range incoming on port 81 to another machine with the IP address 192.168.5.2 on port 80.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-A<span class="w"> </span>PREROUTING<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.5.5.0/24<span class="w"> </span>--dport<span class="w"> </span><span class="m">81</span><span class="w"> </span>-j<span class="w"> </span>DNAT<span class="w"> </span>--to-destination<span class="w"> </span><span class="m">192</span>.168.5.2:80
+</code></pre></div>
+
+<ul>
+<li>masquerading rule so that packets redirected from 10.5.5.0/24 have a way of getting back to that sender</li>
+</ul>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-A<span class="w"> </span>POSTROUTING<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.5.5.0/24<span class="w"> </span>-j<span class="w"> </span>MASQUERADE
+</code></pre></div>
+
+<ul>
+<li>Make it persistent:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>iptables-persistent
+</code></pre></div>
+
 <hr>
 
 

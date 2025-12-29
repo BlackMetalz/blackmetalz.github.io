@@ -407,6 +407,25 @@ root@node01&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;For Exam: &lt;code&gt;man netplan&lt;/code&gt;&lt;/p&gt;
+&lt;h3&gt;Iptables ...&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Redirect rule: redirects any IPv4 packet from the 10.5.5.0/24 CIDR range incoming on port 81 to another machine with the IP address 192.168.5.2 on port 80.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;iptables&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;nat&lt;span class="w"&gt; &lt;/span&gt;-A&lt;span class="w"&gt; &lt;/span&gt;PREROUTING&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;tcp&lt;span class="w"&gt; &lt;/span&gt;-s&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.5.5.0/24&lt;span class="w"&gt; &lt;/span&gt;--dport&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;81&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-j&lt;span class="w"&gt; &lt;/span&gt;DNAT&lt;span class="w"&gt; &lt;/span&gt;--to-destination&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;192&lt;/span&gt;.168.5.2:80
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;masquerading rule so that packets redirected from 10.5.5.0/24 have a way of getting back to that sender&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;iptables&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;nat&lt;span class="w"&gt; &lt;/span&gt;-A&lt;span class="w"&gt; &lt;/span&gt;POSTROUTING&lt;span class="w"&gt; &lt;/span&gt;-s&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.5.5.0/24&lt;span class="w"&gt; &lt;/span&gt;-j&lt;span class="w"&gt; &lt;/span&gt;MASQUERADE
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Make it persistent:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;iptables-persistent
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;hr&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="certification"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This document outlines the deployment of a Kubernetes v1.31.9 HA cluster on Ubuntu 24.04 using Kubespray v2.27.1.&lt;/p&gt;
 &lt;p&gt;Objective: Establish a robust lab environment with minimum requirements. It can be upgraded to production later by simply adding more worker nodes and migrating to dedicated master nodes.
