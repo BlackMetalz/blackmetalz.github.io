@@ -131,7 +131,7 @@ root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &l
 &lt;h3&gt;Volume Group (VG)&lt;/h3&gt;
 &lt;p&gt;Group of physical volumes (V). You group all the PVs together into one large group called VGs.&lt;/p&gt;
 &lt;p&gt;VG named by you, ex: VG named "my-vg"&lt;/p&gt;
-&lt;p&gt;Command to create VG: &lt;code&gt;pvcreate volume-name pv-here&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Command to create VG: &lt;code&gt;vgcreate volume-name pv-here&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;vgcreate&lt;span class="w"&gt; &lt;/span&gt;volume1&lt;span class="w"&gt; &lt;/span&gt;/dev/vdb
 &lt;span class="w"&gt;  &lt;/span&gt;Volume&lt;span class="w"&gt; &lt;/span&gt;group&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;volume1&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;successfully&lt;span class="w"&gt; &lt;/span&gt;created
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -180,9 +180,11 @@ root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &l
 &lt;span class="w"&gt;  &lt;/span&gt;Logical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;volume1/smalldata&lt;span class="w"&gt; &lt;/span&gt;successfully&lt;span class="w"&gt; &lt;/span&gt;resized.
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;While &lt;code&gt;lvresize&lt;/code&gt; can reduce size of VG, &lt;code&gt;lvxtend&lt;/code&gt; can not, only extend&lt;/p&gt;
+&lt;p&gt;While &lt;code&gt;lvresize&lt;/code&gt; can reduce size of LV, &lt;code&gt;lvextend&lt;/code&gt; can not&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;lvextend&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;+100%FREE&lt;span class="w"&gt; &lt;/span&gt;/dev/VG1/LV1&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Add 100% free of VG1 to LV1&lt;/span&gt;
 lvextend&lt;span class="w"&gt; &lt;/span&gt;-L&lt;span class="w"&gt; &lt;/span&gt;5G&lt;span class="w"&gt; &lt;/span&gt;/dev/VG1/LV1&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Add LV1 Size to 5Gb, error if current size &amp;gt; 5G&lt;/span&gt;
+
+lvextend&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;+100%FREE&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;/dev/VG1/LV1&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="c1"&gt;# -r auto resize fs&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Destroy/Remove LV from VG&lt;/p&gt;
@@ -234,8 +236,8 @@ other::r--
 user::rw-
 group::r--
 other::r--
-&lt;span class="c1"&gt;####&lt;/span&gt;
-root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;setfacl&lt;span class="w"&gt; &lt;/span&gt;--modify&lt;span class="w"&gt; &lt;/span&gt;user:john:rw&lt;span class="w"&gt; &lt;/span&gt;specialfile&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="c1"&gt;###&lt;/span&gt;
+root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;setfacl&lt;span class="w"&gt; &lt;/span&gt;--modify&lt;span class="w"&gt; &lt;/span&gt;user:john:rw&lt;span class="w"&gt; &lt;/span&gt;specialfile&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="c1"&gt;# Alternative: setfacl -m u:john:rw specialfile&lt;/span&gt;
 root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;getfacl&lt;span class="w"&gt; &lt;/span&gt;specialfile&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;grep&lt;span class="w"&gt; &lt;/span&gt;john
 user:john:rw-
 &lt;span class="c1"&gt;### For group mail and permission read and execute&lt;/span&gt;

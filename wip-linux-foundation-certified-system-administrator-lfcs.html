@@ -210,7 +210,7 @@ root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span clas
 <h3>Volume Group (VG)</h3>
 <p>Group of physical volumes (V). You group all the PVs together into one large group called VGs.</p>
 <p>VG named by you, ex: VG named "my-vg"</p>
-<p>Command to create VG: <code>pvcreate volume-name pv-here</code></p>
+<p>Command to create VG: <code>vgcreate volume-name pv-here</code></p>
 <div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>vgcreate<span class="w"> </span>volume1<span class="w"> </span>/dev/vdb
 <span class="w">  </span>Volume<span class="w"> </span>group<span class="w"> </span><span class="s2">&quot;volume1&quot;</span><span class="w"> </span>successfully<span class="w"> </span>created
 </code></pre></div>
@@ -259,9 +259,11 @@ root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span clas
 <span class="w">  </span>Logical<span class="w"> </span>volume<span class="w"> </span>volume1/smalldata<span class="w"> </span>successfully<span class="w"> </span>resized.
 </code></pre></div>
 
-<p>While <code>lvresize</code> can reduce size of VG, <code>lvxtend</code> can not, only extend</p>
+<p>While <code>lvresize</code> can reduce size of LV, <code>lvextend</code> can not</p>
 <div class="highlight"><pre><span></span><code>lvextend<span class="w"> </span>-l<span class="w"> </span>+100%FREE<span class="w"> </span>/dev/VG1/LV1<span class="w"> </span><span class="c1"># Add 100% free of VG1 to LV1</span>
 lvextend<span class="w"> </span>-L<span class="w"> </span>5G<span class="w"> </span>/dev/VG1/LV1<span class="w"> </span><span class="c1"># Add LV1 Size to 5Gb, error if current size &gt; 5G</span>
+
+lvextend<span class="w"> </span>-l<span class="w"> </span>+100%FREE<span class="w"> </span>-r<span class="w"> </span>/dev/VG1/LV1<span class="w">  </span><span class="c1"># -r auto resize fs</span>
 </code></pre></div>
 
 <p>Destroy/Remove LV from VG</p>
@@ -313,8 +315,8 @@ other::r--
 user::rw-
 group::r--
 other::r--
-<span class="c1">####</span>
-root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>setfacl<span class="w"> </span>--modify<span class="w"> </span>user:john:rw<span class="w"> </span>specialfile<span class="w"> </span>
+<span class="c1">###</span>
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>setfacl<span class="w"> </span>--modify<span class="w"> </span>user:john:rw<span class="w"> </span>specialfile<span class="w">  </span><span class="c1"># Alternative: setfacl -m u:john:rw specialfile</span>
 root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>getfacl<span class="w"> </span>specialfile<span class="w"> </span><span class="p">|</span>grep<span class="w"> </span>john
 user:john:rw-
 <span class="c1">### For group mail and permission read and execute</span>
