@@ -180,6 +180,11 @@ root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &l
 &lt;span class="w"&gt;  &lt;/span&gt;Logical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;volume1/smalldata&lt;span class="w"&gt; &lt;/span&gt;successfully&lt;span class="w"&gt; &lt;/span&gt;resized.
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;While &lt;code&gt;lvresize&lt;/code&gt; can reduce size of VG, &lt;code&gt;lvxtend&lt;/code&gt; can not, only extend&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;lvextend&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;+100%FREE&lt;span class="w"&gt; &lt;/span&gt;/dev/VG1/LV1&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Add 100% free of VG1 to LV1&lt;/span&gt;
+lvextend&lt;span class="w"&gt; &lt;/span&gt;-L&lt;span class="w"&gt; &lt;/span&gt;5G&lt;span class="w"&gt; &lt;/span&gt;/dev/VG1/LV1&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Add LV1 Size to 5Gb, error if current size &amp;gt; 5G&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;Destroy/Remove LV from VG&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;lvremove&lt;span class="w"&gt; &lt;/span&gt;volume1/smalldata
 Do&lt;span class="w"&gt; &lt;/span&gt;you&lt;span class="w"&gt; &lt;/span&gt;really&lt;span class="w"&gt; &lt;/span&gt;want&lt;span class="w"&gt; &lt;/span&gt;to&lt;span class="w"&gt; &lt;/span&gt;remove&lt;span class="w"&gt; &lt;/span&gt;and&lt;span class="w"&gt; &lt;/span&gt;DISCARD&lt;span class="w"&gt; &lt;/span&gt;active&lt;span class="w"&gt; &lt;/span&gt;logical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;volume1/smalldata?&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;y/n&lt;span class="o"&gt;]&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;y
@@ -372,7 +377,8 @@ system_u:object_r:user_tmp_t:s0&lt;span class="w"&gt; &lt;/span&gt;/usr/bin/less
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Fix: &lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@node01&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-Z&lt;span class="w"&gt; &lt;/span&gt;/usr/bin/less
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@node01&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt; &lt;/span&gt;restorecon&lt;span class="w"&gt; &lt;/span&gt;-v&lt;span class="w"&gt; &lt;/span&gt;/usr/bin/less
+root@node01&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-Z&lt;span class="w"&gt; &lt;/span&gt;/usr/bin/less
 system_u:object_r:bin_t:s0&lt;span class="w"&gt; &lt;/span&gt;/usr/bin/less
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
@@ -424,9 +430,7 @@ root@node01&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span
 &lt;li&gt;Make it persistent:&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;iptables-persistent
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;hr&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="certification"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="certification"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This document outlines the deployment of a Kubernetes v1.31.9 HA cluster on Ubuntu 24.04 using Kubespray v2.27.1.&lt;/p&gt;
 &lt;p&gt;Objective: Establish a robust lab environment with minimum requirements. It can be upgraded to production later by simply adding more worker nodes and migrating to dedicated master nodes.
 Topology: 3-node HA architecture (Control Plane, Etcd, and Worker roles on all nodes).&lt;/p&gt;

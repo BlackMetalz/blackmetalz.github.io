@@ -259,6 +259,11 @@ root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span clas
 <span class="w">  </span>Logical<span class="w"> </span>volume<span class="w"> </span>volume1/smalldata<span class="w"> </span>successfully<span class="w"> </span>resized.
 </code></pre></div>
 
+<p>While <code>lvresize</code> can reduce size of VG, <code>lvxtend</code> can not, only extend</p>
+<div class="highlight"><pre><span></span><code>lvextend<span class="w"> </span>-l<span class="w"> </span>+100%FREE<span class="w"> </span>/dev/VG1/LV1<span class="w"> </span><span class="c1"># Add 100% free of VG1 to LV1</span>
+lvextend<span class="w"> </span>-L<span class="w"> </span>5G<span class="w"> </span>/dev/VG1/LV1<span class="w"> </span><span class="c1"># Add LV1 Size to 5Gb, error if current size &gt; 5G</span>
+</code></pre></div>
+
 <p>Destroy/Remove LV from VG</p>
 <div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>lvremove<span class="w"> </span>volume1/smalldata
 Do<span class="w"> </span>you<span class="w"> </span>really<span class="w"> </span>want<span class="w"> </span>to<span class="w"> </span>remove<span class="w"> </span>and<span class="w"> </span>DISCARD<span class="w"> </span>active<span class="w"> </span>logical<span class="w"> </span>volume<span class="w"> </span>volume1/smalldata?<span class="w"> </span><span class="o">[</span>y/n<span class="o">]</span>:<span class="w"> </span>y
@@ -451,7 +456,8 @@ system_u:object_r:user_tmp_t:s0<span class="w"> </span>/usr/bin/less
 </code></pre></div>
 
 <p>Fix: </p>
-<div class="highlight"><pre><span></span><code>root@node01<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>ls<span class="w"> </span>-Z<span class="w"> </span>/usr/bin/less
+<div class="highlight"><pre><span></span><code>root@node01<span class="w"> </span>~<span class="w"> </span>➜<span class="w"> </span>restorecon<span class="w"> </span>-v<span class="w"> </span>/usr/bin/less
+root@node01<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>ls<span class="w"> </span>-Z<span class="w"> </span>/usr/bin/less
 system_u:object_r:bin_t:s0<span class="w"> </span>/usr/bin/less
 </code></pre></div>
 
@@ -504,8 +510,6 @@ root@node01<span class="w"> </span>~<span class="w"> </span>➜<span class="w"> 
 </ul>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>iptables-persistent
 </code></pre></div>
-
-<hr>
 
 
              
