@@ -78,8 +78,13 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>My favorite list in this Exam</h1>
-<h3>IO Redirection</h3>
+            <h1>Sections</h1>
+<ul>
+<li>IO Redirection</li>
+<li>LVM</li>
+</ul>
+<hr>
+<h1>IO Redirection</h1>
 <p>I think this is the most command I often used but never understand correctly, LOL. Yes, it is <code>2&gt;&amp;1</code>. But no more, today I swear I will remember and understand it! So let's take an example:</p>
 <div class="highlight"><pre><span></span><code>./script.sh<span class="w"> </span>&gt;<span class="w"> </span>output.txt<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
 </code></pre></div>
@@ -127,6 +132,139 @@ bob@ubuntu-host<span class="w"> </span>~<span class="w"> </span>✖<span class="
 <li><strong><code>./script.sh 2&gt; error.txt</code></strong> Redirects <strong>only the errors</strong> to a file; the normal logs will still show up on your terminal.</li>
 </ul>
 <p>And the last, we had fd2/fd1 so what is fd0? It is standard input (stdin). Example: <code>mysql database_name &lt; backup.sql</code></p>
+<hr>
+<h1>LVM (Logical Volume Manager)</h1>
+<p>To be honest, I rarely use LVM in OpenStack environments because my managed platforms are Elasticsearch, Kafka, which all support multiple disks. You know in the OpenStack environment, 1 volume 10 GB has 200 IOPS, but 2 volumes 5 GB have 400 IOPS. Same size but double IOPS, that is why I used multi disk.</p>
+<p>But when it comes to MongoDB, it needs to use LVM since MongoDB doesn't support multi-disk. But It was a lab setup without document write back, so it is like fire and forget mode -.-</p>
+<p>So that is a story for simple knowledge everyone remembers and understands, but not me xD. So this is "day one" instead of "one day"!</p>
+<h3>Prerequisite</h3>
+<ul>
+<li>Ubuntu 22/24 and package <code>lvm2</code> installed</li>
+<li><a href="https://learn.kodekloud.com/user/courses/labs-linux-foundation-certified-system-administrator-lfcs/">Kodekloud Lab - Manage LVM</a></li>
+</ul>
+<h3>Physical Volume (PV)</h3>
+<p>They are physical volumes (P) like <code>/dev/sdb</code> or disk partition <code>/dev/sda1</code> you want to put it in LVM system.</p>
+<ul>
+<li>Init PV: <code>pvcreate /dev/sdb</code> (turn <code>/dev/sdb</code> into material for LVM)</li>
+<li>Check PV: <code>pvdisplay</code> or <code>pvs</code></li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">### PV Create</span>
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>pvcreate<span class="w"> </span>/dev/vdb<span class="w"> </span>/dev/vdc
+<span class="w">  </span>Physical<span class="w"> </span>volume<span class="w"> </span><span class="s2">&quot;/dev/vdb&quot;</span><span class="w"> </span>successfully<span class="w"> </span>created.
+<span class="w">  </span>Physical<span class="w"> </span>volume<span class="w"> </span><span class="s2">&quot;/dev/vdc&quot;</span><span class="w"> </span>successfully<span class="w"> </span>created.
+<span class="c1">### PV Display</span>
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>pvdisplay<span class="w"> </span>
+<span class="w">  </span><span class="s2">&quot;/dev/vdb&quot;</span><span class="w"> </span>is<span class="w"> </span>a<span class="w"> </span>new<span class="w"> </span>physical<span class="w"> </span>volume<span class="w"> </span>of<span class="w"> </span><span class="s2">&quot;1.00 GiB&quot;</span>
+<span class="w">  </span>---<span class="w"> </span>NEW<span class="w"> </span>Physical<span class="w"> </span>volume<span class="w"> </span>---
+<span class="w">  </span>PV<span class="w"> </span>Name<span class="w">               </span>/dev/vdb
+<span class="w">  </span>VG<span class="w"> </span>Name<span class="w">               </span>
+<span class="w">  </span>PV<span class="w"> </span>Size<span class="w">               </span><span class="m">1</span>.00<span class="w"> </span>GiB
+<span class="w">  </span>Allocatable<span class="w">           </span>NO
+<span class="w">  </span>PE<span class="w"> </span>Size<span class="w">               </span><span class="m">0</span><span class="w">   </span>
+<span class="w">  </span>Total<span class="w"> </span>PE<span class="w">              </span><span class="m">0</span>
+<span class="w">  </span>Free<span class="w"> </span>PE<span class="w">               </span><span class="m">0</span>
+<span class="w">  </span>Allocated<span class="w"> </span>PE<span class="w">          </span><span class="m">0</span>
+<span class="w">  </span>PV<span class="w"> </span>UUID<span class="w">               </span>aaPJMu-vtoq-yU0a-xsg4-LwPV-IYE4-TRb1sF
+
+<span class="w">  </span><span class="s2">&quot;/dev/vdc&quot;</span><span class="w"> </span>is<span class="w"> </span>a<span class="w"> </span>new<span class="w"> </span>physical<span class="w"> </span>volume<span class="w"> </span>of<span class="w"> </span><span class="s2">&quot;1.00 GiB&quot;</span>
+<span class="w">  </span>---<span class="w"> </span>NEW<span class="w"> </span>Physical<span class="w"> </span>volume<span class="w"> </span>---
+<span class="w">  </span>PV<span class="w"> </span>Name<span class="w">               </span>/dev/vdc
+<span class="w">  </span>VG<span class="w"> </span>Name<span class="w">               </span>
+<span class="w">  </span>PV<span class="w"> </span>Size<span class="w">               </span><span class="m">1</span>.00<span class="w"> </span>GiB
+<span class="w">  </span>Allocatable<span class="w">           </span>NO
+<span class="w">  </span>PE<span class="w"> </span>Size<span class="w">               </span><span class="m">0</span><span class="w">   </span>
+<span class="w">  </span>Total<span class="w"> </span>PE<span class="w">              </span><span class="m">0</span>
+<span class="w">  </span>Free<span class="w"> </span>PE<span class="w">               </span><span class="m">0</span>
+<span class="w">  </span>Allocated<span class="w"> </span>PE<span class="w">          </span><span class="m">0</span>
+<span class="w">  </span>PV<span class="w"> </span>UUID<span class="w">               </span>y1Mod8-Li2M-i7NR-Yqg4-mjZt-gEos-M4EwSe
+
+
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>pvs
+<span class="w">  </span>PV<span class="w">         </span>VG<span class="w"> </span>Fmt<span class="w">  </span>Attr<span class="w"> </span>PSize<span class="w"> </span>PFree
+<span class="w">  </span>/dev/vdb<span class="w">      </span>lvm2<span class="w"> </span>---<span class="w">  </span><span class="m">1</span>.00g<span class="w"> </span><span class="m">1</span>.00g
+<span class="w">  </span>/dev/vdc<span class="w">      </span>lvm2<span class="w"> </span>---<span class="w">  </span><span class="m">1</span>.00g<span class="w"> </span><span class="m">1</span>.00g
+</code></pre></div>
+
+<ul>
+<li>Remove PV from LVM: <code>pvremove /dev/vdc</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>pvremove<span class="w"> </span>/dev/vdc
+<span class="w">  </span>Labels<span class="w"> </span>on<span class="w"> </span>physical<span class="w"> </span>volume<span class="w"> </span><span class="s2">&quot;/dev/vdc&quot;</span><span class="w"> </span>successfully<span class="w"> </span>wiped.
+
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>pvs
+<span class="w">  </span>PV<span class="w">         </span>VG<span class="w"> </span>Fmt<span class="w">  </span>Attr<span class="w"> </span>PSize<span class="w"> </span>PFree
+<span class="w">  </span>/dev/vdb<span class="w">      </span>lvm2<span class="w"> </span>---<span class="w">  </span><span class="m">1</span>.00g<span class="w"> </span><span class="m">1</span>.00g
+</code></pre></div>
+
+<h3>Volume Group (VG)</h3>
+<p>Group of physical volumes (V). You group all the PVs together into one large group called VGs.</p>
+<p>VG named by you, ex: VG named "my-vg"</p>
+<p>Command to create VG: <code>pvcreate volume-name pv-here</code></p>
+<div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>vgcreate<span class="w"> </span>volume1<span class="w"> </span>/dev/vdb
+<span class="w">  </span>Volume<span class="w"> </span>group<span class="w"> </span><span class="s2">&quot;volume1&quot;</span><span class="w"> </span>successfully<span class="w"> </span>created
+</code></pre></div>
+
+<p>Command to check VG: <code>vgdisplay</code> or <code>vgs</code></p>
+<p>Extend VG by adding PV: <code>vgextend volume-name pv-here</code></p>
+<div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>vgextend<span class="w"> </span>volume1<span class="w"> </span>/dev/vdc
+<span class="w">  </span>Physical<span class="w"> </span>volume<span class="w"> </span><span class="s2">&quot;/dev/vdc&quot;</span><span class="w"> </span>successfully<span class="w"> </span>created.
+<span class="w">  </span>Volume<span class="w"> </span>group<span class="w"> </span><span class="s2">&quot;volume1&quot;</span><span class="w"> </span>successfully<span class="w"> </span>extended
+
+<span class="c1"># Before add pv /dev/vdc to vg volume1, it was 1 PV and Vsize 1.00g</span>
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>vgs
+<span class="w">  </span>VG<span class="w">      </span><span class="c1">#PV #LV #SN Attr   VSize VFree</span>
+<span class="w">  </span>volume1<span class="w">   </span><span class="m">2</span><span class="w">   </span><span class="m">0</span><span class="w">   </span><span class="m">0</span><span class="w"> </span>wz--n-<span class="w"> </span><span class="m">1</span>.99g<span class="w"> </span><span class="m">1</span>.99g
+</code></pre></div>
+
+<p>Remove PV from VG: <code>vgreduce volume-name pv-here</code></p>
+<div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>vgreduce<span class="w"> </span>volume1<span class="w"> </span>/dev/vdc
+<span class="w">  </span>Removed<span class="w"> </span><span class="s2">&quot;/dev/vdc&quot;</span><span class="w"> </span>from<span class="w"> </span>volume<span class="w"> </span>group<span class="w"> </span><span class="s2">&quot;volume1&quot;</span>
+
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>vgs
+<span class="w">  </span>VG<span class="w">      </span><span class="c1">#PV #LV #SN Attr   VSize    VFree   </span>
+<span class="w">  </span>volume1<span class="w">   </span><span class="m">1</span><span class="w">   </span><span class="m">0</span><span class="w">   </span><span class="m">0</span><span class="w"> </span>wz--n-<span class="w"> </span><span class="m">1020</span>.00m<span class="w"> </span><span class="m">1020</span>.00m
+</code></pre></div>
+
+<h3>Logical Volume (LV)</h3>
+<p>from big VG, you divide it into smaller or all to use called LV (L).</p>
+<p>Relationship: 1 VG can divide into 1 or more LV</p>
+<p>Init command: Create LV named <code>smalldata</code>, size 0.5 G from VG volume1.</p>
+<div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>✖<span class="w"> </span>lvcreate<span class="w"> </span>-L<span class="w"> </span><span class="m">0</span>.5G<span class="w"> </span>-n<span class="w"> </span>smalldata<span class="w"> </span>volume1
+<span class="w">  </span>Logical<span class="w"> </span>volume<span class="w"> </span><span class="s2">&quot;smalldata&quot;</span><span class="w"> </span>created.
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>lvs
+<span class="w">  </span>LV<span class="w">        </span>VG<span class="w">      </span>Attr<span class="w">       </span>LSize<span class="w">   </span>Pool<span class="w"> </span>Origin<span class="w"> </span>Data%<span class="w">  </span>Meta%<span class="w">  </span>Move<span class="w"> </span>Log<span class="w"> </span>Cpy%Sync<span class="w"> </span>Convert
+<span class="w">  </span>smalldata<span class="w"> </span>volume1<span class="w"> </span>-wi-a-----<span class="w"> </span><span class="m">512</span>.00m<span class="w">                                               </span>
+</code></pre></div>
+
+<p>Display LV command: <code>lvs</code> or <code>lvdisplay</code></p>
+<p>Resize LV to <code>752 MB</code>: param can be <code>-L</code> or <code>--size</code> xD</p>
+<div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>✖<span class="w"> </span>lvresize<span class="w"> </span>-L<span class="w"> </span>752M<span class="w"> </span>volume1/smalldata
+<span class="w">  </span>Size<span class="w"> </span>of<span class="w"> </span>logical<span class="w"> </span>volume<span class="w"> </span>volume1/smalldata<span class="w"> </span>changed<span class="w"> </span>from<span class="w"> </span><span class="m">512</span>.00<span class="w"> </span>MiB<span class="w"> </span><span class="o">(</span><span class="m">128</span><span class="w"> </span>extents<span class="o">)</span><span class="w"> </span>to<span class="w"> </span><span class="m">752</span>.00<span class="w"> </span>MiB<span class="w"> </span><span class="o">(</span><span class="m">188</span><span class="w"> </span>extents<span class="o">)</span>.
+<span class="w">  </span>Logical<span class="w"> </span>volume<span class="w"> </span>volume1/smalldata<span class="w"> </span>successfully<span class="w"> </span>resized.
+
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>lvresize<span class="w"> </span>--size<span class="w"> </span>753M<span class="w"> </span>volume1/smalldata
+<span class="w">  </span>Rounding<span class="w"> </span>size<span class="w"> </span>to<span class="w"> </span>boundary<span class="w"> </span>between<span class="w"> </span>physical<span class="w"> </span>extents:<span class="w"> </span><span class="m">756</span>.00<span class="w"> </span>MiB.
+<span class="w">  </span>Size<span class="w"> </span>of<span class="w"> </span>logical<span class="w"> </span>volume<span class="w"> </span>volume1/smalldata<span class="w"> </span>changed<span class="w"> </span>from<span class="w"> </span><span class="m">752</span>.00<span class="w"> </span>MiB<span class="w"> </span><span class="o">(</span><span class="m">188</span><span class="w"> </span>extents<span class="o">)</span><span class="w"> </span>to<span class="w"> </span><span class="m">756</span>.00<span class="w"> </span>MiB<span class="w"> </span><span class="o">(</span><span class="m">189</span><span class="w"> </span>extents<span class="o">)</span>.
+<span class="w">  </span>Logical<span class="w"> </span>volume<span class="w"> </span>volume1/smalldata<span class="w"> </span>successfully<span class="w"> </span>resized.
+</code></pre></div>
+
+<p>Destroy/Remove LV from VG</p>
+<div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>lvremove<span class="w"> </span>volume1/smalldata
+Do<span class="w"> </span>you<span class="w"> </span>really<span class="w"> </span>want<span class="w"> </span>to<span class="w"> </span>remove<span class="w"> </span>and<span class="w"> </span>DISCARD<span class="w"> </span>active<span class="w"> </span>logical<span class="w"> </span>volume<span class="w"> </span>volume1/smalldata?<span class="w"> </span><span class="o">[</span>y/n<span class="o">]</span>:<span class="w"> </span>y
+<span class="w">  </span>Logical<span class="w"> </span>volume<span class="w"> </span><span class="s2">&quot;smalldata&quot;</span><span class="w"> </span>successfully<span class="w"> </span>removed
+<span class="w">  </span>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>vgs
+<span class="w">  </span>VG<span class="w">      </span><span class="c1">#PV #LV #SN Attr   VSize    VFree   </span>
+<span class="w">  </span>volume1<span class="w">   </span><span class="m">1</span><span class="w">   </span><span class="m">0</span><span class="w">   </span><span class="m">0</span><span class="w"> </span>wz--n-<span class="w"> </span><span class="m">1020</span>.00m<span class="w"> </span><span class="m">1020</span>.00m
+
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>lvs
+</code></pre></div>
+
+<h3>Create filesystem from LV</h3>
+<p>XFS or EXT4, your choice</p>
+<p>Command: <code>mkfs.xfs /dev/volume1/smalldata</code></p>
+<div class="highlight"><pre><span></span><code>mkfs.xfs<span class="w"> </span>/dev/volume1/smalldata
+</code></pre></div>
 
 
              

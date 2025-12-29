@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2025-12-31T00:00:00+07:00</updated><entry><title>[WIP] Linux Foundation Certified System Administrator (LFCS)</title><link href="https://blackmetalz.github.io/wip-linux-foundation-certified-system-administrator-lfcs.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-linux-foundation-certified-system-administrator-lfcs.html</id><summary type="html"/><content type="html">&lt;h1&gt;My favorite list in this Exam&lt;/h1&gt;
-&lt;h3&gt;IO Redirection&lt;/h3&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2025-12-31T00:00:00+07:00</updated><entry><title>[WIP] Linux Foundation Certified System Administrator (LFCS)</title><link href="https://blackmetalz.github.io/wip-linux-foundation-certified-system-administrator-lfcs.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-linux-foundation-certified-system-administrator-lfcs.html</id><summary type="html"/><content type="html">&lt;h1&gt;Sections&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;IO Redirection&lt;/li&gt;
+&lt;li&gt;LVM&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h1&gt;IO Redirection&lt;/h1&gt;
 &lt;p&gt;I think this is the most command I often used but never understand correctly, LOL. Yes, it is &lt;code&gt;2&amp;gt;&amp;amp;1&lt;/code&gt;. But no more, today I swear I will remember and understand it! So let's take an example:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;./script.sh&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;output.txt&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -47,7 +52,140 @@ bob@ubuntu-host&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/
 &lt;li&gt;&lt;strong&gt;&lt;code&gt;./script.sh &amp;gt; /dev/null 2&amp;gt;&amp;amp;1&lt;/code&gt;&lt;/strong&gt; &lt;strong&gt;Total silence&lt;/strong&gt;; suppresses all output and error messages completely.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;&lt;code&gt;./script.sh 2&amp;gt; error.txt&lt;/code&gt;&lt;/strong&gt; Redirects &lt;strong&gt;only the errors&lt;/strong&gt; to a file; the normal logs will still show up on your terminal.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;And the last, we had fd2/fd1 so what is fd0? It is standard input (stdin). Example: &lt;code&gt;mysql database_name &amp;lt; backup.sql&lt;/code&gt;&lt;/p&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="certification"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;And the last, we had fd2/fd1 so what is fd0? It is standard input (stdin). Example: &lt;code&gt;mysql database_name &amp;lt; backup.sql&lt;/code&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1&gt;LVM (Logical Volume Manager)&lt;/h1&gt;
+&lt;p&gt;To be honest, I rarely use LVM in OpenStack environments because my managed platforms are Elasticsearch, Kafka, which all support multiple disks. You know in the OpenStack environment, 1 volume 10 GB has 200 IOPS, but 2 volumes 5 GB have 400 IOPS. Same size but double IOPS, that is why I used multi disk.&lt;/p&gt;
+&lt;p&gt;But when it comes to MongoDB, it needs to use LVM since MongoDB doesn't support multi-disk. But It was a lab setup without document write back, so it is like fire and forget mode -.-&lt;/p&gt;
+&lt;p&gt;So that is a story for simple knowledge everyone remembers and understands, but not me xD. So this is "day one" instead of "one day"!&lt;/p&gt;
+&lt;h3&gt;Prerequisite&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Ubuntu 22/24 and package &lt;code&gt;lvm2&lt;/code&gt; installed&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://learn.kodekloud.com/user/courses/labs-linux-foundation-certified-system-administrator-lfcs/"&gt;Kodekloud Lab - Manage LVM&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Physical Volume (PV)&lt;/h3&gt;
+&lt;p&gt;They are physical volumes (P) like &lt;code&gt;/dev/sdb&lt;/code&gt; or disk partition &lt;code&gt;/dev/sda1&lt;/code&gt; you want to put it in LVM system.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Init PV: &lt;code&gt;pvcreate /dev/sdb&lt;/code&gt; (turn &lt;code&gt;/dev/sdb&lt;/code&gt; into material for LVM)&lt;/li&gt;
+&lt;li&gt;Check PV: &lt;code&gt;pvdisplay&lt;/code&gt; or &lt;code&gt;pvs&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;### PV Create&lt;/span&gt;
+root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;pvcreate&lt;span class="w"&gt; &lt;/span&gt;/dev/vdb&lt;span class="w"&gt; &lt;/span&gt;/dev/vdc
+&lt;span class="w"&gt;  &lt;/span&gt;Physical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/dev/vdb&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;successfully&lt;span class="w"&gt; &lt;/span&gt;created.
+&lt;span class="w"&gt;  &lt;/span&gt;Physical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/dev/vdc&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;successfully&lt;span class="w"&gt; &lt;/span&gt;created.
+&lt;span class="c1"&gt;### PV Display&lt;/span&gt;
+root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;pvdisplay&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/dev/vdb&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;is&lt;span class="w"&gt; &lt;/span&gt;a&lt;span class="w"&gt; &lt;/span&gt;new&lt;span class="w"&gt; &lt;/span&gt;physical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;of&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;1.00 GiB&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;---&lt;span class="w"&gt; &lt;/span&gt;NEW&lt;span class="w"&gt; &lt;/span&gt;Physical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;---
+&lt;span class="w"&gt;  &lt;/span&gt;PV&lt;span class="w"&gt; &lt;/span&gt;Name&lt;span class="w"&gt;               &lt;/span&gt;/dev/vdb
+&lt;span class="w"&gt;  &lt;/span&gt;VG&lt;span class="w"&gt; &lt;/span&gt;Name&lt;span class="w"&gt;               &lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;PV&lt;span class="w"&gt; &lt;/span&gt;Size&lt;span class="w"&gt;               &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.00&lt;span class="w"&gt; &lt;/span&gt;GiB
+&lt;span class="w"&gt;  &lt;/span&gt;Allocatable&lt;span class="w"&gt;           &lt;/span&gt;NO
+&lt;span class="w"&gt;  &lt;/span&gt;PE&lt;span class="w"&gt; &lt;/span&gt;Size&lt;span class="w"&gt;               &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;Total&lt;span class="w"&gt; &lt;/span&gt;PE&lt;span class="w"&gt;              &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;Free&lt;span class="w"&gt; &lt;/span&gt;PE&lt;span class="w"&gt;               &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;Allocated&lt;span class="w"&gt; &lt;/span&gt;PE&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;PV&lt;span class="w"&gt; &lt;/span&gt;UUID&lt;span class="w"&gt;               &lt;/span&gt;aaPJMu-vtoq-yU0a-xsg4-LwPV-IYE4-TRb1sF
+
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/dev/vdc&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;is&lt;span class="w"&gt; &lt;/span&gt;a&lt;span class="w"&gt; &lt;/span&gt;new&lt;span class="w"&gt; &lt;/span&gt;physical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;of&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;1.00 GiB&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;---&lt;span class="w"&gt; &lt;/span&gt;NEW&lt;span class="w"&gt; &lt;/span&gt;Physical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;---
+&lt;span class="w"&gt;  &lt;/span&gt;PV&lt;span class="w"&gt; &lt;/span&gt;Name&lt;span class="w"&gt;               &lt;/span&gt;/dev/vdc
+&lt;span class="w"&gt;  &lt;/span&gt;VG&lt;span class="w"&gt; &lt;/span&gt;Name&lt;span class="w"&gt;               &lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;PV&lt;span class="w"&gt; &lt;/span&gt;Size&lt;span class="w"&gt;               &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.00&lt;span class="w"&gt; &lt;/span&gt;GiB
+&lt;span class="w"&gt;  &lt;/span&gt;Allocatable&lt;span class="w"&gt;           &lt;/span&gt;NO
+&lt;span class="w"&gt;  &lt;/span&gt;PE&lt;span class="w"&gt; &lt;/span&gt;Size&lt;span class="w"&gt;               &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;Total&lt;span class="w"&gt; &lt;/span&gt;PE&lt;span class="w"&gt;              &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;Free&lt;span class="w"&gt; &lt;/span&gt;PE&lt;span class="w"&gt;               &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;Allocated&lt;span class="w"&gt; &lt;/span&gt;PE&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;PV&lt;span class="w"&gt; &lt;/span&gt;UUID&lt;span class="w"&gt;               &lt;/span&gt;y1Mod8-Li2M-i7NR-Yqg4-mjZt-gEos-M4EwSe
+
+
+root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;pvs
+&lt;span class="w"&gt;  &lt;/span&gt;PV&lt;span class="w"&gt;         &lt;/span&gt;VG&lt;span class="w"&gt; &lt;/span&gt;Fmt&lt;span class="w"&gt;  &lt;/span&gt;Attr&lt;span class="w"&gt; &lt;/span&gt;PSize&lt;span class="w"&gt; &lt;/span&gt;PFree
+&lt;span class="w"&gt;  &lt;/span&gt;/dev/vdb&lt;span class="w"&gt;      &lt;/span&gt;lvm2&lt;span class="w"&gt; &lt;/span&gt;---&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.00g&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.00g
+&lt;span class="w"&gt;  &lt;/span&gt;/dev/vdc&lt;span class="w"&gt;      &lt;/span&gt;lvm2&lt;span class="w"&gt; &lt;/span&gt;---&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.00g&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.00g
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Remove PV from LVM: &lt;code&gt;pvremove /dev/vdc&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;pvremove&lt;span class="w"&gt; &lt;/span&gt;/dev/vdc
+&lt;span class="w"&gt;  &lt;/span&gt;Labels&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;physical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/dev/vdc&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;successfully&lt;span class="w"&gt; &lt;/span&gt;wiped.
+
+root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;pvs
+&lt;span class="w"&gt;  &lt;/span&gt;PV&lt;span class="w"&gt;         &lt;/span&gt;VG&lt;span class="w"&gt; &lt;/span&gt;Fmt&lt;span class="w"&gt;  &lt;/span&gt;Attr&lt;span class="w"&gt; &lt;/span&gt;PSize&lt;span class="w"&gt; &lt;/span&gt;PFree
+&lt;span class="w"&gt;  &lt;/span&gt;/dev/vdb&lt;span class="w"&gt;      &lt;/span&gt;lvm2&lt;span class="w"&gt; &lt;/span&gt;---&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.00g&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.00g
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Volume Group (VG)&lt;/h3&gt;
+&lt;p&gt;Group of physical volumes (V). You group all the PVs together into one large group called VGs.&lt;/p&gt;
+&lt;p&gt;VG named by you, ex: VG named "my-vg"&lt;/p&gt;
+&lt;p&gt;Command to create VG: &lt;code&gt;pvcreate volume-name pv-here&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;vgcreate&lt;span class="w"&gt; &lt;/span&gt;volume1&lt;span class="w"&gt; &lt;/span&gt;/dev/vdb
+&lt;span class="w"&gt;  &lt;/span&gt;Volume&lt;span class="w"&gt; &lt;/span&gt;group&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;volume1&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;successfully&lt;span class="w"&gt; &lt;/span&gt;created
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Command to check VG: &lt;code&gt;vgdisplay&lt;/code&gt; or &lt;code&gt;vgs&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Extend VG by adding PV: &lt;code&gt;vgextend volume-name pv-here&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;vgextend&lt;span class="w"&gt; &lt;/span&gt;volume1&lt;span class="w"&gt; &lt;/span&gt;/dev/vdc
+&lt;span class="w"&gt;  &lt;/span&gt;Physical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/dev/vdc&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;successfully&lt;span class="w"&gt; &lt;/span&gt;created.
+&lt;span class="w"&gt;  &lt;/span&gt;Volume&lt;span class="w"&gt; &lt;/span&gt;group&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;volume1&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;successfully&lt;span class="w"&gt; &lt;/span&gt;extended
+
+&lt;span class="c1"&gt;# Before add pv /dev/vdc to vg volume1, it was 1 PV and Vsize 1.00g&lt;/span&gt;
+root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;vgs
+&lt;span class="w"&gt;  &lt;/span&gt;VG&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="c1"&gt;#PV #LV #SN Attr   VSize VFree&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;volume1&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;wz--n-&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.99g&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.99g
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Remove PV from VG: &lt;code&gt;vgreduce volume-name pv-here&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;vgreduce&lt;span class="w"&gt; &lt;/span&gt;volume1&lt;span class="w"&gt; &lt;/span&gt;/dev/vdc
+&lt;span class="w"&gt;  &lt;/span&gt;Removed&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/dev/vdc&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;from&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;group&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;volume1&amp;quot;&lt;/span&gt;
+
+root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;vgs
+&lt;span class="w"&gt;  &lt;/span&gt;VG&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="c1"&gt;#PV #LV #SN Attr   VSize    VFree   &lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;volume1&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;wz--n-&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1020&lt;/span&gt;.00m&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1020&lt;/span&gt;.00m
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Logical Volume (LV)&lt;/h3&gt;
+&lt;p&gt;from big VG, you divide it into smaller or all to use called LV (L).&lt;/p&gt;
+&lt;p&gt;Relationship: 1 VG can divide into 1 or more LV&lt;/p&gt;
+&lt;p&gt;Init command: Create LV named &lt;code&gt;smalldata&lt;/code&gt;, size 0.5 G from VG volume1.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;✖&lt;span class="w"&gt; &lt;/span&gt;lvcreate&lt;span class="w"&gt; &lt;/span&gt;-L&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.5G&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;smalldata&lt;span class="w"&gt; &lt;/span&gt;volume1
+&lt;span class="w"&gt;  &lt;/span&gt;Logical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;smalldata&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;created.
+root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;lvs
+&lt;span class="w"&gt;  &lt;/span&gt;LV&lt;span class="w"&gt;        &lt;/span&gt;VG&lt;span class="w"&gt;      &lt;/span&gt;Attr&lt;span class="w"&gt;       &lt;/span&gt;LSize&lt;span class="w"&gt;   &lt;/span&gt;Pool&lt;span class="w"&gt; &lt;/span&gt;Origin&lt;span class="w"&gt; &lt;/span&gt;Data%&lt;span class="w"&gt;  &lt;/span&gt;Meta%&lt;span class="w"&gt;  &lt;/span&gt;Move&lt;span class="w"&gt; &lt;/span&gt;Log&lt;span class="w"&gt; &lt;/span&gt;Cpy%Sync&lt;span class="w"&gt; &lt;/span&gt;Convert
+&lt;span class="w"&gt;  &lt;/span&gt;smalldata&lt;span class="w"&gt; &lt;/span&gt;volume1&lt;span class="w"&gt; &lt;/span&gt;-wi-a-----&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;512&lt;/span&gt;.00m&lt;span class="w"&gt;                                               &lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Display LV command: &lt;code&gt;lvs&lt;/code&gt; or &lt;code&gt;lvdisplay&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Resize LV to &lt;code&gt;752 MB&lt;/code&gt;: param can be &lt;code&gt;-L&lt;/code&gt; or &lt;code&gt;--size&lt;/code&gt; xD&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;✖&lt;span class="w"&gt; &lt;/span&gt;lvresize&lt;span class="w"&gt; &lt;/span&gt;-L&lt;span class="w"&gt; &lt;/span&gt;752M&lt;span class="w"&gt; &lt;/span&gt;volume1/smalldata
+&lt;span class="w"&gt;  &lt;/span&gt;Size&lt;span class="w"&gt; &lt;/span&gt;of&lt;span class="w"&gt; &lt;/span&gt;logical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;volume1/smalldata&lt;span class="w"&gt; &lt;/span&gt;changed&lt;span class="w"&gt; &lt;/span&gt;from&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;512&lt;/span&gt;.00&lt;span class="w"&gt; &lt;/span&gt;MiB&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;128&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;extents&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;to&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;752&lt;/span&gt;.00&lt;span class="w"&gt; &lt;/span&gt;MiB&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;188&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;extents&lt;span class="o"&gt;)&lt;/span&gt;.
+&lt;span class="w"&gt;  &lt;/span&gt;Logical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;volume1/smalldata&lt;span class="w"&gt; &lt;/span&gt;successfully&lt;span class="w"&gt; &lt;/span&gt;resized.
+
+root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;lvresize&lt;span class="w"&gt; &lt;/span&gt;--size&lt;span class="w"&gt; &lt;/span&gt;753M&lt;span class="w"&gt; &lt;/span&gt;volume1/smalldata
+&lt;span class="w"&gt;  &lt;/span&gt;Rounding&lt;span class="w"&gt; &lt;/span&gt;size&lt;span class="w"&gt; &lt;/span&gt;to&lt;span class="w"&gt; &lt;/span&gt;boundary&lt;span class="w"&gt; &lt;/span&gt;between&lt;span class="w"&gt; &lt;/span&gt;physical&lt;span class="w"&gt; &lt;/span&gt;extents:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;756&lt;/span&gt;.00&lt;span class="w"&gt; &lt;/span&gt;MiB.
+&lt;span class="w"&gt;  &lt;/span&gt;Size&lt;span class="w"&gt; &lt;/span&gt;of&lt;span class="w"&gt; &lt;/span&gt;logical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;volume1/smalldata&lt;span class="w"&gt; &lt;/span&gt;changed&lt;span class="w"&gt; &lt;/span&gt;from&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;752&lt;/span&gt;.00&lt;span class="w"&gt; &lt;/span&gt;MiB&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;188&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;extents&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;to&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;756&lt;/span&gt;.00&lt;span class="w"&gt; &lt;/span&gt;MiB&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;189&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;extents&lt;span class="o"&gt;)&lt;/span&gt;.
+&lt;span class="w"&gt;  &lt;/span&gt;Logical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;volume1/smalldata&lt;span class="w"&gt; &lt;/span&gt;successfully&lt;span class="w"&gt; &lt;/span&gt;resized.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Destroy/Remove LV from VG&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;lvremove&lt;span class="w"&gt; &lt;/span&gt;volume1/smalldata
+Do&lt;span class="w"&gt; &lt;/span&gt;you&lt;span class="w"&gt; &lt;/span&gt;really&lt;span class="w"&gt; &lt;/span&gt;want&lt;span class="w"&gt; &lt;/span&gt;to&lt;span class="w"&gt; &lt;/span&gt;remove&lt;span class="w"&gt; &lt;/span&gt;and&lt;span class="w"&gt; &lt;/span&gt;DISCARD&lt;span class="w"&gt; &lt;/span&gt;active&lt;span class="w"&gt; &lt;/span&gt;logical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;volume1/smalldata?&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;y/n&lt;span class="o"&gt;]&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;y
+&lt;span class="w"&gt;  &lt;/span&gt;Logical&lt;span class="w"&gt; &lt;/span&gt;volume&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;smalldata&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;successfully&lt;span class="w"&gt; &lt;/span&gt;removed
+&lt;span class="w"&gt;  &lt;/span&gt;root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;vgs
+&lt;span class="w"&gt;  &lt;/span&gt;VG&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="c1"&gt;#PV #LV #SN Attr   VSize    VFree   &lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;volume1&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;wz--n-&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1020&lt;/span&gt;.00m&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1020&lt;/span&gt;.00m
+
+root@caleston-lp10&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span&gt;➜&lt;span class="w"&gt;  &lt;/span&gt;lvs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Create filesystem from LV&lt;/h3&gt;
+&lt;p&gt;XFS or EXT4, your choice&lt;/p&gt;
+&lt;p&gt;Command: &lt;code&gt;mkfs.xfs /dev/volume1/smalldata&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;mkfs.xfs&lt;span class="w"&gt; &lt;/span&gt;/dev/volume1/smalldata
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="certification"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This document outlines the deployment of a Kubernetes v1.31.9 HA cluster on Ubuntu 24.04 using Kubespray v2.27.1.&lt;/p&gt;
 &lt;p&gt;Objective: Establish a robust lab environment with minimum requirements. It can be upgraded to production later by simply adding more worker nodes and migrating to dedicated master nodes.
 Topology: 3-node HA architecture (Control Plane, Etcd, and Worker roles on all nodes).&lt;/p&gt;
