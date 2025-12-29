@@ -412,42 +412,63 @@ swapon<span class="w"> </span>/swfile<span class="w"> </span><span class="c1"># 
 
 <p>Answer copied:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Install</span>
-<span class="n">sudo</span><span class="w"> </span><span class="n">virt</span><span class="o">-</span><span class="n">install</span><span class="w"> \</span>
-<span class="w">  </span><span class="o">--</span><span class="n">name</span><span class="w"> </span><span class="n">mockexam2</span><span class="w"> \</span>
-<span class="w">  </span><span class="o">--</span><span class="n">memory</span><span class="w"> </span><span class="mi">1024</span><span class="w"> \</span>
-<span class="w">  </span><span class="o">--</span><span class="n">vcpus</span><span class="w"> </span><span class="mi">1</span><span class="w"> \</span>
-<span class="w">  </span><span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="n">variant</span><span class="w"> </span><span class="n">ubuntu22</span><span class="mf">.04</span><span class="w"> \</span>
-<span class="w">  </span><span class="o">--</span><span class="n">disk</span><span class="w"> </span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">.</span><span class="n">img</span><span class="w"> \</span>
-<span class="w">  </span><span class="o">--</span><span class="kn">import</span><span class="w"> \</span>
-<span class="w">  </span><span class="o">--</span><span class="n">noautoconsole</span>
+sudo<span class="w"> </span>virt-install<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>mockexam2<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--memory<span class="w"> </span><span class="m">1024</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--vcpus<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--os-variant<span class="w"> </span>ubuntu22.04<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--disk<span class="w"> </span><span class="nv">path</span><span class="o">=</span>/var/lib/libvirt/images/ubuntu.img<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--import<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--noautoconsole
 <span class="c1"># Auto start</span>
-<span class="n">sudo</span><span class="w"> </span><span class="n">virsh</span><span class="w"> </span><span class="n">autostart</span><span class="w"> </span><span class="n">mockexam2</span>
+sudo<span class="w"> </span>virsh<span class="w"> </span>autostart<span class="w"> </span>mockexam2
 </code></pre></div>
 
 <p>Check:</p>
-<div class="highlight"><pre><span></span><code><span class="n">root</span><span class="nv">@caleston</span><span class="o">-</span><span class="n">lp10</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="err">➜</span><span class="w">  </span><span class="n">virsh</span><span class="w"> </span><span class="n">list</span><span class="w"> </span><span class="o">--</span><span class="ow">all</span>
-<span class="w"> </span><span class="n">Id</span><span class="w">   </span><span class="n">Name</span><span class="w">        </span><span class="k">State</span>
-<span class="o">---------------------------</span>
-<span class="w"> </span><span class="mi">1</span><span class="w">    </span><span class="n">mockexam2</span><span class="w">   </span><span class="n">running</span>
+<div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>virsh<span class="w"> </span>list<span class="w"> </span>--all
+<span class="w"> </span>Id<span class="w">   </span>Name<span class="w">        </span>State
+---------------------------
+<span class="w"> </span><span class="m">1</span><span class="w">    </span>mockexam2<span class="w">   </span>running
 </code></pre></div>
 
-<hr>
-<h1>Others</h1>
-<h3>Find process eating high IO</h3>
-<p>First find process first: <code>iotop</code> or <code>pidstat -d 1</code></p>
-<h3>SELinux</h3>
-<p>Get current <code>SELinux</code> mode: <code>getenforce</code> or more detail with <code>sestatus</code></p>
-<div class="highlight"><pre><span></span><code>sestatus
-SELinux<span class="w"> </span>status:<span class="w">                 </span>enabled
-SELinuxfs<span class="w"> </span>mount:<span class="w">                </span>/sys/fs/selinux
-SELinux<span class="w"> </span>root<span class="w"> </span>directory:<span class="w">         </span>/etc/selinux
-Loaded<span class="w"> </span>policy<span class="w"> </span>name:<span class="w">             </span>default
-Current<span class="w"> </span>mode:<span class="w">                   </span>permissive
-Mode<span class="w"> </span>from<span class="w"> </span>config<span class="w"> </span>file:<span class="w">          </span>permissive
-Policy<span class="w"> </span>MLS<span class="w"> </span>status:<span class="w">              </span>enabled
-Policy<span class="w"> </span>deny_unknown<span class="w"> </span>status:<span class="w">     </span>allowed
-Memory<span class="w"> </span>protection<span class="w"> </span>checking:<span class="w">     </span>requested<span class="w"> </span><span class="o">(</span>insecure<span class="o">)</span>
-Max<span class="w"> </span>kernel<span class="w"> </span>policy<span class="w"> </span>version:<span class="w">      </span><span class="m">33</span>
+<p>Create new VM with New Disk:</p>
+<div class="highlight"><pre><span></span><code><span class="sb">```</span>bash
+sudo<span class="w"> </span>virt-install<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--name<span class="w"> </span>myvm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--memory<span class="w"> </span><span class="m">2048</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--vcpus<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--os-variant<span class="w"> </span>ubuntu22.04<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--disk<span class="w"> </span><span class="nv">size</span><span class="o">=</span><span class="m">20</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--cdrom<span class="w"> </span>/path/to/ubuntu.iso<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--network<span class="w"> </span><span class="nv">network</span><span class="o">=</span>default<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--graphics<span class="w"> </span>vnc<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--noautoconsole
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="o">---</span>
+
+<span class="c1"># Others</span>
+
+<span class="c1">### Find process eating high IO</span>
+
+<span class="k">First</span><span class="w"> </span><span class="n">find</span><span class="w"> </span><span class="k">process</span><span class="w"> </span><span class="k">first</span><span class="o">:</span><span class="w"> </span><span class="n n-Quoted">`iotop`</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n n-Quoted">`pidstat -d 1`</span>
+
+<span class="c1">### SELinux</span>
+
+<span class="k">Get</span><span class="w"> </span><span class="k">current</span><span class="w"> </span><span class="n n-Quoted">`SELinux`</span><span class="w"> </span><span class="k">mode</span><span class="o">:</span><span class="w"> </span><span class="n n-Quoted">`getenforce`</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">more</span><span class="w"> </span><span class="n">detail</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n n-Quoted">`sestatus`</span>
+
+<span class="n n-Quoted">`</span><span class="n n-Quoted n-Quoted-Escape">``</span><span class="n n-Quoted">bash</span>
+<span class="n n-Quoted">sestatus</span>
+<span class="n n-Quoted">SELinux status:                 enabled</span>
+<span class="n n-Quoted">SELinuxfs mount:                /sys/fs/selinux</span>
+<span class="n n-Quoted">SELinux root directory:         /etc/selinux</span>
+<span class="n n-Quoted">Loaded policy name:             default</span>
+<span class="n n-Quoted">Current mode:                   permissive</span>
+<span class="n n-Quoted">Mode from config file:          permissive</span>
+<span class="n n-Quoted">Policy MLS status:              enabled</span>
+<span class="n n-Quoted">Policy deny_unknown status:     allowed</span>
+<span class="n n-Quoted">Memory protection checking:     requested (insecure)</span>
+<span class="n n-Quoted">Max kernel policy version:      33</span>
 </code></pre></div>
 
 <p>Check if file that has the wrong SELinux type label: </p>
@@ -492,7 +513,7 @@ root@node01<span class="w"> </span>~<span class="w"> </span>➜<span class="w"> 
 </code></pre></div>
 
 <p>For Exam: <code>man netplan</code></p>
-<h3>Iptables ...</h3>
+<h3>Iptables</h3>
 <ul>
 <li>Redirect rule: redirects any IPv4 packet from the 10.5.5.0/24 CIDR range incoming on port 81 to another machine with the IP address 192.168.5.2 on port 80.</li>
 </ul>
@@ -510,6 +531,109 @@ root@node01<span class="w"> </span>~<span class="w"> </span>➜<span class="w"> 
 </ul>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>iptables-persistent
 </code></pre></div>
+
+<h3>OpenSSL Cheat Sheet for LFCS</h3>
+<ul>
+<li>
+<ol>
+<li>Generate Private Key</li>
+</ol>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>genrsa<span class="w"> </span>-out<span class="w"> </span>server.key<span class="w"> </span><span class="m">2048</span>
+</code></pre></div>
+
+<ul>
+<li>
+<ol>
+<li>Generate CSR (Certificate Signing Request)</li>
+</ol>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>req<span class="w"> </span>-new<span class="w"> </span>-key<span class="w"> </span>server.key<span class="w"> </span>-out<span class="w"> </span>server.csr
+</code></pre></div>
+
+<ul>
+<li>
+<ol>
+<li>Generate Self-signed Cert (single command)</li>
+</ol>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>req<span class="w"> </span>-x509<span class="w"> </span>-nodes<span class="w"> </span>-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>-newkey<span class="w"> </span>rsa:2048<span class="w"> </span>-keyout<span class="w"> </span>server.key<span class="w"> </span>-out<span class="w"> </span>server.crt
+</code></pre></div>
+
+<ul>
+<li>
+<ol>
+<li>View Information</li>
+</ol>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># View cert</span>
+openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>server.crt<span class="w"> </span>-noout<span class="w"> </span>-text
+openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>server.crt<span class="w"> </span>-noout<span class="w"> </span>-subject
+openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>server.crt<span class="w"> </span>-noout<span class="w"> </span>-dates
+
+<span class="c1"># View CSR</span>
+openssl<span class="w"> </span>req<span class="w"> </span>-in<span class="w"> </span>server.csr<span class="w"> </span>-noout<span class="w"> </span>-text
+
+<span class="c1"># View private key</span>
+openssl<span class="w"> </span>rsa<span class="w"> </span>-in<span class="w"> </span>server.key<span class="w"> </span>-check
+</code></pre></div>
+
+<ul>
+<li>
+<ol>
+<li>Verify cert and key match</li>
+</ol>
+</li>
+</ul>
+<div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>server.crt<span class="w"> </span>-noout<span class="w"> </span>-modulus<span class="w"> </span><span class="p">|</span><span class="w"> </span>md5sum
+openssl<span class="w"> </span>rsa<span class="w"> </span>-in<span class="w"> </span>server.key<span class="w"> </span>-noout<span class="w"> </span>-modulus<span class="w"> </span><span class="p">|</span><span class="w"> </span>md5sum
+<span class="c1"># Both must be identical</span>
+</code></pre></div>
+
+<ul>
+<li>Quick Reference</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Keyword</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Generate key</td>
+<td><code>genrsa</code></td>
+</tr>
+<tr>
+<td>Generate CSR</td>
+<td><code>req -new</code></td>
+</tr>
+<tr>
+<td>Generate self-signed</td>
+<td><code>req -x509</code></td>
+</tr>
+<tr>
+<td>View cert</td>
+<td><code>x509 -in</code></td>
+</tr>
+<tr>
+<td>View CSR</td>
+<td><code>req -in</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Basic Flow</li>
+</ul>
+<p><code>genrsa</code> → <code>req -new</code> → CA sign → <code>.crt</code></p>
+<ul>
+<li>Or shortcut: <code>req -x509 -newkey</code> (generate key + cert at once)</li>
+</ul>
 
 
              
