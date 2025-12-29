@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2025-12-31T00:00:00+07:00</updated><entry><title>[WIP] Linux Foundation Certified System Administrator (LFCS)</title><link href="https://blackmetalz.github.io/wip-linux-foundation-certified-system-administrator-lfcs.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-linux-foundation-certified-system-administrator-lfcs.html</id><summary type="html"/><content type="html">&lt;h1&gt;Sections&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2025-12-31T00:00:00+07:00</updated><entry><title>Prepare for Linux Foundation Certified System Administrator (LFCS)</title><link href="https://blackmetalz.github.io/prepare-for-linux-foundation-certified-system-administrator-lfcs.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/prepare-for-linux-foundation-certified-system-administrator-lfcs.html</id><summary type="html"/><content type="html">&lt;h1&gt;Sections&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;Introduction&lt;/li&gt;
 &lt;li&gt;IO Redirection&lt;/li&gt;
@@ -10,6 +10,7 @@
 &lt;li&gt;Fallocate and Swap&lt;/li&gt;
 &lt;li&gt;Manage Virtual Machines (libvirt)&lt;/li&gt;
 &lt;li&gt;Others&lt;/li&gt;
+&lt;li&gt;Conclusion&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr&gt;
 &lt;h1&gt;Introduction&lt;/h1&gt;
@@ -548,7 +549,9 @@ openssl&lt;span class="w"&gt; &lt;/span&gt;rsa&lt;span class="w"&gt; &lt;/span&g
 &lt;p&gt;&lt;code&gt;genrsa&lt;/code&gt; → &lt;code&gt;req -new&lt;/code&gt; → CA sign → &lt;code&gt;.crt&lt;/code&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Or shortcut: &lt;code&gt;req -x509 -newkey&lt;/code&gt; (generate key + cert at once)&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="certification"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;/ul&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;Passing this exam is not satisfactory as much as the knowledge I learn and remember while preparing for this exam!&lt;/p&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="certification"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This document outlines the deployment of a Kubernetes v1.31.9 HA cluster on Ubuntu 24.04 using Kubespray v2.27.1.&lt;/p&gt;
 &lt;p&gt;Objective: Establish a robust lab environment with minimum requirements. It can be upgraded to production later by simply adding more worker nodes and migrating to dedicated master nodes.
 Topology: 3-node HA architecture (Control Plane, Etcd, and Worker roles on all nodes).&lt;/p&gt;
