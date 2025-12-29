@@ -80,9 +80,19 @@
             
             <h1>Sections</h1>
 <ul>
+<li>Introduction</li>
 <li>IO Redirection</li>
 <li>LVM</li>
+<li>Advanced Permissions</li>
+<li>Special Bits</li>
+<li>Security Limit / Resource Limit</li>
+<li>Fallocate and Swap</li>
+<li>Manage Virtual Machines (libvirt)</li>
+<li>Others</li>
 </ul>
+<hr>
+<h1>Introduction</h1>
+<p>Holy fuck, I lost basic, very, very much!</p>
 <hr>
 <h1>IO Redirection</h1>
 <p>I think this is the most command I often used but never understand correctly, LOL. Yes, it is <code>2&gt;&amp;1</code>. But no more, today I swear I will remember and understand it! So let's take an example:</p>
@@ -265,6 +275,218 @@ root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span clas
 <p>Command: <code>mkfs.xfs /dev/volume1/smalldata</code></p>
 <div class="highlight"><pre><span></span><code>mkfs.xfs<span class="w"> </span>/dev/volume1/smalldata
 </code></pre></div>
+
+<hr>
+<h1>Advanced Permissions</h1>
+<h3>Get ACL</h3>
+<p>Question: Check permission for user <code>john</code> in file <code>archive</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">root</span><span class="nv">@caleston</span><span class="o">-</span><span class="n">lp10</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="err">➜</span><span class="w">  </span><span class="n">ls</span><span class="w"> </span><span class="o">-</span><span class="n">lia</span>
+<span class="n">total</span><span class="w"> </span><span class="mi">44</span>
+<span class="mi">1572865</span><span class="w"> </span><span class="n">drwx</span><span class="o">------</span><span class="p">.</span><span class="w">  </span><span class="mi">7</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="mi">4096</span><span class="w"> </span><span class="k">Dec</span><span class="w"> </span><span class="mi">29</span><span class="w"> </span><span class="mi">05</span><span class="err">:</span><span class="mi">16</span><span class="w"> </span><span class="p">.</span>
+<span class="w">      </span><span class="mi">2</span><span class="w"> </span><span class="n">drwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span><span class="p">.</span><span class="w"> </span><span class="mi">19</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="mi">4096</span><span class="w"> </span><span class="n">Sep</span><span class="w"> </span><span class="mi">19</span><span class="w">  </span><span class="mi">2024</span><span class="w"> </span><span class="p">..</span>
+<span class="mi">1572885</span><span class="w"> </span><span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">r</span><span class="c1">--r--+  1 root root    0 Dec 29 05:16 archive</span>
+</code></pre></div>
+
+<p>We already know <code>others</code> only has read permission, and <code>john</code> is in <code>others</code>. There is another way give same output</p>
+<div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>getfacl<span class="w"> </span>archive<span class="w"> </span>
+<span class="c1"># file: archive</span>
+<span class="c1"># owner: root</span>
+<span class="c1"># group: root</span>
+user::rw-
+user:john:r--
+group::r--
+mask::r--
+other::r--
+</code></pre></div>
+
+<h3>Set ACL</h3>
+<p>We have this file <code>specialfile</code>, we want to add <code>john</code> can <code>read and write</code> it</p>
+<div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>✖<span class="w"> </span>getfacl<span class="w"> </span>specialfile<span class="w"> </span>
+<span class="c1"># file: specialfile</span>
+<span class="c1"># owner: root</span>
+<span class="c1"># group: root</span>
+user::rw-
+group::r--
+other::r--
+<span class="c1">####</span>
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>setfacl<span class="w"> </span>--modify<span class="w"> </span>user:john:rw<span class="w"> </span>specialfile<span class="w"> </span>
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>getfacl<span class="w"> </span>specialfile<span class="w"> </span><span class="p">|</span>grep<span class="w"> </span>john
+user:john:rw-
+<span class="c1">### For group mail and permission read and execute</span>
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>setfacl<span class="w"> </span>--modify<span class="w"> </span>group:mail:rx<span class="w"> </span>specialfile<span class="w"> </span>
+<span class="c1">### For recursive within folder</span>
+setfacl<span class="w"> </span>--recursive<span class="w"> </span>--modify<span class="w"> </span>user:john:rwx<span class="w"> </span>collection/
+</code></pre></div>
+
+<h3>Remove ACL</h3>
+<div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>✖<span class="w"> </span>setfacl<span class="w"> </span>--remove<span class="w"> </span>user:john<span class="w"> </span>specialfile
+
+root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>getfacl<span class="w"> </span>specialfile<span class="w"> </span><span class="p">|</span>grep<span class="w"> </span>john
+</code></pre></div>
+
+<h3>Create Raid 1</h3>
+<p>Question: Create Raid 1 named <code>/dev/md0</code> with 2 disk <code>/dev/vdb</code> <code>/dev/vdc</code></p>
+<div class="highlight"><pre><span></span><code>root@caleston-lp10<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>mdadm<span class="w"> </span>--create<span class="w"> </span>/dev/md0<span class="w"> </span>--level<span class="o">=</span><span class="m">1</span><span class="w"> </span>--raid-devices<span class="o">=</span><span class="m">2</span><span class="w"> </span>/dev/vdb<span class="w"> </span>/dev/vdc
+mdadm:<span class="w"> </span>Note:<span class="w"> </span>this<span class="w"> </span>array<span class="w"> </span>has<span class="w"> </span>metadata<span class="w"> </span>at<span class="w"> </span>the<span class="w"> </span>start<span class="w"> </span>and
+<span class="w">    </span>may<span class="w"> </span>not<span class="w"> </span>be<span class="w"> </span>suitable<span class="w"> </span>as<span class="w"> </span>a<span class="w"> </span>boot<span class="w"> </span>device.<span class="w">  </span>If<span class="w"> </span>you<span class="w"> </span>plan<span class="w"> </span>to
+<span class="w">    </span>store<span class="w"> </span><span class="s1">&#39;/boot&#39;</span><span class="w"> </span>on<span class="w"> </span>this<span class="w"> </span>device<span class="w"> </span>please<span class="w"> </span>ensure<span class="w"> </span>that
+<span class="w">    </span>your<span class="w"> </span>boot-loader<span class="w"> </span>understands<span class="w"> </span>md/v1.x<span class="w"> </span>metadata,<span class="w"> </span>or<span class="w"> </span>use
+<span class="w">    </span>--metadata<span class="o">=</span><span class="m">0</span>.90
+Continue<span class="w"> </span>creating<span class="w"> </span>array?<span class="w"> </span>
+Continue<span class="w"> </span>creating<span class="w"> </span>array?<span class="w"> </span><span class="o">(</span>y/n<span class="o">)</span><span class="w"> </span>y
+mdadm:<span class="w"> </span>Defaulting<span class="w"> </span>to<span class="w"> </span>version<span class="w"> </span><span class="m">1</span>.2<span class="w"> </span>metadata
+mdadm:<span class="w"> </span>array<span class="w"> </span>/dev/md0<span class="w"> </span>started.
+</code></pre></div>
+
+<h1>Special Bits</h1>
+<p>Haha, I still don't remember this enough like common permission. I guess I rarely use it. So this is a chance for me, to write a document, whenever I forget, I read this document again!</p>
+<h3>SetUID (Set User ID): 4</h3>
+<p>So when execute a binary that have this bit, anyone executes that file will has permission like owner of file (permission borrow?)</p>
+<p>Example: <code>passwd</code>
+Symbol: <code>rwsr-xr-x</code> ==&gt; 4755</p>
+<div class="highlight"><pre><span></span><code>ll<span class="w"> </span>/usr/bin/passwd
+-rwsr-xr-x.<span class="w"> </span><span class="m">1</span><span class="w"> </span>root<span class="w"> </span>root<span class="w"> </span><span class="m">59976</span><span class="w"> </span>Feb<span class="w">  </span><span class="m">6</span><span class="w">  </span><span class="m">2024</span><span class="w"> </span>/usr/bin/passwd*
+</code></pre></div>
+
+<p>If owner doesn't have executes: </p>
+<div class="highlight"><pre><span></span><code><span class="c1"># ll</span>
+-rw-rw-r--.<span class="w"> </span><span class="m">1</span><span class="w"> </span>bob<span class="w">  </span>bob<span class="w">     </span><span class="m">0</span><span class="w"> </span>Dec<span class="w"> </span><span class="m">29</span><span class="w"> </span><span class="m">07</span>:47<span class="w"> </span>test.txt
+<span class="c1"># chmod 4644 test.txt &amp;&amp; ll</span>
+-rwSr--r--.<span class="w"> </span><span class="m">1</span><span class="w"> </span>bob<span class="w">  </span>bob<span class="w">     </span><span class="m">0</span><span class="w"> </span>Dec<span class="w"> </span><span class="m">29</span><span class="w"> </span><span class="m">07</span>:47<span class="w"> </span>test.txt
+</code></pre></div>
+
+<h3>SetGID (Set Group ID): 2</h3>
+<p>This is more interesting, especially when applied to <strong>directories</strong>.</p>
+<ul>
+<li>
+<p><strong>On a file</strong>: When you run the file, it runs with the <strong>group permissions</strong> of the file’s group owner (you "borrow" the group’s rights).</p>
+</li>
+<li>
+<p><strong>On a directory</strong> (this is the most common and useful case):<br>
+  Any file or subdirectory created inside this folder will <strong>automatically inherit the group owner</strong> of the parent directory — instead of taking the group of the user who created it.</p>
+</li>
+</ul>
+<p><strong>Real benefit</strong>: In team shared folders, this ensures everyone in the same group can read, write, and manage each other’s files without needing to manually change ownership every time.</p>
+<h3>Sticky Bit: 1</h3>
+<p>This commonly used by directory to protect file getting deleted.</p>
+<p>Mechanic: If folder has stick bit set, only owner or root has permission to delete/rename/... that file.</p>
+<p>Example: <code>/tmp</code> folder, Everyone can create file in that, but you can not delete file of other user</p>
+<p>Symbol: <code>t</code> in the last (<code>rwxrwxrwt</code>)</p>
+<div class="highlight"><pre><span></span><code>drwxrwxrwt.<span class="w">  </span><span class="m">11</span><span class="w"> </span>root<span class="w"> </span>root<span class="w">       </span><span class="m">4096</span><span class="w"> </span>Dec<span class="w"> </span><span class="m">29</span><span class="w"> </span><span class="m">07</span>:48<span class="w"> </span>tmp/
+</code></pre></div>
+
+<hr>
+<h1>Security Limit / Resource Limit</h1>
+<p>Haha, I often used for increase max open file of mysql server instance. Read <code>/etc/security/limits.conf</code></p>
+<p>Scenario: Set limit for user <code>john</code> that he can open no more than 30 process. Set limit for user <code>jane</code> that she can not create file more than 1024kb, soft limit</p>
+<div class="highlight"><pre><span></span><code>john<span class="w"> </span>hard<span class="w"> </span>nproc<span class="w"> </span><span class="m">30</span>
+jane<span class="w"> </span>soft<span class="w"> </span>fsize<span class="w"> </span><span class="m">1024</span>
+</code></pre></div>
+
+<hr>
+<h1>Fallocate and Swap</h1>
+<p>For the exam....</p>
+<div class="highlight"><pre><span></span><code>fallocate<span class="w"> </span>-l<span class="w"> </span>1024M<span class="w"> </span>/swfile<span class="w"> </span><span class="c1"># Locate file</span>
+chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/swfile<span class="w"> </span><span class="c1"># Change permission</span>
+mkswap<span class="w"> </span>/swfile<span class="w"> </span><span class="c1"># Create swap</span>
+swapon<span class="w"> </span>/swfile<span class="w"> </span><span class="c1"># Enable swap</span>
+/swfile<span class="w"> </span>none<span class="w"> </span>swap<span class="w"> </span>sw<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="c1"># mount on boot in /etc/fstab</span>
+</code></pre></div>
+
+<hr>
+<h1>Manage Virtual Machines (libvirt)</h1>
+<p>Shiet, I have no fucking idea about this!!!!</p>
+<p>Question:</p>
+<div class="highlight"><pre><span></span><code><span class="n">For</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">operating</span><span class="w"> </span><span class="n">system</span><span class="w"> </span><span class="n">information</span><span class="w"> </span><span class="n">parameter</span><span class="w"> </span><span class="n">use</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">ubuntu22</span><span class="o">.</span><span class="mf">04.</span>
+<span class="n">Name</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">virtual</span><span class="w"> </span><span class="n">machine</span><span class="w"> </span><span class="n">mockexam2</span><span class="o">.</span>
+<span class="n">Assign</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="n">MB</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">RAM</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">machine</span><span class="o">.</span>
+<span class="n">Assign</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">one</span><span class="w"> </span><span class="n">virtual</span><span class="w"> </span><span class="n">CPU</span><span class="o">.</span>
+<span class="n">Import</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">disk</span><span class="w"> </span><span class="n">image</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">.</span><span class="n">img</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">virtual</span><span class="w"> </span><span class="n">machine</span><span class="o">.</span>
+<span class="n">At</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">end</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">command</span><span class="p">,</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">add</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">parameter</span><span class="w"> </span><span class="o">--</span><span class="n">noautoconsole</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">avoid</span><span class="w"> </span><span class="n">waiting</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">virtual</span><span class="w"> </span><span class="n">machine</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">boot</span><span class="w"> </span><span class="n">up</span><span class="p">,</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">get</span><span class="w"> </span><span class="n">stuck</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">virtual</span><span class="w"> </span><span class="n">console</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">initializes</span><span class="o">.</span>
+</code></pre></div>
+
+<p>Answer copied:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install</span>
+<span class="n">sudo</span><span class="w"> </span><span class="n">virt</span><span class="o">-</span><span class="n">install</span><span class="w"> \</span>
+<span class="w">  </span><span class="o">--</span><span class="n">name</span><span class="w"> </span><span class="n">mockexam2</span><span class="w"> \</span>
+<span class="w">  </span><span class="o">--</span><span class="n">memory</span><span class="w"> </span><span class="mi">1024</span><span class="w"> \</span>
+<span class="w">  </span><span class="o">--</span><span class="n">vcpus</span><span class="w"> </span><span class="mi">1</span><span class="w"> \</span>
+<span class="w">  </span><span class="o">--</span><span class="n">os</span><span class="o">-</span><span class="n">variant</span><span class="w"> </span><span class="n">ubuntu22</span><span class="mf">.04</span><span class="w"> \</span>
+<span class="w">  </span><span class="o">--</span><span class="n">disk</span><span class="w"> </span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libvirt</span><span class="o">/</span><span class="n">images</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">.</span><span class="n">img</span><span class="w"> \</span>
+<span class="w">  </span><span class="o">--</span><span class="kn">import</span><span class="w"> \</span>
+<span class="w">  </span><span class="o">--</span><span class="n">noautoconsole</span>
+<span class="c1"># Auto start</span>
+<span class="n">sudo</span><span class="w"> </span><span class="n">virsh</span><span class="w"> </span><span class="n">autostart</span><span class="w"> </span><span class="n">mockexam2</span>
+</code></pre></div>
+
+<p>Check:</p>
+<div class="highlight"><pre><span></span><code><span class="n">root</span><span class="nv">@caleston</span><span class="o">-</span><span class="n">lp10</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="err">➜</span><span class="w">  </span><span class="n">virsh</span><span class="w"> </span><span class="n">list</span><span class="w"> </span><span class="o">--</span><span class="ow">all</span>
+<span class="w"> </span><span class="n">Id</span><span class="w">   </span><span class="n">Name</span><span class="w">        </span><span class="k">State</span>
+<span class="o">---------------------------</span>
+<span class="w"> </span><span class="mi">1</span><span class="w">    </span><span class="n">mockexam2</span><span class="w">   </span><span class="n">running</span>
+</code></pre></div>
+
+<hr>
+<h1>Others</h1>
+<h3>Find process eating high IO</h3>
+<p>First find process first: <code>iotop</code> or <code>pidstat -d 1</code></p>
+<h3>SELinux</h3>
+<p>Get current <code>SELinux</code> mode: <code>getenforce</code> or more detail with <code>sestatus</code></p>
+<div class="highlight"><pre><span></span><code>sestatus
+SELinux<span class="w"> </span>status:<span class="w">                 </span>enabled
+SELinuxfs<span class="w"> </span>mount:<span class="w">                </span>/sys/fs/selinux
+SELinux<span class="w"> </span>root<span class="w"> </span>directory:<span class="w">         </span>/etc/selinux
+Loaded<span class="w"> </span>policy<span class="w"> </span>name:<span class="w">             </span>default
+Current<span class="w"> </span>mode:<span class="w">                   </span>permissive
+Mode<span class="w"> </span>from<span class="w"> </span>config<span class="w"> </span>file:<span class="w">          </span>permissive
+Policy<span class="w"> </span>MLS<span class="w"> </span>status:<span class="w">              </span>enabled
+Policy<span class="w"> </span>deny_unknown<span class="w"> </span>status:<span class="w">     </span>allowed
+Memory<span class="w"> </span>protection<span class="w"> </span>checking:<span class="w">     </span>requested<span class="w"> </span><span class="o">(</span>insecure<span class="o">)</span>
+Max<span class="w"> </span>kernel<span class="w"> </span>policy<span class="w"> </span>version:<span class="w">      </span><span class="m">33</span>
+</code></pre></div>
+
+<p>Check if file that has the wrong SELinux type label: </p>
+<div class="highlight"><pre><span></span><code>ls<span class="w"> </span>-Z<span class="w"> </span>/usr/bin/less
+system_u:object_r:user_tmp_t:s0<span class="w"> </span>/usr/bin/less
+</code></pre></div>
+
+<p>Fix: </p>
+<div class="highlight"><pre><span></span><code>root@node01<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>ls<span class="w"> </span>-Z<span class="w"> </span>/usr/bin/less
+system_u:object_r:bin_t:s0<span class="w"> </span>/usr/bin/less
+</code></pre></div>
+
+<h3>Create bridge network</h3>
+<p>Question: have 2 interfaces <code>eth1</code> and <code>eth2</code>,turn DHCP off</p>
+<p>Answer: edit file <code>/etc/netplan/60-bridge.yaml</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">network</span><span class="o">:</span>
+<span class="w">  </span><span class="n">version</span><span class="o">:</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">  </span><span class="n">ethernets</span><span class="o">:</span>
+<span class="w">    </span><span class="n">eth1</span><span class="o">:</span>
+<span class="w">      </span><span class="n">dhcp4</span><span class="o">:</span><span class="w"> </span><span class="n">no</span>
+<span class="w">    </span><span class="n">eth2</span><span class="o">:</span>
+<span class="w">      </span><span class="n">dhcp4</span><span class="o">:</span><span class="w"> </span><span class="n">no</span>
+<span class="w">  </span><span class="n">bridges</span><span class="o">:</span>
+<span class="w">    </span><span class="n">bridge1</span><span class="o">:</span>
+<span class="w">      </span><span class="n">interfaces</span><span class="o">:</span><span class="w"> </span><span class="o">[</span><span class="n">eth1</span><span class="o">,</span><span class="w"> </span><span class="n">eth2</span><span class="o">]</span>
+<span class="w">      </span><span class="n">dhcp4</span><span class="o">:</span><span class="w"> </span><span class="n">yes</span>
+</code></pre></div>
+
+<p>Run command: <code>netplan apply</code>
+Check: </p>
+<div class="highlight"><pre><span></span><code>root@node01<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>ip<span class="w"> </span>addr<span class="w"> </span>show<span class="w"> </span>bridge1
+<span class="m">6</span>:<span class="w"> </span>bridge1:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>group<span class="w"> </span>default<span class="w"> </span>qlen<span class="w"> </span><span class="m">1000</span>
+<span class="w">    </span>link/ether<span class="w"> </span><span class="m">22</span>:17:8b:bb:af:16<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff
+<span class="w">    </span>inet<span class="w"> </span><span class="m">172</span>.28.128.239/24<span class="w"> </span>metric<span class="w"> </span><span class="m">100</span><span class="w"> </span>brd<span class="w"> </span><span class="m">172</span>.28.128.255<span class="w"> </span>scope<span class="w"> </span>global<span class="w"> </span>dynamic<span class="w"> </span>bridge1
+<span class="w">       </span>valid_lft<span class="w"> </span>3585sec<span class="w"> </span>preferred_lft<span class="w"> </span>3585sec
+<span class="w">    </span>inet6<span class="w"> </span>fe80::2017:8bff:febb:af16/64<span class="w"> </span>scope<span class="w"> </span>link<span class="w"> </span>
+<span class="w">       </span>valid_lft<span class="w"> </span>forever<span class="w"> </span>preferred_lft<span class="w"> </span>forever
+root@node01<span class="w"> </span>~<span class="w"> </span>➜<span class="w">  </span>bridge<span class="w"> </span>link<span class="w"> </span>show
+<span class="m">3</span>:<span class="w"> </span>eth1:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>master<span class="w"> </span>bridge1<span class="w"> </span>state<span class="w"> </span>forwarding<span class="w"> </span>priority<span class="w"> </span><span class="m">32</span><span class="w"> </span>cost<span class="w"> </span><span class="m">100</span><span class="w"> </span>
+<span class="m">4</span>:<span class="w"> </span>eth2:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>master<span class="w"> </span>bridge1<span class="w"> </span>state<span class="w"> </span>forwarding<span class="w"> </span>priority<span class="w"> </span><span class="m">32</span><span class="w"> </span>cost<span class="w"> </span><span class="m">100</span><span class="w"> </span>
+</code></pre></div>
+
+<p>For Exam: <code>man netplan</code></p>
+<hr>
 
 
              
