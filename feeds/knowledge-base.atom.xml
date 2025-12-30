@@ -905,164 +905,7 @@
 &lt;/ul&gt;
 &lt;/blockquote&gt;
 &lt;hr&gt;
-&lt;h3&gt;10. Troubleshooting Commands&lt;/h3&gt;
-&lt;p&gt;&lt;em&gt;Domain: Troubleshooting&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;Essential &lt;code&gt;istioctl&lt;/code&gt; commands for the exam.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Installation &amp;amp; Verification:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Install Istio&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;--set&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;profile&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;demo&lt;span class="w"&gt; &lt;/span&gt;-y
-
-&lt;span class="c1"&gt;# Verify installation&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;verify-install
-
-&lt;span class="c1"&gt;# Check Istio version&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;version
-
-&lt;span class="c1"&gt;# View installation profile&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;profile&lt;span class="w"&gt; &lt;/span&gt;dump&lt;span class="w"&gt; &lt;/span&gt;demo
-istioctl&lt;span class="w"&gt; &lt;/span&gt;profile&lt;span class="w"&gt; &lt;/span&gt;diff&lt;span class="w"&gt; &lt;/span&gt;default&lt;span class="w"&gt; &lt;/span&gt;demo
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;strong&gt;Analyze Configuration:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Analyze entire mesh for issues&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;analyze
-
-&lt;span class="c1"&gt;# Analyze specific namespace&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;analyze&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;production
-
-&lt;span class="c1"&gt;# Analyze specific file&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;analyze&lt;span class="w"&gt; &lt;/span&gt;my-config.yaml
-
-&lt;span class="c1"&gt;# Common issues detected:&lt;/span&gt;
-&lt;span class="c1"&gt;# - IST0101: Referenced gateway not found&lt;/span&gt;
-&lt;span class="c1"&gt;# - IST0102: Referenced host not found&lt;/span&gt;
-&lt;span class="c1"&gt;# - IST0106: Schema validation error&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;strong&gt;Proxy Status &amp;amp; Sync:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Check proxy sync status with control plane&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-status
-&lt;span class="c1"&gt;# Output columns: NAME, CDS, LDS, EDS, RDS, ECDS, ISTIOD&lt;/span&gt;
-
-&lt;span class="c1"&gt;# Status meanings:&lt;/span&gt;
-&lt;span class="c1"&gt;# SYNCED - Config synced with control plane&lt;/span&gt;
-&lt;span class="c1"&gt;# NOT SENT - Config not sent (usually no listeners)&lt;/span&gt;
-&lt;span class="c1"&gt;# STALE - Config outdated&lt;/span&gt;
-
-&lt;span class="c1"&gt;# Debug specific proxy&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-status&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;.&amp;lt;namespace&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;strong&gt;Proxy Configuration:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# View proxy configuration summary&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-config&lt;span class="w"&gt; &lt;/span&gt;all&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;namespace&amp;gt;
-
-&lt;span class="c1"&gt;# View specific config types&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-config&lt;span class="w"&gt; &lt;/span&gt;routes&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;namespace&amp;gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-config&lt;span class="w"&gt; &lt;/span&gt;clusters&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;namespace&amp;gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-config&lt;span class="w"&gt; &lt;/span&gt;listeners&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;namespace&amp;gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-config&lt;span class="w"&gt; &lt;/span&gt;endpoints&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;namespace&amp;gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-config&lt;span class="w"&gt; &lt;/span&gt;secrets&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;namespace&amp;gt;
-
-&lt;span class="c1"&gt;# Output as JSON for detailed analysis&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-config&lt;span class="w"&gt; &lt;/span&gt;routes&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;json
-
-&lt;span class="c1"&gt;# Filter by service&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-config&lt;span class="w"&gt; &lt;/span&gt;clusters&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;--fqdn&lt;span class="w"&gt; &lt;/span&gt;reviews.default.svc.cluster.local
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;strong&gt;Debug &amp;amp; Logging:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Enable debug logging on proxy&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-config&lt;span class="w"&gt; &lt;/span&gt;log&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;--level&lt;span class="w"&gt; &lt;/span&gt;debug
-
-&lt;span class="c1"&gt;# Enable specific component logging&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-config&lt;span class="w"&gt; &lt;/span&gt;log&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;--level&lt;span class="w"&gt; &lt;/span&gt;connection:debug,http:debug
-
-&lt;span class="c1"&gt;# View Envoy access logs (in pod)&lt;/span&gt;
-kubectl&lt;span class="w"&gt; &lt;/span&gt;logs&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;-c&lt;span class="w"&gt; &lt;/span&gt;istio-proxy&lt;span class="w"&gt; &lt;/span&gt;-f
-
-&lt;span class="c1"&gt;# Describe proxy (detailed info)&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &lt;/span&gt;describe&lt;span class="w"&gt; &lt;/span&gt;pod&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;strong&gt;Dashboard &amp;amp; Visualization:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Open Kiali dashboard&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;dashboard&lt;span class="w"&gt; &lt;/span&gt;kiali
-
-&lt;span class="c1"&gt;# Open Grafana&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;dashboard&lt;span class="w"&gt; &lt;/span&gt;grafana
-
-&lt;span class="c1"&gt;# Open Jaeger (tracing)&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;dashboard&lt;span class="w"&gt; &lt;/span&gt;jaeger
-
-&lt;span class="c1"&gt;# Open Envoy admin interface&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;dashboard&lt;span class="w"&gt; &lt;/span&gt;envoy&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;
-
-&lt;span class="c1"&gt;# Open Prometheus&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;dashboard&lt;span class="w"&gt; &lt;/span&gt;prometheus
-
-&lt;span class="c1"&gt;# Open istiod control plane&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;dashboard&lt;span class="w"&gt; &lt;/span&gt;controlz&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;istiod-pod&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;strong&gt;Injection &amp;amp; Labeling:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Check if namespace has auto-injection enabled&lt;/span&gt;
-kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;namespace&lt;span class="w"&gt; &lt;/span&gt;-L&lt;span class="w"&gt; &lt;/span&gt;istio-injection
-
-&lt;span class="c1"&gt;# Enable auto-injection&lt;/span&gt;
-kubectl&lt;span class="w"&gt; &lt;/span&gt;label&lt;span class="w"&gt; &lt;/span&gt;namespace&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;ns&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;istio-injection&lt;span class="o"&gt;=&lt;/span&gt;enabled
-
-&lt;span class="c1"&gt;# Disable auto-injection&lt;/span&gt;
-kubectl&lt;span class="w"&gt; &lt;/span&gt;label&lt;span class="w"&gt; &lt;/span&gt;namespace&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;ns&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;istio-injection-
-
-&lt;span class="c1"&gt;# Manual injection&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;kube-inject&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;deployment.yaml&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;apply&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;-
-
-&lt;span class="c1"&gt;# Check injection status&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &lt;/span&gt;check-inject&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;namespace&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;strong&gt;Common Troubleshooting Scenarios:&lt;/strong&gt;&lt;/p&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;Symptom&lt;/th&gt;
-&lt;th&gt;Command&lt;/th&gt;
-&lt;th&gt;What to Check&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;503 errors&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;istioctl proxy-config clusters&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Cluster health, endpoints&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Routing not working&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;istioctl proxy-config routes&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;VirtualService applied correctly&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Config not applied&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;istioctl analyze&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Configuration errors&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Sidecar not injected&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;kubectl get pod -o yaml&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Injection labels&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://istio.io/latest/docs/reference/commands/istioctl/"&gt;istioctl Reference&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://istio.io/latest/docs/ops/diagnostic-tools/"&gt;Troubleshooting Guide&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/blockquote&gt;
-&lt;hr&gt;
-&lt;h3&gt;11. Installation &amp;amp; Upgrade&lt;/h3&gt;
+&lt;h3&gt;10. Installation &amp;amp; Upgrade&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;Domain: Installation, Upgrade &amp;amp; Configuration&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Installation Profiles:&lt;/strong&gt;&lt;/p&gt;
 &lt;table&gt;
@@ -1123,6 +966,12 @@ helm&lt;span class="w"&gt; &lt;/span&gt;repo&lt;span class="w"&gt; &lt;/span&gt;
 helm&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;istio-base&lt;span class="w"&gt; &lt;/span&gt;istio/base&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;istio-system&lt;span class="w"&gt; &lt;/span&gt;--create-namespace
 helm&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;istiod&lt;span class="w"&gt; &lt;/span&gt;istio/istiod&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;istio-system
 helm&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;istio-ingress&lt;span class="w"&gt; &lt;/span&gt;istio/gateway&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;istio-ingress&lt;span class="w"&gt; &lt;/span&gt;--create-namespace
+
+&lt;span class="c1"&gt;# Verify installation&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;verify-install
+
+&lt;span class="c1"&gt;# Check Istio version&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;version
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;IstioOperator Custom Configuration:&lt;/strong&gt;&lt;/p&gt;
@@ -1194,7 +1043,7 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;uninstall&lt;span class="w"&gt; &lt;
 &lt;li&gt;&lt;a href="https://istio.io/latest/docs/setup/upgrade/"&gt;Upgrade Guide&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/blockquote&gt;
-&lt;h3&gt;12. What is WorkloadGroup?&lt;/h3&gt;
+&lt;h3&gt;11. What is WorkloadGroup?&lt;/h3&gt;
 &lt;p&gt;WorkloadGroup = Template to create WorkloadEntry, like Deployment for Pod xD&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;WorkloadGroup&lt;/span&gt;
@@ -1347,99 +1196,78 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;uninstall&lt;span class="w"&gt; &lt;
 &lt;/table&gt;
 &lt;hr&gt;
 &lt;h1&gt;Istio CLI Cheat Sheet&lt;/h1&gt;
-&lt;h3&gt;Installation&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;Domain: Troubleshooting&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Essential &lt;code&gt;istioctl&lt;/code&gt; commands for the exam.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Debug &amp;amp; Logging:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Enable debug logging on proxy&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-config&lt;span class="w"&gt; &lt;/span&gt;log&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;--level&lt;span class="w"&gt; &lt;/span&gt;debug
+
+&lt;span class="c1"&gt;# Enable specific component logging&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-config&lt;span class="w"&gt; &lt;/span&gt;log&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;--level&lt;span class="w"&gt; &lt;/span&gt;connection:debug,http:debug
+
+&lt;span class="c1"&gt;# View Envoy access logs (in pod)&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;logs&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;-c&lt;span class="w"&gt; &lt;/span&gt;istio-proxy&lt;span class="w"&gt; &lt;/span&gt;-f
+
+&lt;span class="c1"&gt;# Describe proxy (detailed info)&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &lt;/span&gt;describe&lt;span class="w"&gt; &lt;/span&gt;pod&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Injection &amp;amp; Labeling:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Check if namespace has auto-injection enabled&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;namespace&lt;span class="w"&gt; &lt;/span&gt;-L&lt;span class="w"&gt; &lt;/span&gt;istio-injection
+
+&lt;span class="c1"&gt;# Enable auto-injection&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;label&lt;span class="w"&gt; &lt;/span&gt;namespace&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;ns&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;istio-injection&lt;span class="o"&gt;=&lt;/span&gt;enabled
+
+&lt;span class="c1"&gt;# Disable auto-injection&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;label&lt;span class="w"&gt; &lt;/span&gt;namespace&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;ns&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;istio-injection-
+
+&lt;span class="c1"&gt;# Manual injection&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;kube-inject&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;deployment.yaml&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;apply&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;-
+
+&lt;span class="c1"&gt;# Check injection status&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &lt;/span&gt;check-inject&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;namespace&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Common Troubleshooting Scenarios:&lt;/strong&gt;&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
+&lt;th&gt;Symptom&lt;/th&gt;
 &lt;th&gt;Command&lt;/th&gt;
-&lt;th&gt;Purpose&lt;/th&gt;
+&lt;th&gt;What to Check&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl install --set profile=demo&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Install Istio with specified profile (demo/default/minimal/ambient)&lt;/td&gt;
+&lt;td&gt;503 errors&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;istioctl proxy-config clusters&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Cluster health, endpoints&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl verify-install&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Verify Istio installation is correct and healthy&lt;/td&gt;
+&lt;td&gt;Routing not working&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;istioctl proxy-config routes&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;VirtualService applied correctly&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl version&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Show client and control plane versions&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl profile list&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;List available installation profiles&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl profile dump &amp;lt;profile&amp;gt;&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Show full configuration of a profile&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h3&gt;Analysis (Configuration Validation)&lt;/h3&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;Command&lt;/th&gt;
-&lt;th&gt;Purpose&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
+&lt;td&gt;Config not applied&lt;/td&gt;
 &lt;td&gt;&lt;code&gt;istioctl analyze&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Validate Istio configuration for errors/warnings (misconfigs, missing resources)&lt;/td&gt;
+&lt;td&gt;Configuration errors&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl analyze -n &amp;lt;namespace&amp;gt;&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Analyze configuration in specific namespace&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl analyze &amp;lt;file.yaml&amp;gt;&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Validate config file before applying&lt;/td&gt;
+&lt;td&gt;Sidecar not injected&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;kubectl get pod -o yaml&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Injection labels&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h3&gt;Proxy Debug (Envoy Sidecar Inspection)&lt;/h3&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;Command&lt;/th&gt;
-&lt;th&gt;Purpose&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl proxy-status&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Show sync status of all sidecars with control plane (SYNCED/NOT SENT/STALE)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl proxy-config all &amp;lt;pod&amp;gt;&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Dump full Envoy config of a pod&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl proxy-config routes &amp;lt;pod&amp;gt;&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Show route configuration (VirtualService applied)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl proxy-config clusters &amp;lt;pod&amp;gt;&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Show upstream clusters (DestinationRule applied)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl proxy-config listeners &amp;lt;pod&amp;gt;&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Show listeners (inbound/outbound ports)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl proxy-config endpoints &amp;lt;pod&amp;gt;&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Show endpoints Envoy knows about&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl proxy-config log &amp;lt;pod&amp;gt; --level debug&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Change Envoy log level for debugging&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://istio.io/latest/docs/reference/commands/istioctl/"&gt;istioctl Reference&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://istio.io/latest/docs/ops/diagnostic-tools/"&gt;Troubleshooting Guide&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
 &lt;h3&gt;Dashboards (Quick Access to Observability UIs)&lt;/h3&gt;
 &lt;table&gt;
 &lt;thead&gt;
@@ -1464,25 +1292,6 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;uninstall&lt;span class="w"&gt; &lt;
 &lt;tr&gt;
 &lt;td&gt;&lt;code&gt;istioctl dashboard envoy &amp;lt;pod&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;Open Envoy admin UI for specific pod&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h3&gt;Injection (Sidecar Management)&lt;/h3&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;Command&lt;/th&gt;
-&lt;th&gt;Purpose&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;kubectl label ns &amp;lt;ns&amp;gt; istio-injection=enabled&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Enable auto sidecar injection for namespace&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;istioctl kube-inject -f &amp;lt;file.yaml&amp;gt; \| kubectl apply -f -&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Manual sidecar injection into manifest&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
