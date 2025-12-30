@@ -1752,7 +1752,7 @@ k&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;node
 &lt;hr&gt;
 &lt;h1&gt;Where to practice&lt;/h1&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href="https://learn.kodekloud.com/user/courses/labs-linux-foundation-certified-system-administrator-lfcs/"&gt;Kodekloud Lab - Manage LVM&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://learn.kodekloud.com/user/courses/labs-linux-foundation-certified-system-administrator-lfcs/"&gt;Kodekloud Lab&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr&gt;
 &lt;h1&gt;IO Redirection&lt;/h1&gt;
@@ -2285,7 +2285,9 @@ openssl&lt;span class="w"&gt; &lt;/span&gt;rsa&lt;span class="w"&gt; &lt;/span&g
 &lt;li&gt;Or shortcut: &lt;code&gt;req -x509 -newkey&lt;/code&gt; (generate key + cert at once)&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;This exam is considered easy to pass because it requires only 67 to pass! In fact, I only spent 2 days preparing.&lt;/p&gt;
 &lt;p&gt;Passing this exam doesn't make me satisfied, I am satisfied with the progress, what I learned and remembered while preparing for this exam!&lt;/p&gt;
+&lt;p&gt;Scored 86/100, not too bad! Hats off to people who scored 100/100, since there are some questions that are really advanced and require deep knowledge to score!&lt;/p&gt;
 &lt;p&gt;Thanks to KodeKloud for providing good mock exams!&lt;/p&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="certification"/></entry><entry><title>Prepare for the Cilium Certified Associate (CCA) Exam</title><link href="https://blackmetalz.github.io/prepare-for-the-cilium-certified-associate-cca-exam.html" rel="alternate"/><published>2025-12-28T00:00:00+07:00</published><updated>2025-12-28T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-28:/prepare-for-the-cilium-certified-associate-cca-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/21.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Cilium Certified Associate (CCA) Overview&lt;/h1&gt;
