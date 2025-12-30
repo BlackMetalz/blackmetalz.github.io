@@ -2185,41 +2185,25 @@ root@node01&lt;span class="w"&gt; &lt;/span&gt;~&lt;span class="w"&gt; &lt;/span
 
 &lt;h3&gt;OpenSSL Cheat Sheet for LFCS&lt;/h3&gt;
 &lt;ul&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;Generate Private Key&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;openssl&lt;span class="w"&gt; &lt;/span&gt;genrsa&lt;span class="w"&gt; &lt;/span&gt;-out&lt;span class="w"&gt; &lt;/span&gt;server.key&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2048&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;ul&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;Generate CSR (Certificate Signing Request)&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;openssl&lt;span class="w"&gt; &lt;/span&gt;req&lt;span class="w"&gt; &lt;/span&gt;-new&lt;span class="w"&gt; &lt;/span&gt;-key&lt;span class="w"&gt; &lt;/span&gt;server.key&lt;span class="w"&gt; &lt;/span&gt;-out&lt;span class="w"&gt; &lt;/span&gt;server.csr
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;ul&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;Generate Self-signed Cert (single command)&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;openssl&lt;span class="w"&gt; &lt;/span&gt;req&lt;span class="w"&gt; &lt;/span&gt;-x509&lt;span class="w"&gt; &lt;/span&gt;-nodes&lt;span class="w"&gt; &lt;/span&gt;-days&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;365&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-newkey&lt;span class="w"&gt; &lt;/span&gt;rsa:2048&lt;span class="w"&gt; &lt;/span&gt;-keyout&lt;span class="w"&gt; &lt;/span&gt;server.key&lt;span class="w"&gt; &lt;/span&gt;-out&lt;span class="w"&gt; &lt;/span&gt;server.crt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;ul&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;View Information&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# View cert&lt;/span&gt;
 openssl&lt;span class="w"&gt; &lt;/span&gt;x509&lt;span class="w"&gt; &lt;/span&gt;-in&lt;span class="w"&gt; &lt;/span&gt;server.crt&lt;span class="w"&gt; &lt;/span&gt;-noout&lt;span class="w"&gt; &lt;/span&gt;-text
@@ -2234,11 +2218,7 @@ openssl&lt;span class="w"&gt; &lt;/span&gt;rsa&lt;span class="w"&gt; &lt;/span&g
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;ul&gt;
-&lt;li&gt;
-&lt;ol&gt;
 &lt;li&gt;Verify cert and key match&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;openssl&lt;span class="w"&gt; &lt;/span&gt;x509&lt;span class="w"&gt; &lt;/span&gt;-in&lt;span class="w"&gt; &lt;/span&gt;server.crt&lt;span class="w"&gt; &lt;/span&gt;-noout&lt;span class="w"&gt; &lt;/span&gt;-modulus&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;md5sum
 openssl&lt;span class="w"&gt; &lt;/span&gt;rsa&lt;span class="w"&gt; &lt;/span&gt;-in&lt;span class="w"&gt; &lt;/span&gt;server.key&lt;span class="w"&gt; &lt;/span&gt;-noout&lt;span class="w"&gt; &lt;/span&gt;-modulus&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;md5sum

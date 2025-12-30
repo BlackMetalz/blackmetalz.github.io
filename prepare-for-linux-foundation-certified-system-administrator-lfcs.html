@@ -531,41 +531,25 @@ root@node01<span class="w"> </span>~<span class="w"> </span>➜<span class="w"> 
 
 <h3>OpenSSL Cheat Sheet for LFCS</h3>
 <ul>
-<li>
-<ol>
 <li>Generate Private Key</li>
-</ol>
-</li>
 </ul>
 <div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>genrsa<span class="w"> </span>-out<span class="w"> </span>server.key<span class="w"> </span><span class="m">2048</span>
 </code></pre></div>
 
 <ul>
-<li>
-<ol>
 <li>Generate CSR (Certificate Signing Request)</li>
-</ol>
-</li>
 </ul>
 <div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>req<span class="w"> </span>-new<span class="w"> </span>-key<span class="w"> </span>server.key<span class="w"> </span>-out<span class="w"> </span>server.csr
 </code></pre></div>
 
 <ul>
-<li>
-<ol>
 <li>Generate Self-signed Cert (single command)</li>
-</ol>
-</li>
 </ul>
 <div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>req<span class="w"> </span>-x509<span class="w"> </span>-nodes<span class="w"> </span>-days<span class="w"> </span><span class="m">365</span><span class="w"> </span>-newkey<span class="w"> </span>rsa:2048<span class="w"> </span>-keyout<span class="w"> </span>server.key<span class="w"> </span>-out<span class="w"> </span>server.crt
 </code></pre></div>
 
 <ul>
-<li>
-<ol>
 <li>View Information</li>
-</ol>
-</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="c1"># View cert</span>
 openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>server.crt<span class="w"> </span>-noout<span class="w"> </span>-text
@@ -580,11 +564,7 @@ openssl<span class="w"> </span>rsa<span class="w"> </span>-in<span class="w"> </
 </code></pre></div>
 
 <ul>
-<li>
-<ol>
 <li>Verify cert and key match</li>
-</ol>
-</li>
 </ul>
 <div class="highlight"><pre><span></span><code>openssl<span class="w"> </span>x509<span class="w"> </span>-in<span class="w"> </span>server.crt<span class="w"> </span>-noout<span class="w"> </span>-modulus<span class="w"> </span><span class="p">|</span><span class="w"> </span>md5sum
 openssl<span class="w"> </span>rsa<span class="w"> </span>-in<span class="w"> </span>server.key<span class="w"> </span>-noout<span class="w"> </span>-modulus<span class="w"> </span><span class="p">|</span><span class="w"> </span>md5sum
