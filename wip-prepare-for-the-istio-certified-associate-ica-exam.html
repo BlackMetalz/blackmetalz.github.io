@@ -108,7 +108,7 @@
 <h3>4. Traffic Management (35%)</h3>
 <p>The largest exam domain — master this well.</p>
 <ul>
-<li><strong>Ingress &amp; Egress:</strong> Configuring Gateway resources for north-south traffic.</li>
+<li><strong>Ingress &amp; Egress:</strong> Configuring Gateway resources for north-south traffic. (North-South = traffic comes from external)</li>
 <li><strong>VirtualService:</strong> Defining routing rules (host-based, header-based, URI matching).</li>
 <li><strong>DestinationRule:</strong> Configuring load balancing policies, connection pools, and outlier detection.</li>
 <li><strong>Traffic Shifting:</strong> Canary deployments and A/B testing with weighted routing.</li>
@@ -199,7 +199,7 @@
 <h3>2. VirtualService &amp; DestinationRule Relationship</h3>
 <p><em>Domain: Traffic Management</em></p>
 <p>These two resources work together and are the <strong>most important concepts</strong> for the exam.</p>
-<p>TLDR: This may be complicated for you to understand (same for me). But no worry read the fucking document and practice here:</p>
+<p>TLDR: This may be complicated for you to understand (same for me). But no worry read the fucking document and practice here, it is fucking best lab based in my opinion to explain how Virtual Service and Destination Rule work together!</p>
 <p><a href="https://killercoda.com/lorenzo-g/scenario/traffic-management-request-routing">KillerCoda ICA - Traffic Management - Request Routing</a></p>
 <p>It could be a little outdated, but still good to practice</p>
 <div class="highlight"><pre><span></span><code>controlplane:~$ istioctl version
@@ -252,7 +252,7 @@ virtualservices<span class="w">                     </span>vs<span class="w">   
 destinationrules<span class="w">                    </span>dr<span class="w">           </span>networking.istio.io/v1beta1<span class="w">       </span><span class="nb">true</span><span class="w">         </span>DestinationRule
 </code></pre></div>
 
-<p><strong>DestinationRule — Defines HOW traffic is handled:</strong>  This is also fucking complicated, try to simplify as <code>kind: DestinationRule</code> in <a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/">HERE</a></p>
+<p><strong>DestinationRule — Defines HOW traffic is handled:</strong> This is also fucking complicated, try to simplify as <code>kind: DestinationRule</code> in <a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/">HERE</a></p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DestinationRule</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -328,6 +328,14 @@ destinationrules<span class="w">                    </span>dr<span class="w">   
 </code></pre></div>
 
 <p>So we have to move subset v2 to be the first entry, then follow with subset v1!</p>
+<p>Another thing you should notice, that both resource VirtualService and DestinationRule have to define hosts? Why not merge them???</p>
+<p>It is <code>Separation of Concerns</code> of Istio.</p>
+<ul>
+<li><code>VirtualService</code> is router for traffic filter, where the fuck you want to go?</li>
+<li><code>DestinationRule</code> is policy, traffic have been arrived, how would you act?</li>
+</ul>
+<p>So, in explanation of SQL. <code>hosts</code> is <code>Foreign Key</code> to match table <code>VirtualService</code> to table <code>DestinationRule</code> xD</p>
+<p>Conclusion: It took me about 2 hours to understand this properly!</p>
 <blockquote>
 <p><strong>Key Point:</strong> VirtualService references subsets defined in DestinationRule. Always create DestinationRule <strong>before</strong> or <strong>together with</strong> VirtualService.</p>
 <p><strong>References:</strong></p>
@@ -926,6 +934,55 @@ destinationrules<span class="w">                    </span>dr<span class="w">   
 <span class="w">            </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">reviews</span>
 </code></pre></div>
 
+<p>There is some funny information about <code>value</code> of Fault Injection!</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Value (<code>percentage.value</code>)</th>
+<th style="text-align: left;">Actual Percentage</th>
+<th style="text-align: left;">Errors per 1,000 Requests</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>100</strong></td>
+<td style="text-align: left;">100%</td>
+<td style="text-align: left;">1,000</td>
+<td style="text-align: left;"><strong>Total Failure:</strong> Every single request will fail.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>50</strong></td>
+<td style="text-align: left;">50%</td>
+<td style="text-align: left;">500</td>
+<td style="text-align: left;"><strong>Even Split:</strong> Half of the requests will fail (1 in 2).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>10</strong></td>
+<td style="text-align: left;">10%</td>
+<td style="text-align: left;">100</td>
+<td style="text-align: left;"><strong>Significant Impact:</strong> 1 in every 10 requests fails.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>1</strong></td>
+<td style="text-align: left;">1%</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;"><strong>Minor Impact:</strong> 1 in every 100 requests fails.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>0.5</strong></td>
+<td style="text-align: left;">0.5%</td>
+<td style="text-align: left;">5</td>
+<td style="text-align: left;"><strong>Granular Testing:</strong> 5 in every 1,000 requests fail.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>0.1</strong></td>
+<td style="text-align: left;">0.1%</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;"><strong>Subtle Testing:</strong> Only 1 in every 1,000 requests fails.</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
 <p><strong>References:</strong></p>
 <ul>
@@ -1468,6 +1525,13 @@ istioctl<span class="w"> </span>experimental<span class="w"> </span>check-inject
 <li><a href="https://killercoda.com/ica">Killercoda Interactive Environments</a></li>
 </ul>
 <p><strong>To be updated</strong></p>
+<h1>Comparison: Istio vs Haproxy</h1>
+<p>If we are simply using Istio for request routing, it would be called over-engineering. So, when to use Istio:</p>
+<ul>
+<li>Fault Injection: Simulate 503 or delay 5s to test the app's fault tolerance</li>
+<li>Circuit Breaking: Auto-disconnect traffic to fucked Pod to prevent domino?</li>
+<li>Mirroring: Fire and forget traffic to the beta version without affecting the live version! </li>
+</ul>
 
 
              

@@ -29,7 +29,7 @@
 &lt;h3&gt;4. Traffic Management (35%)&lt;/h3&gt;
 &lt;p&gt;The largest exam domain — master this well.&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Ingress &amp;amp; Egress:&lt;/strong&gt; Configuring Gateway resources for north-south traffic.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Ingress &amp;amp; Egress:&lt;/strong&gt; Configuring Gateway resources for north-south traffic. (North-South = traffic comes from external)&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;VirtualService:&lt;/strong&gt; Defining routing rules (host-based, header-based, URI matching).&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;DestinationRule:&lt;/strong&gt; Configuring load balancing policies, connection pools, and outlier detection.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Traffic Shifting:&lt;/strong&gt; Canary deployments and A/B testing with weighted routing.&lt;/li&gt;
@@ -120,7 +120,7 @@
 &lt;h3&gt;2. VirtualService &amp;amp; DestinationRule Relationship&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;Domain: Traffic Management&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;These two resources work together and are the &lt;strong&gt;most important concepts&lt;/strong&gt; for the exam.&lt;/p&gt;
-&lt;p&gt;TLDR: This may be complicated for you to understand (same for me). But no worry read the fucking document and practice here:&lt;/p&gt;
+&lt;p&gt;TLDR: This may be complicated for you to understand (same for me). But no worry read the fucking document and practice here, it is fucking best lab based in my opinion to explain how Virtual Service and Destination Rule work together!&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://killercoda.com/lorenzo-g/scenario/traffic-management-request-routing"&gt;KillerCoda ICA - Traffic Management - Request Routing&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;It could be a little outdated, but still good to practice&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;controlplane:~$ istioctl version
@@ -173,7 +173,7 @@ virtualservices&lt;span class="w"&gt;                     &lt;/span&gt;vs&lt;spa
 destinationrules&lt;span class="w"&gt;                    &lt;/span&gt;dr&lt;span class="w"&gt;           &lt;/span&gt;networking.istio.io/v1beta1&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;DestinationRule
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;strong&gt;DestinationRule — Defines HOW traffic is handled:&lt;/strong&gt;  This is also fucking complicated, try to simplify as &lt;code&gt;kind: DestinationRule&lt;/code&gt; in &lt;a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/"&gt;HERE&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;DestinationRule — Defines HOW traffic is handled:&lt;/strong&gt; This is also fucking complicated, try to simplify as &lt;code&gt;kind: DestinationRule&lt;/code&gt; in &lt;a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/"&gt;HERE&lt;/a&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;DestinationRule&lt;/span&gt;
 &lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -249,6 +249,14 @@ destinationrules&lt;span class="w"&gt;                    &lt;/span&gt;dr&lt;spa
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;So we have to move subset v2 to be the first entry, then follow with subset v1!&lt;/p&gt;
+&lt;p&gt;Another thing you should notice, that both resource VirtualService and DestinationRule have to define hosts? Why not merge them???&lt;/p&gt;
+&lt;p&gt;It is &lt;code&gt;Separation of Concerns&lt;/code&gt; of Istio.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;VirtualService&lt;/code&gt; is router for traffic filter, where the fuck you want to go?&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;DestinationRule&lt;/code&gt; is policy, traffic have been arrived, how would you act?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;So, in explanation of SQL. &lt;code&gt;hosts&lt;/code&gt; is &lt;code&gt;Foreign Key&lt;/code&gt; to match table &lt;code&gt;VirtualService&lt;/code&gt; to table &lt;code&gt;DestinationRule&lt;/code&gt; xD&lt;/p&gt;
+&lt;p&gt;Conclusion: It took me about 2 hours to understand this properly!&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;Key Point:&lt;/strong&gt; VirtualService references subsets defined in DestinationRule. Always create DestinationRule &lt;strong&gt;before&lt;/strong&gt; or &lt;strong&gt;together with&lt;/strong&gt; VirtualService.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
@@ -847,6 +855,55 @@ destinationrules&lt;span class="w"&gt;                    &lt;/span&gt;dr&lt;spa
 &lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;host&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;reviews&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;There is some funny information about &lt;code&gt;value&lt;/code&gt; of Fault Injection!&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="text-align: left;"&gt;Value (&lt;code&gt;percentage.value&lt;/code&gt;)&lt;/th&gt;
+&lt;th style="text-align: left;"&gt;Actual Percentage&lt;/th&gt;
+&lt;th style="text-align: left;"&gt;Errors per 1,000 Requests&lt;/th&gt;
+&lt;th style="text-align: left;"&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;strong&gt;100&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;100%&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;1,000&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;&lt;strong&gt;Total Failure:&lt;/strong&gt; Every single request will fail.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;strong&gt;50&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;50%&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;500&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;&lt;strong&gt;Even Split:&lt;/strong&gt; Half of the requests will fail (1 in 2).&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;strong&gt;10&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;10%&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;100&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;&lt;strong&gt;Significant Impact:&lt;/strong&gt; 1 in every 10 requests fails.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;strong&gt;1&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;1%&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;10&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;&lt;strong&gt;Minor Impact:&lt;/strong&gt; 1 in every 100 requests fails.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;strong&gt;0.5&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.5%&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;5&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;&lt;strong&gt;Granular Testing:&lt;/strong&gt; 5 in every 1,000 requests fail.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;strong&gt;0.1&lt;/strong&gt;&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;0.1%&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;1&lt;/td&gt;
+&lt;td style="text-align: left;"&gt;&lt;strong&gt;Subtle Testing:&lt;/strong&gt; Only 1 in every 1,000 requests fails.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
@@ -1388,7 +1445,14 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &
 &lt;li&gt;&lt;a href="https://killercoda.com/istio"&gt;Istio | Killercoda&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://killercoda.com/ica"&gt;Killercoda Interactive Environments&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;To be updated&lt;/strong&gt;&lt;/p&gt;</content><category term="Knowledge Base"/><category term="istio"/><category term="certification"/><category term="linux-foundation"/><category term="ica"/><category term="service-mesh"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;To be updated&lt;/strong&gt;&lt;/p&gt;
+&lt;h1&gt;Comparison: Istio vs Haproxy&lt;/h1&gt;
+&lt;p&gt;If we are simply using Istio for request routing, it would be called over-engineering. So, when to use Istio:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Fault Injection: Simulate 503 or delay 5s to test the app's fault tolerance&lt;/li&gt;
+&lt;li&gt;Circuit Breaking: Auto-disconnect traffic to fucked Pod to prevent domino?&lt;/li&gt;
+&lt;li&gt;Mirroring: Fire and forget traffic to the beta version without affecting the live version! &lt;/li&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="istio"/><category term="certification"/><category term="linux-foundation"/><category term="ica"/><category term="service-mesh"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This document outlines the deployment of a Kubernetes v1.31.9 HA cluster on Ubuntu 24.04 using Kubespray v2.27.1.&lt;/p&gt;
 &lt;p&gt;Objective: Establish a robust lab environment with minimum requirements. It can be upgraded to production later by simply adding more worker nodes and migrating to dedicated master nodes.
 Topology: 3-node HA architecture (Control Plane, Etcd, and Worker roles on all nodes).&lt;/p&gt;
