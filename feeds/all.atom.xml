@@ -120,9 +120,24 @@
 &lt;h3&gt;2. VirtualService &amp;amp; DestinationRule Relationship&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;Domain: Traffic Management&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;These two resources work together and are the &lt;strong&gt;most important concepts&lt;/strong&gt; for the exam.&lt;/p&gt;
+&lt;p&gt;TLDR: This may be complicated for you to understand (same for me). But no worry read the fucking document and practice here:&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://killercoda.com/lorenzo-g/scenario/traffic-management-request-routing"&gt;KillerCoda ICA - Traffic Management - Request Routing&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;It could be a little outdated, but still good to practice&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;controlplane:~$ istioctl version
+client version: 1.18.2
+control plane version: 1.18.2
+data plane version: 1.18.2 (3 proxies)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;So you have to change apiVersion from &lt;code&gt;networking.istio.io/v1&lt;/code&gt; to &lt;code&gt;networking.istio.io/v1alpha3&lt;/code&gt; to prevent issue in that scenario!&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Resource Relationship:&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt="alt text" src="images/2025/12/39.png"&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;VirtualService — Defines WHERE traffic goes:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Can be retrieved with: &lt;code&gt;k get vs&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;controlplane:~$&lt;span class="w"&gt; &lt;/span&gt;k&lt;span class="w"&gt; &lt;/span&gt;api-resources&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;grep&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;virtual
+virtualservices&lt;span class="w"&gt;                     &lt;/span&gt;vs&lt;span class="w"&gt;           &lt;/span&gt;networking.istio.io/v1beta1&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;VirtualService
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;VirtualService — Defines WHERE traffic goes:&lt;/strong&gt; This may complicate as hell, try to start simple with hosts and http route + destination!&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;VirtualService&lt;/span&gt;
 &lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -153,7 +168,12 @@
 &lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="nt"&gt;weight&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;20&lt;/span&gt;&lt;span class="w"&gt;                   &lt;/span&gt;&lt;span class="c1"&gt;# 20% to v3&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;strong&gt;DestinationRule — Defines HOW traffic is handled:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Can be retrieved with: &lt;code&gt;k get dr&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;controlplane:~$&lt;span class="w"&gt; &lt;/span&gt;k&lt;span class="w"&gt; &lt;/span&gt;api-resources&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;grep&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;dest&lt;span class="w"&gt;   &lt;/span&gt;
+destinationrules&lt;span class="w"&gt;                    &lt;/span&gt;dr&lt;span class="w"&gt;           &lt;/span&gt;networking.istio.io/v1beta1&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;DestinationRule
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;DestinationRule — Defines HOW traffic is handled:&lt;/strong&gt;  This is also fucking complicated, try to simplify as &lt;code&gt;kind: DestinationRule&lt;/code&gt; in &lt;a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/"&gt;HERE&lt;/a&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;DestinationRule&lt;/span&gt;
 &lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -203,6 +223,32 @@
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;code&gt;VirtualService&lt;/code&gt; and &lt;code&gt;DestinationRule&lt;/code&gt; are namespace-scoped. But can be reference cross-namespace by FQDN &lt;code&gt;my-svc.other-namespace.svc.cluster.local&lt;/code&gt; in &lt;code&gt;host&lt;/code&gt; field!&lt;/p&gt;
+&lt;p&gt;Extra note: Order matters! &lt;/p&gt;
+&lt;p&gt;With this VirtualService, subset v2 will be ignored. Because Istio is working with the rule: &lt;code&gt;First Match Wins.&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1alpha3&lt;/span&gt;
+&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;VirtualService&lt;/span&gt;
+&lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;notification&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;namespace&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;default&lt;/span&gt;
+&lt;span class="nt"&gt;spec&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;hosts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;notification-service.default.svc.cluster.local&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;route&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;destination&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="nt"&gt;host&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;notification-service.default.svc.cluster.local&lt;/span&gt;
+&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="nt"&gt;subset&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;v1&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;route&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;destination&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="nt"&gt;host&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;notification-service.default.svc.cluster.local&lt;/span&gt;
+&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="nt"&gt;subset&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;v2&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;match&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;headers&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="nt"&gt;testing&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;exact&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;true&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;So we have to move subset v2 to be the first entry, then follow with subset v1!&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;Key Point:&lt;/strong&gt; VirtualService references subsets defined in DestinationRule. Always create DestinationRule &lt;strong&gt;before&lt;/strong&gt; or &lt;strong&gt;together with&lt;/strong&gt; VirtualService.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
@@ -1330,6 +1376,9 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &
 &lt;li&gt;&lt;a href="https://github.com/istio/istio/tree/master/samples"&gt;Istio GitHub Examples&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr&gt;
+&lt;h1&gt;Mock exam quiz choice&lt;/h1&gt;
+&lt;p&gt;Seems unnecessary for you and for me, but in case you want to test your knowledge before practice, why not?&lt;/p&gt;
+&lt;p&gt;-- To be updated after pass this exam --&lt;/p&gt;
 &lt;h1&gt;Exam Notes&lt;/h1&gt;
 &lt;p&gt;Don't be like me, I was thinking this exam was a quiz choice, not hands-on. And then you know what happens, I failed 1st time. My mistake was that I didn't check the exam before scheduling xD. But luckily Linux Foundation gives 1 free retry.&lt;/p&gt;
 &lt;h3&gt;Where to practice&lt;/h3&gt;

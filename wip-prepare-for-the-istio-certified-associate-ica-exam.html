@@ -199,9 +199,24 @@
 <h3>2. VirtualService &amp; DestinationRule Relationship</h3>
 <p><em>Domain: Traffic Management</em></p>
 <p>These two resources work together and are the <strong>most important concepts</strong> for the exam.</p>
+<p>TLDR: This may be complicated for you to understand (same for me). But no worry read the fucking document and practice here:</p>
+<p><a href="https://killercoda.com/lorenzo-g/scenario/traffic-management-request-routing">KillerCoda ICA - Traffic Management - Request Routing</a></p>
+<p>It could be a little outdated, but still good to practice</p>
+<div class="highlight"><pre><span></span><code>controlplane:~$ istioctl version
+client version: 1.18.2
+control plane version: 1.18.2
+data plane version: 1.18.2 (3 proxies)
+</code></pre></div>
+
+<p>So you have to change apiVersion from <code>networking.istio.io/v1</code> to <code>networking.istio.io/v1alpha3</code> to prevent issue in that scenario!</p>
 <p><strong>Resource Relationship:</strong></p>
 <p><img alt="alt text" src="images/2025/12/39.png"></p>
-<p><strong>VirtualService — Defines WHERE traffic goes:</strong></p>
+<p>Can be retrieved with: <code>k get vs</code></p>
+<div class="highlight"><pre><span></span><code>controlplane:~$<span class="w"> </span>k<span class="w"> </span>api-resources<span class="w"> </span><span class="p">|</span>grep<span class="w"> </span>-i<span class="w"> </span>virtual
+virtualservices<span class="w">                     </span>vs<span class="w">           </span>networking.istio.io/v1beta1<span class="w">       </span><span class="nb">true</span><span class="w">         </span>VirtualService
+</code></pre></div>
+
+<p><strong>VirtualService — Defines WHERE traffic goes:</strong> This may complicate as hell, try to start simple with hosts and http route + destination!</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -232,7 +247,12 @@
 <span class="w">          </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w">                   </span><span class="c1"># 20% to v3</span>
 </code></pre></div>
 
-<p><strong>DestinationRule — Defines HOW traffic is handled:</strong></p>
+<p>Can be retrieved with: <code>k get dr</code></p>
+<div class="highlight"><pre><span></span><code>controlplane:~$<span class="w"> </span>k<span class="w"> </span>api-resources<span class="w"> </span><span class="p">|</span>grep<span class="w"> </span>-i<span class="w"> </span>dest<span class="w">   </span>
+destinationrules<span class="w">                    </span>dr<span class="w">           </span>networking.istio.io/v1beta1<span class="w">       </span><span class="nb">true</span><span class="w">         </span>DestinationRule
+</code></pre></div>
+
+<p><strong>DestinationRule — Defines HOW traffic is handled:</strong>  This is also fucking complicated, try to simplify as <code>kind: DestinationRule</code> in <a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/">HERE</a></p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DestinationRule</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -282,6 +302,32 @@
 </code></pre></div>
 
 <p><code>VirtualService</code> and <code>DestinationRule</code> are namespace-scoped. But can be reference cross-namespace by FQDN <code>my-svc.other-namespace.svc.cluster.local</code> in <code>host</code> field!</p>
+<p>Extra note: Order matters! </p>
+<p>With this VirtualService, subset v2 will be ignored. Because Istio is working with the rule: <code>First Match Wins.</code></p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1alpha3</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notification</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">hosts</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notification-service.default.svc.cluster.local</span>
+<span class="w">  </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notification-service.default.svc.cluster.local</span>
+<span class="w">          </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">route</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notification-service.default.svc.cluster.local</span>
+<span class="w">          </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v2</span>
+<span class="w">      </span><span class="nt">match</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">headers</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">testing</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">exact</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+</code></pre></div>
+
+<p>So we have to move subset v2 to be the first entry, then follow with subset v1!</p>
 <blockquote>
 <p><strong>Key Point:</strong> VirtualService references subsets defined in DestinationRule. Always create DestinationRule <strong>before</strong> or <strong>together with</strong> VirtualService.</p>
 <p><strong>References:</strong></p>
@@ -1409,6 +1455,9 @@ istioctl<span class="w"> </span>experimental<span class="w"> </span>check-inject
 <li><a href="https://github.com/istio/istio/tree/master/samples">Istio GitHub Examples</a></li>
 </ul>
 <hr>
+<h1>Mock exam quiz choice</h1>
+<p>Seems unnecessary for you and for me, but in case you want to test your knowledge before practice, why not?</p>
+<p>-- To be updated after pass this exam --</p>
 <h1>Exam Notes</h1>
 <p>Don't be like me, I was thinking this exam was a quiz choice, not hands-on. And then you know what happens, I failed 1st time. My mistake was that I didn't check the exam before scheduling xD. But luckily Linux Foundation gives 1 free retry.</p>
 <h3>Where to practice</h3>
