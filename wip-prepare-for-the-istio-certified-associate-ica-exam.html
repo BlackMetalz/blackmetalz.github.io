@@ -854,6 +854,10 @@ destinationrules<span class="w">                    </span>dr<span class="w">   
 <p><em>Domain: Traffic Management</em></p>
 <p>Build fault-tolerant services with Istio's resilience features.</p>
 <p><strong>Circuit Breaker (Connection Pool + Outlier Detection):</strong></p>
+<ul>
+<li><code>connectionPool</code> (Connection/Request Volume Limits): Limits the number of concurrent connections and requests to the backend service.</li>
+<li><code>outlierDetection</code> (Passive Health Checking / Ejection): Automatically ejects (removes) "unhealthy" or "faulty" pods from the load balancing pool.</li>
+</ul>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DestinationRule</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -1156,7 +1160,7 @@ istioctl<span class="w"> </span>verify-install
 istioctl<span class="w"> </span>version
 </code></pre></div>
 
-<p><strong>IstioOperator Custom Configuration:</strong></p>
+<p><strong>IstioOperator Custom Configuration:</strong> Define Istio config, need Istio installed already! You can imagine it as <code>values.yaml</code> of Helm</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">install.istio.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IstioOperator</span>
 <span class="nt">metadata</span><span class="p">:</span>

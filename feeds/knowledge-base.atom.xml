@@ -775,6 +775,10 @@ destinationrules&lt;span class="w"&gt;                    &lt;/span&gt;dr&lt;spa
 &lt;p&gt;&lt;em&gt;Domain: Traffic Management&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Build fault-tolerant services with Istio's resilience features.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Circuit Breaker (Connection Pool + Outlier Detection):&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;connectionPool&lt;/code&gt; (Connection/Request Volume Limits): Limits the number of concurrent connections and requests to the backend service.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;outlierDetection&lt;/code&gt; (Passive Health Checking / Ejection): Automatically ejects (removes) "unhealthy" or "faulty" pods from the load balancing pool.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;DestinationRule&lt;/span&gt;
 &lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -1077,7 +1081,7 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;verify-install
 istioctl&lt;span class="w"&gt; &lt;/span&gt;version
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;strong&gt;IstioOperator Custom Configuration:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;IstioOperator Custom Configuration:&lt;/strong&gt; Define Istio config, need Istio installed already! You can imagine it as &lt;code&gt;values.yaml&lt;/code&gt; of Helm&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;install.istio.io/v1alpha1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;IstioOperator&lt;/span&gt;
 &lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
