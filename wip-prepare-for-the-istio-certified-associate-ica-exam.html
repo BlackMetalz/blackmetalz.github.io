@@ -298,7 +298,7 @@ destinationrules<span class="w">                    </span>dr<span class="w">   
 <span class="nt">route</span><span class="p">:</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-svc</span>
-<span class="w">    </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w">  </span><span class="c1"># refer to DR</span>
+<span class="w">    </span><span class="nt">subset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span><span class="w">  </span><span class="c1"># refer to DestinationRule</span>
 </code></pre></div>
 
 <p><code>VirtualService</code> and <code>DestinationRule</code> are namespace-scoped. But can be reference cross-namespace by FQDN <code>my-svc.other-namespace.svc.cluster.local</code> in <code>host</code> field!</p>
@@ -355,7 +355,7 @@ destinationrules<span class="w">                    </span>dr<span class="w">   
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bookinfo-gateway</span>
 <span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">istio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingressgateway</span><span class="w">              </span><span class="c1"># Use Istio&#39;s default ingress gateway</span>
+<span class="w">    </span><span class="nt">istio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingressgateway</span><span class="w">              </span><span class="c1"># Use Istio&#39;s default ingress gateway. </span>
 <span class="w">  </span><span class="nt">servers</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
@@ -392,7 +392,7 @@ destinationrules<span class="w">                    </span>dr<span class="w">   
 <tr>
 <td><code>MUTUAL</code></td>
 <td>mTLS - client cert required</td>
-<td>High security</td>
+<td>High security, need correct keys: <code>tls.crt tls.key ca.cert</code></td>
 </tr>
 <tr>
 <td><code>PASSTHROUGH</code></td>
@@ -1318,61 +1318,56 @@ istioctl<span class="w"> </span>uninstall<span class="w"> </span>--revision<span
 </tr>
 </tbody>
 </table>
-<h3>Extensibility</h3>
-<table>
-<thead>
-<tr>
-<th>Kind</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>EnvoyFilter</strong></td>
-<td>Low-level Envoy config patching</td>
-</tr>
-<tr>
-<td><strong>WasmPlugin</strong></td>
-<td>Extend Envoy with custom WASM modules</td>
-</tr>
-<tr>
-<td><strong>Telemetry</strong></td>
-<td>Config metrics, logs, tracing behavior</td>
-</tr>
-</tbody>
-</table>
 <h3>Key Combos</h3>
+<p>This is pretty useful for you to remember what is used together and what is the reason to use.</p>
 <table>
 <thead>
 <tr>
 <th>Use Case</th>
 <th>Resources</th>
+<th>Explanation</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Ingress</td>
 <td><code>Gateway</code> + <code>VirtualService</code></td>
+<td>Receive traffic from the internet and route it to internal services.</td>
 </tr>
 <tr>
 <td>Egress</td>
 <td><code>ServiceEntry</code> + <code>Gateway</code> + <code>VirtualService</code></td>
+<td>Route traffic going out of the mesh through a dedicated Egress Gateway for security/auditing.</td>
 </tr>
 <tr>
 <td>mTLS enforce</td>
 <td><code>PeerAuthentication</code></td>
+<td>Encrypt communication between pods and enforce Mutual TLS (Strict/Permissive).</td>
 </tr>
 <tr>
 <td>JWT required</td>
 <td><code>RequestAuthentication</code> + <code>AuthorizationPolicy</code></td>
+<td>Validate JSON Web Tokens (JWT) and enforce access control based on token claims.</td>
 </tr>
 <tr>
 <td>Traffic splitting</td>
 <td><code>VirtualService</code> + <code>DestinationRule</code> (subsets)</td>
+<td>Manage Canary Deployments or A/B testing by splitting traffic between subsets (v1/v2).</td>
 </tr>
 <tr>
 <td>External VM</td>
 <td><code>WorkloadEntry</code> + <code>ServiceEntry</code></td>
+<td>Integrate non-Kubernetes workloads (VMs/Bare-metal) into the mesh as if they were pods.</td>
+</tr>
+<tr>
+<td>Resilience</td>
+<td><code>VirtualService</code> + <code>DestinationRule</code></td>
+<td>Configure Circuit Breakers, Retries, Timeouts, and Outlier Detection to handle failures.</td>
+</tr>
+<tr>
+<td>L7 Authz</td>
+<td>AuthorizationPolicy</td>
+<td>Enforce fine-grained Access Control (e.g., allow Service A to call GET on Service B but deny POST).</td>
 </tr>
 </tbody>
 </table>
@@ -1523,6 +1518,9 @@ istioctl<span class="w"> </span>experimental<span class="w"> </span>check-inject
 <li><a href="https://killercoda.com/ica-scenarios">ICA Certification | Killercoda</a></li>
 <li><a href="https://killercoda.com/istio">Istio | Killercoda</a></li>
 <li><a href="https://killercoda.com/ica">Killercoda Interactive Environments</a></li>
+<li><a href="https://www.solo.io/resources/lab">Solo IO</a></li>
+<li><a href="https://istioworkshop.github.io/">Istioworkshop.github.io</a></li>
+<li><a href="https://academy.tetrate.io/courses/take/istio-fundamentals/lessons/19935842-1-0-module-overview">Tetrate</a></li>
 </ul>
 <p><strong>To be updated</strong></p>
 <h1>Comparison: Istio vs Haproxy</h1>
