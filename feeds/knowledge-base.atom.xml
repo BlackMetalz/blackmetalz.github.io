@@ -1447,7 +1447,90 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &
 &lt;li&gt;&lt;a href="https://istioworkshop.github.io/"&gt;Istioworkshop.github.io&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://academy.tetrate.io/courses/take/istio-fundamentals/lessons/19935842-1-0-module-overview"&gt;Tetrate&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;To be updated&lt;/strong&gt;&lt;/p&gt;
+&lt;h3&gt;Practice Istio Installation&lt;/h3&gt;
+&lt;p&gt;Scenario: Install Istio version 1.21.0 on a Kubernetes cluster using istioctl.
+Requirements:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Download Istio version 1.21.0&lt;/li&gt;
+&lt;li&gt;Install Istio using &lt;code&gt;demo&lt;/code&gt; profile&lt;/li&gt;
+&lt;li&gt;Enable sidecar injection for &lt;code&gt;production&lt;/code&gt; namespace&lt;/li&gt;
+&lt;li&gt;Deploy a test application httpbin in &lt;code&gt;production&lt;/code&gt; namespace&lt;/li&gt;
+&lt;li&gt;Verify Istio installation and sidecar injection&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Step 1: Download Istio 1.21.0&lt;/span&gt;
+curl&lt;span class="w"&gt; &lt;/span&gt;-L&lt;span class="w"&gt; &lt;/span&gt;https://istio.io/downloadIstio&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;ISTIO_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.21.0&lt;span class="w"&gt; &lt;/span&gt;sh&lt;span class="w"&gt; &lt;/span&gt;-
+
+&lt;span class="c1"&gt;# Step 2: Add istioctl to PATH&lt;/span&gt;
+&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;PATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$PWD&lt;/span&gt;/istio-1.21.0/bin:&lt;span class="nv"&gt;$PATH&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Step 3: Verify istioctl&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;version&lt;span class="w"&gt; &lt;/span&gt;--remote&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;false&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Step 4: Install Istio with demo profile&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;--set&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;profile&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;demo&lt;span class="w"&gt; &lt;/span&gt;-y
+
+&lt;span class="c1"&gt;# Step 5: Verify installation&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;verify-install
+kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;istio-system
+
+&lt;span class="c1"&gt;# Step 6: Create and label production namespace&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;create&lt;span class="w"&gt; &lt;/span&gt;namespace&lt;span class="w"&gt; &lt;/span&gt;production
+kubectl&lt;span class="w"&gt; &lt;/span&gt;label&lt;span class="w"&gt; &lt;/span&gt;namespace&lt;span class="w"&gt; &lt;/span&gt;production&lt;span class="w"&gt; &lt;/span&gt;istio-injection&lt;span class="o"&gt;=&lt;/span&gt;enabled
+
+&lt;span class="c1"&gt;# Step 7: Deploy test app&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;apply&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;istio-1.21.0/samples/sleep/sleep.yaml&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;production
+
+&lt;span class="c1"&gt;# Step 8: Verify sidecar injection (2/2 containers)&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;production
+&lt;span class="c1"&gt;# Expected: sleep-xxx  2/2  Running&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Practice Canary Upgrade Istio&lt;/h3&gt;
+&lt;p&gt;Scenario: Upgrade Istio from &lt;code&gt;1.21.0&lt;/code&gt; to &lt;code&gt;1.22.0&lt;/code&gt; using canary method.
+Pre-requisites: Lab 1 completed (Istio &lt;code&gt;1.21.0&lt;/code&gt; running)
+Requirements:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Download Istio version &lt;code&gt;1.22.0&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Install new control plane with revision &lt;code&gt;1-22-0&lt;/code&gt; using &lt;code&gt;demo&lt;/code&gt; profile&lt;/li&gt;
+&lt;li&gt;Migrate &lt;code&gt;production&lt;/code&gt; namespace to new revision&lt;/li&gt;
+&lt;li&gt;Restart workloads and verify sync status&lt;/li&gt;
+&lt;li&gt;Uninstall old control plane&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Step 1: Download Istio 1.22.0&lt;/span&gt;
+curl&lt;span class="w"&gt; &lt;/span&gt;-L&lt;span class="w"&gt; &lt;/span&gt;https://istio.io/downloadIstio&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;ISTIO_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.22.0&lt;span class="w"&gt; &lt;/span&gt;sh&lt;span class="w"&gt; &lt;/span&gt;-
+&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;PATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$PWD&lt;/span&gt;/istio-1.22.0/bin:&lt;span class="nv"&gt;$PATH&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Step 2: Install new control plane with revision&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;--set&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;revision&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;-22-0&lt;span class="w"&gt; &lt;/span&gt;--set&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;profile&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;demo&lt;span class="w"&gt; &lt;/span&gt;-y
+
+&lt;span class="c1"&gt;# Step 3: Verify 2 istiod running&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;istio-system&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;app&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;istiod
+&lt;span class="c1"&gt;# Expected: istiod-xxxxx (old) + istiod-1-22-0-xxxxx (new)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Step 4: Relabel production namespace&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;label&lt;span class="w"&gt; &lt;/span&gt;namespace&lt;span class="w"&gt; &lt;/span&gt;production&lt;span class="w"&gt; &lt;/span&gt;istio-injection-
+kubectl&lt;span class="w"&gt; &lt;/span&gt;label&lt;span class="w"&gt; &lt;/span&gt;namespace&lt;span class="w"&gt; &lt;/span&gt;production&lt;span class="w"&gt; &lt;/span&gt;istio.io/rev&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;-22-0
+
+&lt;span class="c1"&gt;# Step 5: Restart workloads&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;rollout&lt;span class="w"&gt; &lt;/span&gt;restart&lt;span class="w"&gt; &lt;/span&gt;deployment&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;production
+
+&lt;span class="c1"&gt;# Step 6: Verify proxies sync with new control plane&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;proxy-status
+&lt;span class="c1"&gt;# Expected: All showing &amp;quot;istiod-1-22-0&amp;quot;&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Step 7: Uninstall old control plane&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;uninstall&lt;span class="w"&gt; &lt;/span&gt;--revision&lt;span class="w"&gt; &lt;/span&gt;default&lt;span class="w"&gt; &lt;/span&gt;-y
+
+&lt;span class="c1"&gt;# Step 8: Final verification&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;istio-system&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;app&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;istiod
+&lt;span class="c1"&gt;# Expected: only 1 istiod-1-22-0 xD&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;istio-system
+istioctl&lt;span class="w"&gt; &lt;/span&gt;version
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Remember to uninstall it to retest xD: &lt;code&gt;istioctl uninstall --purge -y &amp;amp;&amp;amp; rm -rf istio-1.2*&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Document page for the exam: &lt;a href="https://istio.io/latest/docs/setup/upgrade/canary/"&gt;https://istio.io/latest/docs/setup/upgrade/canary/&lt;/a&gt;&lt;/p&gt;
+&lt;hr&gt;
 &lt;h1&gt;Comparison: Istio vs Haproxy&lt;/h1&gt;
 &lt;p&gt;If we are simply using Istio for request routing, it would be called over-engineering. So, when to use Istio:&lt;/p&gt;
 &lt;ul&gt;
