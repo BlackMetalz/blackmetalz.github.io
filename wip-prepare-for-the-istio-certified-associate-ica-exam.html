@@ -128,7 +128,7 @@
 <p>Debugging when things go wrong.</p>
 <ul>
 <li><strong>Configuration Issues:</strong> Using <code>istioctl analyze</code> to detect misconfigurations.</li>
-<li><strong>Control Plane Debugging:</strong> Checking istiod logs, sync status, and xDS configuration.</li>
+<li><strong>Control Plane Debugging:</strong> Checking istiod logs, sync status, and xDS (x Discovery Service) configuration. </li>
 <li><strong>Data Plane Debugging:</strong> Using <code>istioctl proxy-status</code>, <code>proxy-config</code>, and Envoy admin interface.</li>
 <li><strong>Common Issues:</strong> 503 errors, mTLS conflicts, missing sidecars, and routing mismatches.</li>
 </ul>
@@ -199,7 +199,7 @@
 <h3>2. VirtualService &amp; DestinationRule Relationship</h3>
 <p><em>Domain: Traffic Management</em></p>
 <p>These two resources work together and are the <strong>most important concepts</strong> for the exam.</p>
-<p>TLDR: This may be complicated for you to understand (same for me). But no worry read the fucking document and practice here, it is fucking best lab based in my opinion to explain how Virtual Service and Destination Rule work together!</p>
+<p>TLDR: This may be complicated for you to understand (same for me). But no worry, just read the fucking document and practice here, it is fucking best lab based in my opinion to explain how Virtual Service and Destination Rule work together!</p>
 <p><a href="https://killercoda.com/lorenzo-g/scenario/traffic-management-request-routing">KillerCoda ICA - Traffic Management - Request Routing</a></p>
 <p>It could be a little outdated, but still good to practice</p>
 <div class="highlight"><pre><span></span><code>controlplane:~$ istioctl version
@@ -247,12 +247,12 @@ virtualservices<span class="w">                     </span>vs<span class="w">   
 <span class="w">          </span><span class="nt">weight</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w">                   </span><span class="c1"># 20% to v3</span>
 </code></pre></div>
 
+<p><strong>DestinationRule — Defines HOW traffic is handled:</strong> This is also fucking complicated, try to simplify as <code>kind: DestinationRule</code> in <a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/">HERE</a></p>
 <p>Can be retrieved with: <code>k get dr</code></p>
 <div class="highlight"><pre><span></span><code>controlplane:~$<span class="w"> </span>k<span class="w"> </span>api-resources<span class="w"> </span><span class="p">|</span>grep<span class="w"> </span>-i<span class="w"> </span>dest<span class="w">   </span>
 destinationrules<span class="w">                    </span>dr<span class="w">           </span>networking.istio.io/v1beta1<span class="w">       </span><span class="nb">true</span><span class="w">         </span>DestinationRule
 </code></pre></div>
 
-<p><strong>DestinationRule — Defines HOW traffic is handled:</strong> This is also fucking complicated, try to simplify as <code>kind: DestinationRule</code> in <a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/">HERE</a></p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DestinationRule</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -302,7 +302,7 @@ destinationrules<span class="w">                    </span>dr<span class="w">   
 </code></pre></div>
 
 <p><code>VirtualService</code> and <code>DestinationRule</code> are namespace-scoped. But can be reference cross-namespace by FQDN <code>my-svc.other-namespace.svc.cluster.local</code> in <code>host</code> field!</p>
-<p>Extra note: Order matters! </p>
+<p>Extra note: <strong>Order matters!</strong> </p>
 <p>With this VirtualService, subset v2 will be ignored. Because Istio is working with the rule: <code>First Match Wins.</code></p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1alpha3</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VirtualService</span>
@@ -348,6 +348,12 @@ destinationrules<span class="w">                    </span>dr<span class="w">   
 <h3>3. Gateway Configuration</h3>
 <p><em>Domain: Traffic Management</em></p>
 <p>Gateway defines the entry/exit points for traffic entering or leaving the mesh.</p>
+<p>You may want to know where <code>istio: ingressgateway</code> in the selector field comes from xD</p>
+<div class="highlight"><pre><span></span><code>controlplane:~$<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-A<span class="w"> </span>-l<span class="w"> </span><span class="nv">istio</span><span class="o">=</span>ingressgateway
+NAMESPACE<span class="w">      </span>NAME<span class="w">                                    </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE
+istio-system<span class="w">   </span>istio-ingressgateway-78dcb6c4fb-72j69<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>4m22s
+</code></pre></div>
+
 <p><strong>Ingress Gateway (North-South Traffic IN):</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.istio.io/v1beta1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gateway</span>
@@ -1464,6 +1470,7 @@ istioctl<span class="w"> </span>experimental<span class="w"> </span>check-inject
 </tr>
 </tbody>
 </table>
+<p>After applying the manifest every time, I would run <code>istioctl analyze</code> to check if there were any issues.</p>
 <blockquote>
 <p><strong>References:</strong></p>
 <ul>

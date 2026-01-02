@@ -49,7 +49,7 @@
 &lt;p&gt;Debugging when things go wrong.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Configuration Issues:&lt;/strong&gt; Using &lt;code&gt;istioctl analyze&lt;/code&gt; to detect misconfigurations.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Control Plane Debugging:&lt;/strong&gt; Checking istiod logs, sync status, and xDS configuration.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Control Plane Debugging:&lt;/strong&gt; Checking istiod logs, sync status, and xDS (x Discovery Service) configuration. &lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Data Plane Debugging:&lt;/strong&gt; Using &lt;code&gt;istioctl proxy-status&lt;/code&gt;, &lt;code&gt;proxy-config&lt;/code&gt;, and Envoy admin interface.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Common Issues:&lt;/strong&gt; 503 errors, mTLS conflicts, missing sidecars, and routing mismatches.&lt;/li&gt;
 &lt;/ul&gt;
@@ -120,7 +120,7 @@
 &lt;h3&gt;2. VirtualService &amp;amp; DestinationRule Relationship&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;Domain: Traffic Management&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;These two resources work together and are the &lt;strong&gt;most important concepts&lt;/strong&gt; for the exam.&lt;/p&gt;
-&lt;p&gt;TLDR: This may be complicated for you to understand (same for me). But no worry read the fucking document and practice here, it is fucking best lab based in my opinion to explain how Virtual Service and Destination Rule work together!&lt;/p&gt;
+&lt;p&gt;TLDR: This may be complicated for you to understand (same for me). But no worry, just read the fucking document and practice here, it is fucking best lab based in my opinion to explain how Virtual Service and Destination Rule work together!&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://killercoda.com/lorenzo-g/scenario/traffic-management-request-routing"&gt;KillerCoda ICA - Traffic Management - Request Routing&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;It could be a little outdated, but still good to practice&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;controlplane:~$ istioctl version
@@ -168,12 +168,12 @@ virtualservices&lt;span class="w"&gt;                     &lt;/span&gt;vs&lt;spa
 &lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="nt"&gt;weight&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;20&lt;/span&gt;&lt;span class="w"&gt;                   &lt;/span&gt;&lt;span class="c1"&gt;# 20% to v3&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;&lt;strong&gt;DestinationRule — Defines HOW traffic is handled:&lt;/strong&gt; This is also fucking complicated, try to simplify as &lt;code&gt;kind: DestinationRule&lt;/code&gt; in &lt;a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/"&gt;HERE&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;Can be retrieved with: &lt;code&gt;k get dr&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;controlplane:~$&lt;span class="w"&gt; &lt;/span&gt;k&lt;span class="w"&gt; &lt;/span&gt;api-resources&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;grep&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;dest&lt;span class="w"&gt;   &lt;/span&gt;
 destinationrules&lt;span class="w"&gt;                    &lt;/span&gt;dr&lt;span class="w"&gt;           &lt;/span&gt;networking.istio.io/v1beta1&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;DestinationRule
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;strong&gt;DestinationRule — Defines HOW traffic is handled:&lt;/strong&gt; This is also fucking complicated, try to simplify as &lt;code&gt;kind: DestinationRule&lt;/code&gt; in &lt;a href="https://istio.io/latest/docs/reference/config/networking/virtual-service/"&gt;HERE&lt;/a&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;DestinationRule&lt;/span&gt;
 &lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -223,7 +223,7 @@ destinationrules&lt;span class="w"&gt;                    &lt;/span&gt;dr&lt;spa
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;code&gt;VirtualService&lt;/code&gt; and &lt;code&gt;DestinationRule&lt;/code&gt; are namespace-scoped. But can be reference cross-namespace by FQDN &lt;code&gt;my-svc.other-namespace.svc.cluster.local&lt;/code&gt; in &lt;code&gt;host&lt;/code&gt; field!&lt;/p&gt;
-&lt;p&gt;Extra note: Order matters! &lt;/p&gt;
+&lt;p&gt;Extra note: &lt;strong&gt;Order matters!&lt;/strong&gt; &lt;/p&gt;
 &lt;p&gt;With this VirtualService, subset v2 will be ignored. Because Istio is working with the rule: &lt;code&gt;First Match Wins.&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1alpha3&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;VirtualService&lt;/span&gt;
@@ -269,6 +269,12 @@ destinationrules&lt;span class="w"&gt;                    &lt;/span&gt;dr&lt;spa
 &lt;h3&gt;3. Gateway Configuration&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;Domain: Traffic Management&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Gateway defines the entry/exit points for traffic entering or leaving the mesh.&lt;/p&gt;
+&lt;p&gt;You may want to know where &lt;code&gt;istio: ingressgateway&lt;/code&gt; in the selector field comes from xD&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;controlplane:~$&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-A&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;istio&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;ingressgateway
+NAMESPACE&lt;span class="w"&gt;      &lt;/span&gt;NAME&lt;span class="w"&gt;                                    &lt;/span&gt;READY&lt;span class="w"&gt;   &lt;/span&gt;STATUS&lt;span class="w"&gt;    &lt;/span&gt;RESTARTS&lt;span class="w"&gt;   &lt;/span&gt;AGE
+istio-system&lt;span class="w"&gt;   &lt;/span&gt;istio-ingressgateway-78dcb6c4fb-72j69&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;4m22s
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;&lt;strong&gt;Ingress Gateway (North-South Traffic IN):&lt;/strong&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;networking.istio.io/v1beta1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;Gateway&lt;/span&gt;
@@ -1385,6 +1391,7 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
+&lt;p&gt;After applying the manifest every time, I would run &lt;code&gt;istioctl analyze&lt;/code&gt; to check if there were any issues.&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
