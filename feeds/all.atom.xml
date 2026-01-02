@@ -795,10 +795,13 @@ destinationrules&lt;span class="w"&gt;                    &lt;/span&gt;dr&lt;spa
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;maxRequestsPerConnection&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;10&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="c1"&gt;# Requests per connection&lt;/span&gt;
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;maxRetries&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;3&lt;/span&gt;&lt;span class="w"&gt;                  &lt;/span&gt;&lt;span class="c1"&gt;# Max concurrent retries&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;outlierDetection&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="c1"&gt;# Analyze every 10s, eject any pod with 5 consecutive 5xx errors for 30s, capping at 50% max ejections and disabling the mechanism if healthy pods drop below 30%.&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;consecutive5xxErrors&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;5&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="c1"&gt;# Eject after 5 consecutive 5xx&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;interval&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;10s&lt;/span&gt;&lt;span class="w"&gt;                    &lt;/span&gt;&lt;span class="c1"&gt;# Analysis interval&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;baseEjectionTime&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;30s&lt;/span&gt;&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="c1"&gt;# Min ejection time&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;maxEjectionPercent&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;50&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="c1"&gt;# Max % of hosts to eject&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="c1"&gt;# This technique allows the system to automatically increase the ejection period for unhealthy upstream servers&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="c1"&gt;# https://istio.io/latest/docs/reference/config/networking/destination-rule/&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;maxEjectionPercent&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;50&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="c1"&gt;# Max % of pods to eject for example . If we have 2 pods, we can not eject larger than 1 pod!&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;minHealthPercent&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;30&lt;/span&gt;&lt;span class="w"&gt;             &lt;/span&gt;&lt;span class="c1"&gt;# Min healthy hosts required&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
@@ -1057,8 +1060,14 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;profile&lt;span class="w"&gt; &lt;/s
 &lt;span class="c1"&gt;# Show profile configuration&lt;/span&gt;
 istioctl&lt;span class="w"&gt; &lt;/span&gt;profile&lt;span class="w"&gt; &lt;/span&gt;dump&lt;span class="w"&gt; &lt;/span&gt;demo
 
+&lt;span class="c1"&gt;# Get configuration of specific profile with specific setting&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;profile&lt;span class="w"&gt; &lt;/span&gt;dump&lt;span class="w"&gt; &lt;/span&gt;demo&lt;span class="w"&gt; &lt;/span&gt;--config-path&lt;span class="w"&gt; &lt;/span&gt;components.cni
+
 &lt;span class="c1"&gt;# Compare profiles&lt;/span&gt;
 istioctl&lt;span class="w"&gt; &lt;/span&gt;profile&lt;span class="w"&gt; &lt;/span&gt;diff&lt;span class="w"&gt; &lt;/span&gt;default&lt;span class="w"&gt; &lt;/span&gt;demo
+
+&lt;span class="c1"&gt;# Dump all resource that will be installed in YAML format for profile &amp;#39;demo&amp;#39;&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;manifest&lt;span class="w"&gt; &lt;/span&gt;generate&lt;span class="w"&gt; &lt;/span&gt;--set&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;profile&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;demo
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;Installation Methods:&lt;/strong&gt;&lt;/p&gt;
@@ -1066,7 +1075,7 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;profile&lt;span class="w"&gt; &lt;/s
 istioctl&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;--set&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;profile&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;demo&lt;span class="w"&gt; &lt;/span&gt;-y
 
 &lt;span class="c1"&gt;# Method 2: IstioOperator manifest&lt;/span&gt;
-istioctl&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;my-istio-config.yaml
+istioctl&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;my-istio-config.yaml&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# resource kind: IstioOperator&lt;/span&gt;
 
 &lt;span class="c1"&gt;# Method 3: Helm&lt;/span&gt;
 helm&lt;span class="w"&gt; &lt;/span&gt;repo&lt;span class="w"&gt; &lt;/span&gt;add&lt;span class="w"&gt; &lt;/span&gt;istio&lt;span class="w"&gt; &lt;/span&gt;https://istio-release.storage.googleapis.com/charts
@@ -1079,6 +1088,9 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;verify-install
 
 &lt;span class="c1"&gt;# Check Istio version&lt;/span&gt;
 istioctl&lt;span class="w"&gt; &lt;/span&gt;version
+
+&lt;span class="c1"&gt;# Display the parameters of the current installation&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;IstioOperator&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;istio-system&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;yaml&lt;span class="w"&gt; &lt;/span&gt;installed-state
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;IstioOperator Custom Configuration:&lt;/strong&gt; Define Istio config, need Istio installed already! You can imagine it as &lt;code&gt;values.yaml&lt;/code&gt; of Helm&lt;/p&gt;
@@ -1130,7 +1142,12 @@ kubectl&lt;span class="w"&gt; &lt;/span&gt;rollout&lt;span class="w"&gt; &lt;/sp
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;Canary Upgrade (Recommended for Production):&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Install new control plane with revision&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Check system before installation&lt;/span&gt;
+istioctl&lt;span class="w"&gt; &lt;/span&gt;x&lt;span class="w"&gt; &lt;/span&gt;precheck
+&lt;span class="c1"&gt;# ✔ No issues found when checking the cluster. Istio is safe to install or upgrade!&lt;/span&gt;
+&lt;span class="c1"&gt;# To get started, check out https://istio.io/latest/docs/setup/getting-started/&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Install new control plane with revision&lt;/span&gt;
 istioctl&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;--set&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;revision&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;-22-0&lt;span class="w"&gt; &lt;/span&gt;--set&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;profile&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;default
 
 &lt;span class="c1"&gt;# Label namespace to use new revision&lt;/span&gt;
@@ -1314,7 +1331,7 @@ kubectl&lt;span class="w"&gt; &lt;/span&gt;logs&lt;span class="w"&gt; &lt;/span&
 istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &lt;/span&gt;describe&lt;span class="w"&gt; &lt;/span&gt;pod&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;pod-name&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;strong&gt;Injection &amp;amp; Labeling:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Injection &amp;amp; Labeling:&lt;/strong&gt; Be sure to remember and understand this for exam plz!&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Check if namespace has auto-injection enabled&lt;/span&gt;
 kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;namespace&lt;span class="w"&gt; &lt;/span&gt;-L&lt;span class="w"&gt; &lt;/span&gt;istio-injection
 
@@ -1354,6 +1371,11 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &
 &lt;tr&gt;
 &lt;td&gt;Config not applied&lt;/td&gt;
 &lt;td&gt;&lt;code&gt;istioctl analyze&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Configuration errors&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Still like above but with namespace xD&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;istioctl analyze -n default-namespace&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;Configuration errors&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -1432,20 +1454,16 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &
 &lt;li&gt;&lt;a href="https://github.com/istio/istio/tree/master/samples"&gt;Istio GitHub Examples&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr&gt;
-&lt;h1&gt;Mock exam quiz choice&lt;/h1&gt;
-&lt;p&gt;Seems unnecessary for you and for me, but in case you want to test your knowledge before practice, why not?&lt;/p&gt;
-&lt;p&gt;-- To be updated after pass this exam --&lt;/p&gt;
 &lt;h1&gt;Exam Notes&lt;/h1&gt;
 &lt;p&gt;Don't be like me, I was thinking this exam was a quiz choice, not hands-on. And then you know what happens, I failed 1st time. My mistake was that I didn't check the exam before scheduling xD. But luckily Linux Foundation gives 1 free retry.&lt;/p&gt;
 &lt;h3&gt;Where to practice&lt;/h3&gt;
 &lt;p&gt;Killercoda fore sure!&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href="https://killercoda.com/ica-scenarios"&gt;ICA Certification | Killercoda&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Recommended: &lt;a href="https://killercoda.com/ica-scenarios"&gt;ICA Certification | Killercoda&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://killercoda.com/istio"&gt;Istio | Killercoda&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://killercoda.com/ica"&gt;Killercoda Interactive Environments&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://www.solo.io/resources/lab"&gt;Solo IO&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Recommended: &lt;a href="https://killercoda.com/ica"&gt;Killercoda Interactive Environments&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://istioworkshop.github.io/"&gt;Istioworkshop.github.io&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://academy.tetrate.io/courses/take/istio-fundamentals/lessons/19935842-1-0-module-overview"&gt;Tetrate&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Free resource for learning: &lt;a href="https://academy.tetrate.io/courses/take/istio-fundamentals/lessons/19935842-1-0-module-overview"&gt;Tetrate&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3&gt;Practice Istio Installation&lt;/h3&gt;
 &lt;p&gt;Scenario: Install Istio version 1.21.0 on a Kubernetes cluster using istioctl.
