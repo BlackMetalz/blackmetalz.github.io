@@ -313,7 +313,7 @@ destinationrules&lt;span class="w"&gt;                    &lt;/span&gt;dr&lt;spa
 &lt;tr&gt;
 &lt;td&gt;&lt;code&gt;MUTUAL&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;mTLS - client cert required&lt;/td&gt;
-&lt;td&gt;High security, need correct keys: &lt;code&gt;tls.crt tls.key ca.cert&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;High security, need correct keys: &lt;code&gt;tls.crt tls.key ca.crt&lt;/code&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;&lt;code&gt;PASSTHROUGH&lt;/code&gt;&lt;/td&gt;
@@ -798,7 +798,7 @@ destinationrules&lt;span class="w"&gt;                    &lt;/span&gt;dr&lt;spa
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="c1"&gt;# Analyze every 10s, eject any pod with 5 consecutive 5xx errors for 30s, capping at 50% max ejections and disabling the mechanism if healthy pods drop below 30%.&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;consecutive5xxErrors&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;5&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="c1"&gt;# Eject after 5 consecutive 5xx&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;interval&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;10s&lt;/span&gt;&lt;span class="w"&gt;                    &lt;/span&gt;&lt;span class="c1"&gt;# Analysis interval&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;baseEjectionTime&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;30s&lt;/span&gt;&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="c1"&gt;# Min ejection time&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;baseEjectionTime&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;30s&lt;/span&gt;&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="c1"&gt;# Min ejection time. First time, 1*30s, second time, 2*30s and so on....&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="c1"&gt;# This technique allows the system to automatically increase the ejection period for unhealthy upstream servers&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="c1"&gt;# https://istio.io/latest/docs/reference/config/networking/destination-rule/&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;maxEjectionPercent&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;50&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="c1"&gt;# Max % of pods to eject for example . If we have 2 pods, we can not eject larger than 1 pod!&lt;/span&gt;

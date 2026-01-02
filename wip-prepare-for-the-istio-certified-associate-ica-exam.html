@@ -392,7 +392,7 @@ destinationrules<span class="w">                    </span>dr<span class="w">   
 <tr>
 <td><code>MUTUAL</code></td>
 <td>mTLS - client cert required</td>
-<td>High security, need correct keys: <code>tls.crt tls.key ca.cert</code></td>
+<td>High security, need correct keys: <code>tls.crt tls.key ca.crt</code></td>
 </tr>
 <tr>
 <td><code>PASSTHROUGH</code></td>
@@ -877,7 +877,7 @@ destinationrules<span class="w">                    </span>dr<span class="w">   
 <span class="w">    </span><span class="c1"># Analyze every 10s, eject any pod with 5 consecutive 5xx errors for 30s, capping at 50% max ejections and disabling the mechanism if healthy pods drop below 30%.</span>
 <span class="w">      </span><span class="nt">consecutive5xxErrors</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w">          </span><span class="c1"># Eject after 5 consecutive 5xx</span>
 <span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span><span class="w">                    </span><span class="c1"># Analysis interval</span>
-<span class="w">      </span><span class="nt">baseEjectionTime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span><span class="w">            </span><span class="c1"># Min ejection time</span>
+<span class="w">      </span><span class="nt">baseEjectionTime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span><span class="w">            </span><span class="c1"># Min ejection time. First time, 1*30s, second time, 2*30s and so on....</span>
 <span class="w">      </span><span class="c1"># This technique allows the system to automatically increase the ejection period for unhealthy upstream servers</span>
 <span class="w">      </span><span class="c1"># https://istio.io/latest/docs/reference/config/networking/destination-rule/</span>
 <span class="w">      </span><span class="nt">maxEjectionPercent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w">           </span><span class="c1"># Max % of pods to eject for example . If we have 2 pods, we can not eject larger than 1 pod!</span>
