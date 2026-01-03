@@ -17,16 +17,16 @@
 
 <meta name="keywords" content="istio, certification, linux-foundation, ica, service-mesh, Knowledge Base, " />
 
-<meta property="og:title" content="[WIP] Prepare for the Istio Certified Associate (ICA) Exam "/>
-<meta property="og:url" content="https://blackmetalz.github.io/wip-prepare-for-the-istio-certified-associate-ica-exam.html" />
+<meta property="og:title" content="Prepare for the Istio Certified Associate (ICA) Exam "/>
+<meta property="og:url" content="https://blackmetalz.github.io/prepare-for-the-istio-certified-associate-ica-exam.html" />
 <meta property="og:description" content="" />
 <meta property="og:site_name" content="Kienlt&#39;s notebook" />
 <meta property="og:article:author" content="kienlt" />
 <meta property="og:article:published_time" content="2025-12-31T00:00:00+07:00" />
-<meta name="twitter:title" content="[WIP] Prepare for the Istio Certified Associate (ICA) Exam ">
+<meta name="twitter:title" content="Prepare for the Istio Certified Associate (ICA) Exam ">
 <meta name="twitter:description" content="">
 
-        <title>[WIP] Prepare for the Istio Certified Associate (ICA) Exam  · Kienlt&#39;s notebook
+        <title>Prepare for the Istio Certified Associate (ICA) Exam  · Kienlt&#39;s notebook
 </title>
         <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
 
@@ -68,8 +68,8 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="https://blackmetalz.github.io/wip-prepare-for-the-istio-certified-associate-ica-exam.html">
-                [WIP] Prepare for the Istio Certified Associate (ICA) Exam
+            <a href="https://blackmetalz.github.io/prepare-for-the-istio-certified-associate-ica-exam.html">
+                Prepare for the Istio Certified Associate (ICA) Exam
             </a>
         </h1>
     </header>
@@ -1540,8 +1540,21 @@ istioctl<span class="w"> </span>experimental<span class="w"> </span>check-inject
 <li><a href="https://github.com/istio/istio/tree/master/samples">Istio GitHub Examples</a></li>
 </ul>
 <hr>
+<h1>Comparison: Istio vs Haproxy</h1>
+<p>If we are simply using Istio for request routing, it would be called over-engineering. So, when to use Istio:</p>
+<ul>
+<li>Fault Injection: Simulate 503 or delay 5s to test the app's fault tolerance</li>
+<li>Circuit Breaking: Auto-disconnect traffic to fucked Pod to prevent domino?</li>
+<li>Mirroring: Fire and forget traffic to the beta version without affecting the live version! </li>
+</ul>
+<hr>
 <h1>Exam Notes</h1>
 <p>Don't be like me, I was thinking this exam was a quiz choice, not hands-on. And then you know what happens, I failed 1st time. My mistake was that I didn't check the exam before scheduling xD. But luckily Linux Foundation gives 1 free retry.</p>
+<h3>After taking exam</h3>
+<p>I don't think it is that hard to pass the exam, but I will not make any excuses for my 1st fail xD (It is just my bad didn't take a look properly!) </p>
+<p>The only question I didn't make is a question related to Virtual Service, but with port redirection. I think I need an extra 10 minutes for that question T_T</p>
+<p>And the last thing, for any configuration issue or after every apply, run command: <code>istioctl analyze -n namespace</code>, it will help you a lot for saving time xD</p>
+<p>I scored <code>81/100</code></p>
 <h3>Where to practice</h3>
 <p>Killercoda fore sure!</p>
 <ul>
@@ -1634,14 +1647,6 @@ istioctl<span class="w"> </span>version
 
 <p>Remember to uninstall it to retest xD: <code>istioctl uninstall --purge -y &amp;&amp; rm -rf istio-1.2*</code></p>
 <p>Document page for the exam: <a href="https://istio.io/latest/docs/setup/upgrade/canary/">https://istio.io/latest/docs/setup/upgrade/canary/</a></p>
-<hr>
-<h1>Comparison: Istio vs Haproxy</h1>
-<p>If we are simply using Istio for request routing, it would be called over-engineering. So, when to use Istio:</p>
-<ul>
-<li>Fault Injection: Simulate 503 or delay 5s to test the app's fault tolerance</li>
-<li>Circuit Breaking: Auto-disconnect traffic to fucked Pod to prevent domino?</li>
-<li>Mirroring: Fire and forget traffic to the beta version without affecting the live version! </li>
-</ul>
 
 
              

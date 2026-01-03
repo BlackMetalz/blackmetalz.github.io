@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2025-12-31T00:00:00+07:00</updated><entry><title>[WIP] Prepare for the Istio Certified Associate (ICA) Exam</title><link href="https://blackmetalz.github.io/wip-prepare-for-the-istio-certified-associate-ica-exam.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-prepare-for-the-istio-certified-associate-ica-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/20.png"&gt;&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2025-12-31T00:00:00+07:00</updated><entry><title>Prepare for the Istio Certified Associate (ICA) Exam</title><link href="https://blackmetalz.github.io/prepare-for-the-istio-certified-associate-ica-exam.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/prepare-for-the-istio-certified-associate-ica-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/20.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Istio Certified Associate (ICA) Overview&lt;/h1&gt;
 &lt;h3&gt;1. Service Mesh Fundamentals&lt;/h3&gt;
@@ -1461,8 +1461,21 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;experimental&lt;span class="w"&gt; &
 &lt;li&gt;&lt;a href="https://github.com/istio/istio/tree/master/samples"&gt;Istio GitHub Examples&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr&gt;
+&lt;h1&gt;Comparison: Istio vs Haproxy&lt;/h1&gt;
+&lt;p&gt;If we are simply using Istio for request routing, it would be called over-engineering. So, when to use Istio:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Fault Injection: Simulate 503 or delay 5s to test the app's fault tolerance&lt;/li&gt;
+&lt;li&gt;Circuit Breaking: Auto-disconnect traffic to fucked Pod to prevent domino?&lt;/li&gt;
+&lt;li&gt;Mirroring: Fire and forget traffic to the beta version without affecting the live version! &lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
 &lt;h1&gt;Exam Notes&lt;/h1&gt;
 &lt;p&gt;Don't be like me, I was thinking this exam was a quiz choice, not hands-on. And then you know what happens, I failed 1st time. My mistake was that I didn't check the exam before scheduling xD. But luckily Linux Foundation gives 1 free retry.&lt;/p&gt;
+&lt;h3&gt;After taking exam&lt;/h3&gt;
+&lt;p&gt;I don't think it is that hard to pass the exam, but I will not make any excuses for my 1st fail xD (It is just my bad didn't take a look properly!) &lt;/p&gt;
+&lt;p&gt;The only question I didn't make is a question related to Virtual Service, but with port redirection. I think I need an extra 10 minutes for that question T_T&lt;/p&gt;
+&lt;p&gt;And the last thing, for any configuration issue or after every apply, run command: &lt;code&gt;istioctl analyze -n namespace&lt;/code&gt;, it will help you a lot for saving time xD&lt;/p&gt;
+&lt;p&gt;I scored &lt;code&gt;81/100&lt;/code&gt;&lt;/p&gt;
 &lt;h3&gt;Where to practice&lt;/h3&gt;
 &lt;p&gt;Killercoda fore sure!&lt;/p&gt;
 &lt;ul&gt;
@@ -1554,15 +1567,7 @@ istioctl&lt;span class="w"&gt; &lt;/span&gt;version
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Remember to uninstall it to retest xD: &lt;code&gt;istioctl uninstall --purge -y &amp;amp;&amp;amp; rm -rf istio-1.2*&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;Document page for the exam: &lt;a href="https://istio.io/latest/docs/setup/upgrade/canary/"&gt;https://istio.io/latest/docs/setup/upgrade/canary/&lt;/a&gt;&lt;/p&gt;
-&lt;hr&gt;
-&lt;h1&gt;Comparison: Istio vs Haproxy&lt;/h1&gt;
-&lt;p&gt;If we are simply using Istio for request routing, it would be called over-engineering. So, when to use Istio:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Fault Injection: Simulate 503 or delay 5s to test the app's fault tolerance&lt;/li&gt;
-&lt;li&gt;Circuit Breaking: Auto-disconnect traffic to fucked Pod to prevent domino?&lt;/li&gt;
-&lt;li&gt;Mirroring: Fire and forget traffic to the beta version without affecting the live version! &lt;/li&gt;
-&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="istio"/><category term="certification"/><category term="linux-foundation"/><category term="ica"/><category term="service-mesh"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;Document page for the exam: &lt;a href="https://istio.io/latest/docs/setup/upgrade/canary/"&gt;https://istio.io/latest/docs/setup/upgrade/canary/&lt;/a&gt;&lt;/p&gt;</content><category term="Knowledge Base"/><category term="istio"/><category term="certification"/><category term="linux-foundation"/><category term="ica"/><category term="service-mesh"/></entry><entry><title>[WIP] Setup K8s with Kubespray</title><link href="https://blackmetalz.github.io/wip-setup-k8s-with-kubespray.html" rel="alternate"/><published>2025-12-31T00:00:00+07:00</published><updated>2025-12-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-31:/wip-setup-k8s-with-kubespray.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This document outlines the deployment of a Kubernetes v1.31.9 HA cluster on Ubuntu 24.04 using Kubespray v2.27.1.&lt;/p&gt;
 &lt;p&gt;Objective: Establish a robust lab environment with minimum requirements. It can be upgraded to production later by simply adding more worker nodes and migrating to dedicated master nodes.
 Topology: 3-node HA architecture (Control Plane, Etcd, and Worker roles on all nodes).&lt;/p&gt;
@@ -1764,7 +1769,9 @@ ssh&lt;span class="w"&gt; &lt;/span&gt;root@kienlt-lab-machine-1&lt;span class="
 chmod&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;600&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$HOME&lt;/span&gt;/.kube/config
 sed&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;s/127.0.0.1/kienlt-lab-machine-1/g&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$HOME&lt;/span&gt;/.kube/config
 k&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;nodes
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="Knowledge Base"/><category term="k8s"/><category term="kubespray"/></entry><entry><title>Prepare for Linux Foundation Certified System Administrator (LFCS)</title><link href="https://blackmetalz.github.io/prepare-for-linux-foundation-certified-system-administrator-lfcs.html" rel="alternate"/><published>2025-12-29T00:00:00+07:00</published><updated>2025-12-29T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-29:/prepare-for-linux-foundation-certified-system-administrator-lfcs.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/44.png"&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h1&gt;I'm to lazy to finish this shit -.-&lt;/h1&gt;</content><category term="Knowledge Base"/><category term="k8s"/><category term="kubespray"/></entry><entry><title>Prepare for Linux Foundation Certified System Administrator (LFCS)</title><link href="https://blackmetalz.github.io/prepare-for-linux-foundation-certified-system-administrator-lfcs.html" rel="alternate"/><published>2025-12-29T00:00:00+07:00</published><updated>2025-12-29T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2025-12-29:/prepare-for-linux-foundation-certified-system-administrator-lfcs.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2025/12/44.png"&gt;&lt;/p&gt;
 &lt;h1&gt;Sections&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;Introduction&lt;/li&gt;
