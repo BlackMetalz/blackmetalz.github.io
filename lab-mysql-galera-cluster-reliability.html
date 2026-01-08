@@ -916,20 +916,26 @@ cluster operations.
 <h1>Conclusion</h1>
 <p>Through these three comprehensive lab scenarios, we've explored the fault tolerance and self-healing capabilities of MySQL Galera Cluster under various network conditions. Here are the key takeaways:</p>
 <h3>Lab 1: Segment Isolation &amp; Data Synchronization</h3>
-<p><strong>Key Findings:</strong>
-- <strong>Graceful shutdown</strong>: Cluster handles segment isolation cleanly. When 3 nodes (segment 1) shutdown gracefully, the remaining 4 nodes (segment 0 + garbd) maintain quorum and continue operations. Upon rejoin, data synchronizes seamlessly using IST/SST.
-- <strong>Ungraceful shutdown (kill -9)</strong>: Leads to split-brain suspicion. All segments enter <code>non-Primary</code> state to prevent conflicting writes. Recovery requires manual intervention via bootstrap procedure.
-- <strong>Recovery procedure</strong>: Critical to identify the node with highest <code>seqno</code> in <code>grastate.dat</code> for safe bootstrap. The <code>mysqld --wsrep-recover</code> command is essential when all nodes show <code>seqno: -1</code>.</p>
+<p><strong>Key Findings:</strong></p>
+<ul>
+<li><strong>Graceful shutdown</strong>: Cluster handles segment isolation cleanly. When 3 nodes (segment 1) shutdown gracefully, the remaining 4 nodes (segment 0 + garbd) maintain quorum and continue operations. Upon rejoin, data synchronizes seamlessly using IST/SST.</li>
+<li><strong>Ungraceful shutdown (kill -9)</strong>: Leads to split-brain suspicion. All segments enter <code>non-Primary</code> state to prevent conflicting writes. Recovery requires manual intervention via bootstrap procedure.</li>
+<li><strong>Recovery procedure</strong>: Critical to identify the node with highest <code>seqno</code> in <code>grastate.dat</code> for safe bootstrap. The <code>mysqld --wsrep-recover</code> command is essential when all nodes show <code>seqno: -1</code>.</li>
+</ul>
 <h3>Lab 2: Network Partition with Garbd Relay</h3>
-<p><strong>Key Findings:</strong>
-- <strong>Garbd as relay</strong>: When segment 0 and segment 1 cannot communicate directly (via iptables blocks), Galera Arbitrator acts as a message relay, maintaining cluster integrity and enabling data synchronization between isolated segments.
-- <strong>Garbd failure impact</strong>: If garbd goes down during network partition, both segments lose quorum and enter <code>non-Primary</code> state, requiring manual recovery.
-- <strong>Network validation</strong>: Always verify connectivity with <code>nc</code> and <code>ping</code> when troubleshooting. Tcpdump analysis confirms garbd's relay behavior - receiving data from all nodes and broadcasting to others.</p>
+<p><strong>Key Findings:</strong></p>
+<ul>
+<li><strong>Garbd as relay</strong>: When segment 0 and segment 1 cannot communicate directly (via iptables blocks), Galera Arbitrator acts as a message relay, maintaining cluster integrity and enabling data synchronization between isolated segments.</li>
+<li><strong>Garbd failure impact</strong>: If garbd goes down during network partition, both segments lose quorum and enter <code>non-Primary</code> state, requiring manual recovery.</li>
+<li><strong>Network validation</strong>: Always verify connectivity with <code>nc</code> and <code>ping</code> when troubleshooting. Tcpdump analysis confirms garbd's relay behavior - receiving data from all nodes and broadcasting to others.</li>
+</ul>
 <h3>Lab 3: Network Instability Simulation</h3>
-<p><strong>Key Findings:</strong>
-- <strong>Good network conditions</strong> (≤5% packet loss, ~50ms latency, ±10ms jitter): Cluster operates normally with successful data replication across segments.
-- <strong>Poor network conditions</strong> (≥30% packet loss, ~100ms latency, ±50ms jitter): Cluster fails to reach consensus on membership, causing all nodes to enter <code>non-Primary</code> state.
-- <strong>Consensus before quorum</strong>: The critical insight is that Galera requires <strong>unanimous consensus</strong> on cluster membership before calculating quorum. With high packet loss, nodes see different membership views, preventing consensus - even if majority would support quorum.</p>
+<p><strong>Key Findings:</strong></p>
+<ul>
+<li><strong>Good network conditions</strong> (≤5% packet loss, ~50ms latency, ±10ms jitter): Cluster operates normally with successful data replication across segments.</li>
+<li><strong>Poor network conditions</strong> (≥30% packet loss, ~100ms latency, ±50ms jitter): Cluster fails to reach consensus on membership, causing all nodes to enter <code>non-Primary</code> state.</li>
+<li><strong>Consensus before quorum</strong>: The critical insight is that Galera requires <strong>unanimous consensus</strong> on cluster membership before calculating quorum. With high packet loss, nodes see different membership views, preventing consensus - even if majority would support quorum.</li>
+</ul>
 <h3>Best Practices Learned</h3>
 <ol>
 <li><strong>Monitoring</strong>: Track <code>wsrep_cluster_conf_id</code> - rapid increases indicate cluster instability (nodes joining/leaving frequently).</li>
