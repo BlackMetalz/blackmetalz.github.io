@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-01-10T00:00:00+07:00</updated><entry><title>[WIP] My journey: from Kubestronaut to Golden Kubestronaut in 30 days</title><link href="https://blackmetalz.github.io/wip-my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html" rel="alternate"/><published>2026-01-10T00:00:00+07:00</published><updated>2026-01-10T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-01-10:/wip-my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2026/01/01.png"&gt;&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-01-10T00:00:00+07:00</updated><entry><title>My journey: from Kubestronaut to Golden Kubestronaut in 30 days</title><link href="https://blackmetalz.github.io/my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html" rel="alternate"/><published>2026-01-10T00:00:00+07:00</published><updated>2026-01-10T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-01-10:/my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2026/01/01.png"&gt;&lt;/p&gt;
 &lt;h1&gt;The story&lt;/h1&gt;
 &lt;p&gt;TLDR: The title is a lie xD, in fact, I have spent about total 45-50 days.&lt;/p&gt;
 &lt;p&gt;From the beginning, I never think I will go for full Golden Kubestronaut certifications, I just had interest in field of Platform Engineering after viewing a demo what its capabilities, then I was aiming for 2 certifications which are Certified Backstage Associate (CBA) and Certified Cloud Native Platform Engineer (CNPE), but somehow I started thinking about full complete Golden Kubestronaut, it was affected by the following conditions:&lt;/p&gt;
@@ -45,8 +45,8 @@
 &lt;h3&gt;10. Linux Admin (LFCS)&lt;/h3&gt;
 &lt;p&gt;I forgot some basics, this is a chance that forced me to re-learn xD&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://blackmetalz.github.io/prepare-for-linux-foundation-certified-system-administrator-lfcs.html"&gt;Link to article - Prepare for LFCS&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Here is the result (ummm, My handwriting is bad and ugly AF)
-&lt;img alt="alt text" src="images/2026/01/04.png"&gt;&lt;/p&gt;
+&lt;p&gt;Here is the result (ummm, My handwriting is bad and ugly AF)&lt;/p&gt;
+&lt;p&gt;&lt;img alt="alt text" src="images/2026/01/04.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;My personal rating and recommendation for each certification&lt;/h1&gt;
 &lt;h3&gt;Rating&lt;/h3&gt;
@@ -64,7 +64,7 @@
 &lt;li&gt;Linux Admin (LFCS): Easy&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3&gt;Recommendation&lt;/h3&gt;
-&lt;p&gt;First and second, orders do not matter.&lt;/p&gt;
+&lt;p&gt;First and second, orders do not matter&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;1st: Prometheus, Argo, Gitops, Opentelemetry, Linux Admin, Istio, Cilium&lt;/li&gt;
 &lt;li&gt;2nd: Kyverno, Backstage&lt;/li&gt;
