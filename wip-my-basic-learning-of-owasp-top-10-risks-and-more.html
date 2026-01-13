@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="security, owasp, Knowledge Base, " />
+
+<meta property="og:title" content="[WIP] My basic learning of OWASP top 10 risks and more. "/>
+<meta property="og:url" content="https://blackmetalz.github.io/wip-my-basic-learning-of-owasp-top-10-risks-and-more.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2026-01-13T00:00:00+07:00" />
+<meta name="twitter:title" content="[WIP] My basic learning of OWASP top 10 risks and more. ">
+<meta name="twitter:description" content="">
+
+        <title>[WIP] My basic learning of OWASP top 10 risks and more.  · Kienlt&#39;s notebook
+</title>
+        <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://blackmetalz.github.io/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://blackmetalz.github.io
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://blackmetalz.github.io/categories.html">Categories</a></li>
+                                <li ><a href="https://blackmetalz.github.io/tags.html">Tags</a></li>
+                                <li ><a href="https://blackmetalz.github.io/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://blackmetalz.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://blackmetalz.github.io/wip-my-basic-learning-of-owasp-top-10-risks-and-more.html">
+                [WIP] My basic learning of OWASP top 10 risks and more.
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h1>Introduction to OWASP (Opensource Web Application Security Project)</h1>
+<p>Objective: Understand the top 10 most common web application attacks, their impact, and how these attacks can be prevented or mitigated!</p>
+<p>Resource usage:
+<a href="https://fpt.udemy.com/course/web-application-security-for-absolute-beginners-no-coding/">Learn OWASP top 10 risks!</a></p>
+<p>The story for this article: since my company, where I work, forced every employee to finish the course above, I want to write down something about my ability, or what I understood while watching the resource. I will put my story about some security issues I have faced before to remind me not fucked up again!</p>
+<hr>
+<h1>Top 10 OWASP and more</h1>
+<p>It could be already outdated, but I'm here to learn its essence and concepts; name or definition could be changed, but the essence never!</p>
+<h3>Injection</h3>
+<p>I think it is best known as "SQL Injection". Example, if we don't validate input <code>username = "admin' OR '1'='1' --"</code>. Then our code will be fucked if:</p>
+<div class="highlight"><pre><span></span><code><span class="n">SQL</span> <span class="n">Injection</span>  
+<span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;SELECT * FROM users WHERE user=&#39;</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&#39; AND pass=&#39;</span><span class="si">{</span><span class="n">password</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="c1"># username = &quot;admin&#39; --&quot; </span>
+    <span class="c1"># → Query: SELECT * FROM users WHERE user=&#39;admin&#39; --&#39; AND pass=&#39;...&#39;</span>
+    <span class="c1"># Consequence: Bypass authentication and more....</span>
+</code></pre></div>
+
+<p>It is already prevented by most modern frameworks today, but it's better to know its essence instead of using a framework without understanding why it is secure!</p>
+<p><a href="https://owasp.org/Top10/2025/A05_2025-Injection/">Resource</a></p>
+<h3>Broken Authentication and Session Management</h3>
+<p>Prevent "Impersonate"
+- Use a strong password, multi-factor authentication.
+- Require current password/credentials when "sensitive" information is requested or changed, like in my Techcombank - Banking App, I want to view my CCV for the current card, it always requires me to enter my secret PIN.
+- Log out or expire session after xxx amount of time.</p>
+<p>And something else I didn't really understand</p>
+<h3>Cross-site Scripting (XSS)</h3>
+<p>Why XSS? because CSS will get mis-understand related with Cascading Style Sheets xD</p>
+<p>What is it? Still same like injection but executed by browser</p>
+<p>How to mitigate? Just alway untrust the fucking input data!</p>
+<p><a href="https://owasp.org/www-community/attacks/xss/">Resource</a></p>
+<h3>Broken Access Control</h3>
+<p>I could tell a story related to this, so it is about a lazy issue. Back in 2017, I was working with the role of System Admin and yeah manual tester as well, LOL. When my department (4 people) is creating a new tool for internal usage. When the tool was about to finish and ready to release, the leader asked me to test and report if any issues were found. </p>
+<p>So in the user view, the menu of the manager is hidden, but you can still access the manager page by entering the direct URL xD. I asked why that was. He just told skip it, haha.</p>
+<p>So let me provide a simple issue by pseudocode</p>
+<div class="highlight"><pre><span></span><code>//<span class="w"> </span>Frontend<span class="w"> </span>-<span class="w"> </span>Only<span class="w"> </span>hide<span class="w"> </span>button
+{user.role<span class="w"> </span>===<span class="w"> </span>&#39;admin&#39;<span class="w"> </span><span class="err">&amp;&amp;</span><span class="w"> </span><span class="nt">&lt;Link</span><span class="w"> </span><span class="na">to=</span><span class="s">&quot;/admin&quot;</span><span class="nt">&gt;</span>Admin<span class="w"> </span>Panel<span class="nt">&lt;/Link&gt;</span>}
+
+//<span class="w"> </span>Backend<span class="w"> </span>doesn&#39;t<span class="w"> </span>check<span class="w"> </span>role
+app.get(&#39;/admin&#39;,<span class="w"> </span>(req,<span class="w"> </span>res)<span class="w"> </span>=&gt;<span class="w"> </span>{
+<span class="w">  </span>return<span class="w"> </span>res.json(adminData);<span class="w"> </span>
+});
+</code></pre></div>
+
+<p><a href="https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/">Resource</a></p>
+<h3>Security Misconfiguration</h3>
+<p>Yes, this is simple to understand, misconfiguration will fucked you up!</p>
+<p>The most common issue is enabling fucking debug flag! Developers deploy themself; no one verifies or validates changes for deployment! This simple misconfiguration can lead to many, many more problems later!</p>
+<p>The example I really remember about: Path traversal via misconfigured NGINX alias</p>
+<p><a href="https://www.invicti.com/web-application-vulnerabilities/path-traversal-via-misconfigured-nginx-alias">Resource for Path travelsal</a></p>
+<h3>Sensitive Data Exposure</h3>
+<ul>
+<li>The resource showed back in 2017, it was using MD5/SHA1 hash solution, which is well-known as insecure</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="gh">#</span> Bad
+password_hash = md5(password)
+
+<span class="gh">#</span> Great for example xD
+password_hash = bcrypt.hash(password, 12)
+</code></pre></div>
+
+<ul>
+<li>
+<p>HTTP vs HTTPS: HTTPS could prevent <a href="https://owasp.org/www-community/attacks/Manipulator-in-the-middle_attack">Man-in-the-Middle</a> (MitM)</p>
+</li>
+<li>
+<p>Storing Sensitive Data in Plain Text: It is about dev behavior, i guess? Because it is a very bad practice, if we store sensitive information without hashing or tokenizing.</p>
+</li>
+<li>
+<p>Exposing Data in Logs/Errors: Haha, I see myself in this sometimes, for debugging purposes, but forgot to remove or set the log level.</p>
+</li>
+<li>
+<p>Unnecessary Data Collection: Collect more information than required? This can be related to speed or performance. It would be better if we select only 2 required fields rather than select all fields. I have been told by my developer friend in the very early days, when I started typing echo hello world!</p>
+</li>
+</ul>
+<h3>Insufficient Attack Protection</h3>
+<p>It was updated to: <code>Security Logging and Monitoring Failures - A09:2021</code></p>
+<p>When I'm learning this section, the first thing I thought was <code>Rate Limit</code>, we should not trust users even if it was deployed to the internal environment, who knows in the future they will not fucked us up? Just set the fucking <code>Rate Limit</code> to prevent issues in the future!</p>
+<p>Other key protections are: <code>Account Lockout</code>, <code>Automated Response</code>, and <code>Web Application Firewall (WAF).</code></p>
+<p>Conclusion: Defense in depth!</p>
+<h3>Cross-site request forgery (CSRF)</h3>
+<p>I think I was familiar with this before long time ago, but I never understood it, haha. So an example with PHP - Laravel. </p>
+<p>So, CSRF protection prevents an attacker from using the <code>authenticated session</code> of a victim to send an illegal request.</p>
+<p>CSRF Token generated with the user session. When sending a request to the server, it will go together. Server validates by checking the token to see if it matches with session.</p>
+<ul>
+<li>Match: process request</li>
+<li>Not match: reject (with 419 status response)</li>
+</ul>
+<p>And only need to use CSRF for state-changing requests: POST/PUT/DELETE/PATCH. Other state like GET/HEAD/OPTIONS is not needed!</p>
+<p><a href="https://laravel.com/docs/12.x/csrf#preventing-csrf-requests">Resource - CSRF Protection</a></p>
+<h3>Using Components with Known Vulnerabilities</h3>
+<p>We can understand that they are a third-party component.</p>
+<ul>
+<li>Virtual Patch: Workaround by block, limit access, or whatever, but do not fix the real issue! Short-term solutions, bro!</li>
+<li>Real Patch: So we can have a small example with a Python package, which is a third-party component because we would install/import and use it. Ex <code>requests</code> version <code>1.0.0</code> has <code>CVE-XXX</code>, fix it by upgrading it to version <code>1.0.1.</code>. Ex: <a href="https://nvd.nist.gov/vuln/detail/cve-2023-32681">CVE-2023-32681</a></li>
+</ul>
+<div class="highlight"><pre><span></span><code># Vulnerable
+requests==2.6.0  # CVE-2023-32681: Certificate validation bypass
+# Fixed example
+requests==2.31.0  # Patched version
+</code></pre></div>
+
+<p>That is a simple example, Known vulnerabilities can be appear in:
+- Third-party libraries (requests, lodash, spring, etc.)
+- Frameworks (Laravel, Django, React)
+- OS packages (OpenSSL, bash)
+- Containers/images (Docker base images)
+- Dependencies of dependencies (transitive dependencies)</p>
+<h3>Underprotected APIs</h3>
+<p>This is basic, nothing much to tell, I guess...</p>
+<p>Simple example on a project I recently used. The Pydantic package used data validation library for Python.</p>
+<p>I remember I used it to validate both requests to the API and responses from the API.</p>
+<p>Sample pseudo code for input:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">EmailStr</span><span class="p">,</span> <span class="n">Field</span>
+
+<span class="c1"># Define schema cho request</span>
+<span class="k">class</span> <span class="nc">CreateUserRequest</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">email</span><span class="p">:</span> <span class="n">EmailStr</span>  <span class="c1"># Auto validate email format</span>
+    <span class="n">age</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">ge</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>  <span class="c1"># &gt;= 18 and &lt;= 100</span>
+    <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="c1"># API endpoint</span>
+<span class="k">def</span> <span class="nf">create_user</span><span class="p">(</span><span class="n">request_data</span><span class="p">):</span>
+    <span class="c1"># ✅ Pydantic validate automatically</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">CreateUserRequest</span><span class="p">(</span><span class="o">**</span><span class="n">request_data</span><span class="p">)</span>
+
+    <span class="c1"># ❌ If invalid:</span>
+    <span class="c1"># {&quot;username&quot;: &quot;ab&quot;} → ValidationError: min_length 3</span>
+    <span class="c1"># {&quot;email&quot;: &quot;bad-email&quot;} → ValidationError: invalid email</span>
+    <span class="c1"># {&quot;age&quot;: 15} → ValidationError: must be &gt;= 18</span>
+
+    <span class="c1"># ✅ If valid, continue processing</span>
+    <span class="n">save_to_db</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;User created&quot;</span><span class="p">}</span>
+
+<span class="c1"># Usage:</span>
+<span class="n">create_user</span><span class="p">({</span>
+    <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;john&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;john@example.com&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+    <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="s2">&quot;SecurePass123&quot;</span>
+<span class="p">})</span>
+</code></pre></div>
+
+<p>For response validation, you can use Google to search, but putting it here is not necessary, haha</p>
+<h3>XML external entities (XXE)</h3>
+<p>No idea about this much, I guess I haven't used this feature before</p>
+<p>But good to know how to prevent in a scenario where you are <code>processing XML data</code>.</p>
+<p><a href="https://portswigger.net/web-security/xxe">XXE injection</a></p>
+<h3>Insecure deserialization</h3>
+<p>Hmm, from what I'm understanding, it is not only validate serialized object, also need to validate deserilialized object progress?</p>
+<p><a href="https://semgrep.dev/docs/learn/vulnerabilities/insecure-deserialization/python">Resource</a></p>
+<h3>Insufficient logging and monitoring</h3>
+<p>Lack of logging and monitoring, which is unable to discover an attack when it happens or has happened!</p>
+<p>Basically, make a system with fully logged (but only with useful logs) and monitored (with useful metrics), sounds easy, but in fact it is hard AF!!!</p>
+<p>Simple example AF to help you/me to understand: log when a user enters wrong credentials and notify if there are like 10 failed logins from a single account / single IP (Which can be known as brute-force!)</p>
+<h3></h3>
+<hr>
+<h1>Updated OWASP from 2021 -&gt; 2025 xD</h1>
+<h3></h3>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2026-01-13T00:00:00+07:00">Tue 13 January 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://blackmetalz.github.io/tags.html#owasp-ref">owasp
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#security-ref">security
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://blackmetalz.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

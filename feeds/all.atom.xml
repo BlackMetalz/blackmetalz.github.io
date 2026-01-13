@@ -1,5 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-01-10T00:00:00+07:00</updated><entry><title>My journey: from Kubestronaut to Golden Kubestronaut in 30 days</title><link href="https://blackmetalz.github.io/my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html" rel="alternate"/><published>2026-01-10T00:00:00+07:00</published><updated>2026-01-10T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-01-10:/my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2026/01/01.png"&gt;&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-01-13T00:00:00+07:00</updated><entry><title>[WIP] My basic learning of OWASP top 10 risks and more.</title><link href="https://blackmetalz.github.io/wip-my-basic-learning-of-owasp-top-10-risks-and-more.html" rel="alternate"/><published>2026-01-13T00:00:00+07:00</published><updated>2026-01-13T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-01-13:/wip-my-basic-learning-of-owasp-top-10-risks-and-more.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction to OWASP (Opensource Web Application Security Project)&lt;/h1&gt;
+&lt;p&gt;Objective: Understand the top 10 most common web application attacks, their impact, and how these attacks can be prevented or mitigated!&lt;/p&gt;
+&lt;p&gt;Resource usage:
+&lt;a href="https://fpt.udemy.com/course/web-application-security-for-absolute-beginners-no-coding/"&gt;Learn OWASP top 10 risks!&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;The story for this article: since my company, where I work, forced every employee to finish the course above, I want to write down something about my ability, or what I understood while watching the resource. I will put my story about some security issues I have faced before to remind me not fucked up again!&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1&gt;Top 10 OWASP and more&lt;/h1&gt;
+&lt;p&gt;It could be already outdated, but I'm here to learn its essence and concepts; name or definition could be changed, but the essence never!&lt;/p&gt;
+&lt;h3&gt;Injection&lt;/h3&gt;
+&lt;p&gt;I think it is best known as "SQL Injection". Example, if we don't validate input &lt;code&gt;username = "admin' OR '1'='1' --"&lt;/code&gt;. Then our code will be fucked if:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;SQL&lt;/span&gt; &lt;span class="n"&gt;Injection&lt;/span&gt;  
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;login&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;username&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;password&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;query&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;SELECT * FROM users WHERE user=&amp;#39;&lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;username&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;#39; AND pass=&amp;#39;&lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;password&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;#39;&amp;quot;&lt;/span&gt;
+    &lt;span class="c1"&gt;# username = &amp;quot;admin&amp;#39; --&amp;quot; &lt;/span&gt;
+    &lt;span class="c1"&gt;# → Query: SELECT * FROM users WHERE user=&amp;#39;admin&amp;#39; --&amp;#39; AND pass=&amp;#39;...&amp;#39;&lt;/span&gt;
+    &lt;span class="c1"&gt;# Consequence: Bypass authentication and more....&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;It is already prevented by most modern frameworks today, but it's better to know its essence instead of using a framework without understanding why it is secure!&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://owasp.org/Top10/2025/A05_2025-Injection/"&gt;Resource&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;Broken Authentication and Session Management&lt;/h3&gt;
+&lt;p&gt;Prevent "Impersonate"
+- Use a strong password, multi-factor authentication.
+- Require current password/credentials when "sensitive" information is requested or changed, like in my Techcombank - Banking App, I want to view my CCV for the current card, it always requires me to enter my secret PIN.
+- Log out or expire session after xxx amount of time.&lt;/p&gt;
+&lt;p&gt;And something else I didn't really understand&lt;/p&gt;
+&lt;h3&gt;Cross-site Scripting (XSS)&lt;/h3&gt;
+&lt;p&gt;Why XSS? because CSS will get mis-understand related with Cascading Style Sheets xD&lt;/p&gt;
+&lt;p&gt;What is it? Still same like injection but executed by browser&lt;/p&gt;
+&lt;p&gt;How to mitigate? Just alway untrust the fucking input data!&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://owasp.org/www-community/attacks/xss/"&gt;Resource&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;Broken Access Control&lt;/h3&gt;
+&lt;p&gt;I could tell a story related to this, so it is about a lazy issue. Back in 2017, I was working with the role of System Admin and yeah manual tester as well, LOL. When my department (4 people) is creating a new tool for internal usage. When the tool was about to finish and ready to release, the leader asked me to test and report if any issues were found. &lt;/p&gt;
+&lt;p&gt;So in the user view, the menu of the manager is hidden, but you can still access the manager page by entering the direct URL xD. I asked why that was. He just told skip it, haha.&lt;/p&gt;
+&lt;p&gt;So let me provide a simple issue by pseudocode&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;//&lt;span class="w"&gt; &lt;/span&gt;Frontend&lt;span class="w"&gt; &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;Only&lt;span class="w"&gt; &lt;/span&gt;hide&lt;span class="w"&gt; &lt;/span&gt;button
+{user.role&lt;span class="w"&gt; &lt;/span&gt;===&lt;span class="w"&gt; &lt;/span&gt;&amp;#39;admin&amp;#39;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;Link&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;to=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;/admin&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;Admin&lt;span class="w"&gt; &lt;/span&gt;Panel&lt;span class="nt"&gt;&amp;lt;/Link&amp;gt;&lt;/span&gt;}
+
+//&lt;span class="w"&gt; &lt;/span&gt;Backend&lt;span class="w"&gt; &lt;/span&gt;doesn&amp;#39;t&lt;span class="w"&gt; &lt;/span&gt;check&lt;span class="w"&gt; &lt;/span&gt;role
+app.get(&amp;#39;/admin&amp;#39;,&lt;span class="w"&gt; &lt;/span&gt;(req,&lt;span class="w"&gt; &lt;/span&gt;res)&lt;span class="w"&gt; &lt;/span&gt;=&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;{
+&lt;span class="w"&gt;  &lt;/span&gt;return&lt;span class="w"&gt; &lt;/span&gt;res.json(adminData);&lt;span class="w"&gt; &lt;/span&gt;
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a href="https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/"&gt;Resource&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;Security Misconfiguration&lt;/h3&gt;
+&lt;p&gt;Yes, this is simple to understand, misconfiguration will fucked you up!&lt;/p&gt;
+&lt;p&gt;The most common issue is enabling fucking debug flag! Developers deploy themself; no one verifies or validates changes for deployment! This simple misconfiguration can lead to many, many more problems later!&lt;/p&gt;
+&lt;p&gt;The example I really remember about: Path traversal via misconfigured NGINX alias&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.invicti.com/web-application-vulnerabilities/path-traversal-via-misconfigured-nginx-alias"&gt;Resource for Path travelsal&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;Sensitive Data Exposure&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;The resource showed back in 2017, it was using MD5/SHA1 hash solution, which is well-known as insecure&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gh"&gt;#&lt;/span&gt; Bad
+password_hash = md5(password)
+
+&lt;span class="gh"&gt;#&lt;/span&gt; Great for example xD
+password_hash = bcrypt.hash(password, 12)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;HTTP vs HTTPS: HTTPS could prevent &lt;a href="https://owasp.org/www-community/attacks/Manipulator-in-the-middle_attack"&gt;Man-in-the-Middle&lt;/a&gt; (MitM)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Storing Sensitive Data in Plain Text: It is about dev behavior, i guess? Because it is a very bad practice, if we store sensitive information without hashing or tokenizing.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Exposing Data in Logs/Errors: Haha, I see myself in this sometimes, for debugging purposes, but forgot to remove or set the log level.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Unnecessary Data Collection: Collect more information than required? This can be related to speed or performance. It would be better if we select only 2 required fields rather than select all fields. I have been told by my developer friend in the very early days, when I started typing echo hello world!&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Insufficient Attack Protection&lt;/h3&gt;
+&lt;p&gt;It was updated to: &lt;code&gt;Security Logging and Monitoring Failures - A09:2021&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;When I'm learning this section, the first thing I thought was &lt;code&gt;Rate Limit&lt;/code&gt;, we should not trust users even if it was deployed to the internal environment, who knows in the future they will not fucked us up? Just set the fucking &lt;code&gt;Rate Limit&lt;/code&gt; to prevent issues in the future!&lt;/p&gt;
+&lt;p&gt;Other key protections are: &lt;code&gt;Account Lockout&lt;/code&gt;, &lt;code&gt;Automated Response&lt;/code&gt;, and &lt;code&gt;Web Application Firewall (WAF).&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Conclusion: Defense in depth!&lt;/p&gt;
+&lt;h3&gt;Cross-site request forgery (CSRF)&lt;/h3&gt;
+&lt;p&gt;I think I was familiar with this before long time ago, but I never understood it, haha. So an example with PHP - Laravel. &lt;/p&gt;
+&lt;p&gt;So, CSRF protection prevents an attacker from using the &lt;code&gt;authenticated session&lt;/code&gt; of a victim to send an illegal request.&lt;/p&gt;
+&lt;p&gt;CSRF Token generated with the user session. When sending a request to the server, it will go together. Server validates by checking the token to see if it matches with session.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Match: process request&lt;/li&gt;
+&lt;li&gt;Not match: reject (with 419 status response)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;And only need to use CSRF for state-changing requests: POST/PUT/DELETE/PATCH. Other state like GET/HEAD/OPTIONS is not needed!&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://laravel.com/docs/12.x/csrf#preventing-csrf-requests"&gt;Resource - CSRF Protection&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;Using Components with Known Vulnerabilities&lt;/h3&gt;
+&lt;p&gt;We can understand that they are a third-party component.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Virtual Patch: Workaround by block, limit access, or whatever, but do not fix the real issue! Short-term solutions, bro!&lt;/li&gt;
+&lt;li&gt;Real Patch: So we can have a small example with a Python package, which is a third-party component because we would install/import and use it. Ex &lt;code&gt;requests&lt;/code&gt; version &lt;code&gt;1.0.0&lt;/code&gt; has &lt;code&gt;CVE-XXX&lt;/code&gt;, fix it by upgrading it to version &lt;code&gt;1.0.1.&lt;/code&gt;. Ex: &lt;a href="https://nvd.nist.gov/vuln/detail/cve-2023-32681"&gt;CVE-2023-32681&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;# Vulnerable
+requests==2.6.0  # CVE-2023-32681: Certificate validation bypass
+# Fixed example
+requests==2.31.0  # Patched version
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That is a simple example, Known vulnerabilities can be appear in:
+- Third-party libraries (requests, lodash, spring, etc.)
+- Frameworks (Laravel, Django, React)
+- OS packages (OpenSSL, bash)
+- Containers/images (Docker base images)
+- Dependencies of dependencies (transitive dependencies)&lt;/p&gt;
+&lt;h3&gt;Underprotected APIs&lt;/h3&gt;
+&lt;p&gt;This is basic, nothing much to tell, I guess...&lt;/p&gt;
+&lt;p&gt;Simple example on a project I recently used. The Pydantic package used data validation library for Python.&lt;/p&gt;
+&lt;p&gt;I remember I used it to validate both requests to the API and responses from the API.&lt;/p&gt;
+&lt;p&gt;Sample pseudo code for input:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;pydantic&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;BaseModel&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;EmailStr&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;Field&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Define schema cho request&lt;/span&gt;
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;CreateUserRequest&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;BaseModel&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;username&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Field&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;min_length&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;max_length&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;email&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;EmailStr&lt;/span&gt;  &lt;span class="c1"&gt;# Auto validate email format&lt;/span&gt;
+    &lt;span class="n"&gt;age&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;int&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Field&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ge&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;18&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;le&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="c1"&gt;# &amp;gt;= 18 and &amp;lt;= 100&lt;/span&gt;
+    &lt;span class="n"&gt;password&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Field&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;min_length&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# API endpoint&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;create_user&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;request_data&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="c1"&gt;# ✅ Pydantic validate automatically&lt;/span&gt;
+    &lt;span class="n"&gt;user&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CreateUserRequest&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="n"&gt;request_data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# ❌ If invalid:&lt;/span&gt;
+    &lt;span class="c1"&gt;# {&amp;quot;username&amp;quot;: &amp;quot;ab&amp;quot;} → ValidationError: min_length 3&lt;/span&gt;
+    &lt;span class="c1"&gt;# {&amp;quot;email&amp;quot;: &amp;quot;bad-email&amp;quot;} → ValidationError: invalid email&lt;/span&gt;
+    &lt;span class="c1"&gt;# {&amp;quot;age&amp;quot;: 15} → ValidationError: must be &amp;gt;= 18&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# ✅ If valid, continue processing&lt;/span&gt;
+    &lt;span class="n"&gt;save_to_db&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;user&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;message&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;User created&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Usage:&lt;/span&gt;
+&lt;span class="n"&gt;create_user&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;username&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;john&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;email&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;john@example.com&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;age&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;25&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;password&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;SecurePass123&amp;quot;&lt;/span&gt;
+&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;For response validation, you can use Google to search, but putting it here is not necessary, haha&lt;/p&gt;
+&lt;h3&gt;XML external entities (XXE)&lt;/h3&gt;
+&lt;p&gt;No idea about this much, I guess I haven't used this feature before&lt;/p&gt;
+&lt;p&gt;But good to know how to prevent in a scenario where you are &lt;code&gt;processing XML data&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://portswigger.net/web-security/xxe"&gt;XXE injection&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;Insecure deserialization&lt;/h3&gt;
+&lt;p&gt;Hmm, from what I'm understanding, it is not only validate serialized object, also need to validate deserilialized object progress?&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://semgrep.dev/docs/learn/vulnerabilities/insecure-deserialization/python"&gt;Resource&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;Insufficient logging and monitoring&lt;/h3&gt;
+&lt;p&gt;Lack of logging and monitoring, which is unable to discover an attack when it happens or has happened!&lt;/p&gt;
+&lt;p&gt;Basically, make a system with fully logged (but only with useful logs) and monitored (with useful metrics), sounds easy, but in fact it is hard AF!!!&lt;/p&gt;
+&lt;p&gt;Simple example AF to help you/me to understand: log when a user enters wrong credentials and notify if there are like 10 failed logins from a single account / single IP (Which can be known as brute-force!)&lt;/p&gt;
+&lt;h3&gt;&lt;/h3&gt;
+&lt;hr&gt;
+&lt;h1&gt;Updated OWASP from 2021 -&amp;gt; 2025 xD&lt;/h1&gt;
+&lt;h3&gt;&lt;/h3&gt;</content><category term="Knowledge Base"/><category term="security"/><category term="owasp"/></entry><entry><title>My journey: from Kubestronaut to Golden Kubestronaut in 30 days</title><link href="https://blackmetalz.github.io/my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html" rel="alternate"/><published>2026-01-10T00:00:00+07:00</published><updated>2026-01-10T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-01-10:/my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2026/01/01.png"&gt;&lt;/p&gt;
 &lt;h1&gt;The story&lt;/h1&gt;
 &lt;p&gt;TLDR: The title is a lie xD, in fact, I have spent about total 45-50 days.&lt;/p&gt;
 &lt;p&gt;From the beginning, I never think I will go for full Golden Kubestronaut certifications, I just had interest in field of Platform Engineering after viewing a demo what its capabilities, then I was aiming for 2 certifications which are Certified Backstage Associate (CBA) and Certified Cloud Native Platform Engineer (CNPE), but somehow I started thinking about full complete Golden Kubestronaut, it was affected by the following conditions:&lt;/p&gt;
