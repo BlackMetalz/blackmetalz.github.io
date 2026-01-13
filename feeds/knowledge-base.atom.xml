@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-01-13T00:00:00+07:00</updated><entry><title>[WIP] My basic learning of OWASP top 10 risks and more.</title><link href="https://blackmetalz.github.io/wip-my-basic-learning-of-owasp-top-10-risks-and-more.html" rel="alternate"/><published>2026-01-13T00:00:00+07:00</published><updated>2026-01-13T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-01-13:/wip-my-basic-learning-of-owasp-top-10-risks-and-more.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction to OWASP (Opensource Web Application Security Project)&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-01-13T00:00:00+07:00</updated><entry><title>OWASP Top 10 Security Risks: Personal Study Notes</title><link href="https://blackmetalz.github.io/owasp-top-10-security-risks-personal-study-notes.html" rel="alternate"/><published>2026-01-13T00:00:00+07:00</published><updated>2026-01-13T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-01-13:/owasp-top-10-security-risks-personal-study-notes.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction to OWASP (Opensource Web Application Security Project)&lt;/h1&gt;
 &lt;p&gt;Objective: Understand the top 10 most common web application attacks, their impact, and how these attacks can be prevented or mitigated!&lt;/p&gt;
 &lt;p&gt;Resource usage:
 &lt;a href="https://fpt.udemy.com/course/web-application-security-for-absolute-beginners-no-coding/"&gt;Learn OWASP top 10 risks!&lt;/a&gt;&lt;/p&gt;
@@ -8,7 +8,7 @@
 &lt;h1&gt;Top 10 OWASP and more&lt;/h1&gt;
 &lt;p&gt;It could be already outdated, but I'm here to learn its essence and concepts; name or definition could be changed, but the essence never!&lt;/p&gt;
 &lt;h3&gt;Injection&lt;/h3&gt;
-&lt;p&gt;I think it is best known as "SQL Injection". Example, if we don't validate input &lt;code&gt;username = "admin' OR '1'='1' --"&lt;/code&gt;. Then our code will be fucked if:&lt;/p&gt;
+&lt;p&gt;I think it is best known as "SQL Injection". Example, if we don't validate input &lt;strong&gt;username = "admin' OR '1'='1' --"&lt;/strong&gt;. Then our code will be fucked if:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;SQL&lt;/span&gt; &lt;span class="n"&gt;Injection&lt;/span&gt;  
 &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;login&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;username&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;password&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
     &lt;span class="n"&gt;query&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;SELECT * FROM users WHERE user=&amp;#39;&lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;username&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;#39; AND pass=&amp;#39;&lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;password&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;#39;&amp;quot;&lt;/span&gt;
@@ -18,18 +18,20 @@
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;It is already prevented by most modern frameworks today, but it's better to know its essence instead of using a framework without understanding why it is secure!&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://owasp.org/Top10/2025/A05_2025-Injection/"&gt;Resource&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://owasp.org/Top10/2025/A05_2025-Injection/"&gt;Resource here&lt;/a&gt;&lt;/p&gt;
 &lt;h3&gt;Broken Authentication and Session Management&lt;/h3&gt;
-&lt;p&gt;Prevent "Impersonate"
-- Use a strong password, multi-factor authentication.
-- Require current password/credentials when "sensitive" information is requested or changed, like in my Techcombank - Banking App, I want to view my CCV for the current card, it always requires me to enter my secret PIN.
-- Log out or expire session after xxx amount of time.&lt;/p&gt;
+&lt;p&gt;Prevent "Impersonate":&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Use a strong password, multi-factor authentication.&lt;/li&gt;
+&lt;li&gt;Require current password/credentials when "sensitive" information is requested or changed, like in my Techcombank - Banking App, I want to view my CCV for the current card, it always requires me to enter my secret PIN.&lt;/li&gt;
+&lt;li&gt;Log out or expire session after xxx amount of time.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;And something else I didn't really understand&lt;/p&gt;
 &lt;h3&gt;Cross-site Scripting (XSS)&lt;/h3&gt;
 &lt;p&gt;Why XSS? because CSS will get mis-understand related with Cascading Style Sheets xD&lt;/p&gt;
 &lt;p&gt;What is it? Still same like injection but executed by browser&lt;/p&gt;
 &lt;p&gt;How to mitigate? Just alway untrust the fucking input data!&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://owasp.org/www-community/attacks/xss/"&gt;Resource&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://owasp.org/www-community/attacks/xss/"&gt;Resource here&lt;/a&gt;&lt;/p&gt;
 &lt;h3&gt;Broken Access Control&lt;/h3&gt;
 &lt;p&gt;I could tell a story related to this, so it is about a lazy issue. Back in 2017, I was working with the role of System Admin and yeah manual tester as well, LOL. When my department (4 people) is creating a new tool for internal usage. When the tool was about to finish and ready to release, the leader asked me to test and report if any issues were found. &lt;/p&gt;
 &lt;p&gt;So in the user view, the menu of the manager is hidden, but you can still access the manager page by entering the direct URL xD. I asked why that was. He just told skip it, haha.&lt;/p&gt;
@@ -43,16 +45,25 @@ app.get(&amp;#39;/admin&amp;#39;,&lt;span class="w"&gt; &lt;/span&gt;(req,&lt;sp
 });
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;a href="https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/"&gt;Resource&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/"&gt;Resource here&lt;/a&gt;&lt;/p&gt;
 &lt;h3&gt;Security Misconfiguration&lt;/h3&gt;
 &lt;p&gt;Yes, this is simple to understand, misconfiguration will fucked you up!&lt;/p&gt;
 &lt;p&gt;The most common issue is enabling fucking debug flag! Developers deploy themself; no one verifies or validates changes for deployment! This simple misconfiguration can lead to many, many more problems later!&lt;/p&gt;
 &lt;p&gt;The example I really remember about: Path traversal via misconfigured NGINX alias&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://www.invicti.com/web-application-vulnerabilities/path-traversal-via-misconfigured-nginx-alias"&gt;Resource for Path travelsal&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Example - bad:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;DEBUG=True
+ALLOWED_HOSTS=[&amp;#39;*&amp;#39;]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Example - good:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;DEBUG=False
+ALLOWED_HOSTS=[&amp;#39;yourdomain.com&amp;#39;]
+SECRET_KEY=os.environ.get(&amp;#39;SECRET_KEY&amp;#39;)  # From env, not hardcode
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;h3&gt;Sensitive Data Exposure&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;The resource showed back in 2017, it was using MD5/SHA1 hash solution, which is well-known as insecure&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;The resource showed back in 2017, it was using MD5/SHA1 hash solution, which is well-known as insecure&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gh"&gt;#&lt;/span&gt; Bad
 password_hash = md5(password)
 
@@ -60,20 +71,14 @@ password_hash = md5(password)
 password_hash = bcrypt.hash(password, 12)
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;ul&gt;
-&lt;li&gt;
 &lt;p&gt;HTTP vs HTTPS: HTTPS could prevent &lt;a href="https://owasp.org/www-community/attacks/Manipulator-in-the-middle_attack"&gt;Man-in-the-Middle&lt;/a&gt; (MitM)&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
 &lt;p&gt;Storing Sensitive Data in Plain Text: It is about dev behavior, i guess? Because it is a very bad practice, if we store sensitive information without hashing or tokenizing.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
 &lt;p&gt;Exposing Data in Logs/Errors: Haha, I see myself in this sometimes, for debugging purposes, but forgot to remove or set the log level.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
 &lt;p&gt;Unnecessary Data Collection: Collect more information than required? This can be related to speed or performance. It would be better if we select only 2 required fields rather than select all fields. I have been told by my developer friend in the very early days, when I started typing echo hello world!&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;Additional mask for logs:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;logger.info(f&amp;quot;Processing card: ****{card[-4:]}&amp;quot;) # Show only last 4 fucking number!
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;h3&gt;Insufficient Attack Protection&lt;/h3&gt;
 &lt;p&gt;It was updated to: &lt;code&gt;Security Logging and Monitoring Failures - A09:2021&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;When I'm learning this section, the first thing I thought was &lt;code&gt;Rate Limit&lt;/code&gt;, we should not trust users even if it was deployed to the internal environment, who knows in the future they will not fucked us up? Just set the fucking &lt;code&gt;Rate Limit&lt;/code&gt; to prevent issues in the future!&lt;/p&gt;
@@ -101,12 +106,14 @@ requests==2.6.0  # CVE-2023-32681: Certificate validation bypass
 requests==2.31.0  # Patched version
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;That is a simple example, Known vulnerabilities can be appear in:
-- Third-party libraries (requests, lodash, spring, etc.)
-- Frameworks (Laravel, Django, React)
-- OS packages (OpenSSL, bash)
-- Containers/images (Docker base images)
-- Dependencies of dependencies (transitive dependencies)&lt;/p&gt;
+&lt;p&gt;That is a simple example, Known vulnerabilities can be appear in:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Third-party libraries (requests, lodash, spring, etc.)&lt;/li&gt;
+&lt;li&gt;Frameworks (Laravel, Django, React)&lt;/li&gt;
+&lt;li&gt;OS packages (OpenSSL, bash)&lt;/li&gt;
+&lt;li&gt;Containers/images (Docker base images)&lt;/li&gt;
+&lt;li&gt;Dependencies of dependencies (transitive dependencies)&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h3&gt;Underprotected APIs&lt;/h3&gt;
 &lt;p&gt;This is basic, nothing much to tell, I guess...&lt;/p&gt;
 &lt;p&gt;Simple example on a project I recently used. The Pydantic package used data validation library for Python.&lt;/p&gt;
@@ -145,6 +152,7 @@ requests==2.31.0  # Patched version
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;For response validation, you can use Google to search, but putting it here is not necessary, haha&lt;/p&gt;
+&lt;p&gt;And put the fucking &lt;strong&gt;Rate Limit&lt;/strong&gt;&lt;/p&gt;
 &lt;h3&gt;XML external entities (XXE)&lt;/h3&gt;
 &lt;p&gt;No idea about this much, I guess I haven't used this feature before&lt;/p&gt;
 &lt;p&gt;But good to know how to prevent in a scenario where you are &lt;code&gt;processing XML data&lt;/code&gt;.&lt;/p&gt;
@@ -159,7 +167,55 @@ requests==2.31.0  # Patched version
 &lt;h3&gt;&lt;/h3&gt;
 &lt;hr&gt;
 &lt;h1&gt;Updated OWASP from 2021 -&amp;gt; 2025 xD&lt;/h1&gt;
-&lt;h3&gt;&lt;/h3&gt;</content><category term="Knowledge Base"/><category term="security"/><category term="owasp"/></entry><entry><title>My journey: from Kubestronaut to Golden Kubestronaut in 30 days</title><link href="https://blackmetalz.github.io/my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html" rel="alternate"/><published>2026-01-10T00:00:00+07:00</published><updated>2026-01-10T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-01-10:/my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2026/01/01.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Software and data integrity failures&lt;/h3&gt;
+&lt;p&gt;What was that? Supply chain attack&lt;/p&gt;
+&lt;p&gt;What the hell is &lt;strong&gt;Supply chain attack?&lt;/strong&gt; When the third-party software, tools, or dependencies your product relies on become compromised, outdated, or malicious without you noticing!&lt;/p&gt;
+&lt;p&gt;How to prevent or reduce the risk of being attacked? I think there are some basic things, like scanning for CVE/Vulnerable, using an image tag with a hash, not a tag, because they could be changed&lt;/p&gt;
+&lt;p&gt;Sample command to scan an image and get SBOM, this is for compliance requirements to prove what you did on that day. Otherwise integrated to CI/CD, no need for  it really in my opinion xD&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;docker&lt;span class="w"&gt; &lt;/span&gt;run&lt;span class="w"&gt; &lt;/span&gt;--rm&lt;span class="w"&gt; &lt;/span&gt;-v&lt;span class="w"&gt; &lt;/span&gt;/var/run/docker.sock:/var/run/docker.sock&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;-v&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;&lt;span class="nb"&gt;pwd&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;:/output&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;aquasec/trivy:latest&lt;span class="w"&gt; &lt;/span&gt;image&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--format&lt;span class="w"&gt; &lt;/span&gt;cyclonedx&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--output&lt;span class="w"&gt; &lt;/span&gt;/output/sbom.json&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;nginx:latest
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Server-side Request Forgery&lt;/h3&gt;
+&lt;p&gt;So basically, just don't trust anyone, anything, even if they are in the same internal network.&lt;/p&gt;
+&lt;p&gt;Zero trust (Never trust, always verify) for everything:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Input validation and strict as most you can&lt;/li&gt;
+&lt;li&gt;Network segmentation: allow specific and known traffic flows, always use a service account with the least privileges&lt;/li&gt;
+&lt;li&gt;Service authentication/authorization: Yes, trust fucking no one, even in the internal network!&lt;/li&gt;
+&lt;li&gt;Monitor and Alert! &lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h1&gt;Extra section&lt;/h1&gt;
+&lt;h3&gt;Defense in depth&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://www.oracle.com/a/ocom/docs/security/modern-defense-in-depth.pdf"&gt;MODERN Defense In-Depth!&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;It could be boring while reading, but in fact, they did really great to provide complete information, covering almost everything you need to do!&lt;/p&gt;
+&lt;h3&gt;STRIDE&lt;/h3&gt;
+&lt;p&gt;Hmm, this appears in the exam Kubernetes and Cloud Native Security Associate (KCSA). I would prefer not to talk about it here!&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;#&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Search&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;google&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;STRIDE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;framework&lt;/span&gt;
+&lt;span class="nx"&gt;The&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;STRIDE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;framework&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;is&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;threat&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;modeling&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;methodology&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;developed&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;by&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Microsoft&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;to&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;help&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;identify&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;potential&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;security&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;threats&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;software&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;by&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;categorizing&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;them&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;into&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;six&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;types&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Spoofing&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Tampering&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Repudiation&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Information&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Disclosure&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Denial&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;of&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Service&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Elevation&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;of&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Privilege&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;each&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;corresponding&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;to&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;core&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;security&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;property&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;like&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Authenticity&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;or&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Confidentiality&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;guiding&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;developers&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;to&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;find&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fix&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;vulnerabilities&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;early&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Software&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Development&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Life&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Cycle&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;SDLC&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;What I'm missing?&lt;/h3&gt;
+&lt;p&gt;I think some sections below are missing, but I'm too lazy to continue xDD&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Security Headers&lt;/li&gt;
+&lt;li&gt;Secrets Management&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;The course I used to write this article is great, I believe. Great explanation for something I used to see but never understood its essence!&lt;/p&gt;
+&lt;p&gt;And most of it can be reduced by implementing a correct CI/CD pipeline. I would like to give a link to my DevSecOps pipeline here xD:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/practical-devsecops-securing-the-pipeline-from-code-to-deployment-part-1.html"&gt;Practical DevSecOps: Securing the Pipeline from Code to Deployment - Part 1&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/practical-devsecops-hardening-and-monitoring-benchmarking-and-runtime-security-in-devsecops-part-2.html"&gt;Practical DevSecOps: Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps - Part 2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/practical-devsecops-automating-security-integrating-devsecops-into-cicd-with-jenkins-and-golang-application-part-3.html"&gt;Practical DevSecOps: Automating Security, Integrating DevSecOps into CI/CD with Jenkins and Golang application - Part 3&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Not really perfect, a little outdated at this time (1 year ago xD). But still has essences in some aspect to prevent/reduce the chance of being attacked!&lt;/p&gt;</content><category term="Knowledge Base"/><category term="security"/><category term="owasp"/></entry><entry><title>My journey: from Kubestronaut to Golden Kubestronaut in 30 days</title><link href="https://blackmetalz.github.io/my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html" rel="alternate"/><published>2026-01-10T00:00:00+07:00</published><updated>2026-01-10T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-01-10:/my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;img alt="alt text" src="images/2026/01/01.png"&gt;&lt;/p&gt;
 &lt;h1&gt;The story&lt;/h1&gt;
 &lt;p&gt;TLDR: The title is a lie xD, in fact, I have spent about total 45-50 days.&lt;/p&gt;
 &lt;p&gt;From the beginning, I never think I will go for full Golden Kubestronaut certifications, I just had interest in field of Platform Engineering after viewing a demo what its capabilities, then I was aiming for 2 certifications which are Certified Backstage Associate (CBA) and Certified Cloud Native Platform Engineer (CNPE), but somehow I started thinking about full complete Golden Kubestronaut, it was affected by the following conditions:&lt;/p&gt;
