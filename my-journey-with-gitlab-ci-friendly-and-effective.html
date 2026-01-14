@@ -550,6 +550,7 @@ flake8==6.1.0
 <span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${BUILDER_IMAGE_WINDOWS}</span><span class="w">  </span><span class="c1"># Pre-built Windows builder image. </span>
 <span class="w">  </span><span class="nt">dependencies</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build-windows-libs</span>
+<span class="w">  </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10m</span><span class="w">  </span><span class="c1"># Maximum 10 minutes for entire job  </span>
 <span class="w">  </span><span class="nt">variables</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">WINEDEBUG</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;-all&quot;</span><span class="w">  </span><span class="c1"># Suppress Wine debug messages</span>
 <span class="w">  </span><span class="nt">script</span><span class="p">:</span>
@@ -622,11 +623,28 @@ flake8==6.1.0
 <span class="w">      </span><span class="no">echo &quot;${VERSION}&quot; &gt; &quot;build-info/windows_version.txt&quot;</span>
 
 <span class="w">      </span><span class="no">echo &quot;✓ Windows build and upload completed successfully&quot;</span>
+
+<span class="w">      </span><span class="no"># Kill ALL Wine processes before exit to prevent hanging</span>
+<span class="w">      </span><span class="no">echo &quot;Killing all Wine and background processes...&quot;</span>
+<span class="w">      </span><span class="no">killall -9 wine 2&gt;/dev/null || true</span>
+<span class="w">      </span><span class="no">killall -9 wineserver 2&gt;/dev/null || true</span>
+<span class="w">      </span><span class="no">killall -9 python 2&gt;/dev/null || true</span>
+<span class="w">      </span><span class="no">wineserver -k 2&gt;/dev/null || true</span>
+
+<span class="w">      </span><span class="no"># Wait for processes to die</span>
+<span class="w">      </span><span class="no">sleep 3</span>
+
+<span class="w">      </span><span class="no">echo &quot;Process cleanup complete. Exiting...&quot;</span>
 <span class="w">  </span><span class="nt">after_script</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <span class="w">      </span><span class="no"># Save job URL (runs even on failure)</span>
 <span class="w">      </span><span class="no">mkdir -p build-info</span>
 <span class="w">      </span><span class="no">echo &quot;${CI_JOB_URL}&quot; &gt; &quot;build-info/windows_job_url.txt&quot;</span>
+
+<span class="w">      </span><span class="no"># Final cleanup in after_script too</span>
+<span class="w">      </span><span class="no">killall -9 wine 2&gt;/dev/null || true</span>
+<span class="w">      </span><span class="no">killall -9 wineserver 2&gt;/dev/null || true</span>
+<span class="w">      </span><span class="no">wineserver -k 2&gt;/dev/null || true</span>
 <span class="w">  </span><span class="nt">artifacts</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">paths</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build-info/</span>

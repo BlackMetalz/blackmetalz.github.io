@@ -8533,6 +8533,7 @@ flake8==6.1.0
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;${BUILDER_IMAGE_WINDOWS}&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="c1"&gt;# Pre-built Windows builder image. &lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;dependencies&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;build-windows-libs&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;timeout&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;10m&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="c1"&gt;# Maximum 10 minutes for entire job  &lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;variables&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;WINEDEBUG&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;-all&amp;quot;&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="c1"&gt;# Suppress Wine debug messages&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;script&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -8605,11 +8606,28 @@ flake8==6.1.0
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;echo &amp;quot;${VERSION}&amp;quot; &amp;gt; &amp;quot;build-info/windows_version.txt&amp;quot;&lt;/span&gt;
 
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;echo &amp;quot;✓ Windows build and upload completed successfully&amp;quot;&lt;/span&gt;
+
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;# Kill ALL Wine processes before exit to prevent hanging&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;echo &amp;quot;Killing all Wine and background processes...&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;killall -9 wine 2&amp;gt;/dev/null || true&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;killall -9 wineserver 2&amp;gt;/dev/null || true&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;killall -9 python 2&amp;gt;/dev/null || true&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;wineserver -k 2&amp;gt;/dev/null || true&lt;/span&gt;
+
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;# Wait for processes to die&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;sleep 3&lt;/span&gt;
+
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;echo &amp;quot;Process cleanup complete. Exiting...&amp;quot;&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;after_script&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;|&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;# Save job URL (runs even on failure)&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;mkdir -p build-info&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;echo &amp;quot;${CI_JOB_URL}&amp;quot; &amp;gt; &amp;quot;build-info/windows_job_url.txt&amp;quot;&lt;/span&gt;
+
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;# Final cleanup in after_script too&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;killall -9 wine 2&amp;gt;/dev/null || true&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;killall -9 wineserver 2&amp;gt;/dev/null || true&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="no"&gt;wineserver -k 2&amp;gt;/dev/null || true&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;artifacts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;paths&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;build-info/&lt;/span&gt;
