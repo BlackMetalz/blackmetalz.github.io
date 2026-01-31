@@ -267,9 +267,9 @@ kubectl&lt;span class="w"&gt; &lt;/span&gt;create&lt;span class="w"&gt; &lt;/spa
 &lt;p&gt;That's all, I think it's the best solution for me in this case!&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Conclusion&lt;/h1&gt;
-&lt;p&gt;Trade-off:&lt;/p&gt;
+&lt;p&gt;Trade-off: Only able to save you from lazy attackers. Not from determination attackers.&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Risk: if anyone has access to image registry or pull image, they can get the key.txt and decrypt the secret. So make sure your image registry is secure.&lt;/li&gt;
+&lt;li&gt;Risk: if anyone has access to image registry or pull image, they can get the key.txt and decrypt the secret. So make sure your image registry is secure. In fact, you'll still be fucked if someone has access to your k8s cluster. Can't hide the image pull secret. &lt;/li&gt;
 &lt;li&gt;How to mitigate: Make sure your image registry is secure and only authorized users can pull images.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Something fun I learned:&lt;/p&gt;
