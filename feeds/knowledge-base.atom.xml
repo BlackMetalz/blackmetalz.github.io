@@ -12,18 +12,20 @@
 I copied image from this site: https://mirceanton.com/posts/doing-secrets-the-gitops-way/&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Why I chose SOPS?&lt;/h1&gt;
-&lt;p&gt;Before talking about it, I want to show the current state of staging k8s cluster:
-- I'm not the only person who has access to the k8s cluster
-- No GitOps, ArgoCD
-- No Vault or External Secrets Operator
-- Just kubectl apply xD&lt;/p&gt;
+&lt;p&gt;Before talking about it, I want to show the current state of staging k8s cluster:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;I'm not the only person who has access to the k8s cluster&lt;/li&gt;
+&lt;li&gt;No GitOps, ArgoCD&lt;/li&gt;
+&lt;li&gt;No Vault or External Secrets Operator&lt;/li&gt;
+&lt;li&gt;Just kubectl apply xD&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;So I need to find a solution to encrypt my secret, and I chose SOPS after getting some recommendations from Claude since it is the best that fit with my condition.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Install locally to generate encrypted file&lt;/h1&gt;
 &lt;p&gt;You can read detail in here &lt;a href="https://github.com/getsops/sops"&gt;https://github.com/getsops/sops&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;So, I expected that you already have &lt;code&gt;sops&lt;/code&gt; and &lt;code&gt;age-keygen&lt;/code&gt; available.&lt;/p&gt;
 &lt;h3&gt;1. Generate an Age Key Pair (if you haven't already)&lt;/h3&gt;
-&lt;p&gt;This creates your private key file (&lt;code&gt;key.txt&lt;/code&gt;). This file &lt;strong&gt;must be present in the project root&lt;/strong&gt; when you build the Docker image. It is ignored by &lt;code&gt;.dockerignore&lt;/code&gt; so it won't be committed to Git.&lt;/p&gt;
+&lt;p&gt;This creates your private key file (&lt;code&gt;key.txt&lt;/code&gt;). This file &lt;strong&gt;must be present in the project root&lt;/strong&gt; when you build the Docker image. It is ignored by &lt;code&gt;.gitignore&lt;/code&gt; so it won't be committed to Git.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;age-keygen&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;key.txt
 &lt;span class="c1"&gt;# You will need the public key (from the output or key.txt.pub) for the next step.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -62,16 +64,12 @@ sops&lt;span class="w"&gt; &lt;/span&gt;--decrypt&lt;span class="w"&gt; &lt;/spa
 
 &lt;p&gt;And check output by read content of &lt;code&gt;env.decrypted&lt;/code&gt; file.&lt;/p&gt;
 &lt;h3&gt;3. Create secret and build Dockerfile for it&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Create secret from file: with this, you don't care about people with access can decode the secret xD&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;Create secret from file: with this, you don't care about people with access can decode the secret xD&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# The key is: encrypted.env. Value is content of .env.enc&lt;/span&gt;
 kubectl&lt;span class="w"&gt; &lt;/span&gt;create&lt;span class="w"&gt; &lt;/span&gt;secret&lt;span class="w"&gt; &lt;/span&gt;generic&lt;span class="w"&gt; &lt;/span&gt;my-secret&lt;span class="w"&gt; &lt;/span&gt;--from-file&lt;span class="o"&gt;=&lt;/span&gt;encrypted.env&lt;span class="o"&gt;=&lt;/span&gt;.env.enc
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;ul&gt;
-&lt;li&gt;Dockerfile for that shit, you will notice that I did removed shell from final image. So in that scenario those with k8s cluster access won't be able to enter into container to decode the secret xD&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;Dockerfile for that shit, you will notice that I did removed shell from final image. So in that scenario those with k8s cluster access won't be able to enter into container to decode the secret xD&lt;/p&gt;
 &lt;p&gt;But you need to keep &lt;code&gt;key.txt&lt;/code&gt; and build image manually, it is not possible to put &lt;code&gt;key.txt&lt;/code&gt; into git repo and use pipeline for CICD in there.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c"&gt;# Stage 1: Builder&lt;/span&gt;
 &lt;span class="k"&gt;FROM&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;python:3.12-alpine&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;AS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;builder&lt;/span&gt;
@@ -269,14 +267,18 @@ kubectl&lt;span class="w"&gt; &lt;/span&gt;create&lt;span class="w"&gt; &lt;/spa
 &lt;p&gt;That's all, I think it's the best solution for me in this case!&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Conclusion&lt;/h1&gt;
-&lt;p&gt;Trade-off:
-- Risk: if anyone has access to image registry or pull image, they can get the key.txt and decrypt the secret. So make sure your image registry is secure.
-- How to mitigate: Make sure your image registry is secure and only authorized users can pull images.&lt;/p&gt;
-&lt;p&gt;Something fun I learned:
-- &lt;code&gt;sops&lt;/code&gt; for encryption/decryption
-- &lt;code&gt;age&lt;/code&gt; for key management
-- Just remove fucking shell from container. A little hard to debug but I'm capable of doing that via logging, I don't need to use shell in container for debugging. I think it's a good practice for security. And yeah, I know how the application works since I'm the only developer in that project.
-- Sonarqube is annoying but worth it, it forces me to put resource request and limit if I don't want to see a lot of warning.&lt;/p&gt;
+&lt;p&gt;Trade-off:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Risk: if anyone has access to image registry or pull image, they can get the key.txt and decrypt the secret. So make sure your image registry is secure.&lt;/li&gt;
+&lt;li&gt;How to mitigate: Make sure your image registry is secure and only authorized users can pull images.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Something fun I learned:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;sops&lt;/code&gt; for encryption/decryption&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;age&lt;/code&gt; for key management&lt;/li&gt;
+&lt;li&gt;Just remove fucking shell from container. A little hard to debug but I'm capable of doing that via logging, I don't need to use shell in container for debugging. I think it's a good practice for security. And yeah, I know how the application works since I'm the only developer in that project.&lt;/li&gt;
+&lt;li&gt;Sonarqube is annoying but worth it, it forces me to put resource request and limit if I don't want to see a lot of warning.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;I'm using this solution because it just matched for my case. It's simple, secure, and easy to maintain.&lt;/p&gt;</content><category term="Knowledge Base"/><category term="security"/><category term="k8s"/></entry><entry><title>OWASP Top 10 Security Risks: Personal Study Notes</title><link href="https://blackmetalz.github.io/owasp-top-10-security-risks-personal-study-notes.html" rel="alternate"/><published>2026-01-13T00:00:00+07:00</published><updated>2026-01-13T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-01-13:/owasp-top-10-security-risks-personal-study-notes.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction to OWASP (Opensource Web Application Security Project)&lt;/h1&gt;
 &lt;p&gt;Objective: Understand the top 10 most common web application attacks, their impact, and how these attacks can be prevented or mitigated!&lt;/p&gt;
 &lt;p&gt;Resource usage:
