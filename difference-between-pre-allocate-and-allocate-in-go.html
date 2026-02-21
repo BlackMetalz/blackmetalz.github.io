@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Go, Coding, " />
+
+<meta property="og:title" content="Difference between pre-allocate and allocate in Go "/>
+<meta property="og:url" content="https://blackmetalz.github.io/difference-between-pre-allocate-and-allocate-in-go.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2026-02-21T00:00:00+07:00" />
+<meta name="twitter:title" content="Difference between pre-allocate and allocate in Go ">
+<meta name="twitter:description" content="">
+
+        <title>Difference between pre-allocate and allocate in Go  · Kienlt&#39;s notebook
+</title>
+        <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://blackmetalz.github.io/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://blackmetalz.github.io
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://blackmetalz.github.io/categories.html">Categories</a></li>
+                                <li ><a href="https://blackmetalz.github.io/tags.html">Tags</a></li>
+                                <li ><a href="https://blackmetalz.github.io/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://blackmetalz.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://blackmetalz.github.io/difference-between-pre-allocate-and-allocate-in-go.html">
+                Difference between pre-allocate and allocate in Go
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h1>Introduction</h1>
+<p>While learning Goroutine and Channel, I found there is something interesting about pre-allocate and allocate in Go. That is the reason I wrote this article xD</p>
+<p><strong>TLDR</strong>: Use pre-allocate when you have fixed size of data. Example for fixed size of data:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Create slice with fixed size</span>
+<span class="nx">newSlice</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+<span class="c1">// Create map with fixed size</span>
+<span class="nx">newMap</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div>
+
+<hr>
+<h1>Story</h1>
+<p>I was just comparing two functions to see which one is cleaner (preparing for new article related to the <a href="https://github.com/BlackMetalz/lazy-hole">lazy-hole</a> project)</p>
+<p>First example:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">slowCheck</span><span class="p">(</span><span class="nx">servers</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="nx">Server</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="p">[]</span><span class="nx">Server</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">server</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">servers</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">result</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span><span class="w"> </span><span class="nx">healthCheck</span><span class="p">(</span><span class="nx">server</span><span class="p">))</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">result</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Second example:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">checkAllSlow</span><span class="p">(</span><span class="nx">names</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="nx">Server</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">var</span><span class="w"> </span><span class="nx">results</span><span class="w"> </span><span class="p">[]</span><span class="nx">Server</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">names</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">result</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">checkHealth</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span><span class="w"> </span><span class="c1">// Block here, wait for each host finish</span>
+<span class="w">    </span><span class="nx">results</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">results</span><span class="p">,</span><span class="w"> </span><span class="nx">result</span><span class="p">)</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">results</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Both of them give the same result, just a little different syntax, nothing more. But while chat with Grok, Grok gave me a little recommendation for optimization.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">slowCheck</span><span class="p">(</span><span class="nx">servers</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="nx">Server</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">result</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="nx">Server</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">servers</span><span class="p">))</span><span class="w"> </span><span class="c1">// pre-allocate, better than append multiple times</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">server</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">servers</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">result</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span><span class="w"> </span><span class="nx">healthCheck</span><span class="p">(</span><span class="nx">server</span><span class="p">))</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">result</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>I was like, wow, what is that? How is it different/better? Then new question: how can I see it is better, is there any way I can see it is better? It's time to benchmark bro!!!</p>
+<hr>
+<h1>Difference between pre-allocate and allocate</h1>
+<p>We need to init project first!</p>
+<div class="highlight"><pre><span></span><code>go<span class="w"> </span>mod<span class="w"> </span>init<span class="w"> </span>demo
+touch<span class="w"> </span>main_test.go<span class="w"> </span><span class="c1"># yes, only need main_test</span>
+</code></pre></div>
+
+<p>Let me copy a simple example (generated by <strong>Grok</strong>) to show the difference between pre-allocate and allocate in Go xD</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// main_test.go</span>
+<span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;testing&quot;</span>
+<span class="p">)</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">n</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1000000</span><span class="w"> </span><span class="c1">// 1M</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">BenchmarkNoPrealloc</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">n</span><span class="p">;</span><span class="w"> </span><span class="nx">j</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">s</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">j</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">BenchmarkPrealloc</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">n</span><span class="p">)</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">n</span><span class="p">;</span><span class="w"> </span><span class="nx">j</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">s</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">j</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Run: go test -bench=. -benchmem</span>
+</code></pre></div>
+
+<p>First test result:</p>
+<div class="highlight"><pre><span></span><code>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-bench<span class="o">=</span>.<span class="w"> </span>-benchmem
+goos:<span class="w"> </span>linux
+goarch:<span class="w"> </span>amd64
+pkg:<span class="w"> </span>demo
+cpu:<span class="w"> </span>AMD<span class="w"> </span>Ryzen<span class="w"> </span><span class="m">9</span><span class="w"> </span>5900X<span class="w"> </span><span class="m">12</span>-Core<span class="w"> </span>Processor<span class="w">            </span>
+BenchmarkNoPrealloc-24<span class="w">            </span><span class="m">68</span><span class="w">      </span><span class="m">15625847</span><span class="w"> </span>ns/op<span class="w">    </span><span class="m">41678453</span><span class="w"> </span>B/op<span class="w">         </span><span class="m">40</span><span class="w"> </span>allocs/op
+BenchmarkPrealloc-24<span class="w">            </span><span class="m">1100</span><span class="w">        </span><span class="m">997340</span><span class="w"> </span>ns/op<span class="w">     </span><span class="m">8003586</span><span class="w"> </span>B/op<span class="w">          </span><span class="m">1</span><span class="w"> </span>allocs/op
+PASS
+ok<span class="w">      </span>demo<span class="w">    </span><span class="m">2</span>.294s
+</code></pre></div>
+
+<p>So before we compare, we need to understand what those values mean:</p>
+<ul>
+<li>68/1100: Number of iterations. Why 68/1100 iterations? No idea, I guess there is something related to Go benchmark framework that automatically adjusts the number of iterations to make it correct?</li>
+<li>ns/op: nanoseconds per operation</li>
+<li>B/op: bytes allocated per operation</li>
+<li>allocs/op: number of allocations per operation</li>
+</ul>
+<p>So we can see that Pre-alloc is faster than No Pre-alloc, it runs more times and allocates less memory. </p>
+<p>I already converted for easy comparison:</p>
+<ul>
+<li>ns -&gt; ms</li>
+<li>B -&gt; MB </li>
+</ul>
+<p>Note: <strong>Mallocs</strong> = memory allocations</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>No Pre-alloc</th>
+<th>Pre-alloc</th>
+<th>Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Time</td>
+<td>15.6ms</td>
+<td>0.99ms</td>
+<td>15.6/0.99 ~= 15.76x faster</td>
+</tr>
+<tr>
+<td>RAM</td>
+<td>41MB</td>
+<td>8MB</td>
+<td>41MB/8MB ~= 5.12x less</td>
+</tr>
+<tr>
+<td>Mallocs</td>
+<td>40 allocs/op</td>
+<td>1 allocs/op</td>
+<td>40/1 ~= 40x less</td>
+</tr>
+</tbody>
+</table>
+<p>Ok, let's change n to 1B (1000000000) and run again</p>
+<p>Holy shiet, i have 18Gb memory free...</p>
+<div class="highlight"><pre><span></span><code>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-bench<span class="o">=</span>.<span class="w"> </span>-benchmem
+signal:<span class="w"> </span>killed
+FAIL<span class="w">    </span>demo<span class="w">    </span><span class="m">21</span>.587s
+</code></pre></div>
+
+<p>Better reduce to 100M LOL.</p>
+<div class="highlight"><pre><span></span><code>goos:<span class="w"> </span>linux
+goarch:<span class="w"> </span>amd64
+pkg:<span class="w"> </span>demo
+cpu:<span class="w"> </span>AMD<span class="w"> </span>Ryzen<span class="w"> </span><span class="m">9</span><span class="w"> </span>5900X<span class="w"> </span><span class="m">12</span>-Core<span class="w"> </span>Processor<span class="w">            </span>
+BenchmarkNoPrealloc-24<span class="w">             </span><span class="m">1</span><span class="w">    </span><span class="m">2057327668</span><span class="w"> </span>ns/op<span class="w">    </span><span class="m">4589028512</span><span class="w"> </span>B/op<span class="w">       </span><span class="m">85</span><span class="w"> </span>allocs/op
+BenchmarkPrealloc-24<span class="w">               </span><span class="m">5</span><span class="w">     </span><span class="m">216684883</span><span class="w"> </span>ns/op<span class="w">    </span><span class="m">800006144</span><span class="w"> </span>B/op<span class="w">         </span><span class="m">1</span><span class="w"> </span>allocs/op
+PASS
+ok<span class="w">      </span>demo<span class="w">    </span><span class="m">4</span>.373s
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>No Pre-alloc</th>
+<th>Pre-alloc</th>
+<th>Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Time</td>
+<td>2057ms</td>
+<td>216ms</td>
+<td>2057/216 ~= 9.5x faster</td>
+</tr>
+<tr>
+<td>RAM</td>
+<td>4589MB</td>
+<td>800MB</td>
+<td>4589MB/800MB ~= 5.7x less</td>
+</tr>
+<tr>
+<td>Mallocs</td>
+<td>85 allocs/op</td>
+<td>1 allocs/op</td>
+<td>85/1 ~= 85x less</td>
+</tr>
+</tbody>
+</table>
+<p>Ok, how about 500M (500000000):</p>
+<div class="highlight"><pre><span></span><code>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-bench<span class="o">=</span>.<span class="w"> </span>-benchmem
+goos:<span class="w"> </span>linux
+goarch:<span class="w"> </span>amd64
+pkg:<span class="w"> </span>demo
+cpu:<span class="w"> </span>AMD<span class="w"> </span>Ryzen<span class="w"> </span><span class="m">9</span><span class="w"> </span>5900X<span class="w"> </span><span class="m">12</span>-Core<span class="w"> </span>Processor<span class="w">            </span>
+BenchmarkNoPrealloc-24<span class="w">             </span><span class="m">1</span><span class="w">    </span><span class="m">10683335060</span><span class="w"> </span>ns/op<span class="w">   </span><span class="m">21885821088</span><span class="w"> </span>B/op<span class="w">         </span><span class="m">111</span><span class="w"> </span>allocs/op
+BenchmarkPrealloc-24<span class="w">               </span><span class="m">1</span><span class="w">    </span><span class="m">1084275671</span><span class="w"> </span>ns/op<span class="w">    </span><span class="m">4000011168</span><span class="w"> </span>B/op<span class="w">        </span><span class="m">8</span><span class="w"> </span>allocs/op
+PASS
+ok<span class="w">      </span>demo<span class="w">    </span><span class="m">12</span>.742s
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>No Pre-alloc</th>
+<th>Pre-alloc</th>
+<th>Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Time</td>
+<td>10683ms</td>
+<td>1084ms</td>
+<td>10683/1084 ~= 9.8x faster</td>
+</tr>
+<tr>
+<td>RAM</td>
+<td>21885MB</td>
+<td>4000MB</td>
+<td>21885MB/4000MB ~= 5.47x less</td>
+</tr>
+<tr>
+<td>Mallocs</td>
+<td>111 allocs/op</td>
+<td>8 allocs/op</td>
+<td>111/8 ~= 13.87x less</td>
+</tr>
+</tbody>
+</table>
+<p>Hmm, only 1 iteration and 8 allocations. No idea why it needs 8 allocations. I will try to learn more about it someday, not today xD</p>
+<hr>
+<h1>Growth Factor of Slice</h1>
+<p>Another interesting thing to research. What I understand:</p>
+<ul>
+<li>Each resize would equal 1 malloc</li>
+<li>It will copy all data to new memory</li>
+<li>Old memory/The old underlying array will be deallocated by Garbage Collector (GC)</li>
+</ul>
+<p>When append grow over capacity, it will create a new underlying array with capacity larger than the old one, update the pointer to the new array. Old array have no reference to it. GC clean it up.</p>
+<p>But there is a big advanced topic about it, if you want to know more, here you go (I'm done already, those contents are complicated AF for me! I have no fucking idea about it!)</p>
+<ul>
+<li><a href="https://github.com/golang/go/blob/master/src/runtime/slice.go#L178">growslice</a></li>
+<li><a href="https://go.dev/blog/slices-intro#growing-slices-the-copy-and-append-functions">slices-intro</a></li>
+<li><a href="https://go.dev/ref/spec#Appending_and_copying_slices">Appending_and_copying_slices</a></li>
+</ul>
+<hr>
+<h1>Conclusion</h1>
+<p>Resource: <a href="https://alexanderobregon.substack.com/p/go-testing-benchmarks-and-how-they">https://alexanderobregon.substack.com/p/go-testing-benchmarks-and-how-they</a></p>
+<p>Just remember to use pre-allocate when you have fixed size of data. </p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2026-02-21T00:00:00+07:00">Sat 21 February 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://blackmetalz.github.io/categories.html#coding-ref">Coding</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://blackmetalz.github.io/tags.html#go-ref">Go
+                    <span class="superscript">2</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://blackmetalz.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
