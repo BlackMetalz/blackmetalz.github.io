@@ -301,6 +301,7 @@ Flags:
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;The main disadvantages of generics are complicated syntax, harder to debug. And only use when you have to handle multiple types. If you write generic for single type, it is just over-engineering!&lt;/p&gt;
+&lt;hr&gt;
 &lt;h1&gt;Special section for Higher-order function and Generics (update Feb 21,2026)&lt;/h1&gt;
 &lt;p&gt;As you can see in Day 8 I already described them, but I want to write more about it! So let me bring an example&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;package&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;main&lt;/span&gt;
