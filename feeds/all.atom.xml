@@ -1,5 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-02-21T00:00:00+07:00</updated><entry><title>Difference between pre-allocate and allocate in Go</title><link href="https://blackmetalz.github.io/difference-between-pre-allocate-and-allocate-in-go.html" rel="alternate"/><published>2026-02-21T00:00:00+07:00</published><updated>2026-02-21T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-02-21:/difference-between-pre-allocate-and-allocate-in-go.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-02-22T00:00:00+07:00</updated><entry><title>Sample Streamlit Integration with Keycloak for Authentication</title><link href="https://blackmetalz.github.io/sample-streamlit-integration-with-keycloak-for-authentication.html" rel="alternate"/><published>2026-02-22T00:00:00+07:00</published><updated>2026-02-22T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-02-22:/sample-streamlit-integration-with-keycloak-for-authentication.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;In a scenario you have to write report for your boss, you imagine that your boss needs a dashboard, and you are not Data Engineer or Developer. You would be going to vibe code and you have streamlit as keyword. After that you need to show your report to your boss, but your boss is a security guy, he/she ask you to add authentication to your report. So you need to add authentication to your report. Basic auth is not enough even if it is only for internal users. Then you have an existing Keycloak cluster in your company. So you just need to create new realm in Keycloak for your application then make your application integrate with Keycloak. This article will show you how to do it and for me to remember xD&lt;/p&gt;
+&lt;p&gt;We will use &lt;strong&gt;Keycloak&lt;/strong&gt; as the identity provider and &lt;strong&gt;Streamlit&lt;/strong&gt; as the application. We will use &lt;strong&gt;OIDC&lt;/strong&gt; (OpenID Connect) protocol to integrate them.&lt;/p&gt;
+&lt;p&gt;Step lists:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Create new realm&lt;/li&gt;
+&lt;li&gt;Create new client&lt;/li&gt;
+&lt;li&gt;Create sample user&lt;/li&gt;
+&lt;li&gt;Create sample streamlit application&lt;/li&gt;
+&lt;li&gt;Integrate them&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h1&gt;Prerequisites&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;Docker &amp;amp; Docker Compose&lt;/li&gt;
+&lt;li&gt;Python 3.12 (verified with this demo)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1&gt;Sample Streamlit Application&lt;/h1&gt;
+&lt;p&gt;Just clone this ready to run repo and follow the README.md to run it: &lt;a href="https://github.com/BlackMetalz/streamlit-authentication-with-keycloak-sample"&gt;https://github.com/BlackMetalz/streamlit-authentication-with-keycloak-sample&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Hmm, last step &lt;code&gt;streamlit run&lt;/code&gt; will fail because we haven't set up Keycloak yet. So we need to set up Keycloak first xD&lt;/p&gt;
+&lt;h1&gt;Keycloak Setup&lt;/h1&gt;
+&lt;p&gt;For a god damn easy way, you will want to use docker compose to run Keycloak. Source here: &lt;a href="https://github.com/BlackMetalz/docker-compose/blob/main/keycloak/docker-compose.yml"&gt;Keycloak26+Postgres18&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;services&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;postgres&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;postgres:18&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;container_name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;postgres_keycloak&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;postgres_data:/var/lib/postgresql&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;POSTGRES_DB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;keycloak&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;POSTGRES_USER&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;keycloak&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;POSTGRES_PASSWORD&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;super_secret_password&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;5432:5432&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;healthcheck&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# it should be ready before keycloak starts&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;test&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;CMD-SHELL&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;pg_isready&lt;/span&gt;&lt;span class="nv"&gt; &lt;/span&gt;&lt;span class="s"&gt;-U&lt;/span&gt;&lt;span class="nv"&gt; &lt;/span&gt;&lt;span class="s"&gt;keycloak&lt;/span&gt;&lt;span class="nv"&gt; &lt;/span&gt;&lt;span class="s"&gt;-d&lt;/span&gt;&lt;span class="nv"&gt; &lt;/span&gt;&lt;span class="s"&gt;keycloak&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;]&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;interval&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;10s&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;timeout&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;5s&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;retries&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;5&lt;/span&gt;
+
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;keycloak&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;quay.io/keycloak/keycloak:26.1&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;container_name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;keycloak_server&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;start-dev&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;KC_DB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;postgres&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;KC_DB_URL&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;jdbc:postgresql://postgres:5432/keycloak&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;KC_DB_USERNAME&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;keycloak&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;KC_DB_PASSWORD&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;super_secret_password&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;KC_BOOTSTRAP_ADMIN_USERNAME&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;admin&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;KC_BOOTSTRAP_ADMIN_PASSWORD&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;admin@123&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;8080:8080&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;depends_on&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;postgres&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="c1"&gt;# Document about service_healthy here: https://docs.docker.com/compose/how-tos/startup-order/&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;condition&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;service_healthy&lt;/span&gt;
+
+&lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;postgres_data&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You can simply use it by running command: &lt;code&gt;docker compose up&lt;/code&gt;. Then you will have a ready Keycloak instance at &lt;code&gt;http://localhost:8080&lt;/code&gt;.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3&gt;Create new realm for testing purpose&lt;/h3&gt;
+&lt;p&gt;Who test at &lt;code&gt;master&lt;/code&gt; realm? No one, not even me xD&lt;/p&gt;
+&lt;p&gt;URL to create new realm: http://localhost:8080/admin/master/console/#/master/add-realm&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Add new realm" src="images/2026/02/keycloak-streamlit/01.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Create new client&lt;/h3&gt;
+&lt;p&gt;URL: http://localhost:8080/admin/master/console/#/kienlt-demo/clients/add-client&lt;/p&gt;
+&lt;p&gt;Image for easy to follow:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Add new client" src="images/2026/02/keycloak-streamlit/02.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Add new client" src="images/2026/02/keycloak-streamlit/03.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Add new client" src="images/2026/02/keycloak-streamlit/04.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: In the screenshot, the Valid redirect URI is incorrect. Please set it to &lt;code&gt;http://localhost:8501/*&lt;/code&gt;&lt;/p&gt;
+&lt;h3&gt;Copy client secret and paste to .env file&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="Copy client secret" src="images/2026/02/keycloak-streamlit/05.png"&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gh"&gt;#&lt;/span&gt; Set to &amp;quot;false&amp;quot; to disable Keycloak authentication (guest mode)
+AUTH_ENABLED=false
+
+&lt;span class="gh"&gt;#&lt;/span&gt; Keycloak Configuration
+KEYCLOAK_URL=http://localhost:8080
+KEYCLOAK_REALM=myrealm
+KEYCLOAK_CLIENT_ID=streamlit-app
+KEYCLOAK_CLIENT_SECRET=your-streamlit-app-secret
+REDIRECT_URI=http://localhost:8501
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Test login directly&lt;/h3&gt;
+&lt;p&gt;Holy shiet, create a test account first!&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Create test account" src="images/2026/02/keycloak-streamlit/07.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Create test account" src="images/2026/02/keycloak-streamlit/08.png"&gt;&lt;/p&gt;
+&lt;p&gt;Ok, time to log in. It will pop up the default Keycloak login page. And here is the result after logging in:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Logged" src="images/2026/02/keycloak-streamlit/10.png"&gt;&lt;/p&gt;
+&lt;p&gt;Success! Welcome to my dashboard xD&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;This is just a solution that fits a specific scenario, that is I don't want to manage any external database, the purpose is just for internal users, not for public. Simple and easy to implement since it needed to ship this dashboard fast with requirements changing daily....&lt;/p&gt;</content><category term="Coding"/><category term="Streamlit"/><category term="Keycloak"/></entry><entry><title>Difference between pre-allocate and allocate in Go</title><link href="https://blackmetalz.github.io/difference-between-pre-allocate-and-allocate-in-go.html" rel="alternate"/><published>2026-02-21T00:00:00+07:00</published><updated>2026-02-21T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-02-21:/difference-between-pre-allocate-and-allocate-in-go.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;While learning Goroutine and Channel, I found there is something interesting about pre-allocate and allocate in Go. That is the reason I wrote this article xD&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;TLDR&lt;/strong&gt;: Use pre-allocate when you have fixed size of data. Example for fixed size of data:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;// Create slice with fixed size&lt;/span&gt;
