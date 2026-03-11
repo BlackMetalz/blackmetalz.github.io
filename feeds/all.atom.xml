@@ -1,5 +1,261 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-02-22T00:00:00+07:00</updated><entry><title>Sample Streamlit Integration with Keycloak for Authentication</title><link href="https://blackmetalz.github.io/sample-streamlit-integration-with-keycloak-for-authentication.html" rel="alternate"/><published>2026-02-22T00:00:00+07:00</published><updated>2026-02-22T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-02-22:/sample-streamlit-integration-with-keycloak-for-authentication.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-03-11T00:00:00+07:00</updated><entry><title>Live Clone MySQL Replication using Percona XtraBackup</title><link href="https://blackmetalz.github.io/live-clone-mysql-replication-using-percona-xtrabackup.html" rel="alternate"/><published>2026-03-11T00:00:00+07:00</published><updated>2026-03-11T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-11:/live-clone-mysql-replication-using-percona-xtrabackup.html</id><summary type="html"/><content type="html">&lt;h1&gt;Guide: Live Clone MySQL Replication using Percona XtraBackup&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;Reference:&lt;/strong&gt; &lt;a href="https://docs.percona.com/percona-xtrabackup/8.0/"&gt;Percona XtraBackup 8.0 Documentation&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;Before proceeding, ensure you have the following:
+- &lt;strong&gt;Two pre-provisioned Galera clusters&lt;/strong&gt; (this guide assumes the nodes are already installed with MySQL and Galera). We will not cover the initial base setup of the Galera packages here to keep the guide focused.
+- &lt;strong&gt;Network connectivity:&lt;/strong&gt; Essential Galera ports (3306, 4567, 4568, 4444) must be open across cluster nodes. Specifically, port &lt;code&gt;9999&lt;/code&gt; must be allowed between Node 1 of Cluster A and Node 1 of Cluster B for the &lt;code&gt;nc&lt;/code&gt; stream transfer.
+- &lt;strong&gt;GTID Enabled:&lt;/strong&gt; GTID (Global Transaction Identifier) replication must be enabled in the configuration (&lt;code&gt;gtid_mode=ON&lt;/code&gt; and &lt;code&gt;enforce-gtid-consistency=ON&lt;/code&gt;) on &lt;strong&gt;both&lt;/strong&gt; clusters beforehand. This guide assumes it is already configured.
+- &lt;strong&gt;Zero-Downtime Operation:&lt;/strong&gt; This procedure is designed to be &lt;strong&gt;zero-downtime&lt;/strong&gt; for the Primary cluster (Cluster A). It is safe to perform on a production environment.&lt;/p&gt;
+&lt;h2&gt;Environment Setup&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;OS:&lt;/strong&gt; Ubuntu 24.04&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Privileges:&lt;/strong&gt; All operations are performed using the &lt;code&gt;root&lt;/code&gt; user.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Architecture Topology&lt;/h3&gt;
+&lt;p&gt;We operate with two &lt;strong&gt;Galera clusters&lt;/strong&gt;, each containing 3 nodes:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cluster A (Primary)&lt;/strong&gt;: Contains existing data.
+- Node 1: &lt;code&gt;10.0.0.1&lt;/code&gt; (designated as &lt;code&gt;Master&lt;/code&gt;)
+- Node 2: &lt;code&gt;10.0.0.2&lt;/code&gt;
+- Node 3: &lt;code&gt;10.0.0.3&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cluster B (Secondary)&lt;/strong&gt;: Currently empty.
+- Node 1: &lt;code&gt;10.0.1.1&lt;/code&gt; (designated as &lt;code&gt;Slave&lt;/code&gt;)
+- Node 2: &lt;code&gt;10.0.1.2&lt;/code&gt;
+- Node 3: &lt;code&gt;10.0.1.3&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;flowchart LR
+    A1[(&amp;quot;Node 1&amp;lt;br&amp;gt;10.0.0.1&amp;lt;br&amp;gt;(Master)&amp;quot;)]
+    A2[(&amp;quot;Node 2&amp;lt;br&amp;gt;10.0.0.2&amp;quot;)]
+    A3[(&amp;quot;Node 3&amp;lt;br&amp;gt;10.0.0.3&amp;quot;)]
+
+    B1[(&amp;quot;Node 1&amp;lt;br&amp;gt;10.0.1.1&amp;lt;br&amp;gt;(Slave)&amp;quot;)]
+    B2[(&amp;quot;Node 2&amp;lt;br&amp;gt;10.0.1.2&amp;quot;)]
+    B3[(&amp;quot;Node 3&amp;lt;br&amp;gt;10.0.1.3&amp;quot;)]
+
+    subgraph Cluster_A [&amp;quot;Cluster A (Primary)&amp;quot;]
+        direction TB
+        A1 -.- A2 -.- A3
+    end
+
+    subgraph Cluster_B [&amp;quot;Cluster B (Secondary)&amp;quot;]
+        direction TB
+        B1 -.- B2 -.- B3
+    end
+
+    A1 == &amp;quot;Live Clone (nc + xbstream)&amp;lt;br&amp;gt;&amp;amp;&amp;lt;br&amp;gt;GTID Replication&amp;quot; ===&amp;gt; B1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Objective:&lt;/strong&gt; Create a replication topology ensuring a full database clone, including all users and granted privileges from existing Cluster A (Primary).&lt;/p&gt;
+&lt;h3&gt;Important Context for Cluster B (Secondary)&lt;/h3&gt;
+&lt;p&gt;After the initial setup of Cluster B (Secondary), gracefully shut down the nodes in reverse order: &lt;strong&gt;Node 3&lt;/strong&gt;, then &lt;strong&gt;Node 2&lt;/strong&gt;.
+Only &lt;strong&gt;Node 1&lt;/strong&gt; should remain active. The goal is to establish replication exclusively on Node 1 first. Once replication is stable, Galera will automatically sync the data to the other nodes when they are powered back on.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;1. Install Percona XtraBackup&lt;/h2&gt;
+&lt;p&gt;Execute the following commands on the nodes handling the backup/restore to install Percona XtraBackup 8.0:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;apt&lt;span class="w"&gt; &lt;/span&gt;update
+apt&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;curl&lt;span class="w"&gt; &lt;/span&gt;-y
+curl&lt;span class="w"&gt; &lt;/span&gt;-O&lt;span class="w"&gt; &lt;/span&gt;https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+apt&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;gnupg2&lt;span class="w"&gt; &lt;/span&gt;lsb-release&lt;span class="w"&gt; &lt;/span&gt;./percona-release_latest.generic_all.deb&lt;span class="w"&gt; &lt;/span&gt;-y
+apt&lt;span class="w"&gt; &lt;/span&gt;update
+percona-release&lt;span class="w"&gt; &lt;/span&gt;setup&lt;span class="w"&gt; &lt;/span&gt;pxb-80
+apt&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;percona-xtrabackup-80&lt;span class="w"&gt; &lt;/span&gt;-y
+
+&lt;span class="c1"&gt;# Verify installation&lt;/span&gt;
+xtrabackup&lt;span class="w"&gt; &lt;/span&gt;--version
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Tip:&lt;/strong&gt; For large databases, it is highly recommended to run the upcoming backup/restore processes inside a &lt;code&gt;screen&lt;/code&gt; or &lt;code&gt;tmux&lt;/code&gt; session to prevent interruptions.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2&gt;2. Stream Data from Master to Slave&lt;/h2&gt;
+&lt;h3&gt;On the Slave Node (Cluster B (Secondary) - Node 1)&lt;/h3&gt;
+&lt;p&gt;Prepare the MySQL data directory and start a &lt;code&gt;netcat&lt;/code&gt; listener (&lt;code&gt;nc&lt;/code&gt;) to receive the incoming backup stream:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;cd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;/var/lib/
+mv&lt;span class="w"&gt; &lt;/span&gt;mysql&lt;span class="w"&gt; &lt;/span&gt;mysql.bak
+mkdir&lt;span class="w"&gt; &lt;/span&gt;mysql&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;cd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;mysql
+
+&lt;span class="c1"&gt;# Listen on port 9999 and extract the incoming xbstream&lt;/span&gt;
+nc&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;9999&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;xbstream&lt;span class="w"&gt; &lt;/span&gt;-xv
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;On the Master Node (Cluster A (Primary) - Node 1)&lt;/h3&gt;
+&lt;p&gt;Ensure you have an existing &lt;code&gt;/root/.my.cnf&lt;/code&gt; configuration to authenticate XtraBackup without manual password prompts:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# /root/.my.cnf&lt;/span&gt;
+&lt;span class="k"&gt;[client]&lt;/span&gt;
+&lt;span class="na"&gt;user&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;root&lt;/span&gt;
+&lt;span class="na"&gt;password&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&amp;lt;your_password&amp;gt;&amp;quot;&lt;/span&gt;
+&lt;span class="na"&gt;host&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;localhost&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Initiate the backup process and pipe it over the network to the Slave Node (e.g., &lt;code&gt;10.0.1.1&lt;/code&gt;):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;mkdir&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;/data/tmp
+xtrabackup&lt;span class="w"&gt; &lt;/span&gt;--backup&lt;span class="w"&gt; &lt;/span&gt;--stream&lt;span class="o"&gt;=&lt;/span&gt;xbstream&lt;span class="w"&gt; &lt;/span&gt;--target-dir&lt;span class="o"&gt;=&lt;/span&gt;/data/tmp/&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;nc&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.0.1.1&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;9999&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Wait for the process to output &lt;code&gt;completed OK!&lt;/code&gt; on both sides. Once finished, you can press &lt;code&gt;CTRL+C&lt;/code&gt; on the Master machine if the command doesn't detach automatically.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;3. Prepare the Backup (Apply Logs)&lt;/h2&gt;
+&lt;h3&gt;On the Slave Node (Cluster B (Secondary) - Node 1)&lt;/h3&gt;
+&lt;p&gt;We must "prepare" the database (apply transaction logs) so that the data is consistent.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;mkdir&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;/data/tmp
+xtrabackup&lt;span class="w"&gt; &lt;/span&gt;--prepare&lt;span class="w"&gt; &lt;/span&gt;--use-memory&lt;span class="o"&gt;=&lt;/span&gt;10G&lt;span class="w"&gt; &lt;/span&gt;--tmpdir&lt;span class="o"&gt;=&lt;/span&gt;/data/tmp&lt;span class="w"&gt; &lt;/span&gt;--target-dir&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/mysql
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Wait for the &lt;code&gt;completed OK!&lt;/code&gt; message. Once finished, correct the directory ownership back to the &lt;code&gt;mysql&lt;/code&gt; user:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;chown&lt;span class="w"&gt; &lt;/span&gt;-R&lt;span class="w"&gt; &lt;/span&gt;mysql:mysql&lt;span class="w"&gt; &lt;/span&gt;/var/lib/mysql
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;hr&gt;
+&lt;h2&gt;4. Bootstrap the Replica Galera Cluster&lt;/h2&gt;
+&lt;p&gt;If you start MySQL normally at this stage, it will fail with &lt;code&gt;Connection refused&lt;/code&gt; or &lt;code&gt;failed to reach primary view&lt;/code&gt; because it attempts to join its configured Galera peers (Node 2 and Node 3), which are currently powered off.&lt;/p&gt;
+&lt;p&gt;To safely boot the first node:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Edit the Galera configuration file (&lt;code&gt;/etc/mysql/conf.d/galera.cnf&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;Comment out the existing &lt;code&gt;wsrep_cluster_address&lt;/code&gt; definition.&lt;/li&gt;
+&lt;li&gt;Add an empty &lt;code&gt;gcomm://&lt;/code&gt; address to force the node to bootstrap a new cluster view.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# /etc/mysql/conf.d/galera.cnf&lt;/span&gt;
+&lt;span class="c1"&gt;# wsrep_cluster_address=&amp;quot;gcomm://10.0.1.1,10.0.1.2,10.0.1.3&amp;quot;&lt;/span&gt;
+&lt;span class="na"&gt;wsrep_cluster_address&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;gcomm://&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Start MySQL and verify its status:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;systemctl&lt;span class="w"&gt; &lt;/span&gt;start&lt;span class="w"&gt; &lt;/span&gt;mysql
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Check the MySQL variables to confirm it is running standalone:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;SHOW&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;VARIABLES&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;LIKE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;wsrep_cluster_address&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="c1"&gt;-- Expected: gcomm://&lt;/span&gt;
+
+&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;SHOW&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;STATUS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;LIKE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;wsrep_ready&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="c1"&gt;-- Expected: ON&lt;/span&gt;
+
+&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;SHOW&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;STATUS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;LIKE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;wsrep_cluster_size&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="c1"&gt;-- Expected: 1&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Once successfully booted, &lt;strong&gt;re-edit&lt;/strong&gt; &lt;code&gt;/etc/mysql/conf.d/galera.cnf&lt;/code&gt; back to its original state (uncomment the IP list and delete the empty &lt;code&gt;gcomm://&lt;/code&gt; line).&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;[!WARNING]
+&lt;strong&gt;Do NOT restart MySQL&lt;/strong&gt; at this point! If you leave &lt;code&gt;gcomm://&lt;/code&gt; and the server reboots later, it will attempt to form a new, separate primary partition (Split-Brain) instead of joining the existing cluster.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2&gt;5. Rejoin the Remaining Slave Nodes&lt;/h2&gt;
+&lt;p&gt;Now, power on &lt;strong&gt;Node 2&lt;/strong&gt; in Cluster B (Secondary). You can monitor the cluster size on Node 1:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;SHOW&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;STATUS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;LIKE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;wsrep_cluster_size&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="c1"&gt;-- Should increment to 2&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Next, power on &lt;strong&gt;Node 3&lt;/strong&gt;. &lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;[!WARNING]
+When a new or desynced node joins the cluster, Galera will trigger an &lt;strong&gt;SST (State Snapshot Transfer)&lt;/strong&gt;. This process will completely wipe the existing &lt;code&gt;/var/lib/mysql/&lt;/code&gt; directory on the joining node (Node 2 &amp;amp; Node 3) and stream the fresh data from the donor node.&lt;/p&gt;
+&lt;p&gt;[!NOTE]
+For large databases (e.g., 100GB - 200GB), the initial sync might take considerable time. Node 3 will block on startup until the state transfer from Node 2 completes. &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;To monitor the synchronization status on any active node:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;SHOW&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;STATUS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;LIKE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;wsrep_local_state_comment&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="c1"&gt;-- &amp;quot;Donor/Desynced&amp;quot; implies data transfer is still occurring.&lt;/span&gt;
+&lt;span class="c1"&gt;-- Wait until it changes to &amp;quot;Synced&amp;quot;.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Verify the final cluster size ensures all 3 nodes are active:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;SHOW&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;STATUS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;LIKE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;wsrep_cluster_size&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="c1"&gt;-- Expected: 3&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;hr&gt;
+&lt;h2&gt;6. Configure GTID Replication&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;(Note: Using GTID via &lt;code&gt;SOURCE_AUTO_POSITION=1&lt;/code&gt; abstracts away the requirement to manually provide the precise binlog file and position, but obtaining this XtraBackup info is still good practice for record-keeping).&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Check the binary log coordinate that the backup corresponds to:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/var/lib/mysql/xtrabackup_binlog_info
+&lt;span class="c1"&gt;# Example Output: mysql-bin.000006 197 3bdafe24-05eb-11f1-bcd2-03edd96ddbe9:1-153268&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Connect to MySQL on &lt;strong&gt;Slave Node 1&lt;/strong&gt; and configure the replication link using GTIDs:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;STOP&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;REPLICA&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;RESET&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;REPLICA&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;ALL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;CHANGE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;REPLICATION&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;SOURCE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;TO&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;SOURCE_HOST&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;10.0.0.1&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;SOURCE_USER&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;repl_user&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;SOURCE_PASSWORD&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;password_here&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;SOURCE_AUTO_POSITION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;START&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;REPLICA&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Verify replication is completely healthy:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;SHOW&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;REPLICA&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;STATUS&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="k"&gt;G&lt;/span&gt;
+&lt;span class="c1"&gt;-- Ensure both threading states are &amp;#39;Yes&amp;#39;&lt;/span&gt;
+&lt;span class="c1"&gt;-- Replica_IO_Running: Yes&lt;/span&gt;
+&lt;span class="c1"&gt;-- Replica_SQL_Running: Yes&lt;/span&gt;
+&lt;span class="c1"&gt;-- Seconds_Behind_Source: 0&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Testing Replication&lt;/h3&gt;
+&lt;p&gt;Create a test database on Cluster A (Primary):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;CREATE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;DATABASE&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;test_replication&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Verify it propagates to Cluster B (Secondary):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;SHOW&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;DATABASES&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;hr&gt;
+&lt;h2&gt;Appendix&lt;/h2&gt;
+&lt;h3&gt;A. Example Slave Galera Configuration (&lt;code&gt;galera.cnf&lt;/code&gt;)&lt;/h3&gt;
+&lt;p&gt;Ensure essential replica flags (&lt;code&gt;super_read_only&lt;/code&gt;) are enforced on Cluster B (Secondary) to prevent accidental writes.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;[mysqld]&lt;/span&gt;
+&lt;span class="na"&gt;binlog_format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;ROW&lt;/span&gt;
+&lt;span class="na"&gt;default_storage_engine&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;InnoDB&lt;/span&gt;
+&lt;span class="na"&gt;innodb_autoinc_lock_mode&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;2&lt;/span&gt;
+&lt;span class="na"&gt;max_connections&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;10000&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Galera Provider Configuration&lt;/span&gt;
+&lt;span class="na"&gt;wsrep_on&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;ON&lt;/span&gt;
+&lt;span class="na"&gt;wsrep_provider&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;/usr/lib/galera/libgalera_smm.so&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Cluster Connection (IPs of the 3 Site B nodes)&lt;/span&gt;
+&lt;span class="na"&gt;wsrep_cluster_address&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;gcomm://10.0.1.1,10.0.1.2,10.0.1.3&amp;quot;&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Node Specific&lt;/span&gt;
+&lt;span class="na"&gt;wsrep_node_address&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10.0.1.1&amp;quot;&lt;/span&gt;
+&lt;span class="na"&gt;wsrep_node_name&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;lab-site2-galera-rep-1&amp;quot;&lt;/span&gt;
+&lt;span class="na"&gt;wsrep_cluster_name&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;cluster-site-b&amp;quot;&lt;/span&gt;
+
+&lt;span class="c1"&gt;# SST Method&lt;/span&gt;
+&lt;span class="na"&gt;wsrep_sst_method&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;rsync&lt;/span&gt;
+
+&lt;span class="c1"&gt;# GTID &amp;amp; Binary Logs (Crucial for Site-to-Site Replication)&lt;/span&gt;
+&lt;span class="na"&gt;server-id&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;201&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Must be unique per node (e.g., 201, 202, 203)&lt;/span&gt;
+&lt;span class="na"&gt;log_bin&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;mysql-bin&lt;/span&gt;
+&lt;span class="na"&gt;log_slave_updates&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;ON&lt;/span&gt;
+&lt;span class="na"&gt;gtid_mode&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;ON&lt;/span&gt;
+&lt;span class="na"&gt;enforce-gtid-consistency&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;ON&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Replica safeguards&lt;/span&gt;
+&lt;span class="na"&gt;super_read_only&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;1&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;B. Promoting Cluster B (Secondary)&lt;/h3&gt;
+&lt;p&gt;If a failover occurs and you need to deploy Cluster B (Secondary) as primary, run the following on a single node (&lt;strong&gt;Node 1&lt;/strong&gt;):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;STOP&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;REPLICA&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;RESET&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;REPLICA&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;ALL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Then, on &lt;strong&gt;all 3 nodes&lt;/strong&gt;, disable read-only modes:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;SET&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;GLOBAL&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;super_read_only&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="n"&gt;mysql&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;SET&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;GLOBAL&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;read_only&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Crucial:&lt;/strong&gt; Remember to permanently adjust &lt;code&gt;super_read_only&lt;/code&gt; out of &lt;code&gt;/etc/mysql/conf.d/galera.cnf&lt;/code&gt; (without restarting the service immediately) so the nodes do not revert to a read-only state upon an unexpected machine reboot.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;C. Using ProxySQL vs HAProxy&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Why use ProxySQL over standard HAProxy?&lt;/strong&gt; &lt;/p&gt;
+&lt;p&gt;Galera clusters frequently face Multi-Writer deadlocks (Certification Conflicts) when writing heavily to multiple nodes simultaneously. ProxySQL provides a native capability via the &lt;code&gt;max_writers=1&lt;/code&gt; setting. This intelligently restricts all writes to a single node, completely eliminating Galera deadlock scenarios—a function standard TCP load balancers like HAProxy cannot natively manage. Using Keepalived + VIP without an intelligent proxy leaves the secondary nodes effectively idle without maximizing performance safely.&lt;/p&gt;
+&lt;p&gt;Read more: &lt;a href="https://www.proxysql.com/blog/proxysql-native-galera-support/"&gt;ProxySQL Native Galera Support&lt;/a&gt;&lt;/p&gt;</content><category term="Knowledge Base"/><category term="mysql"/><category term="galera"/><category term="xtrabackup"/></entry><entry><title>Sample Streamlit Integration with Keycloak for Authentication</title><link href="https://blackmetalz.github.io/sample-streamlit-integration-with-keycloak-for-authentication.html" rel="alternate"/><published>2026-02-22T00:00:00+07:00</published><updated>2026-02-22T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-02-22:/sample-streamlit-integration-with-keycloak-for-authentication.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;In a scenario you have to write report for your boss, you imagine that your boss needs a dashboard, and you are not Data Engineer or Developer. You would be going to vibe code and you have streamlit as keyword. After that you need to show your report to your boss, but your boss is a security guy, he/she ask you to add authentication to your report. So you need to add authentication to your report. Basic auth is not enough even if it is only for internal users. Then you have an existing Keycloak cluster in your company. So you just need to create new realm in Keycloak for your application then make your application integrate with Keycloak. This article will show you how to do it and for me to remember xD&lt;/p&gt;
 &lt;p&gt;We will use &lt;strong&gt;Keycloak&lt;/strong&gt; as the identity provider and &lt;strong&gt;Streamlit&lt;/strong&gt; as the application. We will use &lt;strong&gt;OIDC&lt;/strong&gt; (OpenID Connect) protocol to integrate them.&lt;/p&gt;
 &lt;p&gt;Step lists:&lt;/p&gt;
