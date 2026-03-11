@@ -1,0 +1,22 @@
+```mermaid
+flowchart LR
+    A1[("Node 1<br>10.0.0.1<br>(Master)")]
+    A2[("Node 2<br>10.0.0.2")]
+    A3[("Node 3<br>10.0.0.3")]
+
+    B1[("Node 1<br>10.0.1.1<br>(Slave)")]
+    B2[("Node 2<br>10.0.1.2")]
+    B3[("Node 3<br>10.0.1.3")]
+
+    subgraph Cluster_A ["Cluster A (Primary)"]
+        direction TB
+        A1 -.- A2 -.- A3
+    end
+
+    subgraph Cluster_B ["Cluster B (Secondary)"]
+        direction TB
+        B1 -.- B2 -.- B3
+    end
+
+    A1 == "Live Clone (nc + xbstream)<br>&<br>GTID Replication" ===> B1
+```
