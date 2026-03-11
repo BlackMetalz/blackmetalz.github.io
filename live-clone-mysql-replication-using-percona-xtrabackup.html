@@ -80,12 +80,16 @@
             
             <h1>Guide: Live Clone MySQL Replication using Percona XtraBackup</h1>
 <p><strong>Reference:</strong> <a href="https://docs.percona.com/percona-xtrabackup/8.0/">Percona XtraBackup 8.0 Documentation</a></p>
+<hr>
 <h2>Prerequisites</h2>
-<p>Before proceeding, ensure you have the following:
-- <strong>Two pre-provisioned Galera clusters</strong> (this guide assumes the nodes are already installed with MySQL and Galera). We will not cover the initial base setup of the Galera packages here to keep the guide focused.
-- <strong>Network connectivity:</strong> Essential Galera ports (3306, 4567, 4568, 4444) must be open across cluster nodes. Specifically, port <code>9999</code> must be allowed between Node 1 of Cluster A and Node 1 of Cluster B for the <code>nc</code> stream transfer.
-- <strong>GTID Enabled:</strong> GTID (Global Transaction Identifier) replication must be enabled in the configuration (<code>gtid_mode=ON</code> and <code>enforce-gtid-consistency=ON</code>) on <strong>both</strong> clusters beforehand. This guide assumes it is already configured.
-- <strong>Zero-Downtime Operation:</strong> This procedure is designed to be <strong>zero-downtime</strong> for the Primary cluster (Cluster A). It is safe to perform on a production environment.</p>
+<p>Before proceeding, ensure you have the following:</p>
+<ul>
+<li><strong>Two pre-provisioned Galera clusters</strong> (this guide assumes the nodes are already installed with MySQL and Galera). We will not cover the initial base setup of the Galera packages here to keep the guide focused.</li>
+<li><strong>Network connectivity:</strong> Essential Galera ports (3306, 4567, 4568, 4444) must be open across cluster nodes. Specifically, port <code>9999</code> must be allowed between Node 1 of Cluster A and Node 1 of Cluster B for the <code>nc</code> stream transfer.</li>
+<li><strong>GTID Enabled:</strong> GTID (Global Transaction Identifier) replication must be enabled in the configuration (<code>gtid_mode=ON</code> and <code>enforce-gtid-consistency=ON</code>) on <strong>both</strong> clusters beforehand. This guide assumes it is already configured.</li>
+<li><strong>Zero-Downtime Operation:</strong> This procedure is designed to be <strong>zero-downtime</strong> for the Primary cluster (Cluster A). It is safe to perform on a production environment.</li>
+</ul>
+<hr>
 <h2>Environment Setup</h2>
 <ul>
 <li><strong>OS:</strong> Ubuntu 24.04</li>
@@ -93,40 +97,23 @@
 </ul>
 <h3>Architecture Topology</h3>
 <p>We operate with two <strong>Galera clusters</strong>, each containing 3 nodes:</p>
-<p><strong>Cluster A (Primary)</strong>: Contains existing data.
-- Node 1: <code>10.0.0.1</code> (designated as <code>Master</code>)
-- Node 2: <code>10.0.0.2</code>
-- Node 3: <code>10.0.0.3</code></p>
-<p><strong>Cluster B (Secondary)</strong>: Currently empty.
-- Node 1: <code>10.0.1.1</code> (designated as <code>Slave</code>)
-- Node 2: <code>10.0.1.2</code>
-- Node 3: <code>10.0.1.3</code></p>
-<div class="highlight"><pre><span></span><code>flowchart LR
-    A1[(&quot;Node 1&lt;br&gt;10.0.0.1&lt;br&gt;(Master)&quot;)]
-    A2[(&quot;Node 2&lt;br&gt;10.0.0.2&quot;)]
-    A3[(&quot;Node 3&lt;br&gt;10.0.0.3&quot;)]
-
-    B1[(&quot;Node 1&lt;br&gt;10.0.1.1&lt;br&gt;(Slave)&quot;)]
-    B2[(&quot;Node 2&lt;br&gt;10.0.1.2&quot;)]
-    B3[(&quot;Node 3&lt;br&gt;10.0.1.3&quot;)]
-
-    subgraph Cluster_A [&quot;Cluster A (Primary)&quot;]
-        direction TB
-        A1 -.- A2 -.- A3
-    end
-
-    subgraph Cluster_B [&quot;Cluster B (Secondary)&quot;]
-        direction TB
-        B1 -.- B2 -.- B3
-    end
-
-    A1 == &quot;Live Clone (nc + xbstream)&lt;br&gt;&amp;&lt;br&gt;GTID Replication&quot; ===&gt; B1
-</code></pre></div>
-
+<p><strong>Cluster A (Primary)</strong>: Contains existing data.</p>
+<ul>
+<li>Node 1: <code>10.0.0.1</code> (designated as <code>Master</code>)</li>
+<li>Node 2: <code>10.0.0.2</code></li>
+<li>Node 3: <code>10.0.0.3</code></li>
+</ul>
+<p><strong>Cluster B (Secondary)</strong>: Currently empty.</p>
+<ul>
+<li>Node 1: <code>10.0.1.1</code> (designated as <code>Slave</code>)</li>
+<li>Node 2: <code>10.0.1.2</code></li>
+<li>Node 3: <code>10.0.1.3</code></li>
+</ul>
+<p><img alt="Mermaid" src="images/2026/03/01.png"></p>
 <p><strong>Objective:</strong> Create a replication topology ensuring a full database clone, including all users and granted privileges from existing Cluster A (Primary).</p>
 <h3>Important Context for Cluster B (Secondary)</h3>
-<p>After the initial setup of Cluster B (Secondary), gracefully shut down the nodes in reverse order: <strong>Node 3</strong>, then <strong>Node 2</strong>.
-Only <strong>Node 1</strong> should remain active. The goal is to establish replication exclusively on Node 1 first. Once replication is stable, Galera will automatically sync the data to the other nodes when they are powered back on.</p>
+<p>After the initial setup of Cluster B (Secondary), gracefully shut down the nodes in reverse order: <strong>Node 3</strong>, then <strong>Node 2</strong>.</p>
+<p>Only <strong>Node 1</strong> should remain active. The goal is to establish replication exclusively on Node 1 first. Once replication is stable, Galera will automatically sync the data to the other nodes when they are powered back on.</p>
 <hr>
 <h2>1. Install Percona XtraBackup</h2>
 <p>Execute the following commands on the nodes handling the backup/restore to install Percona XtraBackup 8.0:</p>
