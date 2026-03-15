@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-03-16T00:00:00+07:00</updated><entry><title>Mysql - ACID Principle</title><link href="https://blackmetalz.github.io/mysql-acid-principle.html" rel="alternate"/><published>2026-03-16T00:00:00+07:00</published><updated>2026-03-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-16:/mysql-acid-principle.html</id><summary type="html"/><content type="html">&lt;p&gt;As a System Admin, I want to understand ACID principles in MySQL, mainly for learning purposes.&lt;/p&gt;
 &lt;h2&gt;ACID: It is not only definition, it is mechanism!&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;A&lt;/code&gt; stands for &lt;code&gt;Atomicity&lt;/code&gt;
-&lt;code&gt;C&lt;/code&gt; stands for &lt;code&gt;Consistency&lt;/code&gt;
-&lt;code&gt;I&lt;/code&gt; stands for &lt;code&gt;Isolation&lt;/code&gt;
-&lt;code&gt;D&lt;/code&gt; stands for &lt;code&gt;Durability&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;A&lt;/code&gt; stands for &lt;code&gt;Atomicity&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;C&lt;/code&gt; stands for &lt;code&gt;Consistency&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;I&lt;/code&gt; stands for &lt;code&gt;Isolation&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;D&lt;/code&gt; stands for &lt;code&gt;Durability&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h3&gt;Atomicity&lt;/h3&gt;
 &lt;p&gt;&lt;img alt="Picture take from scaler.com" src="./images/2026/03/05.png"&gt;&lt;/p&gt;
 &lt;p&gt;Let's talk about &lt;code&gt;Atomicity&lt;/code&gt;: from what I understand, it means all transactions will be executed completely or not at all (All or nothing). &lt;/p&gt;
@@ -26,9 +28,9 @@
 &lt;span class="k"&gt;COMMIT&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;-- Send transaction&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;strong&gt;What makes it Atomic?&lt;/strong&gt;
-Because we wrapped these 4 queries inside a &lt;code&gt;START TRANSACTION;&lt;/code&gt; ... &lt;code&gt;COMMIT;&lt;/code&gt; block, MySQL will treat them as a single Unit of Work.
-If step 3 fails (e.g., due to a trigger error, constraint violation, or server crash), the application or MySQL will execute a &lt;code&gt;ROLLBACK;&lt;/code&gt; command. At that point, the data inserted in step 2 will be undone (removed). The database will return to the exact same state it was in before running &lt;code&gt;START TRANSACTION&lt;/code&gt;. That is atomicity!&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;What makes it Atomic?&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Because we wrapped these 4 queries inside a &lt;code&gt;START TRANSACTION;&lt;/code&gt; ... &lt;code&gt;COMMIT;&lt;/code&gt; block, MySQL will treat them as a single Unit of Work.&lt;/p&gt;
+&lt;p&gt;If step 3 fails (e.g., due to a trigger error, constraint violation, or server crash), the application or MySQL will execute a &lt;code&gt;ROLLBACK;&lt;/code&gt; command. At that point, the data inserted in step 2 will be undone (removed). The database will return to the exact same state it was in before running &lt;code&gt;START TRANSACTION&lt;/code&gt;. That is atomicity!&lt;/p&gt;
 &lt;p&gt;So for &lt;code&gt;ROLLBACK&lt;/code&gt;, it will used data in &lt;a href="https://dev.mysql.com/doc/refman/8.4/en/innodb-undo-logs.html"&gt;Undo Log&lt;/a&gt; to restore the data to the previous state.&lt;/p&gt;
 &lt;h3&gt;Consistency&lt;/h3&gt;
 &lt;p&gt;Database never lies! If Atomicity ensures "all or nothing", &lt;code&gt;Consistency&lt;/code&gt; ensures that after a transaction is done, the data will be in a valid state. So, how does it work?&lt;/p&gt;
@@ -71,14 +73,20 @@ If step 3 fails (e.g., due to a trigger error, constraint violation, or server c
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;InnoDB System Variables - &lt;a href="https://dev.mysql.com/doc/refman/8.4/en/innodb-parameters.html#sysvar_innodb_flush_log_at_trx_commit"&gt;innodb_flush_log_at_trx_commit&lt;/a&gt;
-So for System/DB Admin: 
-- Value = 1 (default), the most safety, but slowest!
-- Value = 0/2, faster, but less safety!&lt;/p&gt;
+So for System/DB Admin: &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Value = 1 (default), the most safety, but slowest!&lt;/li&gt;
+&lt;li&gt;Value = 0/2, faster, but less safety!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
 &lt;h2&gt;The SRE Takeaway&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Want complete safety?: set &lt;code&gt;innodb_flush_log_at_trx_commit = 1&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;Want to backup without downtime? Use &lt;code&gt;--single-transaction&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="mysql"/><category term="database"/></entry><entry><title>Demystifying Docker Networking: A Deep Dive into Bridge &amp; veth</title><link href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html" rel="alternate"/><published>2026-03-15T00:00:00+07:00</published><updated>2026-03-15T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-15:/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html</id><summary type="html"/><content type="html">&lt;p&gt;I guess I'm not the only one who gets confused with Docker networking. Let's try to understand it better!&lt;/p&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;ACID is a set of properties that ensure transactions in a database are processed reliably. It is a fundamental concept in database management systems, and it is essential for ensuring data integrity and consistency.&lt;/p&gt;</content><category term="Knowledge Base"/><category term="mysql"/><category term="database"/></entry><entry><title>Demystifying Docker Networking: A Deep Dive into Bridge &amp; veth</title><link href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html" rel="alternate"/><published>2026-03-15T00:00:00+07:00</published><updated>2026-03-15T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-15:/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html</id><summary type="html"/><content type="html">&lt;p&gt;I guess I'm not the only one who gets confused with Docker networking. Let's try to understand it better!&lt;/p&gt;
 &lt;h2&gt;Prerequisites&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Ubuntu 24.04&lt;/li&gt;

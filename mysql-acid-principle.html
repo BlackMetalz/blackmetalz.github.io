@@ -80,10 +80,12 @@
             
             <p>As a System Admin, I want to understand ACID principles in MySQL, mainly for learning purposes.</p>
 <h2>ACID: It is not only definition, it is mechanism!</h2>
-<p><code>A</code> stands for <code>Atomicity</code>
-<code>C</code> stands for <code>Consistency</code>
-<code>I</code> stands for <code>Isolation</code>
-<code>D</code> stands for <code>Durability</code></p>
+<ul>
+<li><code>A</code> stands for <code>Atomicity</code></li>
+<li><code>C</code> stands for <code>Consistency</code></li>
+<li><code>I</code> stands for <code>Isolation</code></li>
+<li><code>D</code> stands for <code>Durability</code></li>
+</ul>
 <h3>Atomicity</h3>
 <p><img alt="Picture take from scaler.com" src="./images/2026/03/05.png"></p>
 <p>Let's talk about <code>Atomicity</code>: from what I understand, it means all transactions will be executed completely or not at all (All or nothing). </p>
@@ -105,9 +107,9 @@
 <span class="k">COMMIT</span><span class="p">;</span><span class="w"> </span><span class="c1">-- Send transaction</span>
 </code></pre></div>
 
-<p><strong>What makes it Atomic?</strong>
-Because we wrapped these 4 queries inside a <code>START TRANSACTION;</code> ... <code>COMMIT;</code> block, MySQL will treat them as a single Unit of Work.
-If step 3 fails (e.g., due to a trigger error, constraint violation, or server crash), the application or MySQL will execute a <code>ROLLBACK;</code> command. At that point, the data inserted in step 2 will be undone (removed). The database will return to the exact same state it was in before running <code>START TRANSACTION</code>. That is atomicity!</p>
+<p><strong>What makes it Atomic?</strong></p>
+<p>Because we wrapped these 4 queries inside a <code>START TRANSACTION;</code> ... <code>COMMIT;</code> block, MySQL will treat them as a single Unit of Work.</p>
+<p>If step 3 fails (e.g., due to a trigger error, constraint violation, or server crash), the application or MySQL will execute a <code>ROLLBACK;</code> command. At that point, the data inserted in step 2 will be undone (removed). The database will return to the exact same state it was in before running <code>START TRANSACTION</code>. That is atomicity!</p>
 <p>So for <code>ROLLBACK</code>, it will used data in <a href="https://dev.mysql.com/doc/refman/8.4/en/innodb-undo-logs.html">Undo Log</a> to restore the data to the previous state.</p>
 <h3>Consistency</h3>
 <p>Database never lies! If Atomicity ensures "all or nothing", <code>Consistency</code> ensures that after a transaction is done, the data will be in a valid state. So, how does it work?</p>
@@ -150,14 +152,20 @@ If step 3 fails (e.g., due to a trigger error, constraint violation, or server c
 </code></pre></div>
 
 <p>InnoDB System Variables - <a href="https://dev.mysql.com/doc/refman/8.4/en/innodb-parameters.html#sysvar_innodb_flush_log_at_trx_commit">innodb_flush_log_at_trx_commit</a>
-So for System/DB Admin: 
-- Value = 1 (default), the most safety, but slowest!
-- Value = 0/2, faster, but less safety!</p>
+So for System/DB Admin: </p>
+<ul>
+<li>Value = 1 (default), the most safety, but slowest!</li>
+<li>Value = 0/2, faster, but less safety!</li>
+</ul>
+<hr>
 <h2>The SRE Takeaway</h2>
 <ul>
 <li>Want complete safety?: set <code>innodb_flush_log_at_trx_commit = 1</code></li>
 <li>Want to backup without downtime? Use <code>--single-transaction</code></li>
 </ul>
+<hr>
+<h2>Conclusion</h2>
+<p>ACID is a set of properties that ensure transactions in a database are processed reliably. It is a fundamental concept in database management systems, and it is essential for ensuring data integrity and consistency.</p>
 
 
              
