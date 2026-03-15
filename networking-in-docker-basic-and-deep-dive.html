@@ -112,38 +112,40 @@ root@kienlt-lab-utilities:~#<span class="w"> </span>iptables<span class="w"> </s
 DNAT<span class="w">       </span><span class="m">6</span><span class="w">    </span>--<span class="w">  </span><span class="m">0</span>.0.0.0/0<span class="w">            </span><span class="m">0</span>.0.0.0/0<span class="w">            </span>tcp<span class="w"> </span>dpt:8888<span class="w"> </span>to:172.17.0.2:80
 </code></pre></div>
 
-<p>Let's break down the rule above:
-- DNAT: Destination Network Address Translation
-- 6: protocol (tcp)
-- 0.0.0.0/0: source ip (any ip)
-- 0.0.0.0/0: destination ip (any ip)
-- tcp dpt:8888: destination port (8888)
-- to:172.17.0.2:80: destination ip and port (172.17.0.2:80)</p>
+<p>Let's break down the rule above:</p>
+<ul>
+<li>DNAT: Destination Network Address Translation</li>
+<li>6: protocol (tcp)</li>
+<li>0.0.0.0/0: source ip (any ip)</li>
+<li>0.0.0.0/0: destination ip (any ip)</li>
+<li>tcp dpt:8888: destination port (8888)</li>
+<li>to:172.17.0.2:80: destination ip and port (172.17.0.2:80)</li>
+</ul>
 <p>Hmm, where is the ip <code>172.17.0.2</code> comes from?</p>
 <div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>docker<span class="w"> </span>inspect<span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}&#39;</span><span class="w"> </span>nginx-demo
 <span class="m">172</span>.17.0.2
 </code></pre></div>
 
-<p>Flow summary:
-1. User sends request to: <code>http://host-ip:8888</code>
-2. Host kernel receives the packet, sees destination port 8888
-3. iptables DNAT rule rewrites destination to <code>172.17.0.2:80</code>
-4. The packet is forwarded to docker0 bridge
-5. Packet travels through a <code>veth pair</code> into the container's network namespace
-6. nginx receives it on port 80</p>
-<p>Pro Tip on L2 Switching: </p>
-<div class="highlight"><pre><span></span><code><span class="nx">Once</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">packet</span><span class="w"> </span><span class="nx">reaches</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">docker0</span><span class="w"> </span><span class="nx">bridge</span><span class="p">,</span><span class="w"> </span><span class="nx">it</span><span class="w"> </span><span class="nx">functions</span><span class="w"> </span><span class="nx">exactly</span><span class="w"> </span><span class="k">like</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">physical</span><span class="w"> </span><span class="nx">L2</span><span class="w"> </span><span class="nx">Switch</span><span class="p">.</span><span class="w"> </span><span class="nx">It</span><span class="w"> </span><span class="nx">inspects</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">destination</span><span class="w"> </span><span class="nx">MAC</span><span class="w"> </span><span class="nx">address</span><span class="w"> </span><span class="p">(</span><span class="nx">which</span><span class="w"> </span><span class="nx">belongs</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">eth0</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="nx">inside</span><span class="w"> </span><span class="nx">your</span><span class="w"> </span><span class="nx">container</span><span class="p">)</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">forwards</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">packet</span><span class="w"> </span><span class="nx">through</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">specific</span><span class="w"> </span><span class="nx">veth</span><span class="w"> </span><span class="s">&quot;port&quot;</span><span class="w"> </span><span class="nx">that</span><span class="w"> </span><span class="nx">leads</span><span class="w"> </span><span class="nx">directly</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">that</span><span class="w"> </span><span class="nx">container</span><span class="p">.</span>
-</code></pre></div>
-
+<p>Flow summary:</p>
+<ol>
+<li>User sends request to: <code>http://host-ip:8888</code></li>
+<li>Host kernel receives the packet, sees destination port 8888</li>
+<li>iptables DNAT rule rewrites destination to <code>172.17.0.2:80</code></li>
+<li>The packet is forwarded to docker0 bridge</li>
+<li>Packet travels through a <code>veth pair</code> into the container's network namespace</li>
+<li>nginx receives it on port 80</li>
+</ol>
 <h2>Hmmm, how Bridge (docker0) and veth works?</h2>
 <p>Before running any commands, here's the full picture of what we're about to explore:</p>
 <p><img alt="Full flow" src="./images/2026/03/02.png"></p>
 <p>What is <code>veth</code>? It is a virtual ethernet pair, it is like a tunnel between two network namespaces.</p>
 <p>What is <code>Network Namespace (netns)</code>? It is a feature of Linux kernel that allows you to create isolated network environments.</p>
-<p>There are 3 keys component that need to be understood:
-- <code>docker0</code>: virtual bridge
-- <code>veth pair</code>: 2 way tunnel, 1 plugged into docker0, 1 plugged into container
-- <code>Network Namespace</code>: the reason why container have it's own <code>eth0</code> interface, complete isolated with host network</p>
+<p>There are 3 keys component that need to be understood:</p>
+<ul>
+<li><code>docker0</code>: virtual bridge</li>
+<li><code>veth pair</code>: 2 way tunnel, 1 plugged into docker0, 1 plugged into container</li>
+<li><code>Network Namespace</code>: the reason why container have it's own <code>eth0</code> interface, complete isolated with host network</li>
+</ul>
 <h2>Verifying the Bridge and veth Pairs</h2>
 <p>We mentioned docker0, let's check it. (I have more than 1 container running, so you probably see more than 1 veth)</p>
 <div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>brctl<span class="w"> </span>show
@@ -215,11 +217,6 @@ nginx-demo-ns<span class="w"> </span><span class="o">(</span>id:<span class="w">
 <span class="w">    </span>link/ether<span class="w"> </span><span class="m">42</span>:17:5a:54:f2:c4<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff<span class="w"> </span>link-netnsid<span class="w"> </span><span class="m">0</span>
 </code></pre></div>
 
-<p>Wait, why is it called eth0 and not veth?
-When Docker creates a <code>veth pair</code>, it starts with two random-named interfaces (e.g., <code>veth1</code> and <code>veth2</code>). Docker then:
-1. Keeps one end on the Host (e.g., veth37c4b71).
-2. Pushes the other end into the Container's namespace.
-3. Renames that internal end to eth0.</p>
 <p>Important output: <code>eth0@if10</code>, <code>if10</code> is the other side of the veth pair, it is connected to <code>docker0</code> bridge. So let see all network interface in Host, who the fuck has index 10?</p>
 <p>I want to prove: <code>eth0</code> inside container is paired with <code>veth37c4b71</code> outside, network host.</p>
 <div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>^10:

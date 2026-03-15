@@ -33,38 +33,40 @@ root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;iptables&lt;span
 DNAT&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="m"&gt;6&lt;/span&gt;&lt;span class="w"&gt;    &lt;/span&gt;--&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.0.0.0/0&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.0.0.0/0&lt;span class="w"&gt;            &lt;/span&gt;tcp&lt;span class="w"&gt; &lt;/span&gt;dpt:8888&lt;span class="w"&gt; &lt;/span&gt;to:172.17.0.2:80
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Let's break down the rule above:
-- DNAT: Destination Network Address Translation
-- 6: protocol (tcp)
-- 0.0.0.0/0: source ip (any ip)
-- 0.0.0.0/0: destination ip (any ip)
-- tcp dpt:8888: destination port (8888)
-- to:172.17.0.2:80: destination ip and port (172.17.0.2:80)&lt;/p&gt;
+&lt;p&gt;Let's break down the rule above:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;DNAT: Destination Network Address Translation&lt;/li&gt;
+&lt;li&gt;6: protocol (tcp)&lt;/li&gt;
+&lt;li&gt;0.0.0.0/0: source ip (any ip)&lt;/li&gt;
+&lt;li&gt;0.0.0.0/0: destination ip (any ip)&lt;/li&gt;
+&lt;li&gt;tcp dpt:8888: destination port (8888)&lt;/li&gt;
+&lt;li&gt;to:172.17.0.2:80: destination ip and port (172.17.0.2:80)&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;Hmm, where is the ip &lt;code&gt;172.17.0.2&lt;/code&gt; comes from?&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;docker&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;nginx-demo
 &lt;span class="m"&gt;172&lt;/span&gt;.17.0.2
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Flow summary:
-1. User sends request to: &lt;code&gt;http://host-ip:8888&lt;/code&gt;
-2. Host kernel receives the packet, sees destination port 8888
-3. iptables DNAT rule rewrites destination to &lt;code&gt;172.17.0.2:80&lt;/code&gt;
-4. The packet is forwarded to docker0 bridge
-5. Packet travels through a &lt;code&gt;veth pair&lt;/code&gt; into the container's network namespace
-6. nginx receives it on port 80&lt;/p&gt;
-&lt;p&gt;Pro Tip on L2 Switching: &lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nx"&gt;Once&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;packet&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;reaches&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;docker0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;bridge&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;it&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;functions&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;exactly&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;like&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;physical&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;L2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Switch&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;It&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;inspects&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;destination&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;MAC&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;address&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;which&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;belongs&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;to&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;eth0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;interface&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;inside&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;your&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;container&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;forwards&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;packet&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;through&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;specific&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;veth&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;port&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;that&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;leads&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;directly&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;to&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;that&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;container&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
+&lt;p&gt;Flow summary:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;User sends request to: &lt;code&gt;http://host-ip:8888&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Host kernel receives the packet, sees destination port 8888&lt;/li&gt;
+&lt;li&gt;iptables DNAT rule rewrites destination to &lt;code&gt;172.17.0.2:80&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;The packet is forwarded to docker0 bridge&lt;/li&gt;
+&lt;li&gt;Packet travels through a &lt;code&gt;veth pair&lt;/code&gt; into the container's network namespace&lt;/li&gt;
+&lt;li&gt;nginx receives it on port 80&lt;/li&gt;
+&lt;/ol&gt;
 &lt;h2&gt;Hmmm, how Bridge (docker0) and veth works?&lt;/h2&gt;
 &lt;p&gt;Before running any commands, here's the full picture of what we're about to explore:&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Full flow" src="./images/2026/03/02.png"&gt;&lt;/p&gt;
 &lt;p&gt;What is &lt;code&gt;veth&lt;/code&gt;? It is a virtual ethernet pair, it is like a tunnel between two network namespaces.&lt;/p&gt;
 &lt;p&gt;What is &lt;code&gt;Network Namespace (netns)&lt;/code&gt;? It is a feature of Linux kernel that allows you to create isolated network environments.&lt;/p&gt;
-&lt;p&gt;There are 3 keys component that need to be understood:
-- &lt;code&gt;docker0&lt;/code&gt;: virtual bridge
-- &lt;code&gt;veth pair&lt;/code&gt;: 2 way tunnel, 1 plugged into docker0, 1 plugged into container
-- &lt;code&gt;Network Namespace&lt;/code&gt;: the reason why container have it's own &lt;code&gt;eth0&lt;/code&gt; interface, complete isolated with host network&lt;/p&gt;
+&lt;p&gt;There are 3 keys component that need to be understood:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;docker0&lt;/code&gt;: virtual bridge&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;veth pair&lt;/code&gt;: 2 way tunnel, 1 plugged into docker0, 1 plugged into container&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Network Namespace&lt;/code&gt;: the reason why container have it's own &lt;code&gt;eth0&lt;/code&gt; interface, complete isolated with host network&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2&gt;Verifying the Bridge and veth Pairs&lt;/h2&gt;
 &lt;p&gt;We mentioned docker0, let's check it. (I have more than 1 container running, so you probably see more than 1 veth)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;brctl&lt;span class="w"&gt; &lt;/span&gt;show
@@ -136,11 +138,6 @@ nginx-demo-ns&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/spa
 &lt;span class="w"&gt;    &lt;/span&gt;link/ether&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;42&lt;/span&gt;:17:5a:54:f2:c4&lt;span class="w"&gt; &lt;/span&gt;brd&lt;span class="w"&gt; &lt;/span&gt;ff:ff:ff:ff:ff:ff&lt;span class="w"&gt; &lt;/span&gt;link-netnsid&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Wait, why is it called eth0 and not veth?
-When Docker creates a &lt;code&gt;veth pair&lt;/code&gt;, it starts with two random-named interfaces (e.g., &lt;code&gt;veth1&lt;/code&gt; and &lt;code&gt;veth2&lt;/code&gt;). Docker then:
-1. Keeps one end on the Host (e.g., veth37c4b71).
-2. Pushes the other end into the Container's namespace.
-3. Renames that internal end to eth0.&lt;/p&gt;
 &lt;p&gt;Important output: &lt;code&gt;eth0@if10&lt;/code&gt;, &lt;code&gt;if10&lt;/code&gt; is the other side of the veth pair, it is connected to &lt;code&gt;docker0&lt;/code&gt; bridge. So let see all network interface in Host, who the fuck has index 10?&lt;/p&gt;
 &lt;p&gt;I want to prove: &lt;code&gt;eth0&lt;/code&gt; inside container is paired with &lt;code&gt;veth37c4b71&lt;/code&gt; outside, network host.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;ip&lt;span class="w"&gt; &lt;/span&gt;link&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;grep&lt;span class="w"&gt; &lt;/span&gt;^10:
