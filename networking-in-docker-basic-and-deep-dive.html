@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="networking, container, docker, Knowledge Base, " />
+
+<meta property="og:title" content="Networking in Docker: basic and deep dive "/>
+<meta property="og:url" content="https://blackmetalz.github.io/networking-in-docker-basic-and-deep-dive.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2026-03-15T00:00:00+07:00" />
+<meta name="twitter:title" content="Networking in Docker: basic and deep dive ">
+<meta name="twitter:description" content="">
+
+        <title>Networking in Docker: basic and deep dive  · Kienlt&#39;s notebook
+</title>
+        <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://blackmetalz.github.io/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://blackmetalz.github.io
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://blackmetalz.github.io/categories.html">Categories</a></li>
+                                <li ><a href="https://blackmetalz.github.io/tags.html">Tags</a></li>
+                                <li ><a href="https://blackmetalz.github.io/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://blackmetalz.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://blackmetalz.github.io/networking-in-docker-basic-and-deep-dive.html">
+                Networking in Docker: basic and deep dive
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>I guess I'm not the only one who gets confused with Docker networking. Let's try to understand it better!</p>
+<h2>Prerequisites</h2>
+<ul>
+<li>Ubuntu 24.04</li>
+<li>Docker installed.</li>
+<li>Bridge Utils: <code>apt install bridge-utils -y</code></li>
+</ul>
+<h2>Bridge Network flow</h2>
+<p>I think I will only talk about this, since this is default network in docker.</p>
+<p><img alt="iptables DNAT" src="./images/2026/03/03.png"></p>
+<p>Let's get started:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:80<span class="w"> </span>--name<span class="w"> </span>nginx-demo<span class="w"> </span>nginx
+</code></pre></div>
+
+<p>Expected output:</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>docker<span class="w"> </span>ps
+CONTAINER<span class="w"> </span>ID<span class="w">   </span>IMAGE<span class="w">          </span>COMMAND<span class="w">                  </span>CREATED<span class="w">         </span>STATUS<span class="w">         </span>PORTS<span class="w">                                                    </span>NAMES
+67b80460a739<span class="w">   </span>nginx<span class="w">          </span><span class="s2">&quot;/docker-entrypoint.…&quot;</span><span class="w">   </span><span class="m">2</span><span class="w"> </span>seconds<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">2</span><span class="w"> </span>seconds<span class="w">   </span><span class="m">0</span>.0.0.0:8888-&gt;80/tcp,<span class="w"> </span><span class="o">[</span>::<span class="o">]</span>:8888-&gt;80/tcp<span class="w">                  </span>nginx-demo
+</code></pre></div>
+
+<p>Haha, I was having a hard time to understand which is container port and which is host port. But it is pretty simple, you just need to remember that the format is <code>host_port:container_port</code>, it means you will access nginx container from outside of the container using <code>host_port</code>, and inside the container, the nginx is running on <code>container_port</code>.</p>
+<p>TLDR: if we have request access to port 8888, docker will throw that damn request to port 80 inside the container.</p>
+<p>Verify by this command below:</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>docker<span class="w"> </span>port<span class="w"> </span>nginx-demo
+<span class="m">80</span>/tcp<span class="w"> </span>-&gt;<span class="w"> </span><span class="m">0</span>.0.0.0:8888
+<span class="m">80</span>/tcp<span class="w"> </span>-&gt;<span class="w"> </span><span class="o">[</span>::<span class="o">]</span>:8888
+</code></pre></div>
+
+<p>Why request from port 8888 can be forwarded to port 80 inside the heck container? It is iptables, hmm I thought it was used only for drop/accept like a firewall. But it is not, it can be used for port forwarding too. Let's check the iptables rules:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># To view full rule of Docker, remove that grep.</span>
+root@kienlt-lab-utilities:~#<span class="w"> </span>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-L<span class="w"> </span>DOCKER<span class="w"> </span>-n<span class="p">|</span>grep<span class="w"> </span><span class="m">8888</span>
+DNAT<span class="w">       </span><span class="m">6</span><span class="w">    </span>--<span class="w">  </span><span class="m">0</span>.0.0.0/0<span class="w">            </span><span class="m">0</span>.0.0.0/0<span class="w">            </span>tcp<span class="w"> </span>dpt:8888<span class="w"> </span>to:172.17.0.2:80
+</code></pre></div>
+
+<p>Let's break down the rule above:
+- DNAT: Destination Network Address Translation
+- 6: protocol (tcp)
+- 0.0.0.0/0: source ip (any ip)
+- 0.0.0.0/0: destination ip (any ip)
+- tcp dpt:8888: destination port (8888)
+- to:172.17.0.2:80: destination ip and port (172.17.0.2:80)</p>
+<p>Hmm, where is the ip <code>172.17.0.2</code> comes from?</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>docker<span class="w"> </span>inspect<span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}&#39;</span><span class="w"> </span>nginx-demo
+<span class="m">172</span>.17.0.2
+</code></pre></div>
+
+<p>Flow summary:
+1. User sends request to: <code>http://host-ip:8888</code>
+2. Host kernel receives the packet, sees destination port 8888
+3. iptables DNAT rule rewrites destination to <code>172.17.0.2:80</code>
+4. The packet is forwarded to docker0 bridge
+5. Packet travels through a <code>veth pair</code> into the container's network namespace
+6. nginx receives it on port 80</p>
+<p>Pro Tip on L2 Switching: </p>
+<div class="highlight"><pre><span></span><code><span class="nx">Once</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">packet</span><span class="w"> </span><span class="nx">reaches</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">docker0</span><span class="w"> </span><span class="nx">bridge</span><span class="p">,</span><span class="w"> </span><span class="nx">it</span><span class="w"> </span><span class="nx">functions</span><span class="w"> </span><span class="nx">exactly</span><span class="w"> </span><span class="k">like</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">physical</span><span class="w"> </span><span class="nx">L2</span><span class="w"> </span><span class="nx">Switch</span><span class="p">.</span><span class="w"> </span><span class="nx">It</span><span class="w"> </span><span class="nx">inspects</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">destination</span><span class="w"> </span><span class="nx">MAC</span><span class="w"> </span><span class="nx">address</span><span class="w"> </span><span class="p">(</span><span class="nx">which</span><span class="w"> </span><span class="nx">belongs</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">eth0</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="nx">inside</span><span class="w"> </span><span class="nx">your</span><span class="w"> </span><span class="nx">container</span><span class="p">)</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">forwards</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">packet</span><span class="w"> </span><span class="nx">through</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">specific</span><span class="w"> </span><span class="nx">veth</span><span class="w"> </span><span class="s">&quot;port&quot;</span><span class="w"> </span><span class="nx">that</span><span class="w"> </span><span class="nx">leads</span><span class="w"> </span><span class="nx">directly</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">that</span><span class="w"> </span><span class="nx">container</span><span class="p">.</span>
+</code></pre></div>
+
+<h2>Hmmm, how Bridge (docker0) and veth works?</h2>
+<p>Before running any commands, here's the full picture of what we're about to explore:</p>
+<p><img alt="Full flow" src="./images/2026/03/02.png"></p>
+<p>What is <code>veth</code>? It is a virtual ethernet pair, it is like a tunnel between two network namespaces.</p>
+<p>What is <code>Network Namespace (netns)</code>? It is a feature of Linux kernel that allows you to create isolated network environments.</p>
+<p>There are 3 keys component that need to be understood:
+- <code>docker0</code>: virtual bridge
+- <code>veth pair</code>: 2 way tunnel, 1 plugged into docker0, 1 plugged into container
+- <code>Network Namespace</code>: the reason why container have it's own <code>eth0</code> interface, complete isolated with host network</p>
+<h2>Verifying the Bridge and veth Pairs</h2>
+<p>We mentioned docker0, let's check it. (I have more than 1 container running, so you probably see more than 1 veth)</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>brctl<span class="w"> </span>show
+bridge<span class="w"> </span>name<span class="w">         </span>bridge<span class="w"> </span>id<span class="w">           </span>STP<span class="w"> </span>enabled<span class="w"> </span>interfaces
+br-2a065d00678a<span class="w">     </span><span class="m">8000</span>.7687adb1e805<span class="w">   </span>no<span class="w">          </span>vethf6114a2
+br-bf86e395575b<span class="w">     </span><span class="m">8000</span>.72f5de7a4fae<span class="w">   </span>no<span class="w">          </span>vethfc36c96
+br-c1027faa9820<span class="w">     </span><span class="m">8000</span>.6a557a38506a<span class="w">   </span>no<span class="w">          </span>veth11ad843
+docker0<span class="w">             </span><span class="m">8000</span>.fa5bcf9b5087<span class="w">   </span>no<span class="w">          </span>veth37c4b71
+</code></pre></div>
+
+<p><code>veth37c4b71</code> is the host-side end of the tunnel connected to our container.</p>
+<p>Let confirms with <code>ip link</code></p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span>show<span class="w"> </span>master<span class="w"> </span>docker0
+<span class="m">10</span>:<span class="w"> </span>veth37c4b71@if2:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>master<span class="w"> </span>docker0<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
+<span class="w">    </span>link/ether<span class="w"> </span>3a:e0:83:b9:4e:7b<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff<span class="w"> </span>link-netnsid<span class="w"> </span><span class="m">3</span>
+</code></pre></div>
+
+<p>Notice <code>veth37c4b71@if2</code> — the <code>@if2</code> means this interface is paired with interface index 2 on the other side (inside the container).</p>
+<h2>Network Namespaces (netns)</h2>
+<p>Each container runs in its own network namespace. Let's inspect it to confirm the veth pairing.</p>
+<p>We can list all netns with <code>ip netns list</code></p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>ip<span class="w"> </span>netns<span class="w"> </span>list
+root@kienlt-lab-utilities:~#
+</code></pre></div>
+
+<p>"Why are you lying? there is no netns here?" Don't worry bro, I will explain why!</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>man<span class="w"> </span>ip-netns
+</code></pre></div>
+
+<p>You will see a section like this, I'm showing from manual page, so no need external link xD</p>
+<div class="highlight"><pre><span></span><code><span class="w">       </span><span class="nv">ip</span><span class="w"> </span><span class="nv">netns</span><span class="w"> </span><span class="nv">list</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">show</span><span class="w"> </span><span class="nv">all</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">named</span><span class="w"> </span><span class="nv">network</span><span class="w"> </span><span class="nv">namespaces</span>
+
+<span class="w">              </span><span class="nv">This</span><span class="w"> </span><span class="nv">command</span><span class="w"> </span><span class="nv">displays</span><span class="w"> </span><span class="nv">all</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">network</span><span class="w"> </span><span class="nv">namespaces</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="o">/</span><span class="nv">run</span><span class="o">/</span><span class="nv">netns</span>
+</code></pre></div>
+
+<p>Ok, let's check in <code>/run/netns</code> and <code>/var/run/netns</code>. Wait a minute? why <code>/var/run/netns</code>, in man page haven't mentioned it?</p>
+<p>Here you go bro, in Ubuntu <code>/var/run</code> is a link that pointed to <code>/run</code></p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>ll<span class="w">  </span>/var/run
+lrwxrwxrwx<span class="w"> </span><span class="m">1</span><span class="w"> </span>root<span class="w"> </span>root<span class="w"> </span><span class="m">4</span><span class="w"> </span>Feb<span class="w"> </span><span class="m">17</span><span class="w">  </span><span class="m">2025</span><span class="w"> </span>/var/run<span class="w"> </span>-&gt;<span class="w"> </span>/run/
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>ll<span class="w"> </span>/run/netns
+ls:<span class="w"> </span>cannot<span class="w"> </span>access<span class="w"> </span><span class="s1">&#39;/run/netns&#39;</span>:<span class="w"> </span>No<span class="w"> </span>such<span class="w"> </span>file<span class="w"> </span>or<span class="w"> </span>directory
+root@kienlt-lab-utilities:~#<span class="w"> </span>ll<span class="w"> </span>/var/run/netns
+ls:<span class="w"> </span>cannot<span class="w"> </span>access<span class="w"> </span><span class="s1">&#39;/var/run/netns&#39;</span>:<span class="w"> </span>No<span class="w"> </span>such<span class="w"> </span>file<span class="w"> </span>or<span class="w"> </span>directory
+</code></pre></div>
+
+<p>To make it show properly in there, we will need to do some trick, why trick? This is only for learning purpose, in facts Docker doesn't expose <code>netns</code> to <code>/run/netns</code> due security.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1. Find PID of container</span>
+<span class="nv">PID</span><span class="o">=</span><span class="k">$(</span>docker<span class="w"> </span>inspect<span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;{{.State.Pid}}&#39;</span><span class="w"> </span>nginx-demo<span class="k">)</span>
+
+<span class="c1"># 2. Create netns directory because it is not exists</span>
+sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/var/run/netns
+
+<span class="c1"># 3. Soft link namespace of container to /var/run/netns</span>
+sudo<span class="w"> </span>ln<span class="w"> </span>-sf<span class="w"> </span>/proc/<span class="nv">$PID</span>/ns/net<span class="w"> </span>/var/run/netns/nginx-demo-ns
+
+<span class="c1"># 4. Check again - Now it will show up!</span>
+ip<span class="w"> </span>netns<span class="w"> </span>list
+<span class="c1">## expected output</span>
+nginx-demo-ns<span class="w"> </span><span class="o">(</span>id:<span class="w"> </span><span class="m">3</span><span class="o">)</span>
+<span class="c1">## </span>
+</code></pre></div>
+
+<h2>Look inside the container's network namespace</h2>
+<p>Check <code>veth pairing</code></p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>sudo<span class="w"> </span>ip<span class="w"> </span>netns<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>nginx-demo-ns<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span>show<span class="w"> </span>eth0
+<span class="m">2</span>:<span class="w"> </span>eth0@if10:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
+<span class="w">    </span>link/ether<span class="w"> </span><span class="m">42</span>:17:5a:54:f2:c4<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff<span class="w"> </span>link-netnsid<span class="w"> </span><span class="m">0</span>
+</code></pre></div>
+
+<p>Wait, why is it called eth0 and not veth?
+When Docker creates a <code>veth pair</code>, it starts with two random-named interfaces (e.g., <code>veth1</code> and <code>veth2</code>). Docker then:
+1. Keeps one end on the Host (e.g., veth37c4b71).
+2. Pushes the other end into the Container's namespace.
+3. Renames that internal end to eth0.</p>
+<p>Important output: <code>eth0@if10</code>, <code>if10</code> is the other side of the veth pair, it is connected to <code>docker0</code> bridge. So let see all network interface in Host, who the fuck has index 10?</p>
+<p>I want to prove: <code>eth0</code> inside container is paired with <code>veth37c4b71</code> outside, network host.</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>^10:
+<span class="m">10</span>:<span class="w"> </span>veth37c4b71@if2:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>master<span class="w"> </span>docker0<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
+</code></pre></div>
+
+<p>Hmm, it is <code>veth37c4b71</code> and you see master docker0 which means it is plugged into the docker0 bridge. Ok what is <code>@if2</code> in <code>veth37c4b71@if2</code>? I would type this command again to prove it is linked with each other.</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>sudo<span class="w"> </span>ip<span class="w"> </span>netns<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>nginx-demo-ns<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span>show<span class="w"> </span>eth0
+<span class="m">2</span>:<span class="w"> </span>eth0@if10:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
+<span class="w">    </span>link/ether<span class="w"> </span><span class="m">42</span>:17:5a:54:f2:c4<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff<span class="w"> </span>link-netnsid<span class="w"> </span><span class="m">0</span>
+</code></pre></div>
+
+<p>You see index 10 (<code>if10</code>)? It is the other side of the veth pair.</p>
+<p>Hmm, let me tell you what is interface index</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>ip<span class="w"> </span>link
+<span class="m">1</span>:<span class="w"> </span>lo:<span class="w"> </span>&lt;LOOPBACK,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">65536</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>state<span class="w"> </span>UNKNOWN<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default<span class="w"> </span>qlen<span class="w"> </span><span class="m">1000</span>
+<span class="w">    </span>link/loopback<span class="w"> </span><span class="m">00</span>:00:00:00:00:00<span class="w"> </span>brd<span class="w"> </span><span class="m">00</span>:00:00:00:00:00
+<span class="m">2</span>:<span class="w"> </span>eth0:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>mq<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default<span class="w"> </span>qlen<span class="w"> </span><span class="m">1000</span>
+<span class="w">    </span>link/ether<span class="w"> </span>fa:16:3e:36:85:01<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff
+<span class="w">    </span>altname<span class="w"> </span>enp0s3
+<span class="w">    </span>altname<span class="w"> </span>ens3
+<span class="m">3</span>:<span class="w"> </span>docker0:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
+<span class="w">    </span>link/ether<span class="w"> </span>fa:5b:cf:9b:50:87<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff
+<span class="m">4</span>:<span class="w"> </span>br-c1027faa9820:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
+<span class="w">    </span>link/ether<span class="w"> </span>6a:55:7a:38:50:6a<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff
+<span class="m">5</span>:<span class="w"> </span>veth11ad843@if2:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>master<span class="w"> </span>br-c1027faa9820<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
+<span class="w">    </span>link/ether<span class="w"> </span>ee:e7:24:2f:ca:b5<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff<span class="w"> </span>link-netnsid<span class="w"> </span><span class="m">0</span>
+<span class="m">6</span>:<span class="w"> </span>br-2a065d00678a:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
+<span class="w">    </span>link/ether<span class="w"> </span><span class="m">76</span>:87:ad:b1:e8:05<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff
+<span class="m">7</span>:<span class="w"> </span>vethf6114a2@if2:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>master<span class="w"> </span>br-2a065d00678a<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
+<span class="w">    </span>link/ether<span class="w"> </span>ea:85:60:ef:33:a4<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff<span class="w"> </span>link-netnsid<span class="w"> </span><span class="m">1</span>
+<span class="m">8</span>:<span class="w"> </span>br-bf86e395575b:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
+<span class="w">    </span>link/ether<span class="w"> </span><span class="m">72</span>:f5:de:7a:4f:ae<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff
+<span class="m">9</span>:<span class="w"> </span>vethfc36c96@if2:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>master<span class="w"> </span>br-bf86e395575b<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
+<span class="w">    </span>link/ether<span class="w"> </span>5e:e7:47:ac:9c:a2<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff<span class="w"> </span>link-netnsid<span class="w"> </span><span class="m">2</span>
+<span class="m">10</span>:<span class="w"> </span>veth37c4b71@if2:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>master<span class="w"> </span>docker0<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
+<span class="w">    </span>link/ether<span class="w"> </span>3a:e0:83:b9:4e:7b<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff<span class="w"> </span>link-netns<span class="w"> </span>nginx-demo-ns
+</code></pre></div>
+
+<p>so inside container, interface <code>eth0</code> is linked with <code>veth37c4b71@if2</code> which have interface index is 10. And <code>veth37c4b71@if2</code> is linked with <code>docker0</code> bridge.</p>
+<h2>Visualizing the pairing</h2>
+<p><img alt="veth pairing" src="./images/2026/03/04.png"></p>
+<p>You can use this command to see it more clearly</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>ip<span class="w"> </span>netns<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>nginx-demo-ns<span class="w"> </span>ethtool<span class="w"> </span>-S<span class="w"> </span>eth0
+NIC<span class="w"> </span>statistics:
+<span class="w">     </span>peer_ifindex:<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="c1"># This is 10th interface in host</span>
+<span class="w">     </span>...
+
+<span class="c1"># Run this shit</span>
+root@kienlt-lab-utilities:~#<span class="w"> </span>ethtool<span class="w"> </span>-S<span class="w"> </span>veth37c4b71
+NIC<span class="w"> </span>statistics:
+<span class="w">     </span>peer_ifindex:<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="c1"># This is 2nd interface in container</span>
+<span class="w">     </span>...
+</code></pre></div>
+
+<p>Why we need this fucking veth pair? Because <code>Network Namespace</code> is isolated, so we need a tunnel to connect them.</p>
+<h2>Conclusion</h2>
+<p>I hope this post help you understand how docker networking works.</p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2026-03-15T00:00:00+07:00">Sun 15 March 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://blackmetalz.github.io/tags.html#container-ref">container
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#docker-ref">docker
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#networking-ref">networking
+                    <span class="superscript">2</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://blackmetalz.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
