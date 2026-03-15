@@ -1,0 +1,37 @@
+# 1
+```
+flowchart TD
+    B([Browser]) -->|":8888"| E[Host eth0<br/>:8888]
+    E --> I[iptables DNAT<br/>:8888 → 172.17.0.2:80]
+    I --> D[docker0 bridge<br/>virtual switch]
+    D --> V[veth pair]
+    V --> C[Container eth0<br/>nginx :80]
+
+    subgraph host[Linux host]
+        E
+        I
+        D
+        V
+    end
+```
+
+# 2
+```
+flowchart LR
+    subgraph host[Host namespace]
+        D[docker0<br/>172.17.0.1] --- V["veth37c4b71<br/>index: 10 · @if2"]
+    end
+
+    subgraph container[Container namespace]
+        E["eth0<br/>index: 2 · @if10"]
+    end
+
+    V <-->|tunnel| E
+```
+
+# 3
+```
+flowchart LR
+    P1["Incoming packet<br/>dst: host-ip:8888"] --> N["iptables nat DOCKER<br/>tcp dpt:8888 → 172.17.0.2:80"]
+    N --> P2["Rewritten packet<br/>dst: 172.17.0.2:80"]
+```
