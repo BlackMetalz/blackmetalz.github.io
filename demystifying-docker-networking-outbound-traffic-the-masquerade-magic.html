@@ -80,6 +80,7 @@
             
             <p>In the <a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html">previous post</a>, we explored how external requests find their way into a container via DNAT. But there is a flip side to that coin: When a container needs to download a package or call an external API, how does it "break out" to the internet when it only has a private, internal IP?</p>
 <p>Today, we are diving deep into the fucking <code>Egress Flow</code>.</p>
+<hr>
 <h2>1. Finding the "Gateway"</h2>
 <p>Every journey begins with a door. Inside a container, that door is the damn <code>Default Gateway</code>. Usually, we would just <code>exec</code> into the container to check it, but modern official images like <code>nginx:latest</code> are minimal — meaning they lack common tools like <code>ip</code> or <code>ifconfig</code> binary for security and size reasons.</p>
 <p>No worries, we can borrow the Host's <code>ip</code> command to take a look inside the damn container:</p>
@@ -110,6 +111,7 @@ docker0:<span class="w"> </span><span class="nv">flags</span><span class="o">=</
 <span class="w">        </span>TX<span class="w"> </span>errors<span class="w"> </span><span class="m">0</span><span class="w">  </span>dropped<span class="w"> </span><span class="m">0</span><span class="w"> </span>overruns<span class="w"> </span><span class="m">0</span><span class="w">  </span>carrier<span class="w"> </span><span class="m">0</span><span class="w">  </span>collisions<span class="w"> </span><span class="m">0</span>
 </code></pre></div>
 
+<hr>
 <h2>2. IP Forwarding</h2>
 <p>Once the packet hits the Host via the <code>veth pair</code>, the Host Kernel acts as a router. It must decide whether to forward this packet from the virtual bridge (docker0) to the physical interface (like eth0 as a common interface name xD). This requires IP Forwarding to be enabled.</p>
 <div class="highlight"><pre><span></span><code><span class="n">root</span><span class="nv">@kienlt</span><span class="o">-</span><span class="n">lab</span><span class="o">-</span><span class="nl">utilities</span><span class="p">:</span><span class="o">~</span><span class="err">#</span><span class="w"> </span><span class="n">sysctl</span><span class="w"> </span><span class="n">net</span><span class="p">.</span><span class="n">ipv4</span><span class="p">.</span><span class="n">ip_forward</span>
@@ -121,6 +123,7 @@ docker0:<span class="w"> </span><span class="nv">flags</span><span class="o">=</
 <div class="highlight"><pre><span></span><code><span class="nv">Docker</span><span class="w"> </span><span class="nv">requires</span><span class="w"> </span><span class="nv">IP</span><span class="w"> </span><span class="nv">Forwarding</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">be</span><span class="w"> </span><span class="nv">enabled</span><span class="w"> </span><span class="nv">on</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">host</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">its</span><span class="w"> </span><span class="nv">default</span><span class="w"> </span><span class="nv">bridge</span><span class="w"> </span><span class="nv">network</span><span class="w"> </span><span class="nv">configuration</span>
 </code></pre></div>
 
+<hr>
 <h2>3. MASQUERADE</h2>
 <p>The container's IP (e.g., 172.17.0.2) is "non-routable" on the public internet. If you send a packet with this source IP, the internet won't know where to send the response.</p>
 <p>To resolve that issue, Docker uses MASQUERADE (a form of Source NAT). Let's look at our <code>nat</code> table:</p>
@@ -147,6 +150,7 @@ MASQUERADE<span class="w">  </span><span class="m">6</span><span class="w">    <
 <li>The Kernel uses a conntrack (connection tracking) table to remember this mapping, ensuring that when the response comes back, it knows exactly which container to return it to.</li>
 <li>MASQUERADE is essentially a dynamic form of Source NAT (SNAT). While common SNAT requires a static IP to convert, MASQUERADE will dynamically read the IP of the NIC (network interface card) to convert.</li>
 </ul>
+<hr>
 <h2>4. Verification</h2>
 <p>How do we see this in reality instead of just reading a wall of text? <code>tcpdump</code> bro!</p>
 <p>First terminal: Listen for ICMP packets on the physical interface (<code>eth0</code>).</p>
