@@ -1,0 +1,25 @@
+# 1
+
+
+```
+sequenceDiagram
+    autonumber
+    participant C as Container<br>(172.17.0.2)
+    participant H as Host OS & iptables<br>(172.25.110.76)
+    participant I as Internet<br>(8.8.8.8)
+
+    Note over C,I: --- THE ORIGINAL DIRECTION (REQUEST) ---
+    
+    C->>H: ICMP Request<br/>[Src: 172.17.0.2] -> [Dst: 8.8.8.8]
+    Note over H: MASQUERADE (SNAT)<br/>Log to conntrack table
+    H->>I: ICMP Request<br/>[Src: 172.25.110.76] -> [Dst: 8.8.8.8]
+
+    Note over C,I: --- THE REPLY DIRECTION (RESPONSE) ---
+    
+    I-->>H: ICMP Reply<br/>[Src: 8.8.8.8] -> [Dst: 172.25.110.76]
+    Note over H: Check conntrack table<br/>Implicit Reverse SNAT
+    H-->>C: ICMP Reply<br/>[Src: 8.8.8.8] -> [Dst: 172.17.0.2]
+```
+
+
+# 2
