@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-03-21T00:00:00+07:00</updated><entry><title>Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network</title><link href="https://blackmetalz.github.io/demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html" rel="alternate"/><published>2026-03-21T00:00:00+07:00</published><updated>2026-03-21T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-21:/demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html</id><summary type="html"/><content type="html">&lt;p&gt;In the previous two posts, we performed a deep dive into Docker's &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Ingress Flow&lt;/a&gt; and &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Egress Flow&lt;/a&gt; by manually tinkering with &lt;code&gt;veth&lt;/code&gt;, &lt;code&gt;iptables&lt;/code&gt;, and &lt;code&gt;nsenter&lt;/code&gt;.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-03-21T00:00:00+07:00</updated><entry><title>[Container Networking Series - Part 3] Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network</title><link href="https://blackmetalz.github.io/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html" rel="alternate"/><published>2026-03-21T00:00:00+07:00</published><updated>2026-03-21T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-21:/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Demystifying Docker Networking: A Deep Dive into Bridge &amp;amp; veth&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Demystifying Docker Networking Egress: The Masquerade Magic&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network&lt;/strong&gt; &lt;em&gt;(You are here)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;How Cilium CNI works in K8S &lt;em&gt;(In coming)&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In the previous two posts, we performed a deep dive into Docker's &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Ingress Flow&lt;/a&gt; and &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Egress Flow&lt;/a&gt; by manually tinkering with &lt;code&gt;veth&lt;/code&gt;, &lt;code&gt;iptables&lt;/code&gt;, and &lt;code&gt;nsenter&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;But in Kubernetes (K8s), thousands of Pods are created and destroyed continuously. Kubelet can't afford the manual labor of typing those commands for every single Pod. It needs an "assistant" to do the heavy lifting. That assistant is the &lt;strong&gt;CNI (Container Network Interface)&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;Today, we will "strip down" CNI by running it manually (by hand), without using any sophisticated CNI suites like Calico or Cilium.&lt;/p&gt;
 &lt;hr&gt;
@@ -184,8 +191,9 @@ total&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;18804&lt;/span&gt
 &lt;span class="s"&gt;EOF&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Wait, where the fuck &lt;code&gt;cniVersion&lt;/code&gt; comes from? can I put 9.9.9?
-Same energy as the question: But here you go: &lt;a href="https://github.com/containernetworking/cni/blob/main/SPEC.md#version"&gt;https://github.com/containernetworking/cni/blob/main/SPEC.md#version&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Wait, where the fuck &lt;code&gt;cniVersion&lt;/code&gt; comes from? can I put 9.9.9?&lt;/p&gt;
+&lt;p&gt;Same energy as the question: But here you go: &lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/containernetworking/cni/blob/main/SPEC.md#version"&gt;https://github.com/containernetworking/cni/blob/main/SPEC.md#version&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Result:&lt;/strong&gt; The &lt;code&gt;ptp&lt;/code&gt; binary returns JSON confirming a successful IP assignment:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;{&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;cniVersion&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;0.4.0&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
@@ -250,7 +258,8 @@ cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;lt;&amp;lt;EOF
 &lt;span class="s"&gt;}&lt;/span&gt;
 &lt;span class="s"&gt;EOF&lt;/span&gt;
 
-ip&lt;span class="w"&gt; &lt;/span&gt;netns&lt;span class="w"&gt; &lt;/span&gt;del&lt;span class="w"&gt; &lt;/span&gt;demo-cni-ns
+&lt;span class="c1"&gt;# Manually delete!&lt;/span&gt;
+root@kind-control-plane:/#&lt;span class="w"&gt; &lt;/span&gt;ip&lt;span class="w"&gt; &lt;/span&gt;netns&lt;span class="w"&gt; &lt;/span&gt;del&lt;span class="w"&gt; &lt;/span&gt;demo-cni-ns
 
 &lt;span class="c1"&gt;# Validate after delete!&lt;/span&gt;
 root@kind-control-plane:/#&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;/var/lib/cni/networks/demo/
@@ -370,7 +379,14 @@ nsenter&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://www.cni.dev/docs/spec/#cni-operations"&gt;CNI Operations Spec&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://kind.sigs.k8s.io/docs/user/quick-start/"&gt;Kind Quick Start Guide&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="networking"/><category term="container"/><category term="k8s"/></entry><entry><title>Demystifying Docker Networking: Outbound Traffic &amp; The Masquerade Magic</title><link href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html" rel="alternate"/><published>2026-03-16T00:00:00+07:00</published><updated>2026-03-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-16:/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html</id><summary type="html"/><content type="html">&lt;p&gt;In the &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;previous post&lt;/a&gt;, we explored how external requests find their way into a container via DNAT. But there is a flip side to that coin: When a container needs to download a package or call an external API, how does it "break out" to the internet when it only has a private, internal IP?&lt;/p&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="networking"/><category term="container"/><category term="k8s"/></entry><entry><title>[Container Networking Series - Part 2] Demystifying Docker Networking: Outbound Traffic &amp; The Masquerade Magic</title><link href="https://blackmetalz.github.io/container-networking-series-part-2-demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html" rel="alternate"/><published>2026-03-16T00:00:00+07:00</published><updated>2026-03-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-16:/container-networking-series-part-2-demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Demystifying Docker Networking: A Deep Dive into Bridge &amp;amp; veth&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Demystifying Docker Networking Egress: The Masquerade Magic&lt;/strong&gt; &lt;em&gt;(You are here)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html"&gt;Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;How Cilium CNI works in K8S &lt;em&gt;(In coming)&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In the &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;previous post&lt;/a&gt;, we explored how external requests find their way into a container via DNAT. But there is a flip side to that coin: When a container needs to download a package or call an external API, how does it "break out" to the internet when it only has a private, internal IP?&lt;/p&gt;
 &lt;p&gt;Today, we are diving deep into the fucking &lt;code&gt;Egress Flow&lt;/code&gt;.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;1. Finding the "Gateway"&lt;/h2&gt;
@@ -597,7 +613,14 @@ So for System/DB Admin: &lt;/p&gt;
 &lt;/ul&gt;
 &lt;hr&gt;
 &lt;h2&gt;Conclusion&lt;/h2&gt;
-&lt;p&gt;ACID is a set of properties that ensure transactions in a database are processed reliably. It is a fundamental concept in database management systems, and it is essential for ensuring data integrity and consistency.&lt;/p&gt;</content><category term="Knowledge Base"/><category term="mysql"/><category term="database"/></entry><entry><title>Demystifying Docker Networking: A Deep Dive into Bridge &amp; veth</title><link href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html" rel="alternate"/><published>2026-03-15T00:00:00+07:00</published><updated>2026-03-15T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-15:/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html</id><summary type="html"/><content type="html">&lt;p&gt;I guess I'm not the only one who gets confused with Docker networking. Let's try to understand it better!&lt;/p&gt;
+&lt;p&gt;ACID is a set of properties that ensure transactions in a database are processed reliably. It is a fundamental concept in database management systems, and it is essential for ensuring data integrity and consistency.&lt;/p&gt;</content><category term="Knowledge Base"/><category term="mysql"/><category term="database"/></entry><entry><title>[Container Networking Series - Part 1] Demystifying Docker Networking: A Deep Dive into Bridge &amp; veth</title><link href="https://blackmetalz.github.io/container-networking-series-part-1-demystifying-docker-networking-a-deep-dive-into-bridge-veth.html" rel="alternate"/><published>2026-03-15T00:00:00+07:00</published><updated>2026-03-15T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-15:/container-networking-series-part-1-demystifying-docker-networking-a-deep-dive-into-bridge-veth.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Demystifying Docker Networking: A Deep Dive into Bridge &amp;amp; veth&lt;/strong&gt; &lt;em&gt;(You are here)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Demystifying Docker Networking Egress: The Masquerade Magic&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html"&gt;Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;How Cilium CNI works in K8S &lt;em&gt;(In coming)&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I guess I'm not the only one who gets confused with Docker networking. Let's try to understand it better!&lt;/p&gt;
 &lt;h2&gt;Prerequisites&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Ubuntu 24.04&lt;/li&gt;
