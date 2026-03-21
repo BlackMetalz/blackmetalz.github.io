@@ -107,10 +107,12 @@ sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </
 <h3>What exactly is CNI?</h3>
 <p>It's not a background service. CNI is actually just a <strong>Specification</strong> that defines how Kubelet calls <strong>binaries</strong> located in <code>/opt/cni/bin/</code>. Kubelet feeds it JSON, the Binary executes the task and returns the result.</p>
 <h3>IPAM (IP Address Management)</h3>
-<p>If the CNI Plugin (like <code>bridge</code>) handles "plugging the wires," then <strong>IPAM</strong> handles the "ledgering."</p>
+<p>If the main CNI Plugin (like <code>bridge</code> or <code>ptp</code>) handles "plugging the wires," then <strong>IPAM</strong> handles the "ledgering" and decides <em>which</em> IP to use.</p>
 <ul>
 <li>It manages IP ranges (Subnets), tracking which IPs are assigned and which are free.</li>
-<li>In this lab, we use <code>host-local</code>. It stores a simple IP database directly on the Node's disk (in <code>/var/lib/cni/networks/</code>).</li>
+<li><strong>The Delegation:</strong> The main CNI binary (like <code>ptp</code>) doesn't choose the IP itself. It reads the <code>"ipam"</code> section in the JSON config, sees <code>"type": "host-local"</code>, and implicitly executes the <code>host-local</code> binary (also located in <code>/opt/cni/bin/</code>).</li>
+<li>The IPAM plugin returns an available IP back to the main plugin, and the main plugin then applies that IP to the container's network interface.</li>
+<li>In this lab, <code>host-local</code> stores its IP database simply as text files on the Node's disk (in <code>/var/lib/cni/networks/</code>).</li>
 </ul>
 <h3>crictl - When Docker is no longer "The Boss"</h3>
 <p>Modern K8s uses the <strong>CRI (Container Runtime Interface)</strong> — usually <code>containerd</code>. <code>crictl</code> is the tool to interact with the CRI. We use it here because Kind runs K8s nodes using containerd inside Docker.</p>
@@ -245,6 +247,7 @@ total<span class="w"> </span><span class="m">18804</span>
 </tr>
 </tbody>
 </table>
+<p>We gonna use <code>ptp</code> for this demo, why? <code>ptp</code> easier than <code>bridge</code> because it doesn't need to create <code>bridge</code> device, suitable for demo.</p>
 <p>Feed the JSON config into the <code>ptp</code> binary's stdin:</p>
 <div class="highlight"><pre><span></span><code>cat<span class="w"> </span><span class="s">&lt;&lt;EOF | /opt/cni/bin/ptp</span>
 <span class="s">{</span>
@@ -305,7 +308,7 @@ root@kind-control-plane:/#<span class="w"> </span>ls<span class="w"> </span>/var
 <p>Clean up the demo namespace, so we will have to do this everytime when we create new namespace, that is why we are heading to step 4 for automation. But please clear old namespace first:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Call DEL to release the assigned IP (returning it to IPAM)</span>
 <span class="c1"># The assigned IP WAS 10.249.0.2</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">CNI_COMMAND</span><span class="o">=</span>DEL
+<span class="nb">export</span><span class="w"> </span><span class="nv">CNI_COMMAND</span><span class="o">=</span>DEL<span class="w"> </span><span class="c1"># We need to set DEL to release the IP</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">CNI_CONTAINERID</span><span class="o">=</span>demo-container-001<span class="w">    </span><span class="c1"># must be same as ADD</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">CNI_NETNS</span><span class="o">=</span>/var/run/netns/demo-cni-ns
 <span class="nb">export</span><span class="w"> </span><span class="nv">CNI_IFNAME</span><span class="o">=</span>eth0<span class="w">                   </span><span class="c1"># interface name in netns</span>
@@ -360,9 +363,33 @@ nginx-test<span class="w">   </span><span class="m">0</span>/1<span class="w">  
 root@kienlt-lab-utilities:~#<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods
 NAME<span class="w">         </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE
 nginx-test<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>2m28s
+root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>-o<span class="w"> </span>wide
+NAME<span class="w">         </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE<span class="w">   </span>IP<span class="w">           </span>NODE<span class="w">                 </span>NOMINATED<span class="w"> </span>NODE<span class="w">   </span>READINESS<span class="w"> </span>GATES
+nginx-test<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>87m<span class="w">   </span><span class="m">10</span>.249.0.4<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
 </code></pre></div>
 
-<p><strong>The Pod lives!</strong> Kubelet detects the new config file → retries the Pod Sandbox creation → this time containerd calls <code>/opt/cni/bin/ptp</code> (exactly as we did in Step 3) → Network setup succeeds → Pod transitions to <code>Running</code>.</p>
+<p>Check how many IP it assigned inside control plane</p>
+<div class="highlight"><pre><span></span><code>root@kind-control-plane:/#<span class="w"> </span>ls<span class="w"> </span>/var/lib/cni/networks/dummy/
+<span class="m">10</span>.249.0.2<span class="w">  </span><span class="m">10</span>.249.0.3<span class="w">  </span><span class="m">10</span>.249.0.4<span class="w">  </span><span class="m">10</span>.249.0.5<span class="w">  </span>last_reserved_ip.0<span class="w">  </span>lock
+</code></pre></div>
+
+<p>Ok, we see IP <code>10.249.0.4</code>. How about other IPs? Easy AF, get all pod and grep! (forget about <code>local-path-provisioner</code> xD)</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>-owide<span class="w"> </span>-A<span class="p">|</span>grep<span class="w"> </span><span class="m">10</span>.249
+default<span class="w">              </span>nginx-test<span class="w">                                   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">               </span>91m<span class="w">   </span><span class="m">10</span>.249.0.4<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+kube-system<span class="w">          </span>coredns-7d764666f9-hdwlt<span class="w">                     </span><span class="m">0</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">               </span>91m<span class="w">   </span><span class="m">10</span>.249.0.2<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+kube-system<span class="w">          </span>coredns-7d764666f9-p94hv<span class="w">                     </span><span class="m">0</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">               </span>91m<span class="w">   </span><span class="m">10</span>.249.0.5<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+local-path-storage<span class="w">   </span>local-path-provisioner-67b8995b4b-qxhwt<span class="w">      </span><span class="m">0</span>/1<span class="w">     </span>Error<span class="w">     </span><span class="m">6</span><span class="w"> </span><span class="o">(</span>3m45s<span class="w"> </span>ago<span class="o">)</span><span class="w">   </span>91m<span class="w">   </span><span class="m">10</span>.249.0.3<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+</code></pre></div>
+
+<p>So, we know where the IP assigned from!</p>
+<p><strong>The Pod lives! Here is what just happened:</strong></p>
+<ol>
+<li>Kubelet detects the new config file and initializes its network state.</li>
+<li>Kubelet updates the Node's status to <strong><code>Ready</code></strong> (removing the <code>NotReady</code> taint).</li>
+<li>The Kubernetes <strong>Scheduler</strong> sees a <code>Ready</code> Node and finally schedules our pending <code>nginx-test</code> Pod to <code>kind-control-plane</code>.</li>
+<li>Kubelet receives the assigned Pod and tells containerd to create the Pod Sandbox.</li>
+<li>containerd calls /opt/cni/bin/ptp (exactly as we did in Step 3) → Network setup succeeds → Pod transitions to <code>Running</code>.</li>
+</ol>
 <p>Verify using <code>crictl</code> + <code>nsenter</code>:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>kind-control-plane<span class="w"> </span>bash
 
@@ -377,7 +404,7 @@ nsenter<span class="w"> </span>-t<span class="w"> </span><span class="nv">$PID</
 <div class="highlight"><pre><span></span><code>PID:<span class="w"> </span><span class="m">1516</span>
 <span class="m">2</span>:<span class="w"> </span>eth0@if4:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>group<span class="w"> </span>default<span class="w"> </span>qlen<span class="w"> </span><span class="m">1000</span>
 <span class="w">    </span>link/ether<span class="w"> </span>0a:68:56:c0:9c:a3<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff<span class="w"> </span>link-netnsid<span class="w"> </span><span class="m">0</span>
-<span class="w">    </span>inet<span class="w"> </span><span class="m">10</span>.244.0.2/24<span class="w"> </span>brd<span class="w"> </span><span class="m">10</span>.244.0.255<span class="w"> </span>scope<span class="w"> </span>global<span class="w"> </span>eth0
+<span class="w">    </span>inet<span class="w"> </span><span class="m">10</span>.249.0.4/24<span class="w"> </span>brd<span class="w"> </span><span class="m">10</span>.249.0.255<span class="w"> </span>scope<span class="w"> </span>global<span class="w"> </span>eth0
 <span class="w">       </span>valid_lft<span class="w"> </span>forever<span class="w"> </span>preferred_lft<span class="w"> </span>forever
 <span class="w">    </span>inet6<span class="w"> </span>fe80::868:56ff:fec0:9ca3/64<span class="w"> </span>scope<span class="w"> </span>link
 <span class="w">       </span>valid_lft<span class="w"> </span>forever<span class="w"> </span>preferred_lft<span class="w"> </span>forever
