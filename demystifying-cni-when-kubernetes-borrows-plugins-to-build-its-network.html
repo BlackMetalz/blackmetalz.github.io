@@ -119,6 +119,14 @@ sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </
 <hr>
 <h2>3. Lab: Running CNI by Hand (Manual Execution)</h2>
 <h3>Step 1: Spin up a "Naked" Cluster</h3>
+<p>Delete the old cluster (if any), since I have only 1 kind cluster for testing purpose. </p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>kind<span class="w"> </span>get<span class="w"> </span>clusters
+kind
+root@kienlt-lab-utilities:~#<span class="w"> </span>kind<span class="w"> </span>delete<span class="w"> </span>cluster<span class="w"> </span>--name<span class="w"> </span>kind
+Deleting<span class="w"> </span>cluster<span class="w"> </span><span class="s2">&quot;kind&quot;</span><span class="w"> </span>...
+Deleted<span class="w"> </span>nodes:<span class="w"> </span><span class="o">[</span><span class="s2">&quot;kind-control-plane&quot;</span><span class="o">]</span>
+</code></pre></div>
+
 <p>Create a <code>kind-config.yaml</code> file to block the default network:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cluster</span>
 <span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kind.x-k8s.io/v1alpha4</span>
@@ -127,14 +135,6 @@ sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </
 </code></pre></div>
 
 <div class="highlight"><pre><span></span><code>kind<span class="w"> </span>create<span class="w"> </span>cluster<span class="w"> </span>--config<span class="w"> </span>kind-config.yaml
-</code></pre></div>
-
-<p>Delete the old cluster (if any), since I have only 1 kind cluster for testing purpose. </p>
-<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>kind<span class="w"> </span>get<span class="w"> </span>clusters
-kind
-root@kienlt-lab-utilities:~#<span class="w"> </span>kind<span class="w"> </span>delete<span class="w"> </span>cluster<span class="w"> </span>--name<span class="w"> </span>kind
-Deleting<span class="w"> </span>cluster<span class="w"> </span><span class="s2">&quot;kind&quot;</span><span class="w"> </span>...
-Deleted<span class="w"> </span>nodes:<span class="w"> </span><span class="o">[</span><span class="s2">&quot;kind-control-plane&quot;</span><span class="o">]</span>
 </code></pre></div>
 
 <p>Output:</p>
