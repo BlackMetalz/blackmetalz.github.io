@@ -1,0 +1,56 @@
+# 1 
+
+```
+sequenceDiagram
+    participant User as User (Bash)
+    participant NetNS as Network Namespace<br/>(demo-cni-ns)
+    participant main as Main CNI Plugin<br/>(/opt/cni/bin/ptp)
+    participant ipam as IPAM Plugin<br/>(/opt/cni/bin/host-local)
+    participant Disk as Disk DB<br/>(/var/lib/cni/networks/)
+
+    User->>NetNS: 1. ip netns add demo-cni-ns
+    Note over User, main: 2. Export Env Vars (CNI_COMMAND=ADD, CNI_NETNS...)
+    
+    User->>main: 3. Pipe JSON config via stdin
+    Note right of main: 4. Reads JSON ("type": "ptp",<br/>"ipam.type": "host-local")
+    
+    rect rgb(40, 44, 52)
+        main->>ipam: 5. Implicitly call host-local plugin
+        ipam->>Disk: 6. Find & lock an available IP
+        Disk-->>ipam: 7. Return IP (e.g., 10.249.0.2)
+        ipam-->>main: 8. Return IP mapping back to ptp
+    end
+
+    main->>NetNS: 9. Create interface (eth0) in namespace
+    main->>NetNS: 10. Assign IP (10.249.0.2) to eth0
+    main-->>User: 11. Print the result JSON to stdout
+```
+
+# 2
+```
+sequenceDiagram
+    participant User
+    participant Kubelet
+    participant API as API Server / Scheduler
+    participant CRI as containerd (CRI)
+    participant CNI as CNI Plugins
+
+    User->>Kubelet: 1. Write config to /etc/cni/net.d/
+    Kubelet->>Kubelet: 2. Detect CNI config, init network state
+    Kubelet->>API: 3. Update Node status to Ready (Remove taint)
+    
+    API->>Kubelet: 4. Assign pending pod "nginx-test" to this node
+    
+    Kubelet->>CRI: 5. Request to create Pod Sandbox
+    CRI->>CNI: 6. Execute CNI binaries (ptp -> host-local)
+    
+    rect rgb(40, 44, 52)
+        Note right of CNI: 7. Network setup (Same flow as Step 3)
+    end
+    
+    CNI-->>CRI: 8. Return assigned IP
+    
+    CRI-->>Kubelet: 9. Sandbox creation completed successfully
+    Kubelet->>API: 10. Update Pod status to Running
+
+```
