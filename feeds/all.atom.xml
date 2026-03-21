@@ -48,7 +48,7 @@ sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;u
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kind&lt;span class="w"&gt; &lt;/span&gt;create&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;--config&lt;span class="w"&gt; &lt;/span&gt;kind-config.yaml
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Delete the old cluster (if any):&lt;/p&gt;
+&lt;p&gt;Delete the old cluster (if any), since I have only 1 kind cluster for testing purpose. &lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kind&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;clusters
 kind
 root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kind&lt;span class="w"&gt; &lt;/span&gt;delete&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;kind
@@ -100,6 +100,11 @@ Events:
 &lt;span class="w"&gt;  &lt;/span&gt;----&lt;span class="w"&gt;     &lt;/span&gt;------&lt;span class="w"&gt;            &lt;/span&gt;----&lt;span class="w"&gt;  &lt;/span&gt;----&lt;span class="w"&gt;               &lt;/span&gt;-------
 &lt;span class="w"&gt;  &lt;/span&gt;Warning&lt;span class="w"&gt;  &lt;/span&gt;FailedScheduling&lt;span class="w"&gt;  &lt;/span&gt;10s&lt;span class="w"&gt;   &lt;/span&gt;default-scheduler&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/1&lt;span class="w"&gt; &lt;/span&gt;nodes&lt;span class="w"&gt; &lt;/span&gt;are&lt;span class="w"&gt; &lt;/span&gt;available:&lt;span class="w"&gt; &lt;/span&gt;
 &lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;node&lt;span class="o"&gt;(&lt;/span&gt;s&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;had&lt;span class="w"&gt; &lt;/span&gt;condition&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;Ready&lt;span class="w"&gt; &lt;/span&gt;False&lt;span class="o"&gt;}&lt;/span&gt;.&lt;span class="w"&gt; &lt;/span&gt;preemption:&lt;span class="w"&gt; &lt;/span&gt;...
+
+&lt;span class="c1"&gt;# Check node status&lt;/span&gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;k&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;nodes
+NAME&lt;span class="w"&gt;                 &lt;/span&gt;STATUS&lt;span class="w"&gt;     &lt;/span&gt;ROLES&lt;span class="w"&gt;           &lt;/span&gt;AGE&lt;span class="w"&gt;   &lt;/span&gt;VERSION
+kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;NotReady&lt;span class="w"&gt;   &lt;/span&gt;control-plane&lt;span class="w"&gt;   &lt;/span&gt;13s&lt;span class="w"&gt;   &lt;/span&gt;v1.35.0
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;Why?&lt;/strong&gt; No CNI config → Kubelet marks the Node as &lt;code&gt;NotReady&lt;/code&gt; (as seen in Step 1) → The Node is tainted with &lt;code&gt;node.kubernetes.io/not-ready:NoSchedule&lt;/code&gt; → The Scheduler cannot place the Pod on any Node → The Pod stays in &lt;code&gt;Pending&lt;/code&gt; indefinitely.&lt;/p&gt;
@@ -130,14 +135,37 @@ total&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;18804&lt;/span&gt
 &lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CNI_PATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/opt/cni/bin
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Variable Breakdown:
-| Variable | Meaning |
-|------|---------|
-| &lt;code&gt;CNI_COMMAND=ADD&lt;/code&gt; | Tells the plugin: "&lt;strong&gt;Add&lt;/strong&gt; a network interface to this namespace" |
-| &lt;code&gt;CNI_CONTAINERID&lt;/code&gt; | Arbitrary ID to identify the container (used for IPAM tracking) |
-| &lt;code&gt;CNI_NETNS&lt;/code&gt; | Path to the network namespace to be configured |
-| &lt;code&gt;CNI_IFNAME&lt;/code&gt; | Name of the interface to be created inside the namespace |
-| &lt;code&gt;CNI_PATH&lt;/code&gt; | Directory containing CNI binaries (used to find auxiliary plugins like IPAM) |&lt;/p&gt;
+&lt;p&gt;Variable Breakdown:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Variable&lt;/th&gt;
+&lt;th&gt;Meaning&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;CNI_COMMAND=ADD&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Tells the plugin: "&lt;strong&gt;Add&lt;/strong&gt; a network interface to this namespace"&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;CNI_CONTAINERID&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Arbitrary ID to identify the container (used for IPAM tracking)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;CNI_NETNS&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Path to the network namespace to be configured&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;CNI_IFNAME&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Name of the interface to be created inside the namespace&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;CNI_PATH&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Directory containing CNI binaries (used to find auxiliary plugins like IPAM)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 &lt;p&gt;Feed the JSON config into the &lt;code&gt;ptp&lt;/code&gt; binary's stdin:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;lt;&amp;lt;EOF | /opt/cni/bin/ptp&lt;/span&gt;
 &lt;span class="s"&gt;{&lt;/span&gt;
@@ -146,7 +174,7 @@ total&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;18804&lt;/span&gt
 &lt;span class="s"&gt;  &amp;quot;type&amp;quot;: &amp;quot;ptp&amp;quot;,&lt;/span&gt;
 &lt;span class="s"&gt;  &amp;quot;ipam&amp;quot;: {&lt;/span&gt;
 &lt;span class="s"&gt;    &amp;quot;type&amp;quot;: &amp;quot;host-local&amp;quot;,&lt;/span&gt;
-&lt;span class="s"&gt;    &amp;quot;subnet&amp;quot;: &amp;quot;10.244.0.0/24&amp;quot;&lt;/span&gt;
+&lt;span class="s"&gt;    &amp;quot;subnet&amp;quot;: &amp;quot;10.249.0.0/24&amp;quot;&lt;/span&gt;
 &lt;span class="s"&gt;  }&lt;/span&gt;
 &lt;span class="s"&gt;}&lt;/span&gt;
 &lt;span class="s"&gt;EOF&lt;/span&gt;
@@ -157,12 +185,12 @@ total&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;18804&lt;/span&gt
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;cniVersion&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;0.4.0&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;interfaces&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;veth6d427827&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;mac&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;f2:c0:f7:20:1f:90&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;vetha6b605d3&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;mac&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;8e:c0:6e:6a:da:c4&amp;quot;&lt;/span&gt;
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
 &lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;eth0&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;mac&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;66:cd:18:04:95:6a&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;mac&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;da:4d:d4:6f:fb:84&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
 &lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;sandbox&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/var/run/netns/demo-cni-ns&amp;quot;&lt;/span&gt;
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
@@ -170,8 +198,8 @@ total&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;18804&lt;/span&gt
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
 &lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;version&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;4&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
 &lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;interface&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;address&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;10.244.0.2/24&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;gateway&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;10.244.0.1&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;address&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;10.249.0.2/24&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;gateway&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;10.249.0.1&amp;quot;&lt;/span&gt;
 &lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;dns&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;
@@ -180,16 +208,30 @@ total&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;18804&lt;/span&gt
 
 &lt;p&gt;Verify — the namespace now has a real IP:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kind-control-plane:/#&lt;span class="w"&gt; &lt;/span&gt;ip&lt;span class="w"&gt; &lt;/span&gt;netns&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;demo-cni-ns&lt;span class="w"&gt; &lt;/span&gt;ip&lt;span class="w"&gt; &lt;/span&gt;addr&lt;span class="w"&gt; &lt;/span&gt;show&lt;span class="w"&gt; &lt;/span&gt;eth0
-&lt;span class="m"&gt;2&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;eth0@if5:&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;BROADCAST,MULTICAST,UP,LOWER_UP&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;mtu&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1500&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;qdisc&lt;span class="w"&gt; &lt;/span&gt;noqueue&lt;span class="w"&gt; &lt;/span&gt;state&lt;span class="w"&gt; &lt;/span&gt;UP&lt;span class="w"&gt; &lt;/span&gt;group&lt;span class="w"&gt; &lt;/span&gt;default
-&lt;span class="w"&gt;    &lt;/span&gt;link/ether&lt;span class="w"&gt; &lt;/span&gt;aa:bb:cc:dd:ee:ff&lt;span class="w"&gt; &lt;/span&gt;brd&lt;span class="w"&gt; &lt;/span&gt;ff:ff:ff:ff:ff:ff&lt;span class="w"&gt; &lt;/span&gt;link-netnsid&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;inet&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.0.2/24&lt;span class="w"&gt; &lt;/span&gt;brd&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.0.255&lt;span class="w"&gt; &lt;/span&gt;scope&lt;span class="w"&gt; &lt;/span&gt;global&lt;span class="w"&gt; &lt;/span&gt;eth0
+&lt;span class="c1"&gt;# Output&lt;/span&gt;
+&lt;span class="m"&gt;2&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;eth0@if3:&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;BROADCAST,MULTICAST,UP,LOWER_UP&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;mtu&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1500&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;qdisc&lt;span class="w"&gt; &lt;/span&gt;noqueue&lt;span class="w"&gt; &lt;/span&gt;state&lt;span class="w"&gt; &lt;/span&gt;UP&lt;span class="w"&gt; &lt;/span&gt;group&lt;span class="w"&gt; &lt;/span&gt;default&lt;span class="w"&gt; &lt;/span&gt;qlen&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1000&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;link/ether&lt;span class="w"&gt; &lt;/span&gt;da:4d:d4:6f:fb:84&lt;span class="w"&gt; &lt;/span&gt;brd&lt;span class="w"&gt; &lt;/span&gt;ff:ff:ff:ff:ff:ff&lt;span class="w"&gt; &lt;/span&gt;link-netnsid&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;inet&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.2/24&lt;span class="w"&gt; &lt;/span&gt;brd&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.255&lt;span class="w"&gt; &lt;/span&gt;scope&lt;span class="w"&gt; &lt;/span&gt;global&lt;span class="w"&gt; &lt;/span&gt;eth0
 &lt;span class="w"&gt;       &lt;/span&gt;valid_lft&lt;span class="w"&gt; &lt;/span&gt;forever&lt;span class="w"&gt; &lt;/span&gt;preferred_lft&lt;span class="w"&gt; &lt;/span&gt;forever
+&lt;span class="w"&gt;    &lt;/span&gt;inet6&lt;span class="w"&gt; &lt;/span&gt;fe80::d84d:d4ff:fe6f:fb84/64&lt;span class="w"&gt; &lt;/span&gt;scope&lt;span class="w"&gt; &lt;/span&gt;link
+&lt;span class="w"&gt;       &lt;/span&gt;valid_lft&lt;span class="w"&gt; &lt;/span&gt;forever&lt;span class="w"&gt; &lt;/span&gt;preferred_lft&lt;span class="w"&gt; &lt;/span&gt;forever
+root@kind-control-plane:/#&lt;span class="w"&gt; &lt;/span&gt;ip&lt;span class="w"&gt; &lt;/span&gt;netns
+demo-cni-ns
+&lt;span class="c1"&gt;# Check what ip that have been assigned&lt;/span&gt;
+root@kind-control-plane:/#&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;/var/lib/cni/networks/demo/
+&lt;span class="m"&gt;10&lt;/span&gt;.249.0.2&lt;span class="w"&gt;  &lt;/span&gt;last_reserved_ip.0&lt;span class="w"&gt;  &lt;/span&gt;lock
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;strong&gt;Boom!&lt;/strong&gt; With just a binary call + env vars + JSON stdin, we created a functional network interface with an IP for a namespace. This is &lt;strong&gt;exactly&lt;/strong&gt; what Kubelet does behind the scenes whenever it creates a Pod.&lt;/p&gt;
-&lt;p&gt;Clean up the demo namespace:&lt;/p&gt;
+&lt;p&gt;Clean up the demo namespace, so we will have to do this everytime when we create new namespace, that is why we are heading to step 4 for automation. But please clear old namespace first:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Call DEL to release the assigned IP (returning it to IPAM)&lt;/span&gt;
+&lt;span class="c1"&gt;# The assigned IP WAS 10.249.0.2&lt;/span&gt;
 &lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CNI_COMMAND&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;DEL
+&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CNI_CONTAINERID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;demo-container-001&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="c1"&gt;# must be same as ADD&lt;/span&gt;
+&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CNI_NETNS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/run/netns/demo-cni-ns
+&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CNI_IFNAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;eth0&lt;span class="w"&gt;                   &lt;/span&gt;&lt;span class="c1"&gt;# interface name in netns&lt;/span&gt;
+&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CNI_PATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/opt/cni/bin
+
 cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;lt;&amp;lt;EOF | /opt/cni/bin/ptp&lt;/span&gt;
 &lt;span class="s"&gt;{&lt;/span&gt;
 &lt;span class="s"&gt;  &amp;quot;cniVersion&amp;quot;: &amp;quot;0.4.0&amp;quot;,&lt;/span&gt;
@@ -197,15 +239,20 @@ cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;lt;&amp;lt;EOF
 &lt;span class="s"&gt;  &amp;quot;type&amp;quot;: &amp;quot;ptp&amp;quot;,&lt;/span&gt;
 &lt;span class="s"&gt;  &amp;quot;ipam&amp;quot;: {&lt;/span&gt;
 &lt;span class="s"&gt;    &amp;quot;type&amp;quot;: &amp;quot;host-local&amp;quot;,&lt;/span&gt;
-&lt;span class="s"&gt;    &amp;quot;subnet&amp;quot;: &amp;quot;10.244.0.0/24&amp;quot;&lt;/span&gt;
+&lt;span class="s"&gt;    &amp;quot;subnet&amp;quot;: &amp;quot;10.249.0.0/24&amp;quot;&lt;/span&gt;
 &lt;span class="s"&gt;  }&lt;/span&gt;
 &lt;span class="s"&gt;}&lt;/span&gt;
 &lt;span class="s"&gt;EOF&lt;/span&gt;
 
 ip&lt;span class="w"&gt; &lt;/span&gt;netns&lt;span class="w"&gt; &lt;/span&gt;del&lt;span class="w"&gt; &lt;/span&gt;demo-cni-ns
+
+&lt;span class="c1"&gt;# Validate after delete!&lt;/span&gt;
+root@kind-control-plane:/#&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;/var/lib/cni/networks/demo/
+last_reserved_ip.0&lt;span class="w"&gt;  &lt;/span&gt;lock
+root@kind-control-plane:/#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/var/lib/cni/networks/demo/last_reserved_ip.0
+&lt;span class="m"&gt;10&lt;/span&gt;.249.0.2
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;x&lt;/p&gt;
 &lt;h3&gt;Step 4: "Rescuing" the Pod — Letting Kubelet Call CNI&lt;/h3&gt;
 &lt;p&gt;Now, let's create a CNI config file so Kubelet knows which plugin to use:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Still inside the Kind node&lt;/span&gt;
@@ -218,7 +265,7 @@ cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;lt;&amp;lt;EOF
 &lt;span class="s"&gt;  &amp;quot;type&amp;quot;: &amp;quot;ptp&amp;quot;,&lt;/span&gt;
 &lt;span class="s"&gt;  &amp;quot;ipam&amp;quot;: {&lt;/span&gt;
 &lt;span class="s"&gt;    &amp;quot;type&amp;quot;: &amp;quot;host-local&amp;quot;,&lt;/span&gt;
-&lt;span class="s"&gt;    &amp;quot;subnet&amp;quot;: &amp;quot;10.244.0.0/24&amp;quot;&lt;/span&gt;
+&lt;span class="s"&gt;    &amp;quot;subnet&amp;quot;: &amp;quot;10.249.0.0/24&amp;quot;&lt;/span&gt;
 &lt;span class="s"&gt;  }&lt;/span&gt;
 &lt;span class="s"&gt;}&lt;/span&gt;
 &lt;span class="s"&gt;EOF&lt;/span&gt;

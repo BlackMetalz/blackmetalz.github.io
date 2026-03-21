@@ -127,7 +127,7 @@ sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </
 <div class="highlight"><pre><span></span><code>kind<span class="w"> </span>create<span class="w"> </span>cluster<span class="w"> </span>--config<span class="w"> </span>kind-config.yaml
 </code></pre></div>
 
-<p>Delete the old cluster (if any):</p>
+<p>Delete the old cluster (if any), since I have only 1 kind cluster for testing purpose. </p>
 <div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>kind<span class="w"> </span>get<span class="w"> </span>clusters
 kind
 root@kienlt-lab-utilities:~#<span class="w"> </span>kind<span class="w"> </span>delete<span class="w"> </span>cluster<span class="w"> </span>--name<span class="w"> </span>kind
@@ -179,6 +179,11 @@ Events:
 <span class="w">  </span>----<span class="w">     </span>------<span class="w">            </span>----<span class="w">  </span>----<span class="w">               </span>-------
 <span class="w">  </span>Warning<span class="w">  </span>FailedScheduling<span class="w">  </span>10s<span class="w">   </span>default-scheduler<span class="w">  </span><span class="m">0</span>/1<span class="w"> </span>nodes<span class="w"> </span>are<span class="w"> </span>available:<span class="w"> </span>
 <span class="w">           </span><span class="m">1</span><span class="w"> </span>node<span class="o">(</span>s<span class="o">)</span><span class="w"> </span>had<span class="w"> </span>condition<span class="w"> </span><span class="o">{</span>Ready<span class="w"> </span>False<span class="o">}</span>.<span class="w"> </span>preemption:<span class="w"> </span>...
+
+<span class="c1"># Check node status</span>
+root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>get<span class="w"> </span>nodes
+NAME<span class="w">                 </span>STATUS<span class="w">     </span>ROLES<span class="w">           </span>AGE<span class="w">   </span>VERSION
+kind-control-plane<span class="w">   </span>NotReady<span class="w">   </span>control-plane<span class="w">   </span>13s<span class="w">   </span>v1.35.0
 </code></pre></div>
 
 <p><strong>Why?</strong> No CNI config → Kubelet marks the Node as <code>NotReady</code> (as seen in Step 1) → The Node is tainted with <code>node.kubernetes.io/not-ready:NoSchedule</code> → The Scheduler cannot place the Pod on any Node → The Pod stays in <code>Pending</code> indefinitely.</p>
@@ -209,14 +214,37 @@ total<span class="w"> </span><span class="m">18804</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">CNI_PATH</span><span class="o">=</span>/opt/cni/bin
 </code></pre></div>
 
-<p>Variable Breakdown:
-| Variable | Meaning |
-|------|---------|
-| <code>CNI_COMMAND=ADD</code> | Tells the plugin: "<strong>Add</strong> a network interface to this namespace" |
-| <code>CNI_CONTAINERID</code> | Arbitrary ID to identify the container (used for IPAM tracking) |
-| <code>CNI_NETNS</code> | Path to the network namespace to be configured |
-| <code>CNI_IFNAME</code> | Name of the interface to be created inside the namespace |
-| <code>CNI_PATH</code> | Directory containing CNI binaries (used to find auxiliary plugins like IPAM) |</p>
+<p>Variable Breakdown:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CNI_COMMAND=ADD</code></td>
+<td>Tells the plugin: "<strong>Add</strong> a network interface to this namespace"</td>
+</tr>
+<tr>
+<td><code>CNI_CONTAINERID</code></td>
+<td>Arbitrary ID to identify the container (used for IPAM tracking)</td>
+</tr>
+<tr>
+<td><code>CNI_NETNS</code></td>
+<td>Path to the network namespace to be configured</td>
+</tr>
+<tr>
+<td><code>CNI_IFNAME</code></td>
+<td>Name of the interface to be created inside the namespace</td>
+</tr>
+<tr>
+<td><code>CNI_PATH</code></td>
+<td>Directory containing CNI binaries (used to find auxiliary plugins like IPAM)</td>
+</tr>
+</tbody>
+</table>
 <p>Feed the JSON config into the <code>ptp</code> binary's stdin:</p>
 <div class="highlight"><pre><span></span><code>cat<span class="w"> </span><span class="s">&lt;&lt;EOF | /opt/cni/bin/ptp</span>
 <span class="s">{</span>
@@ -225,7 +253,7 @@ total<span class="w"> </span><span class="m">18804</span>
 <span class="s">  &quot;type&quot;: &quot;ptp&quot;,</span>
 <span class="s">  &quot;ipam&quot;: {</span>
 <span class="s">    &quot;type&quot;: &quot;host-local&quot;,</span>
-<span class="s">    &quot;subnet&quot;: &quot;10.244.0.0/24&quot;</span>
+<span class="s">    &quot;subnet&quot;: &quot;10.249.0.0/24&quot;</span>
 <span class="s">  }</span>
 <span class="s">}</span>
 <span class="s">EOF</span>
@@ -236,12 +264,12 @@ total<span class="w"> </span><span class="m">18804</span>
 <span class="w">    </span><span class="nt">&quot;cniVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.4.0&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;interfaces&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;veth6d427827&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;mac&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;f2:c0:f7:20:1f:90&quot;</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vetha6b605d3&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;mac&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;8e:c0:6e:6a:da:c4&quot;</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="p">{</span>
 <span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eth0&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;mac&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;66:cd:18:04:95:6a&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;mac&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;da:4d:d4:6f:fb:84&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="nt">&quot;sandbox&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/var/run/netns/demo-cni-ns&quot;</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">],</span>
@@ -249,8 +277,8 @@ total<span class="w"> </span><span class="m">18804</span>
 <span class="w">        </span><span class="p">{</span>
 <span class="w">            </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="nt">&quot;interface&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.244.0.2/24&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;gateway&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.244.0.1&quot;</span>
+<span class="w">            </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.249.0.2/24&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;gateway&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.249.0.1&quot;</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;dns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
@@ -259,16 +287,30 @@ total<span class="w"> </span><span class="m">18804</span>
 
 <p>Verify — the namespace now has a real IP:</p>
 <div class="highlight"><pre><span></span><code>root@kind-control-plane:/#<span class="w"> </span>ip<span class="w"> </span>netns<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>demo-cni-ns<span class="w"> </span>ip<span class="w"> </span>addr<span class="w"> </span>show<span class="w"> </span>eth0
-<span class="m">2</span>:<span class="w"> </span>eth0@if5:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>group<span class="w"> </span>default
-<span class="w">    </span>link/ether<span class="w"> </span>aa:bb:cc:dd:ee:ff<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff<span class="w"> </span>link-netnsid<span class="w"> </span><span class="m">0</span>
-<span class="w">    </span>inet<span class="w"> </span><span class="m">10</span>.244.0.2/24<span class="w"> </span>brd<span class="w"> </span><span class="m">10</span>.244.0.255<span class="w"> </span>scope<span class="w"> </span>global<span class="w"> </span>eth0
+<span class="c1"># Output</span>
+<span class="m">2</span>:<span class="w"> </span>eth0@if3:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>group<span class="w"> </span>default<span class="w"> </span>qlen<span class="w"> </span><span class="m">1000</span>
+<span class="w">    </span>link/ether<span class="w"> </span>da:4d:d4:6f:fb:84<span class="w"> </span>brd<span class="w"> </span>ff:ff:ff:ff:ff:ff<span class="w"> </span>link-netnsid<span class="w"> </span><span class="m">0</span>
+<span class="w">    </span>inet<span class="w"> </span><span class="m">10</span>.249.0.2/24<span class="w"> </span>brd<span class="w"> </span><span class="m">10</span>.249.0.255<span class="w"> </span>scope<span class="w"> </span>global<span class="w"> </span>eth0
 <span class="w">       </span>valid_lft<span class="w"> </span>forever<span class="w"> </span>preferred_lft<span class="w"> </span>forever
+<span class="w">    </span>inet6<span class="w"> </span>fe80::d84d:d4ff:fe6f:fb84/64<span class="w"> </span>scope<span class="w"> </span>link
+<span class="w">       </span>valid_lft<span class="w"> </span>forever<span class="w"> </span>preferred_lft<span class="w"> </span>forever
+root@kind-control-plane:/#<span class="w"> </span>ip<span class="w"> </span>netns
+demo-cni-ns
+<span class="c1"># Check what ip that have been assigned</span>
+root@kind-control-plane:/#<span class="w"> </span>ls<span class="w"> </span>/var/lib/cni/networks/demo/
+<span class="m">10</span>.249.0.2<span class="w">  </span>last_reserved_ip.0<span class="w">  </span>lock
 </code></pre></div>
 
 <p><strong>Boom!</strong> With just a binary call + env vars + JSON stdin, we created a functional network interface with an IP for a namespace. This is <strong>exactly</strong> what Kubelet does behind the scenes whenever it creates a Pod.</p>
-<p>Clean up the demo namespace:</p>
+<p>Clean up the demo namespace, so we will have to do this everytime when we create new namespace, that is why we are heading to step 4 for automation. But please clear old namespace first:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Call DEL to release the assigned IP (returning it to IPAM)</span>
+<span class="c1"># The assigned IP WAS 10.249.0.2</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">CNI_COMMAND</span><span class="o">=</span>DEL
+<span class="nb">export</span><span class="w"> </span><span class="nv">CNI_CONTAINERID</span><span class="o">=</span>demo-container-001<span class="w">    </span><span class="c1"># must be same as ADD</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CNI_NETNS</span><span class="o">=</span>/var/run/netns/demo-cni-ns
+<span class="nb">export</span><span class="w"> </span><span class="nv">CNI_IFNAME</span><span class="o">=</span>eth0<span class="w">                   </span><span class="c1"># interface name in netns</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CNI_PATH</span><span class="o">=</span>/opt/cni/bin
+
 cat<span class="w"> </span><span class="s">&lt;&lt;EOF | /opt/cni/bin/ptp</span>
 <span class="s">{</span>
 <span class="s">  &quot;cniVersion&quot;: &quot;0.4.0&quot;,</span>
@@ -276,15 +318,20 @@ cat<span class="w"> </span><span class="s">&lt;&lt;EOF | /opt/cni/bin/ptp</span>
 <span class="s">  &quot;type&quot;: &quot;ptp&quot;,</span>
 <span class="s">  &quot;ipam&quot;: {</span>
 <span class="s">    &quot;type&quot;: &quot;host-local&quot;,</span>
-<span class="s">    &quot;subnet&quot;: &quot;10.244.0.0/24&quot;</span>
+<span class="s">    &quot;subnet&quot;: &quot;10.249.0.0/24&quot;</span>
 <span class="s">  }</span>
 <span class="s">}</span>
 <span class="s">EOF</span>
 
 ip<span class="w"> </span>netns<span class="w"> </span>del<span class="w"> </span>demo-cni-ns
+
+<span class="c1"># Validate after delete!</span>
+root@kind-control-plane:/#<span class="w"> </span>ls<span class="w"> </span>/var/lib/cni/networks/demo/
+last_reserved_ip.0<span class="w">  </span>lock
+root@kind-control-plane:/#<span class="w"> </span>cat<span class="w"> </span>/var/lib/cni/networks/demo/last_reserved_ip.0
+<span class="m">10</span>.249.0.2
 </code></pre></div>
 
-<p>x</p>
 <h3>Step 4: "Rescuing" the Pod — Letting Kubelet Call CNI</h3>
 <p>Now, let's create a CNI config file so Kubelet knows which plugin to use:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Still inside the Kind node</span>
@@ -297,7 +344,7 @@ cat<span class="w"> </span><span class="s">&lt;&lt;EOF &gt; /etc/cni/net.d/10-du
 <span class="s">  &quot;type&quot;: &quot;ptp&quot;,</span>
 <span class="s">  &quot;ipam&quot;: {</span>
 <span class="s">    &quot;type&quot;: &quot;host-local&quot;,</span>
-<span class="s">    &quot;subnet&quot;: &quot;10.244.0.0/24&quot;</span>
+<span class="s">    &quot;subnet&quot;: &quot;10.249.0.0/24&quot;</span>
 <span class="s">  }</span>
 <span class="s">}</span>
 <span class="s">EOF</span>
