@@ -184,6 +184,8 @@ total&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;18804&lt;/span&gt
 &lt;span class="s"&gt;EOF&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;Wait, where the fuck &lt;code&gt;cniVersion&lt;/code&gt; comes from? can I put 9.9.9?
+Same energy as the question: But here you go: &lt;a href="https://github.com/containernetworking/cni/blob/main/SPEC.md#version"&gt;https://github.com/containernetworking/cni/blob/main/SPEC.md#version&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Result:&lt;/strong&gt; The &lt;code&gt;ptp&lt;/code&gt; binary returns JSON confirming a successful IP assignment:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;{&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;cniVersion&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;0.4.0&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
