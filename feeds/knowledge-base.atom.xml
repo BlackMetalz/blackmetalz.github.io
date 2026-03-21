@@ -1,5 +1,298 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-03-16T00:00:00+07:00</updated><entry><title>Demystifying Docker Networking: Outbound Traffic &amp; The Masquerade Magic</title><link href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html" rel="alternate"/><published>2026-03-16T00:00:00+07:00</published><updated>2026-03-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-16:/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html</id><summary type="html"/><content type="html">&lt;p&gt;In the &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;previous post&lt;/a&gt;, we explored how external requests find their way into a container via DNAT. But there is a flip side to that coin: When a container needs to download a package or call an external API, how does it "break out" to the internet when it only has a private, internal IP?&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-03-21T00:00:00+07:00</updated><entry><title>Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network</title><link href="https://blackmetalz.github.io/demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html" rel="alternate"/><published>2026-03-21T00:00:00+07:00</published><updated>2026-03-21T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-21:/demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html</id><summary type="html"/><content type="html">&lt;p&gt;In the previous two posts, we performed a deep dive into Docker's &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Ingress Flow&lt;/a&gt; and &lt;a href="https://www.google.com/search?q=https://blackmetalz.github.io/demystifying_docker_networking_egress.html"&gt;Egress Flow&lt;/a&gt; by manually tinkering with &lt;code&gt;veth&lt;/code&gt;, &lt;code&gt;iptables&lt;/code&gt;, and &lt;code&gt;nsenter&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;But in Kubernetes (K8s), thousands of Pods are created and destroyed continuously. Kubelet can't afford the manual labor of typing those commands for every single Pod. It needs an "assistant" to do the heavy lifting. That assistant is the &lt;strong&gt;CNI (Container Network Interface)&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Today, we will "strip down" CNI by running it manually (by hand), without using any sophisticated CNI suites like Calico or Cilium.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;1. Prerequisites (Setup)&lt;/h2&gt;
+&lt;p&gt;To follow this lab on &lt;strong&gt;Ubuntu 24.04&lt;/strong&gt;, you will need:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Docker:&lt;/strong&gt; The foundational engine to run Kind.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kind v0.31.0 (Released Dec 18, 2025):&lt;/strong&gt; A tool to create K8s Nodes as Docker containers.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kubectl:&lt;/strong&gt; The CLI to control your cluster.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;jq:&lt;/strong&gt; A divine JSON processor for parsing PIDs.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;Detailed Installation:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Install Kind v0.31.0&lt;/span&gt;
+curl&lt;span class="w"&gt; &lt;/span&gt;-Lo&lt;span class="w"&gt; &lt;/span&gt;./kind&lt;span class="w"&gt; &lt;/span&gt;https://github.com/kubernetes-sigs/kind/releases/download/v0.31.0/kind-linux-amd64
+chmod&lt;span class="w"&gt; &lt;/span&gt;+x&lt;span class="w"&gt; &lt;/span&gt;./kind
+sudo&lt;span class="w"&gt; &lt;/span&gt;mv&lt;span class="w"&gt; &lt;/span&gt;./kind&lt;span class="w"&gt; &lt;/span&gt;/usr/local/bin/kind
+kind&lt;span class="w"&gt; &lt;/span&gt;version&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="c1"&gt;# Expected output: kind v0.31.0 go1.25.5 linux/amd64&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Install jq&lt;/span&gt;
+sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;update&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;-y
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;hr&gt;
+&lt;h2&gt;2. Decoding the "Core" Concepts&lt;/h2&gt;
+&lt;h3&gt;What exactly is CNI?&lt;/h3&gt;
+&lt;p&gt;It's not a background service. CNI is actually just a &lt;strong&gt;Specification&lt;/strong&gt; that defines how Kubelet calls &lt;strong&gt;binaries&lt;/strong&gt; located in &lt;code&gt;/opt/cni/bin/&lt;/code&gt;. Kubelet feeds it JSON, the Binary executes the task and returns the result.&lt;/p&gt;
+&lt;h3&gt;IPAM (IP Address Management)&lt;/h3&gt;
+&lt;p&gt;If the CNI Plugin (like &lt;code&gt;bridge&lt;/code&gt;) handles "plugging the wires," then &lt;strong&gt;IPAM&lt;/strong&gt; handles the "ledgering."&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It manages IP ranges (Subnets), tracking which IPs are assigned and which are free.&lt;/li&gt;
+&lt;li&gt;In this lab, we use &lt;code&gt;host-local&lt;/code&gt;. It stores a simple IP database directly on the Node's disk (in &lt;code&gt;/var/lib/cni/networks/&lt;/code&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;crictl - When Docker is no longer "The Boss"&lt;/h3&gt;
+&lt;p&gt;Modern K8s uses the &lt;strong&gt;CRI (Container Runtime Interface)&lt;/strong&gt; — usually &lt;code&gt;containerd&lt;/code&gt;. &lt;code&gt;crictl&lt;/code&gt; is the tool to interact with the CRI. We use it here because Kind runs K8s nodes using containerd inside Docker.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;3. Lab: Running CNI by Hand (Manual Execution)&lt;/h2&gt;
+&lt;h3&gt;Step 1: Spin up a "Naked" Cluster&lt;/h3&gt;
+&lt;p&gt;Create a &lt;code&gt;kind-config.yaml&lt;/code&gt; file to block the default network:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;Cluster&lt;/span&gt;
+&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;kind.x-k8s.io/v1alpha4&lt;/span&gt;
+&lt;span class="nt"&gt;networking&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;disableDefaultCNI&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;true&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kind&lt;span class="w"&gt; &lt;/span&gt;create&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;--config&lt;span class="w"&gt; &lt;/span&gt;kind-config.yaml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Delete the old cluster (if any):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kind&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;clusters
+kind
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kind&lt;span class="w"&gt; &lt;/span&gt;delete&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;kind
+Deleting&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;kind&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;...
+Deleted&lt;span class="w"&gt; &lt;/span&gt;nodes:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;kind-control-plane&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kind&lt;span class="w"&gt; &lt;/span&gt;create&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;--config&lt;span class="w"&gt; &lt;/span&gt;kind-config.yaml
+Creating&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;kind&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;...
+&lt;span class="w"&gt; &lt;/span&gt;✓&lt;span class="w"&gt; &lt;/span&gt;Ensuring&lt;span class="w"&gt; &lt;/span&gt;node&lt;span class="w"&gt; &lt;/span&gt;image&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;kindest/node:v1.35.0&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;🖼
+&lt;span class="w"&gt; &lt;/span&gt;✓&lt;span class="w"&gt; &lt;/span&gt;Preparing&lt;span class="w"&gt; &lt;/span&gt;nodes&lt;span class="w"&gt; &lt;/span&gt;📦
+&lt;span class="w"&gt; &lt;/span&gt;✓&lt;span class="w"&gt; &lt;/span&gt;Writing&lt;span class="w"&gt; &lt;/span&gt;configuration&lt;span class="w"&gt; &lt;/span&gt;📜
+&lt;span class="w"&gt; &lt;/span&gt;✓&lt;span class="w"&gt; &lt;/span&gt;Starting&lt;span class="w"&gt; &lt;/span&gt;control-plane&lt;span class="w"&gt; &lt;/span&gt;🕹️
+&lt;span class="w"&gt; &lt;/span&gt;✓&lt;span class="w"&gt; &lt;/span&gt;Installing&lt;span class="w"&gt; &lt;/span&gt;StorageClass&lt;span class="w"&gt; &lt;/span&gt;💾
+Set&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;context&lt;span class="w"&gt; &lt;/span&gt;to&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;kind-kind&amp;quot;&lt;/span&gt;
+You&lt;span class="w"&gt; &lt;/span&gt;can&lt;span class="w"&gt; &lt;/span&gt;now&lt;span class="w"&gt; &lt;/span&gt;use&lt;span class="w"&gt; &lt;/span&gt;your&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;with:
+
+kubectl&lt;span class="w"&gt; &lt;/span&gt;cluster-info&lt;span class="w"&gt; &lt;/span&gt;--context&lt;span class="w"&gt; &lt;/span&gt;kind-kind
+
+Have&lt;span class="w"&gt; &lt;/span&gt;a&lt;span class="w"&gt; &lt;/span&gt;nice&lt;span class="w"&gt; &lt;/span&gt;day!&lt;span class="w"&gt; &lt;/span&gt;👋
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;nodes
+NAME&lt;span class="w"&gt;                 &lt;/span&gt;STATUS&lt;span class="w"&gt;     &lt;/span&gt;ROLES&lt;span class="w"&gt;           &lt;/span&gt;AGE&lt;span class="w"&gt;   &lt;/span&gt;VERSION
+kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;NotReady&lt;span class="w"&gt;   &lt;/span&gt;control-plane&lt;span class="w"&gt;   &lt;/span&gt;12s&lt;span class="w"&gt;   &lt;/span&gt;v1.35.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Check running containers:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;docker&lt;span class="w"&gt; &lt;/span&gt;ps
+CONTAINER&lt;span class="w"&gt; &lt;/span&gt;ID&lt;span class="w"&gt;   &lt;/span&gt;IMAGE&lt;span class="w"&gt;                  &lt;/span&gt;COMMAND&lt;span class="w"&gt;                  &lt;/span&gt;CREATED&lt;span class="w"&gt;         &lt;/span&gt;STATUS&lt;span class="w"&gt;         &lt;/span&gt;PORTS&lt;span class="w"&gt;                       &lt;/span&gt;NAMES
+e174ac300eb9&lt;span class="w"&gt;   &lt;/span&gt;kindest/node:v1.35.0&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/usr/local/bin/entr…&amp;quot;&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;minutes&lt;span class="w"&gt; &lt;/span&gt;ago&lt;span class="w"&gt;   &lt;/span&gt;Up&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;minutes&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;127&lt;/span&gt;.0.0.1:43013-&amp;gt;6443/tcp&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Step 2: Create a Pod — Witness Kubelet's "Helplessness"&lt;/h3&gt;
+&lt;p&gt;Try to create a Pod &lt;strong&gt;WITHOUT&lt;/strong&gt; any CNI config:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;run&lt;span class="w"&gt; &lt;/span&gt;nginx-test&lt;span class="w"&gt; &lt;/span&gt;--image&lt;span class="o"&gt;=&lt;/span&gt;nginx
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Result: The Pod is &lt;strong&gt;stuck&lt;/strong&gt; in &lt;code&gt;Pending&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods
+NAME&lt;span class="w"&gt;         &lt;/span&gt;READY&lt;span class="w"&gt;   &lt;/span&gt;STATUS&lt;span class="w"&gt;    &lt;/span&gt;RESTARTS&lt;span class="w"&gt;   &lt;/span&gt;AGE
+nginx-test&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Pending&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;12s
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Run &lt;code&gt;kubectl describe&lt;/code&gt; to see why:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;describe&lt;span class="w"&gt; &lt;/span&gt;pod&lt;span class="w"&gt; &lt;/span&gt;nginx-test
+...
+Events:
+&lt;span class="w"&gt;  &lt;/span&gt;Type&lt;span class="w"&gt;     &lt;/span&gt;Reason&lt;span class="w"&gt;            &lt;/span&gt;Age&lt;span class="w"&gt;   &lt;/span&gt;From&lt;span class="w"&gt;               &lt;/span&gt;Message
+&lt;span class="w"&gt;  &lt;/span&gt;----&lt;span class="w"&gt;     &lt;/span&gt;------&lt;span class="w"&gt;            &lt;/span&gt;----&lt;span class="w"&gt;  &lt;/span&gt;----&lt;span class="w"&gt;               &lt;/span&gt;-------
+&lt;span class="w"&gt;  &lt;/span&gt;Warning&lt;span class="w"&gt;  &lt;/span&gt;FailedScheduling&lt;span class="w"&gt;  &lt;/span&gt;10s&lt;span class="w"&gt;   &lt;/span&gt;default-scheduler&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/1&lt;span class="w"&gt; &lt;/span&gt;nodes&lt;span class="w"&gt; &lt;/span&gt;are&lt;span class="w"&gt; &lt;/span&gt;available:&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;node&lt;span class="o"&gt;(&lt;/span&gt;s&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;had&lt;span class="w"&gt; &lt;/span&gt;condition&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;Ready&lt;span class="w"&gt; &lt;/span&gt;False&lt;span class="o"&gt;}&lt;/span&gt;.&lt;span class="w"&gt; &lt;/span&gt;preemption:&lt;span class="w"&gt; &lt;/span&gt;...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Why?&lt;/strong&gt; No CNI config → Kubelet marks the Node as &lt;code&gt;NotReady&lt;/code&gt; (as seen in Step 1) → The Node is tainted with &lt;code&gt;node.kubernetes.io/not-ready:NoSchedule&lt;/code&gt; → The Scheduler cannot place the Pod on any Node → The Pod stays in &lt;code&gt;Pending&lt;/code&gt; indefinitely.&lt;/p&gt;
+&lt;h3&gt;Step 3: Call the CNI Binary Manually — Exposing the Truth&lt;/h3&gt;
+&lt;p&gt;Now, we will prove that CNI is just: &lt;strong&gt;a binary + environment variables + JSON via stdin&lt;/strong&gt;. No magic involved.&lt;/p&gt;
+&lt;p&gt;Enter the Kind node:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;docker&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-it&lt;span class="w"&gt; &lt;/span&gt;kind-control-plane&lt;span class="w"&gt; &lt;/span&gt;bash
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Check available CNI binaries:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kind-control-plane:/#&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;/opt/cni/bin
+total&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;18804&lt;/span&gt;
+-rwxr-xr-x&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;4354987&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Dec&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;15&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;23&lt;/span&gt;:24&lt;span class="w"&gt; &lt;/span&gt;host-local
+-rwxr-xr-x&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;4306167&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Dec&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;15&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;23&lt;/span&gt;:24&lt;span class="w"&gt; &lt;/span&gt;loopback
+-rwxr-xr-x&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;5108415&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Dec&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;15&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;23&lt;/span&gt;:24&lt;span class="w"&gt; &lt;/span&gt;portmap
+-rwxr-xr-x&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;5475215&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Dec&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;15&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;23&lt;/span&gt;:24&lt;span class="w"&gt; &lt;/span&gt;ptp
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Manually create a &lt;strong&gt;network namespace&lt;/strong&gt; (simulating the namespace containerd would create for a Pod):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ip&lt;span class="w"&gt; &lt;/span&gt;netns&lt;span class="w"&gt; &lt;/span&gt;add&lt;span class="w"&gt; &lt;/span&gt;demo-cni-ns
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Set all required &lt;strong&gt;Environment Variables&lt;/strong&gt; according to the &lt;a href="https://www.cni.dev/docs/spec/#cni-operations"&gt;CNI Spec&lt;/a&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CNI_COMMAND&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;ADD
+&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CNI_CONTAINERID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;demo-container-001
+&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CNI_NETNS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/var/run/netns/demo-cni-ns
+&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CNI_IFNAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;eth0
+&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CNI_PATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;/opt/cni/bin
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Variable Breakdown:
+| Variable | Meaning |
+|------|---------|
+| &lt;code&gt;CNI_COMMAND=ADD&lt;/code&gt; | Tells the plugin: "&lt;strong&gt;Add&lt;/strong&gt; a network interface to this namespace" |
+| &lt;code&gt;CNI_CONTAINERID&lt;/code&gt; | Arbitrary ID to identify the container (used for IPAM tracking) |
+| &lt;code&gt;CNI_NETNS&lt;/code&gt; | Path to the network namespace to be configured |
+| &lt;code&gt;CNI_IFNAME&lt;/code&gt; | Name of the interface to be created inside the namespace |
+| &lt;code&gt;CNI_PATH&lt;/code&gt; | Directory containing CNI binaries (used to find auxiliary plugins like IPAM) |&lt;/p&gt;
+&lt;p&gt;Feed the JSON config into the &lt;code&gt;ptp&lt;/code&gt; binary's stdin:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;lt;&amp;lt;EOF | /opt/cni/bin/ptp&lt;/span&gt;
+&lt;span class="s"&gt;{&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;cniVersion&amp;quot;: &amp;quot;0.4.0&amp;quot;,&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;name&amp;quot;: &amp;quot;demo&amp;quot;,&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;type&amp;quot;: &amp;quot;ptp&amp;quot;,&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;ipam&amp;quot;: {&lt;/span&gt;
+&lt;span class="s"&gt;    &amp;quot;type&amp;quot;: &amp;quot;host-local&amp;quot;,&lt;/span&gt;
+&lt;span class="s"&gt;    &amp;quot;subnet&amp;quot;: &amp;quot;10.244.0.0/24&amp;quot;&lt;/span&gt;
+&lt;span class="s"&gt;  }&lt;/span&gt;
+&lt;span class="s"&gt;}&lt;/span&gt;
+&lt;span class="s"&gt;EOF&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Result:&lt;/strong&gt; The &lt;code&gt;ptp&lt;/code&gt; binary returns JSON confirming a successful IP assignment:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;cniVersion&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;0.4.0&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;interfaces&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;veth6d427827&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;mac&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;f2:c0:f7:20:1f:90&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;eth0&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;mac&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;66:cd:18:04:95:6a&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;sandbox&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/var/run/netns/demo-cni-ns&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;ips&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;version&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;4&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;interface&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;address&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;10.244.0.2/24&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;gateway&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;10.244.0.1&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;dns&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Verify — the namespace now has a real IP:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kind-control-plane:/#&lt;span class="w"&gt; &lt;/span&gt;ip&lt;span class="w"&gt; &lt;/span&gt;netns&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;demo-cni-ns&lt;span class="w"&gt; &lt;/span&gt;ip&lt;span class="w"&gt; &lt;/span&gt;addr&lt;span class="w"&gt; &lt;/span&gt;show&lt;span class="w"&gt; &lt;/span&gt;eth0
+&lt;span class="m"&gt;2&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;eth0@if5:&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;BROADCAST,MULTICAST,UP,LOWER_UP&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;mtu&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1500&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;qdisc&lt;span class="w"&gt; &lt;/span&gt;noqueue&lt;span class="w"&gt; &lt;/span&gt;state&lt;span class="w"&gt; &lt;/span&gt;UP&lt;span class="w"&gt; &lt;/span&gt;group&lt;span class="w"&gt; &lt;/span&gt;default
+&lt;span class="w"&gt;    &lt;/span&gt;link/ether&lt;span class="w"&gt; &lt;/span&gt;aa:bb:cc:dd:ee:ff&lt;span class="w"&gt; &lt;/span&gt;brd&lt;span class="w"&gt; &lt;/span&gt;ff:ff:ff:ff:ff:ff&lt;span class="w"&gt; &lt;/span&gt;link-netnsid&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;inet&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.0.2/24&lt;span class="w"&gt; &lt;/span&gt;brd&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.0.255&lt;span class="w"&gt; &lt;/span&gt;scope&lt;span class="w"&gt; &lt;/span&gt;global&lt;span class="w"&gt; &lt;/span&gt;eth0
+&lt;span class="w"&gt;       &lt;/span&gt;valid_lft&lt;span class="w"&gt; &lt;/span&gt;forever&lt;span class="w"&gt; &lt;/span&gt;preferred_lft&lt;span class="w"&gt; &lt;/span&gt;forever
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Boom!&lt;/strong&gt; With just a binary call + env vars + JSON stdin, we created a functional network interface with an IP for a namespace. This is &lt;strong&gt;exactly&lt;/strong&gt; what Kubelet does behind the scenes whenever it creates a Pod.&lt;/p&gt;
+&lt;p&gt;Clean up the demo namespace:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Call DEL to release the assigned IP (returning it to IPAM)&lt;/span&gt;
+&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CNI_COMMAND&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;DEL
+cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;lt;&amp;lt;EOF | /opt/cni/bin/ptp&lt;/span&gt;
+&lt;span class="s"&gt;{&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;cniVersion&amp;quot;: &amp;quot;0.4.0&amp;quot;,&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;name&amp;quot;: &amp;quot;demo&amp;quot;,&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;type&amp;quot;: &amp;quot;ptp&amp;quot;,&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;ipam&amp;quot;: {&lt;/span&gt;
+&lt;span class="s"&gt;    &amp;quot;type&amp;quot;: &amp;quot;host-local&amp;quot;,&lt;/span&gt;
+&lt;span class="s"&gt;    &amp;quot;subnet&amp;quot;: &amp;quot;10.244.0.0/24&amp;quot;&lt;/span&gt;
+&lt;span class="s"&gt;  }&lt;/span&gt;
+&lt;span class="s"&gt;}&lt;/span&gt;
+&lt;span class="s"&gt;EOF&lt;/span&gt;
+
+ip&lt;span class="w"&gt; &lt;/span&gt;netns&lt;span class="w"&gt; &lt;/span&gt;del&lt;span class="w"&gt; &lt;/span&gt;demo-cni-ns
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;x&lt;/p&gt;
+&lt;h3&gt;Step 4: "Rescuing" the Pod — Letting Kubelet Call CNI&lt;/h3&gt;
+&lt;p&gt;Now, let's create a CNI config file so Kubelet knows which plugin to use:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Still inside the Kind node&lt;/span&gt;
+mkdir&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;/etc/cni/net.d/
+
+cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;lt;&amp;lt;EOF &amp;gt; /etc/cni/net.d/10-dummy.conf&lt;/span&gt;
+&lt;span class="s"&gt;{&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;cniVersion&amp;quot;: &amp;quot;0.4.0&amp;quot;,&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;name&amp;quot;: &amp;quot;dummy&amp;quot;,&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;type&amp;quot;: &amp;quot;ptp&amp;quot;,&lt;/span&gt;
+&lt;span class="s"&gt;  &amp;quot;ipam&amp;quot;: {&lt;/span&gt;
+&lt;span class="s"&gt;    &amp;quot;type&amp;quot;: &amp;quot;host-local&amp;quot;,&lt;/span&gt;
+&lt;span class="s"&gt;    &amp;quot;subnet&amp;quot;: &amp;quot;10.244.0.0/24&amp;quot;&lt;/span&gt;
+&lt;span class="s"&gt;  }&lt;/span&gt;
+&lt;span class="s"&gt;}&lt;/span&gt;
+&lt;span class="s"&gt;EOF&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Back on your Host machine, wait a few seconds and check:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods
+NAME&lt;span class="w"&gt;         &lt;/span&gt;READY&lt;span class="w"&gt;   &lt;/span&gt;STATUS&lt;span class="w"&gt;    &lt;/span&gt;RESTARTS&lt;span class="w"&gt;   &lt;/span&gt;AGE
+nginx-test&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Pending&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;118s
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods
+NAME&lt;span class="w"&gt;         &lt;/span&gt;READY&lt;span class="w"&gt;   &lt;/span&gt;STATUS&lt;span class="w"&gt;              &lt;/span&gt;RESTARTS&lt;span class="w"&gt;   &lt;/span&gt;AGE
+nginx-test&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;ContainerCreating&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;2m1s
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods
+NAME&lt;span class="w"&gt;         &lt;/span&gt;READY&lt;span class="w"&gt;   &lt;/span&gt;STATUS&lt;span class="w"&gt;    &lt;/span&gt;RESTARTS&lt;span class="w"&gt;   &lt;/span&gt;AGE
+nginx-test&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;2m28s
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;The Pod lives!&lt;/strong&gt; Kubelet detects the new config file → retries the Pod Sandbox creation → this time containerd calls &lt;code&gt;/opt/cni/bin/ptp&lt;/code&gt; (exactly as we did in Step 3) → Network setup succeeds → Pod transitions to &lt;code&gt;Running&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Verify using &lt;code&gt;crictl&lt;/code&gt; + &lt;code&gt;nsenter&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;docker&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-it&lt;span class="w"&gt; &lt;/span&gt;kind-control-plane&lt;span class="w"&gt; &lt;/span&gt;bash
+
+&lt;span class="nv"&gt;POD_ID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;crictl&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;nginx-test&lt;span class="w"&gt; &lt;/span&gt;-q&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;head&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nv"&gt;PID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;crictl&lt;span class="w"&gt; &lt;/span&gt;inspectp&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$POD_ID&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.info.pid&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;PID: &lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+
+nsenter&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;ip&lt;span class="w"&gt; &lt;/span&gt;addr&lt;span class="w"&gt; &lt;/span&gt;show&lt;span class="w"&gt; &lt;/span&gt;eth0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;PID:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1516&lt;/span&gt;
+&lt;span class="m"&gt;2&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;eth0@if4:&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;BROADCAST,MULTICAST,UP,LOWER_UP&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;mtu&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1500&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;qdisc&lt;span class="w"&gt; &lt;/span&gt;noqueue&lt;span class="w"&gt; &lt;/span&gt;state&lt;span class="w"&gt; &lt;/span&gt;UP&lt;span class="w"&gt; &lt;/span&gt;group&lt;span class="w"&gt; &lt;/span&gt;default&lt;span class="w"&gt; &lt;/span&gt;qlen&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1000&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;link/ether&lt;span class="w"&gt; &lt;/span&gt;0a:68:56:c0:9c:a3&lt;span class="w"&gt; &lt;/span&gt;brd&lt;span class="w"&gt; &lt;/span&gt;ff:ff:ff:ff:ff:ff&lt;span class="w"&gt; &lt;/span&gt;link-netnsid&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;inet&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.0.2/24&lt;span class="w"&gt; &lt;/span&gt;brd&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.0.255&lt;span class="w"&gt; &lt;/span&gt;scope&lt;span class="w"&gt; &lt;/span&gt;global&lt;span class="w"&gt; &lt;/span&gt;eth0
+&lt;span class="w"&gt;       &lt;/span&gt;valid_lft&lt;span class="w"&gt; &lt;/span&gt;forever&lt;span class="w"&gt; &lt;/span&gt;preferred_lft&lt;span class="w"&gt; &lt;/span&gt;forever
+&lt;span class="w"&gt;    &lt;/span&gt;inet6&lt;span class="w"&gt; &lt;/span&gt;fe80::868:56ff:fec0:9ca3/64&lt;span class="w"&gt; &lt;/span&gt;scope&lt;span class="w"&gt; &lt;/span&gt;link
+&lt;span class="w"&gt;       &lt;/span&gt;valid_lft&lt;span class="w"&gt; &lt;/span&gt;forever&lt;span class="w"&gt; &lt;/span&gt;preferred_lft&lt;span class="w"&gt; &lt;/span&gt;forever
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Kubelet did &lt;strong&gt;exactly&lt;/strong&gt; what we did manually in Step 3: set env vars → piped JSON into the binary → received the IP.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;4. Summary&lt;/h2&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Step&lt;/th&gt;
+&lt;th&gt;What happens&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;No CNI config&lt;/td&gt;
+&lt;td&gt;Kubelet is helpless, Node is NotReady, Pod is stuck in &lt;code&gt;Pending&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Manual CNI execution&lt;/td&gt;
+&lt;td&gt;Proves CNI = binary + env vars + JSON stdin&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Create config file&lt;/td&gt;
+&lt;td&gt;Kubelet automates the process for every Pod&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;CNI&lt;/strong&gt; isn't magic; it's a coordination between a &lt;strong&gt;Binary&lt;/strong&gt; (execution) and &lt;strong&gt;JSON&lt;/strong&gt; (declaration).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;IPAM&lt;/strong&gt; (&lt;code&gt;host-local&lt;/code&gt;) manages IP addresses — stored directly on disk at &lt;code&gt;/var/lib/cni/networks/&lt;/code&gt; to prevent conflicts.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kubelet&lt;/strong&gt; is just a middleman — reading config from &lt;code&gt;/etc/cni/net.d/&lt;/code&gt;, setting env vars, then calling the binary. That's it.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Understanding how CNI operates "by hand" will take the fear out of networking errors. In the next post, we'll see how &lt;strong&gt;Cilium&lt;/strong&gt; levels up this game using &lt;strong&gt;eBPF&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.cni.dev/docs/spec/#cni-operations"&gt;CNI Operations Spec&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://kind.sigs.k8s.io/docs/user/quick-start/"&gt;Kind Quick Start Guide&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="networking"/><category term="container"/><category term="k8s"/></entry><entry><title>Demystifying Docker Networking: Outbound Traffic &amp; The Masquerade Magic</title><link href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html" rel="alternate"/><published>2026-03-16T00:00:00+07:00</published><updated>2026-03-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-16:/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html</id><summary type="html"/><content type="html">&lt;p&gt;In the &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;previous post&lt;/a&gt;, we explored how external requests find their way into a container via DNAT. But there is a flip side to that coin: When a container needs to download a package or call an external API, how does it "break out" to the internet when it only has a private, internal IP?&lt;/p&gt;
 &lt;p&gt;Today, we are diving deep into the fucking &lt;code&gt;Egress Flow&lt;/code&gt;.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;1. Finding the "Gateway"&lt;/h2&gt;
