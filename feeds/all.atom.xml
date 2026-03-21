@@ -36,7 +36,7 @@ sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;u
 &lt;li&gt;In this lab, &lt;code&gt;host-local&lt;/code&gt; stores its IP database simply as text files on the Node's disk (in &lt;code&gt;/var/lib/cni/networks/&lt;/code&gt;).&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3&gt;crictl - When Docker is no longer "The Boss"&lt;/h3&gt;
-&lt;p&gt;Modern K8s uses the &lt;strong&gt;CRI (Container Runtime Interface)&lt;/strong&gt; — usually &lt;code&gt;containerd&lt;/code&gt;. &lt;code&gt;crictl&lt;/code&gt; is the tool to interact with the CRI. We use it here because Kind runs K8s nodes using containerd inside Docker.&lt;/p&gt;
+&lt;p&gt;Modern K8s uses the &lt;strong&gt;CRI (Container Runtime Interface - API between Kubelet and Container Runtime)&lt;/strong&gt; — usually &lt;code&gt;containerd&lt;/code&gt;. &lt;code&gt;crictl&lt;/code&gt; is the tool to interact with the CRI. We use it here because Kind runs K8s nodes using containerd inside Docker.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;3. Lab: Running CNI by Hand (Manual Execution)&lt;/h2&gt;
 &lt;h3&gt;Step 1: Spin up a "Naked" Cluster&lt;/h3&gt;
@@ -111,7 +111,8 @@ kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;NotReady&lt;span class="
 
 &lt;p&gt;&lt;strong&gt;Why?&lt;/strong&gt; No CNI config → Kubelet marks the Node as &lt;code&gt;NotReady&lt;/code&gt; (as seen in Step 1) → The Node is tainted with &lt;code&gt;node.kubernetes.io/not-ready:NoSchedule&lt;/code&gt; → The Scheduler cannot place the Pod on any Node → The Pod stays in &lt;code&gt;Pending&lt;/code&gt; indefinitely.&lt;/p&gt;
 &lt;h3&gt;Step 3: Call the CNI Binary Manually — Exposing the Truth&lt;/h3&gt;
-&lt;p&gt;Now, we will prove that CNI is just: &lt;strong&gt;a binary + environment variables + JSON via stdin&lt;/strong&gt;. No magic involved.&lt;/p&gt;
+&lt;p&gt;Now, we will prove that CNI is just: &lt;strong&gt;a binary + environment variables + JSON via stdin&lt;/strong&gt;. No magic involved. But let's me show you complete flows first (made with Mermaid)&lt;/p&gt;
+&lt;p&gt;&lt;img alt="cni flow" src="./images/2026/03/07.png"&gt;&lt;/p&gt;
 &lt;p&gt;Enter the Kind node:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;docker&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-it&lt;span class="w"&gt; &lt;/span&gt;kind-control-plane&lt;span class="w"&gt; &lt;/span&gt;bash
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -304,6 +305,7 @@ local-path-storage&lt;span class="w"&gt;   &lt;/span&gt;local-path-provisioner-6
 
 &lt;p&gt;So, we know where the IP assigned from!&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;The Pod lives! Here is what just happened:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="cni flow" src="./images/2026/03/08.png"&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;Kubelet detects the new config file and initializes its network state.&lt;/li&gt;
 &lt;li&gt;Kubelet updates the Node's status to &lt;strong&gt;&lt;code&gt;Ready&lt;/code&gt;&lt;/strong&gt; (removing the &lt;code&gt;NotReady&lt;/code&gt; taint).&lt;/li&gt;

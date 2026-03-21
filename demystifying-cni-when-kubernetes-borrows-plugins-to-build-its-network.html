@@ -115,7 +115,7 @@ sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </
 <li>In this lab, <code>host-local</code> stores its IP database simply as text files on the Node's disk (in <code>/var/lib/cni/networks/</code>).</li>
 </ul>
 <h3>crictl - When Docker is no longer "The Boss"</h3>
-<p>Modern K8s uses the <strong>CRI (Container Runtime Interface)</strong> — usually <code>containerd</code>. <code>crictl</code> is the tool to interact with the CRI. We use it here because Kind runs K8s nodes using containerd inside Docker.</p>
+<p>Modern K8s uses the <strong>CRI (Container Runtime Interface - API between Kubelet and Container Runtime)</strong> — usually <code>containerd</code>. <code>crictl</code> is the tool to interact with the CRI. We use it here because Kind runs K8s nodes using containerd inside Docker.</p>
 <hr>
 <h2>3. Lab: Running CNI by Hand (Manual Execution)</h2>
 <h3>Step 1: Spin up a "Naked" Cluster</h3>
@@ -190,7 +190,8 @@ kind-control-plane<span class="w">   </span>NotReady<span class="w">   </span>co
 
 <p><strong>Why?</strong> No CNI config → Kubelet marks the Node as <code>NotReady</code> (as seen in Step 1) → The Node is tainted with <code>node.kubernetes.io/not-ready:NoSchedule</code> → The Scheduler cannot place the Pod on any Node → The Pod stays in <code>Pending</code> indefinitely.</p>
 <h3>Step 3: Call the CNI Binary Manually — Exposing the Truth</h3>
-<p>Now, we will prove that CNI is just: <strong>a binary + environment variables + JSON via stdin</strong>. No magic involved.</p>
+<p>Now, we will prove that CNI is just: <strong>a binary + environment variables + JSON via stdin</strong>. No magic involved. But let's me show you complete flows first (made with Mermaid)</p>
+<p><img alt="cni flow" src="./images/2026/03/07.png"></p>
 <p>Enter the Kind node:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>kind-control-plane<span class="w"> </span>bash
 </code></pre></div>
@@ -383,6 +384,7 @@ local-path-storage<span class="w">   </span>local-path-provisioner-67b8995b4b-qx
 
 <p>So, we know where the IP assigned from!</p>
 <p><strong>The Pod lives! Here is what just happened:</strong></p>
+<p><img alt="cni flow" src="./images/2026/03/08.png"></p>
 <ol>
 <li>Kubelet detects the new config file and initializes its network state.</li>
 <li>Kubelet updates the Node's status to <strong><code>Ready</code></strong> (removing the <code>NotReady</code> taint).</li>
