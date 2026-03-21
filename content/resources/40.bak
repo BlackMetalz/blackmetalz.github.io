@@ -21,9 +21,8 @@ sequenceDiagram
         ipam-->>main: 8. Return IP mapping back to ptp
     end
 
-    main->>NetNS: 9. Create interface (eth0) in namespace
-    main->>NetNS: 10. Assign IP (10.249.0.2) to eth0
-    main-->>User: 11. Print the result JSON to stdout
+    main->>NetNS: 9. Create interface (eth0) & Assign IP (10.249.0.2)
+    main-->>User: 10. Print the result JSON to stdout
 ```
 
 # 2
@@ -31,7 +30,8 @@ sequenceDiagram
 sequenceDiagram
     participant User
     participant Kubelet
-    participant API as API Server / Scheduler
+    participant API as API Server
+    participant Sched as Kube-Scheduler
     participant CRI as containerd (CRI)
     participant CNI as CNI Plugins
 
@@ -39,18 +39,22 @@ sequenceDiagram
     Kubelet->>Kubelet: 2. Detect CNI config, init network state
     Kubelet->>API: 3. Update Node status to Ready (Remove taint)
     
-    API->>Kubelet: 4. Assign pending pod "nginx-test" to this node
+    Sched->>API: 4. Watch: Sees Ready Node
+    Sched->>API: 5. Bind "nginx-test" pod to this Node
     
-    Kubelet->>CRI: 5. Request to create Pod Sandbox
-    CRI->>CNI: 6. Execute CNI binaries (ptp -> host-local)
+    Kubelet->>API: 6. Watch: Notices new Pod assigned to it
+    
+    Kubelet->>CRI: 7. Request to create Pod Sandbox
+    CRI->>CNI: 8. Execute CNI binaries (ptp -> host-local)
     
     rect rgb(40, 44, 52)
-        Note right of CNI: 7. Network setup (Same flow as Step 3)
+        Note right of CNI: 9. Network setup (Same flow as Step 3)
     end
     
-    CNI-->>CRI: 8. Return assigned IP
+    CNI-->>CRI: 10. Return assigned IP
     
-    CRI-->>Kubelet: 9. Sandbox creation completed successfully
-    Kubelet->>API: 10. Update Pod status to Running
+    CRI-->>Kubelet: 11. Sandbox creation completed successfully
+    Kubelet->>API: 12. Update Pod status to Running
+
 
 ```
