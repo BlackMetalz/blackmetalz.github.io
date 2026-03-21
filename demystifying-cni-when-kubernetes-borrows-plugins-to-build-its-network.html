@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p>In the previous two posts, we performed a deep dive into Docker's <a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html">Ingress Flow</a> and <a href="https://www.google.com/search?q=https://blackmetalz.github.io/demystifying_docker_networking_egress.html">Egress Flow</a> by manually tinkering with <code>veth</code>, <code>iptables</code>, and <code>nsenter</code>.</p>
+            <p>In the previous two posts, we performed a deep dive into Docker's <a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html">Ingress Flow</a> and <a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html">Egress Flow</a> by manually tinkering with <code>veth</code>, <code>iptables</code>, and <code>nsenter</code>.</p>
 <p>But in Kubernetes (K8s), thousands of Pods are created and destroyed continuously. Kubelet can't afford the manual labor of typing those commands for every single Pod. It needs an "assistant" to do the heavy lifting. That assistant is the <strong>CNI (Container Network Interface)</strong>.</p>
 <p>Today, we will "strip down" CNI by running it manually (by hand), without using any sophisticated CNI suites like Calico or Cilium.</p>
 <hr>
