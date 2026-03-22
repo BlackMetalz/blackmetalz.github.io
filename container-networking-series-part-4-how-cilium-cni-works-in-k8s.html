@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="networking, container, k8s, cilium, Knowledge Base, " />
+
+<meta property="og:title" content="[Container Networking Series - Part 4] How Cilium CNI works in K8S "/>
+<meta property="og:url" content="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2026-03-22T00:00:00+07:00" />
+<meta name="twitter:title" content="[Container Networking Series - Part 4] How Cilium CNI works in K8S ">
+<meta name="twitter:description" content="">
+
+        <title>[Container Networking Series - Part 4] How Cilium CNI works in K8S  · Kienlt&#39;s notebook
+</title>
+        <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://blackmetalz.github.io/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://blackmetalz.github.io
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://blackmetalz.github.io/categories.html">Categories</a></li>
+                                <li ><a href="https://blackmetalz.github.io/tags.html">Tags</a></li>
+                                <li ><a href="https://blackmetalz.github.io/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://blackmetalz.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html">
+                [Container Networking Series - Part 4] How Cilium CNI works in K8S
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p><strong>Series: Container Networking Deep Dive</strong></p>
+<ul>
+<li><a href="https://blackmetalz.github.io/container-networking-series-part-1-demystifying-docker-networking-a-deep-dive-into-bridge-veth.html">Demystifying Docker Networking: A Deep Dive into Bridge &amp; veth</a></li>
+<li><a href="https://blackmetalz.github.io/container-networking-series-part-2-demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html">Demystifying Docker Networking Egress: The Masquerade Magic</a></li>
+<li><a href="https://blackmetalz.github.io/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html">Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network</a></li>
+<li><strong>How Cilium CNI works in K8S</strong> <em>(You are here)</em></li>
+</ul>
+<hr>
+<p>In <a href="https://blackmetalz.github.io/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html">Part 3</a>, we stripped the CNI flow down to bare metal: <strong>a binary + env vars + JSON on stdin</strong>. That contract does not change with Cilium. Kubelet still calls a CNI plugin. What changes is what the plugin and its agent do after that call.</p>
+<p>If you want a easier Kubernetes networking refresher before going deeper, I also wrote another intro-level post <a href="https://blackmetalz.github.io/sharing-what-ive-learned-about-kubernetes-networking-part-2.html">back in 01-2025</a>. Even beginner level can read it pretty well (I'm bad at that time xD)</p>
+<p>One correction before we start: "Cilium means iptables is gone" is too simplistic. The more accurate version is:</p>
+<ul>
+<li>Cilium can move <strong>Service load-balancing, policy enforcement, and a large part of the datapath</strong> into <strong>eBPF</strong></li>
+<li>Cilium can also <strong>replace kube-proxy</strong></li>
+<li>Depending on the feature set and host config, you may still see some iptables rules on the node</li>
+</ul>
+<p>So the real win is not "iptables disappears completely". The real win is that the hot Kubernetes networking path no longer depends on kube-proxy building giant iptables chains for every Service.</p>
+<hr>
+<h2>1. Prerequisites (Setup)</h2>
+<p>To follow this lab on <strong>Ubuntu 24.04</strong>, you need those softwares installed:</p>
+<ol>
+<li><strong>Docker</strong> to run Kind</li>
+<li><strong>Kind</strong> to spin up a local multi-node cluster</li>
+<li><strong>Kubectl</strong> to control the cluster</li>
+<li><strong>Cilium CLI</strong> to install and validate Cilium</li>
+<li><strong>A host that can run kube-proxy-free Cilium on Kind</strong></li>
+</ol>
+<p>That last point matters. For Cilium's Socket LB and kube-proxy replacement on Kind, your host should have:</p>
+<ul>
+<li><strong>cgroup v2 enabled</strong></li>
+<li>Docker using <strong>private cgroup namespaces</strong></li>
+<li>A reasonably recent Linux kernel</li>
+</ul>
+<p>Quick checks with output from my lab:</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>docker<span class="w"> </span>info<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span>cgroup
+<span class="w"> </span>Cgroup<span class="w"> </span>Driver:<span class="w"> </span>systemd
+<span class="w"> </span>Cgroup<span class="w"> </span>Version:<span class="w"> </span><span class="m">2</span>
+<span class="w">  </span>cgroupns
+root@kienlt-lab-utilities:~#<span class="w"> </span>stat<span class="w"> </span>-fc<span class="w"> </span>%T<span class="w"> </span>/sys/fs/cgroup
+cgroup2fs
+</code></pre></div>
+
+<p>If those 2 checks are wrong, fix the host first. Otherwise the cluster may come up, but kube-proxy replacement can fail in confusing ways.</p>
+<h3>Install Cilium CLI</h3>
+<div class="highlight"><pre><span></span><code><span class="nv">CILIUM_CLI_VERSION</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt<span class="k">)</span>
+<span class="nv">CLI_ARCH</span><span class="o">=</span>amd64
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>uname<span class="w"> </span>-m<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;aarch64&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>uname<span class="w"> </span>-m<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;arm64&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nv">CLI_ARCH</span><span class="o">=</span>arm64
+<span class="k">fi</span>
+
+curl<span class="w"> </span>-L<span class="w"> </span>--fail<span class="w"> </span>--remote-name-all<span class="w"> </span>https://github.com/cilium/cilium-cli/releases/download/<span class="si">${</span><span class="nv">CILIUM_CLI_VERSION</span><span class="si">}</span>/cilium-linux-<span class="si">${</span><span class="nv">CLI_ARCH</span><span class="si">}</span>.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}</span>
+
+sha256sum<span class="w"> </span>--check<span class="w"> </span>cilium-linux-<span class="si">${</span><span class="nv">CLI_ARCH</span><span class="si">}</span>.tar.gz.sha256sum
+sudo<span class="w"> </span>tar<span class="w"> </span>xzvfC<span class="w"> </span>cilium-linux-<span class="si">${</span><span class="nv">CLI_ARCH</span><span class="si">}</span>.tar.gz<span class="w"> </span>/usr/local/bin
+rm<span class="w"> </span>cilium-linux-<span class="si">${</span><span class="nv">CLI_ARCH</span><span class="si">}</span>.tar.gz<span class="o">{</span>,.sha256sum<span class="o">}</span>
+
+cilium<span class="w"> </span>version<span class="w"> </span>--client
+</code></pre></div>
+
+<p>Expected result: the CLI prints a client version successfully.</p>
+<div class="highlight"><pre><span></span><code>cilium-linux-amd64.tar.gz:<span class="w"> </span>OK
+cilium
+cilium-cli:<span class="w"> </span>v0.19.2<span class="w"> </span>compiled<span class="w"> </span>with<span class="w"> </span>go1.25.5<span class="w"> </span>on<span class="w"> </span>linux/amd64
+cilium<span class="w"> </span>image<span class="w"> </span><span class="o">(</span>default<span class="o">)</span>:<span class="w"> </span>v1.19.1
+cilium<span class="w"> </span>image<span class="w"> </span><span class="o">(</span>stable<span class="o">)</span>:<span class="w"> </span>v1.19.1
+</code></pre></div>
+
+<hr>
+<h2>2. Decoding the Core Concepts</h2>
+<h3>What exactly is eBPF?</h3>
+<p>Think of eBPF as a way to run <strong>small, verified programs inside the Linux kernel</strong>. You do not rebuild the kernel. You do not reboot the machine. You load a program, the kernel verifies it, then attaches it to specific hooks in the networking path.</p>
+<p>That means packets can be inspected, forwarded, dropped, NATed, or load-balanced <strong>inside kernel space</strong>, without punting every decision to userspace tools.</p>
+<h3>What changes when the CNI is Cilium?</h3>
+<p>With a more traditional K8S setup, the flow often looks like this:</p>
+<div class="highlight"><pre><span></span><code>Pod -&gt; veth -&gt; routing -&gt; kube-proxy / iptables / IPVS -&gt; destination
+</code></pre></div>
+
+<p>With Cilium, the flow becomes more like this:</p>
+<div class="highlight"><pre><span></span><code>Pod -&gt; veth -&gt; Cilium eBPF datapath -&gt; destination
+</code></pre></div>
+
+<p>More precisely, Cilium can use <strong>TC(Traffic Control) hooks</strong>, <strong>socket-level load-balancing</strong>, and in some cases <strong>XDP(eXpress Data Path)</strong>, depending on which feature is in play.</p>
+<h3>Cilium can replace kube-proxy</h3>
+<p>In a standard cluster, <code>kube-proxy</code> watches Services and installs iptables or IP Virtual Server (IPVS) rules so <code>ClusterIP</code>, <code>NodePort</code>, and friends actually work.</p>
+<p>In a kube-proxy-free Cilium cluster, Cilium does that job itself. It stores Service and backend mappings in <strong>BPF maps</strong>, so when traffic hits a Service IP, the translation happens in the eBPF datapath instead of an iptables chain.</p>
+<p>That is why in this lab we explicitly disable kube-proxy and tell Cilium to take over.</p>
+<h3>Cilium Identity</h3>
+<p>This is one of Cilium's killer ideas.</p>
+<p>Instead of treating workloads as "just IP addresses", Cilium assigns them <strong>security identities</strong> derived from labels. Policies are then evaluated against identities, not just raw IPs.</p>
+<p>That matters because Pod IPs are ephemeral. Labels are usually a better description of intent.</p>
+<hr>
+<h2>3. Lab: Seeing Cilium in Action</h2>
+<p>This walkthrough intentionally uses:</p>
+<ul>
+<li><strong>Kind</strong> as the cluster runtime</li>
+<li><strong>No default CNI</strong></li>
+<li><strong>No kube-proxy</strong></li>
+<li><strong>Cilium as both CNI and Service datapath</strong></li>
+</ul>
+<p>We will also pin the demo pods to <strong>different worker nodes</strong> so cross-node traffic is guaranteed instead of being left to scheduler luck.</p>
+<h3>Step 1: Create a Kind cluster for Cilium</h3>
+<p>Create <code>kind-cilium-config.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cluster</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kind.x-k8s.io/v1alpha4</span>
+<span class="nt">networking</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">disableDefaultCNI</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">kubeProxyMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">none</span>
+<span class="w">  </span><span class="nt">podSubnet</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10.244.0.0/16&quot;</span>
+<span class="w">  </span><span class="nt">serviceSubnet</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;10.96.0.0/12&quot;</span>
+<span class="nt">nodes</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">control-plane</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">worker</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">worker</span>
+</code></pre></div>
+
+<p>Recreate the cluster:</p>
+<div class="highlight"><pre><span></span><code>kind<span class="w"> </span>delete<span class="w"> </span>cluster<span class="w"> </span>--name<span class="w"> </span>kind<span class="w"> </span><span class="m">2</span>&gt;/dev/null
+kind<span class="w"> </span>create<span class="w"> </span>cluster<span class="w"> </span>--config<span class="w"> </span>kind-cilium-config.yaml
+</code></pre></div>
+
+<p>Expected output:</p>
+<div class="highlight"><pre><span></span><code>kind<span class="w"> </span>create<span class="w"> </span>cluster<span class="w"> </span>--config<span class="w"> </span>kind-cilium-config.yaml
+Creating<span class="w"> </span>cluster<span class="w"> </span><span class="s2">&quot;kind&quot;</span><span class="w"> </span>...
+<span class="w"> </span>✓<span class="w"> </span>Ensuring<span class="w"> </span>node<span class="w"> </span>image<span class="w"> </span><span class="o">(</span>kindest/node:v1.35.0<span class="o">)</span><span class="w"> </span>🖼
+<span class="w"> </span>✓<span class="w"> </span>Preparing<span class="w"> </span>nodes<span class="w"> </span>📦<span class="w"> </span>📦<span class="w"> </span>📦<span class="w">  </span>
+<span class="w"> </span>✓<span class="w"> </span>Writing<span class="w"> </span>configuration<span class="w"> </span>📜<span class="w"> </span>
+<span class="w"> </span>✓<span class="w"> </span>Starting<span class="w"> </span>control-plane<span class="w"> </span>🕹️<span class="w"> </span>
+<span class="w"> </span>✓<span class="w"> </span>Installing<span class="w"> </span>StorageClass<span class="w"> </span>💾<span class="w"> </span>
+<span class="w"> </span>✓<span class="w"> </span>Joining<span class="w"> </span>worker<span class="w"> </span>nodes<span class="w"> </span>🚜<span class="w"> </span>
+Set<span class="w"> </span>kubectl<span class="w"> </span>context<span class="w"> </span>to<span class="w"> </span><span class="s2">&quot;kind-kind&quot;</span>
+You<span class="w"> </span>can<span class="w"> </span>now<span class="w"> </span>use<span class="w"> </span>your<span class="w"> </span>cluster<span class="w"> </span>with:
+
+kubectl<span class="w"> </span>cluster-info<span class="w"> </span>--context<span class="w"> </span>kind-kind
+
+Have<span class="w"> </span>a<span class="w"> </span>nice<span class="w"> </span>day!<span class="w"> </span>👋
+</code></pre></div>
+
+<p>Quick checks:</p>
+<div class="highlight"><pre><span></span><code>k<span class="w"> </span>get<span class="w"> </span>nodes
+k<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>get<span class="w"> </span>ds<span class="w"> </span>kube-proxy
+</code></pre></div>
+
+<p>Expected:</p>
+<ul>
+<li>Nodes are <code>NotReady</code> because there is no CNI yet</li>
+<li><code>kube-proxy</code> is absent because we explicitly disabled it</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>get<span class="w"> </span>nodes
+NAME<span class="w">                 </span>STATUS<span class="w">     </span>ROLES<span class="w">           </span>AGE<span class="w">   </span>VERSION
+kind-control-plane<span class="w">   </span>NotReady<span class="w">   </span>control-plane<span class="w">   </span>32s<span class="w">   </span>v1.35.0
+kind-worker<span class="w">          </span>NotReady<span class="w">   </span>&lt;none&gt;<span class="w">          </span>18s<span class="w">   </span>v1.35.0
+kind-worker2<span class="w">         </span>NotReady<span class="w">   </span>&lt;none&gt;<span class="w">          </span>18s<span class="w">   </span>v1.35.0
+root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>get<span class="w"> </span>ds<span class="w"> </span>kube-proxy
+Error<span class="w"> </span>from<span class="w"> </span>server<span class="w"> </span><span class="o">(</span>NotFound<span class="o">)</span>:<span class="w"> </span>daemonsets.apps<span class="w"> </span><span class="s2">&quot;kube-proxy&quot;</span><span class="w"> </span>not<span class="w"> </span>found
+</code></pre></div>
+
+<h3>Step 2: Install Cilium in kube-proxy-free mode</h3>
+<p>This is the most important step, so be explicit instead of relying on defaults.</p>
+<p>First, get the control-plane container IP. In kube-proxy-free mode, Cilium needs a direct API server address from the start:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">API_SERVER_IP</span><span class="o">=</span><span class="k">$(</span>docker<span class="w"> </span>inspect<span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}&#39;</span><span class="w"> </span>kind-control-plane<span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API_SERVER_IP</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<p>Expected output:</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span><span class="nv">API_SERVER_IP</span><span class="o">=</span><span class="k">$(</span>docker<span class="w"> </span>inspect<span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}&#39;</span><span class="w"> </span>kind-control-plane<span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$API_SERVER_IP</span><span class="s2">&quot;</span>
+<span class="m">172</span>.21.0.4
+root@kienlt-lab-utilities:~#<span class="w"> </span>docker<span class="w"> </span>ps
+CONTAINER<span class="w"> </span>ID<span class="w">   </span>IMAGE<span class="w">                  </span>COMMAND<span class="w">                  </span>CREATED<span class="w">              </span>STATUS<span class="w">              </span>PORTS<span class="w">                       </span>NAMES
+c4f449135b8a<span class="w">   </span>kindest/node:v1.35.0<span class="w">   </span><span class="s2">&quot;/usr/local/bin/entr…&quot;</span><span class="w">   </span>About<span class="w"> </span>a<span class="w"> </span>minute<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span>About<span class="w"> </span>a<span class="w"> </span>minute<span class="w">                               </span>kind-worker
+8d1c2dc19bf7<span class="w">   </span>kindest/node:v1.35.0<span class="w">   </span><span class="s2">&quot;/usr/local/bin/entr…&quot;</span><span class="w">   </span>About<span class="w"> </span>a<span class="w"> </span>minute<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span>About<span class="w"> </span>a<span class="w"> </span>minute<span class="w">                               </span>kind-worker2
+b3b9d1736252<span class="w">   </span>kindest/node:v1.35.0<span class="w">   </span><span class="s2">&quot;/usr/local/bin/entr…&quot;</span><span class="w">   </span>About<span class="w"> </span>a<span class="w"> </span>minute<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span>About<span class="w"> </span>a<span class="w"> </span>minute<span class="w">   </span><span class="m">127</span>.0.0.1:39803-&gt;6443/tcp<span class="w">   </span>kind-control-plane
+</code></pre></div>
+
+<p>Now install Cilium, you will notice why cilium cli is able to interact without K8s cluster?
+It used the same way as <code>kubectl</code> or <code>helm</code> interact with K8s cluster.</p>
+<div class="highlight"><pre><span></span><code>cilium<span class="w"> </span>install<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span><span class="nv">kubeProxyReplacement</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span><span class="nv">k8sServiceHost</span><span class="o">=</span><span class="si">${</span><span class="nv">API_SERVER_IP</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span><span class="nv">k8sServicePort</span><span class="o">=</span><span class="m">6443</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--set<span class="w"> </span>ipam.mode<span class="o">=</span>kubernetes
+</code></pre></div>
+
+<p>Expected output:</p>
+<div class="highlight"><pre><span></span><code>🔮<span class="w"> </span>Auto-detected<span class="w"> </span>Kubernetes<span class="w"> </span>kind:<span class="w"> </span>kind
+ℹ️<span class="w">  </span>Using<span class="w"> </span>Cilium<span class="w"> </span>version<span class="w"> </span><span class="m">1</span>.19.1
+🔮<span class="w"> </span>Auto-detected<span class="w"> </span>cluster<span class="w"> </span>name:<span class="w"> </span>kind-kind
+ℹ️<span class="w">  </span>Detecting<span class="w"> </span>real<span class="w"> </span>Kubernetes<span class="w"> </span>API<span class="w"> </span>server<span class="w"> </span>addr<span class="w"> </span>and<span class="w"> </span>port<span class="w"> </span>on<span class="w"> </span>Kind
+🔮<span class="w"> </span>Auto-detected<span class="w"> </span>kube-proxy<span class="w"> </span>has<span class="w"> </span>not<span class="w"> </span>been<span class="w"> </span>installed
+ℹ️<span class="w">  </span>Cilium<span class="w"> </span>will<span class="w"> </span>fully<span class="w"> </span>replace<span class="w"> </span>all<span class="w"> </span>functionalities<span class="w"> </span>of<span class="w"> </span>kube-proxy
+</code></pre></div>
+
+<p>Wait for it:</p>
+<div class="highlight"><pre><span></span><code>cilium<span class="w"> </span>status<span class="w"> </span>--wait
+</code></pre></div>
+
+<p>Expected output:</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>cilium<span class="w"> </span>status
+<span class="w">    </span>/¯¯<span class="se">\</span>
+<span class="w"> </span>/¯¯<span class="se">\_</span>_/¯¯<span class="se">\ </span><span class="w">   </span>Cilium:<span class="w">             </span>OK
+<span class="w"> </span><span class="se">\_</span>_/¯¯<span class="se">\_</span>_/<span class="w">    </span>Operator:<span class="w">           </span>OK
+<span class="w"> </span>/¯¯<span class="se">\_</span>_/¯¯<span class="se">\ </span><span class="w">   </span>Envoy<span class="w"> </span>DaemonSet:<span class="w">    </span>OK
+<span class="w"> </span><span class="se">\_</span>_/¯¯<span class="se">\_</span>_/<span class="w">    </span>Hubble<span class="w"> </span>Relay:<span class="w">       </span>disabled
+<span class="w">    </span><span class="se">\_</span>_/<span class="w">       </span>ClusterMesh:<span class="w">        </span>disabled
+
+DaemonSet<span class="w">              </span>cilium<span class="w">                   </span>Desired:<span class="w"> </span><span class="m">3</span>,<span class="w"> </span>Ready:<span class="w"> </span><span class="m">3</span>/3,<span class="w"> </span>Available:<span class="w"> </span><span class="m">3</span>/3
+DaemonSet<span class="w">              </span>cilium-envoy<span class="w">             </span>Desired:<span class="w"> </span><span class="m">3</span>,<span class="w"> </span>Ready:<span class="w"> </span><span class="m">3</span>/3,<span class="w"> </span>Available:<span class="w"> </span><span class="m">3</span>/3
+Deployment<span class="w">             </span>cilium-operator<span class="w">          </span>Desired:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span>Ready:<span class="w"> </span><span class="m">1</span>/1,<span class="w"> </span>Available:<span class="w"> </span><span class="m">1</span>/1
+Containers:<span class="w">            </span>cilium<span class="w">                   </span>Running:<span class="w"> </span><span class="m">3</span>
+<span class="w">                       </span>cilium-envoy<span class="w">             </span>Running:<span class="w"> </span><span class="m">3</span>
+<span class="w">                       </span>cilium-operator<span class="w">          </span>Running:<span class="w"> </span><span class="m">1</span>
+<span class="w">                       </span>clustermesh-apiserver<span class="w">    </span>
+<span class="w">                       </span>hubble-relay<span class="w">             </span>
+Cluster<span class="w"> </span>Pods:<span class="w">          </span><span class="m">3</span>/3<span class="w"> </span>managed<span class="w"> </span>by<span class="w"> </span>Cilium
+Helm<span class="w"> </span>chart<span class="w"> </span>version:<span class="w">    </span><span class="m">1</span>.19.1
+Image<span class="w"> </span>versions<span class="w">         </span>cilium<span class="w">             </span>quay.io/cilium/cilium:v1.19.1@sha256:41f1f74a0000de8656f1de4088ea00c8f2d49d6edea579034c73c5fd5fe01792:<span class="w"> </span><span class="m">3</span>
+<span class="w">                       </span>cilium-envoy<span class="w">       </span>quay.io/cilium/cilium-envoy:v1.35.9-1770979049-232ed4a26881e4ab4f766f251f258ed424fff663@sha256:8188114a2768b5f49d6ce58e168b20d765e0fbc64eee0d83241aa2b150ccd788:<span class="w"> </span><span class="m">3</span>
+<span class="w">                       </span>cilium-operator<span class="w">    </span>quay.io/cilium/operator-generic:v1.19.1@sha256:e7278d763e448bf6c184b0682cf98cdca078d58a27e1b2f3c906792670aa211a:<span class="w"> </span><span class="m">1</span>
+</code></pre></div>
+
+<p>Then verify the cluster is alive:</p>
+<div class="highlight"><pre><span></span><code>k<span class="w"> </span>get<span class="w"> </span>nodes
+k<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-o<span class="w"> </span>wide
+</code></pre></div>
+
+<p>Expected result:</p>
+<ul>
+<li>All nodes become <code>Ready</code></li>
+<li>You see a Cilium agent pod on each node</li>
+<li>You see the Cilium operator running</li>
+</ul>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>get<span class="w"> </span>nodes
+NAME<span class="w">                 </span>STATUS<span class="w">   </span>ROLES<span class="w">           </span>AGE<span class="w">     </span>VERSION
+kind-control-plane<span class="w">   </span>Ready<span class="w">    </span>control-plane<span class="w">   </span>4m41s<span class="w">   </span>v1.35.0
+kind-worker<span class="w">          </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">          </span>4m27s<span class="w">   </span>v1.35.0
+kind-worker2<span class="w">         </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">          </span>4m27s<span class="w">   </span>v1.35.0
+root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-o<span class="w"> </span>wide
+NAME<span class="w">                                         </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE<span class="w">     </span>IP<span class="w">             </span>NODE<span class="w">                 </span>NOMINATED<span class="w"> </span>NODE<span class="w">   </span>READINESS<span class="w"> </span>GATES
+cilium-24nnn<span class="w">                                 </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>2m14s<span class="w">   </span><span class="m">172</span>.21.0.3<span class="w">     </span>kind-worker<span class="w">          </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+cilium-envoy-72wgk<span class="w">                           </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>2m14s<span class="w">   </span><span class="m">172</span>.21.0.3<span class="w">     </span>kind-worker<span class="w">          </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+cilium-envoy-dd9c8<span class="w">                           </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>2m14s<span class="w">   </span><span class="m">172</span>.21.0.4<span class="w">     </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+cilium-envoy-m9jsq<span class="w">                           </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>2m14s<span class="w">   </span><span class="m">172</span>.21.0.2<span class="w">     </span>kind-worker2<span class="w">         </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+cilium-k8lp8<span class="w">                                 </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>2m14s<span class="w">   </span><span class="m">172</span>.21.0.4<span class="w">     </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+cilium-operator-8d68cc6b5-78dnv<span class="w">              </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>2m14s<span class="w">   </span><span class="m">172</span>.21.0.3<span class="w">     </span>kind-worker<span class="w">          </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+cilium-pxks9<span class="w">                                 </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>2m14s<span class="w">   </span><span class="m">172</span>.21.0.2<span class="w">     </span>kind-worker2<span class="w">         </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+coredns-7d764666f9-l8rth<span class="w">                     </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>4m36s<span class="w">   </span><span class="m">10</span>.244.0.96<span class="w">    </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+coredns-7d764666f9-pmbvr<span class="w">                     </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>4m36s<span class="w">   </span><span class="m">10</span>.244.0.108<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+etcd-kind-control-plane<span class="w">                      </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>4m44s<span class="w">   </span><span class="m">172</span>.21.0.4<span class="w">     </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+kube-apiserver-kind-control-plane<span class="w">            </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>4m43s<span class="w">   </span><span class="m">172</span>.21.0.4<span class="w">     </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+kube-controller-manager-kind-control-plane<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>4m43s<span class="w">   </span><span class="m">172</span>.21.0.4<span class="w">     </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+kube-scheduler-kind-control-plane<span class="w">            </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>4m44s<span class="w">   </span><span class="m">172</span>.21.0.4<span class="w">     </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+</code></pre></div>
+
+<h3>Step 2.1: Run a smoke test before going deeper</h3>
+<p>TLDR: <strong>Don't run it unless you want to see a wall of text and time consuming. LOLL</strong></p>
+<p>Command to create wall of text and time consuming:</p>
+<div class="highlight"><pre><span></span><code>cilium<span class="w"> </span>connectivity<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+
+<p>Expected output (holy fucking shit, wall of text and time consuming, so I only put some here):</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>cilium<span class="w"> </span>connectivity<span class="w"> </span><span class="nb">test</span>
+ℹ️<span class="w">  </span>Monitor<span class="w"> </span>aggregation<span class="w"> </span>detected,<span class="w"> </span>will<span class="w"> </span>skip<span class="w"> </span>some<span class="w"> </span>flow<span class="w"> </span>validation<span class="w"> </span>steps
+✨<span class="w"> </span><span class="o">[</span>kind-kind<span class="o">]</span><span class="w"> </span>Creating<span class="w"> </span>namespace<span class="w"> </span>cilium-test-1<span class="w"> </span><span class="k">for</span><span class="w"> </span>connectivity<span class="w"> </span>check...
+✨<span class="w"> </span><span class="o">[</span>kind-kind<span class="o">]</span><span class="w"> </span>Deploying<span class="w"> </span>echo-same-node<span class="w"> </span>service...
+✨<span class="w"> </span><span class="o">[</span>kind-kind<span class="o">]</span><span class="w"> </span>Deploying<span class="w"> </span>DNS<span class="w"> </span><span class="nb">test</span><span class="w"> </span>server<span class="w"> </span>configmap...
+✨<span class="w"> </span><span class="o">[</span>kind-kind<span class="o">]</span><span class="w"> </span>Deploying<span class="w"> </span>same-node<span class="w"> </span>deployment...
+..................................................................
+<span class="o">[=]</span><span class="w"> </span><span class="o">[</span>cilium-test-1<span class="o">]</span><span class="w"> </span>Skipping<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="o">[</span>no-policies-from-outside<span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="m">2</span>/130<span class="o">]</span><span class="w"> </span><span class="o">(</span>skipped<span class="w"> </span>by<span class="w"> </span>condition<span class="o">)</span>
+<span class="o">[=]</span><span class="w"> </span><span class="o">[</span>cilium-test-1<span class="o">]</span><span class="w"> </span>Test<span class="w"> </span><span class="o">[</span>no-policies-extra<span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="m">3</span>/130<span class="o">]</span>
+....................................................................
+<span class="o">[=]</span><span class="w"> </span><span class="o">[</span>cilium-test-1<span class="o">]</span><span class="w"> </span>Skipping<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="o">[</span>seq-from-cidr-host-netns<span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="m">36</span>/130<span class="o">]</span><span class="w"> </span><span class="o">(</span>skipped<span class="w"> </span>by<span class="w"> </span>condition<span class="o">)</span>
+<span class="o">[=]</span><span class="w"> </span><span class="o">[</span>cilium-test-1<span class="o">]</span><span class="w"> </span>Test<span class="w"> </span><span class="o">[</span>echo-ingress-from-other-client-deny<span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="m">37</span>/130<span class="o">]</span>
+....................................................................
+<span class="o">[=]</span><span class="w"> </span><span class="o">[</span>cilium-test-1<span class="o">]</span><span class="w"> </span>Skipping<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="o">[</span>client-egress-tls-sni-random-wildcard-denied<span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="m">80</span>/130<span class="o">]</span><span class="w"> </span><span class="o">(</span>requires<span class="w"> </span>Cilium<span class="w"> </span>version<span class="w"> </span>&gt;<span class="o">=</span><span class="m">1</span>.20.0<span class="w"> </span>but<span class="w"> </span>running<span class="w"> </span><span class="m">1</span>.19.1<span class="o">)</span>
+<span class="o">[=]</span><span class="w"> </span><span class="o">[</span>cilium-test-1<span class="o">]</span><span class="w"> </span>Test<span class="w"> </span><span class="o">[</span>client-egress-tls-sni-double-wildcard<span class="o">]</span><span class="w"> </span><span class="o">[</span><span class="m">81</span>/130<span class="o">]</span>
+.........................
+✅<span class="w"> </span><span class="o">[</span>cilium-test-1<span class="o">]</span><span class="w"> </span>All<span class="w"> </span><span class="m">80</span><span class="w"> </span>tests<span class="w"> </span><span class="o">(</span><span class="m">695</span><span class="w"> </span>actions<span class="o">)</span><span class="w"> </span>successful,<span class="w"> </span><span class="m">50</span><span class="w"> </span>tests<span class="w"> </span>skipped,<span class="w"> </span><span class="m">0</span><span class="w"> </span>scenarios<span class="w"> </span>skipped.
+</code></pre></div>
+
+<p>This is the cheapest failure detector in the whole lab but it is time consuming. It validates common paths like:</p>
+<ul>
+<li>pod-to-pod on the same node</li>
+<li>pod-to-pod across nodes</li>
+<li>pod-to-service</li>
+<li>DNS</li>
+<li>policy paths</li>
+</ul>
+<p>If this fails, stop and fix the installation first. Do not continue to the tracing section while the base connectivity test is red.</p>
+<hr>
+<h2>4. Prove That Cilium Replaced kube-proxy</h2>
+<p>We want an explicit signal, not guesswork.</p>
+<p>Pick any Cilium agent pod:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">CILIUM_POD</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-l<span class="w"> </span>k8s-app<span class="o">=</span>cilium<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.items[0].metadata.name}&#39;</span><span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<p>Expected output:</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span><span class="nv">CILIUM_POD</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-l<span class="w"> </span>k8s-app<span class="o">=</span>cilium<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.items[0].metadata.name}&#39;</span><span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD</span><span class="s2">&quot;</span>
+cilium-24nnn
+</code></pre></div>
+
+<p>Any agent pod is fine for cluster-wide views like <code>status</code>, <code>bpf lb list</code>, or <code>identity list</code>. Those views should be consistent across agents. The node-specific nuance shows up later when we trace packets.</p>
+<p>Now inspect the agent status:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span>cilium-dbg<span class="w"> </span>status<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>KubeProxyReplacement
+</code></pre></div>
+
+<p>Expected output:</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span>cilium-dbg<span class="w"> </span>status<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>KubeProxyReplacement
+KubeProxyReplacement:<span class="w">    </span>True<span class="w">   </span><span class="o">[</span>eth0<span class="w">    </span><span class="m">172</span>.21.0.3<span class="w"> </span>fc00:f853:ccd:e793::3<span class="w"> </span>fe80::3016:cff:fe09:cb71<span class="w"> </span><span class="o">(</span>Direct<span class="w"> </span>Routing<span class="o">)]</span>
+</code></pre></div>
+
+<p>That line is much stronger evidence than "iptables looks short today".</p>
+<h3>A note about iptables</h3>
+<p>You can still inspect iptables if you want, but use it as a side observation, not as the primary proof:</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>kind-control-plane<span class="w"> </span>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-L<span class="w"> </span>-n
+</code></pre></div>
+
+<p>You may still see some rules depending on the environment. That does <strong>not</strong> invalidate the point. What matters is whether Kubernetes Service handling and policy enforcement are happening in the Cilium datapath.</p>
+<hr>
+<h2>5. Create Deterministic Cross-Node Workloads</h2>
+<p>Instead of <code>kubectl run</code> and hoping the scheduler spreads the pods out, pin them yourself for this lab.</p>
+<p>Create <code>cilium-demo.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-server</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-server</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">nodeName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kind-worker</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx:stable</span>
+<span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="nn">---</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Pod</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">curl-client</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">curl-client</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">nodeName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kind-worker2</span>
+<span class="w">  </span><span class="nt">containers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">curl</span>
+<span class="w">      </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">curlimages/curl</span>
+<span class="w">      </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;sleep&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;3600&quot;</span><span class="p p-Indicator">]</span>
+<span class="nn">---</span>
+<span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-svc</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-server</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+
+<p>Apply it:</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>cilium-demo.yaml<span class="w"> </span>
+pod/nginx-server<span class="w"> </span>created
+pod/curl-client<span class="w"> </span>created
+service/nginx-svc<span class="w"> </span>created
+<span class="c1"># Wait and check</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-o<span class="w"> </span>wide
+kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>nginx-svc
+</code></pre></div>
+
+<p>Expected:</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-o<span class="w"> </span>wide
+NAME<span class="w">           </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE<span class="w">   </span>IP<span class="w">             </span>NODE<span class="w">           </span>NOMINATED<span class="w"> </span>NODE<span class="w">   </span>READINESS<span class="w"> </span>GATES
+curl-client<span class="w">    </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>49s<span class="w">   </span><span class="m">10</span>.244.1.65<span class="w">    </span>kind-worker2<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+nginx-server<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>49s<span class="w">   </span><span class="m">10</span>.244.2.187<span class="w">   </span>kind-worker<span class="w">    </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+root@kienlt-lab-utilities:~#<span class="w"> </span>kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>nginx-svc
+NAME<span class="w">        </span>TYPE<span class="w">        </span>CLUSTER-IP<span class="w">     </span>EXTERNAL-IP<span class="w">   </span>PORT<span class="o">(</span>S<span class="o">)</span><span class="w">   </span>AGE
+nginx-svc<span class="w">   </span>ClusterIP<span class="w">   </span><span class="m">10</span>.108.51.80<span class="w">   </span>&lt;none&gt;<span class="w">        </span><span class="m">80</span>/TCP<span class="w">    </span>57s
+</code></pre></div>
+
+<ul>
+<li><code>nginx-server</code> runs on <code>kind-worker</code></li>
+<li><code>curl-client</code> runs on <code>kind-worker2</code></li>
+<li><code>nginx-svc</code> gets a <code>ClusterIP</code></li>
+</ul>
+<hr>
+<h2>6. Inspect the eBPF Service Map</h2>
+<p>Now that a real Service exists, inspect how Cilium programs it:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span>cilium-dbg<span class="w"> </span>bpf<span class="w"> </span>lb<span class="w"> </span>list
+</code></pre></div>
+
+<p>You should see entries for:</p>
+<ul>
+<li>the Kubernetes API Service</li>
+<li>CoreDNS</li>
+<li>your <code>nginx-svc</code></li>
+</ul>
+<p>The exact output varies, but conceptually it will look like:</p>
+<div class="highlight"><pre><span></span><code>SERVICE ADDRESS               BACKEND ADDRESS (REVNAT_ID) (SLOT)
+0.0.0.0:4000/TCP (0)          0.0.0.0:0 (18) (0) [HostPort, non-routable]                   
+10.100.124.85:0/ANY (0)       0.0.0.0:0 (0) (0) [ClusterIP, non-routable]                   
+0.0.0.0:4000/TCP (1)          10.244.2.191:8080/TCP (18) (1)                                
+10.108.51.80:80/TCP (0)       0.0.0.0:0 (20) (0) [ClusterIP, non-routable]                  
+
+...
+</code></pre></div>
+
+<p>That is the interesting bit: Service frontends and backends are in BPF maps, which is how Cilium can do Service translation without kube-proxy.</p>
+<hr>
+<h2>7. Trace Cross-Node Traffic</h2>
+<p>We want to prove 2 things:</p>
+<ol>
+<li>direct Pod IP traffic across nodes</li>
+<li>Service traffic through the eBPF load-balancer</li>
+</ol>
+<p>Find the Cilium agent on the destination node and, optionally, on the source node:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">CILIUM_POD_ON_DEST</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-l<span class="w"> </span>k8s-app<span class="o">=</span>cilium<span class="w"> </span>-o<span class="w"> </span>wide<span class="w"> </span>--no-headers<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;$7==&quot;kind-worker&quot;{print $1}&#39;</span><span class="k">)</span>
+<span class="nv">CILIUM_POD_ON_SRC</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-l<span class="w"> </span>k8s-app<span class="o">=</span>cilium<span class="w"> </span>-o<span class="w"> </span>wide<span class="w"> </span>--no-headers<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;$7==&quot;kind-worker2&quot;{print $1}&#39;</span><span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD_ON_DEST</span><span class="s2">&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD_ON_SRC</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<p>Why 2 pods?</p>
+<ul>
+<li>Monitor on <code>kind-worker</code> to inspect ingress handling and policy enforcement at the destination (<code>nginx-server</code>)</li>
+<li>Monitor on <code>kind-worker2</code> if you also want to catch <code>ClusterIP -&gt; Pod IP</code> translation, because Socket LB can translate the Service on the source node before the packet leaves it</li>
+</ul>
+<p>If you only want one monitor, start with the destination-side one. If you want the full picture for the Service request, run both.</p>
+<p>Open <strong>Terminal 1</strong> and start the destination-side monitor:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD_ON_DEST</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>cilium-dbg<span class="w"> </span>monitor<span class="w"> </span>--type<span class="w"> </span>trace<span class="w"> </span>--type<span class="w"> </span>drop<span class="w"> </span>--type<span class="w"> </span>policy-verdict
+</code></pre></div>
+
+<p>Optional: open <strong>Terminal 1B</strong> if you also want to watch the earlier source-side Service translation:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD_ON_SRC</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>cilium-dbg<span class="w"> </span>monitor<span class="w"> </span>--type<span class="w"> </span>trace<span class="w"> </span>--type<span class="w"> </span>drop<span class="w"> </span>--type<span class="w"> </span>policy-verdict
+</code></pre></div>
+
+<p>Open <strong>Terminal 2</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">NGINX_IP</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>nginx-server<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.podIP}&#39;</span><span class="k">)</span>
+<span class="nv">SVC_IP</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>nginx-svc<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.spec.clusterIP}&#39;</span><span class="k">)</span>
+
+kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>curl-client<span class="w"> </span>--<span class="w"> </span>curl<span class="w"> </span>-sS<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-w<span class="w"> </span><span class="s2">&quot;podIP:%{http_code}\n&quot;</span><span class="w"> </span>http://<span class="nv">$NGINX_IP</span>
+kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>curl-client<span class="w"> </span>--<span class="w"> </span>curl<span class="w"> </span>-sS<span class="w"> </span>-o<span class="w"> </span>/dev/null<span class="w"> </span>-w<span class="w"> </span><span class="s2">&quot;svcIP:%{http_code}\n&quot;</span><span class="w"> </span>http://<span class="nv">$SVC_IP</span>
+</code></pre></div>
+
+<p>Expected:</p>
+<div class="highlight"><pre><span></span><code>podIP:200
+svcIP:200
+</code></pre></div>
+
+<p>What this proves:</p>
+<ul>
+<li><code>podIP:200</code> shows <strong>cross-node Pod routing</strong> works</li>
+<li><code>svcIP:200</code> shows <strong>Service translation</strong> works with kube-proxy removed</li>
+</ul>
+<p>If you only run the destination-side monitor, you will mainly see the ingress path and policy verdicts near <code>nginx-server</code>. If you also run the source-side monitor, the <code>svcIP</code> request becomes more interesting because you can catch the earlier Service translation phase there.</p>
+<p>Do not try to match the output 1:1 with some screenshot on the internet because monitor output changes across versions. The important thing is:</p>
+<ul>
+<li>traffic is visible in the Cilium datapath</li>
+<li>the request succeeds</li>
+<li>no kube-proxy exists in the cluster</li>
+</ul>
+<p>That combination is the real proof.</p>
+<hr>
+<h2>8. IPAM in This Lab</h2>
+<p>This lab uses:</p>
+<div class="highlight"><pre><span></span><code>ipam.mode=kubernetes
+</code></pre></div>
+
+<p>That means Cilium uses the <strong>PodCIDRs assigned by Kubernetes on the <code>Node</code> objects</strong>. I chose this mode because it keeps the mental model simple on Kind.</p>
+<p>Check it:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>nodes<span class="w"> </span>-o<span class="w"> </span>custom-columns<span class="o">=</span>NODE:.metadata.name,PODCIDR:.spec.podCIDR
+</code></pre></div>
+
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>NODE<span class="w">                 </span>PODCIDR
+kind-control-plane<span class="w">   </span><span class="m">10</span>.244.0.0/24
+kind-worker<span class="w">          </span><span class="m">10</span>.244.1.0/24
+kind-worker2<span class="w">         </span><span class="m">10</span>.244.2.0/24
+</code></pre></div>
+
+<p>So the mental model for this lab is:</p>
+<ol>
+<li>Kubernetes gives each node a PodCIDR</li>
+<li>Cilium allocates Pod IPs from that per-node range</li>
+<li>Cilium still enforces policy and does Service load-balancing in eBPF</li>
+</ol>
+<h3>Wait, I thought Cilium uses <code>CiliumNode</code> CRDs for IPAM?</h3>
+<p>That is also true, but <strong>not in this exact lab mode</strong>.</p>
+<p>On many generic Cilium installs, the default is <strong>cluster-pool IPAM</strong>, where Cilium Operator assigns per-node PodCIDRs and you inspect that through <code>CiliumNode</code> resources.</p>
+<p>If you want to explore that mode in another lab, <code>kubectl get ciliumnodes -o yaml</code> is a great command. But for this Kind walkthrough, <code>ipam.mode=kubernetes</code> is the cleaner path.</p>
+<hr>
+<h2>9. Identity-Based Network Policy</h2>
+<p>Now let's use labels, not IPs, to block traffic.</p>
+<p>First, inspect identities:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span>cilium-dbg<span class="w"> </span>identity<span class="w"> </span>list
+</code></pre></div>
+
+<p>You should find identities associated with labels similar to:</p>
+<ul>
+<li><code>app=nginx-server</code></li>
+<li><code>app=curl-client</code></li>
+</ul>
+<p>Now create <code>deny-curl.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cilium.io/v2</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CiliumNetworkPolicy</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">deny-curl-to-nginx</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">endpointSelector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx-server</span>
+<span class="w">  </span><span class="nt">ingressDeny</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">fromEndpoints</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">matchLabels</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">curl-client</span>
+</code></pre></div>
+
+<p>Apply it:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>deny-curl.yaml
+</code></pre></div>
+
+<p>Important nuance: this policy does <strong>not</strong> put <code>nginx-server</code> into a full ingress default-deny posture. <code>ingressDeny</code> only adds an explicit deny for traffic from <code>app=curl-client</code> here. Because we did not add any <code>ingress</code> allow section, other sources remain allowed unless another policy restricts them.</p>
+<p>Test again:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>curl-client<span class="w"> </span>--<span class="w"> </span>curl<span class="w"> </span>-sS<span class="w"> </span>--connect-timeout<span class="w"> </span><span class="m">5</span><span class="w"> </span>--max-time<span class="w"> </span><span class="m">5</span><span class="w"> </span>http://<span class="nv">$NGINX_IP</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$?</span>
+</code></pre></div>
+
+<p>Expected result:</p>
+<ul>
+<li>the request fails</li>
+<li>the exit code is non-zero</li>
+<li>in the Cilium monitor, you should see <code>drop</code> or <code>policy-verdict</code> events</li>
+</ul>
+<p>That is the cool part: the policy decision is attached to the workload identity, not some fragile Pod IP you have to keep chasing after reschedules.</p>
+<p>Clean up:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>deny-curl.yaml
+kubectl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>cilium-demo.yaml
+</code></pre></div>
+
+<hr>
+<h2>10. Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Traditional CNI + kube-proxy</th>
+<th>Cilium in this lab</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CNI contract</td>
+<td>Binary + env vars + JSON</td>
+<td>Binary + env vars + JSON</td>
+</tr>
+<tr>
+<td>Datapath</td>
+<td>Linux routing + iptables/IPVS heavy lifting</td>
+<td>eBPF datapath</td>
+</tr>
+<tr>
+<td>Service routing</td>
+<td>kube-proxy</td>
+<td>Cilium eBPF load-balancer</td>
+</tr>
+<tr>
+<td>Network policy</td>
+<td>Often iptables-based</td>
+<td>Identity-aware eBPF policy</td>
+</tr>
+<tr>
+<td>IPAM</td>
+<td>Plugin-specific (<code>host-local</code>, etc.)</td>
+<td>Kubernetes PodCIDR mode in this lab</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td><code>tcpdump</code>, iptables logs</td>
+<td><code>cilium-dbg monitor</code>, Hubble</td>
+</tr>
+</tbody>
+</table>
+<p>The important takeaway is this:</p>
+<ul>
+<li><strong>Cilium does not replace the CNI spec</strong></li>
+<li><strong>Cilium replaces what happens behind that spec</strong></li>
+</ul>
+<p>Kubelet still says, "Hey CNI plugin, wire this Pod up." But once the Pod exists, Cilium can take over the interesting parts:</p>
+<ul>
+<li>Service translation</li>
+<li>policy enforcement</li>
+<li>cross-node datapath</li>
+<li>observability</li>
+</ul>
+<p>And when kube-proxy is removed, Cilium is not just "another CNI plugin". It becomes the thing driving a large part of the cluster network data plane.</p>
+<hr>
+<h2>11. Cilium Certified Associate (CCA) Exam</h2>
+<p>In case you are interest with, you can go to this link (my blog also xD):</p>
+<p><a href="https://blackmetalz.github.io/prepare-for-the-cilium-certified-associate-cca-exam.html">Prepare for the Cilium Certified Associate (CCA) Exam</a></p>
+<hr>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://docs.cilium.io/">Cilium Documentation</a></li>
+<li><a href="https://docs.cilium.io/en/stable/installation/kind/">Installation Using Kind</a></li>
+<li><a href="https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/">Kubernetes Without kube-proxy</a></li>
+<li><a href="https://docs.cilium.io/en/stable/network/kubernetes/ipam-cluster-pool.html">CRD-Backed by Cilium Cluster-Pool IPAM</a></li>
+<li><a href="https://docs.cilium.io/en/latest/network/concepts/ipam/cluster-pool/">Cluster Scope IPAM</a></li>
+<li><a href="https://docs.cilium.io/en/latest/cmdref/cilium_install.html">cilium install</a></li>
+<li><a href="https://docs.cilium.io/en/latest/cmdref/cilium_connectivity_test/">cilium connectivity test</a></li>
+<li><a href="https://docs.cilium.io/en/latest/cmdref/cilium-dbg_monitor.html">cilium-dbg monitor</a></li>
+<li><a href="https://docs.cilium.io/en/stable/cmdref/cilium-dbg_bpf_lb_list.html">cilium-dbg bpf lb list</a></li>
+<li><a href="https://docs.cilium.io/en/latest/cmdref/cilium-dbg_identity_list.html">cilium-dbg identity list</a></li>
+</ul>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2026-03-22T00:00:00+07:00">Sun 22 March 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://blackmetalz.github.io/tags.html#cilium-ref">cilium
+                    <span class="superscript">2</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#container-ref">container
+                    <span class="superscript">4</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#k8s-ref">k8s
+                    <span class="superscript">14</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#networking-ref">networking
+                    <span class="superscript">5</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://blackmetalz.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

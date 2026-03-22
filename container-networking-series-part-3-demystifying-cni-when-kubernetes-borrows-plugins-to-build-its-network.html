@@ -87,7 +87,7 @@
 </ul>
 <p>In the previous two posts, we performed a deep dive into Docker's <a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html">Ingress Flow</a> and <a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html">Egress Flow</a> by manually tinkering with <code>veth</code>, <code>iptables</code>, and <code>nsenter</code>.</p>
 <p>But in Kubernetes (K8s), thousands of Pods are created and destroyed continuously. Kubelet can't afford the manual labor of typing those commands for every single Pod. It needs an "assistant" to do the heavy lifting. That assistant is the <strong>CNI (Container Network Interface)</strong>.</p>
-<p>Today, we will "strip down" CNI by running it manually (by hand), without using any sophisticated CNI suites like Calico or Cilium.</p>
+<p>Today, we will learn about CNI by running it manually (by hand), without using any sophisticated CNI suites like Calico or Cilium.</p>
 <hr>
 <h2>1. Prerequisites (Setup)</h2>
 <p>To follow this lab on <strong>Ubuntu 24.04</strong>, you will need:</p>
@@ -393,7 +393,7 @@ kube-system<span class="w">          </span>coredns-7d764666f9-p94hv<span class=
 local-path-storage<span class="w">   </span>local-path-provisioner-67b8995b4b-qxhwt<span class="w">      </span><span class="m">0</span>/1<span class="w">     </span>Error<span class="w">     </span><span class="m">6</span><span class="w"> </span><span class="o">(</span>2m10s<span class="w"> </span>ago<span class="o">)</span><span class="w">   </span>2m35s<span class="w">   </span><span class="m">10</span>.249.0.3<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
 </code></pre></div>
 
-<p>So, we know where the IP assigned from!</p>
+<p>So, we know where the IP is assigned from!</p>
 <p><strong>The Pod lives! Here is what just happened:</strong></p>
 <p><img alt="cni flow" src="./images/2026/03/08.png"></p>
 <ol>
@@ -495,13 +495,13 @@ nsenter<span class="w"> </span>-t<span class="w"> </span><span class="nv">$PID</
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article">
                 <li><a href="https://blackmetalz.github.io/tags.html#container-ref">container
-                    <span class="superscript">3</span>
+                    <span class="superscript">4</span>
 </a></li>
                 <li><a href="https://blackmetalz.github.io/tags.html#k8s-ref">k8s
-                    <span class="superscript">13</span>
+                    <span class="superscript">14</span>
 </a></li>
                 <li><a href="https://blackmetalz.github.io/tags.html#networking-ref">networking
-                    <span class="superscript">4</span>
+                    <span class="superscript">5</span>
 </a></li>
             </ul>
 <h4>Contact</h4>

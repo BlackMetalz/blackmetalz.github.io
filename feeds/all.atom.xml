@@ -1,5 +1,622 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-03-21T00:00:00+07:00</updated><entry><title>[Container Networking Series - Part 3] Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network</title><link href="https://blackmetalz.github.io/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html" rel="alternate"/><published>2026-03-21T00:00:00+07:00</published><updated>2026-03-21T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-21:/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-03-22T00:00:00+07:00</updated><entry><title>[Container Networking Series - Part 4] How Cilium CNI works in K8S</title><link href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html" rel="alternate"/><published>2026-03-22T00:00:00+07:00</published><updated>2026-03-22T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-22:/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/container-networking-series-part-1-demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Demystifying Docker Networking: A Deep Dive into Bridge &amp;amp; veth&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/container-networking-series-part-2-demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Demystifying Docker Networking Egress: The Masquerade Magic&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html"&gt;Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;How Cilium CNI works in K8S&lt;/strong&gt; &lt;em&gt;(You are here)&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;p&gt;In &lt;a href="https://blackmetalz.github.io/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html"&gt;Part 3&lt;/a&gt;, we stripped the CNI flow down to bare metal: &lt;strong&gt;a binary + env vars + JSON on stdin&lt;/strong&gt;. That contract does not change with Cilium. Kubelet still calls a CNI plugin. What changes is what the plugin and its agent do after that call.&lt;/p&gt;
+&lt;p&gt;If you want a easier Kubernetes networking refresher before going deeper, I also wrote another intro-level post &lt;a href="https://blackmetalz.github.io/sharing-what-ive-learned-about-kubernetes-networking-part-2.html"&gt;back in 01-2025&lt;/a&gt;. Even beginner level can read it pretty well (I'm bad at that time xD)&lt;/p&gt;
+&lt;p&gt;One correction before we start: "Cilium means iptables is gone" is too simplistic. The more accurate version is:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Cilium can move &lt;strong&gt;Service load-balancing, policy enforcement, and a large part of the datapath&lt;/strong&gt; into &lt;strong&gt;eBPF&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Cilium can also &lt;strong&gt;replace kube-proxy&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Depending on the feature set and host config, you may still see some iptables rules on the node&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;So the real win is not "iptables disappears completely". The real win is that the hot Kubernetes networking path no longer depends on kube-proxy building giant iptables chains for every Service.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;1. Prerequisites (Setup)&lt;/h2&gt;
+&lt;p&gt;To follow this lab on &lt;strong&gt;Ubuntu 24.04&lt;/strong&gt;, you need those softwares installed:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Docker&lt;/strong&gt; to run Kind&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kind&lt;/strong&gt; to spin up a local multi-node cluster&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kubectl&lt;/strong&gt; to control the cluster&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cilium CLI&lt;/strong&gt; to install and validate Cilium&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;A host that can run kube-proxy-free Cilium on Kind&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;That last point matters. For Cilium's Socket LB and kube-proxy replacement on Kind, your host should have:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;cgroup v2 enabled&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Docker using &lt;strong&gt;private cgroup namespaces&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;A reasonably recent Linux kernel&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Quick checks with output from my lab:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;docker&lt;span class="w"&gt; &lt;/span&gt;info&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;grep&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;cgroup
+&lt;span class="w"&gt; &lt;/span&gt;Cgroup&lt;span class="w"&gt; &lt;/span&gt;Driver:&lt;span class="w"&gt; &lt;/span&gt;systemd
+&lt;span class="w"&gt; &lt;/span&gt;Cgroup&lt;span class="w"&gt; &lt;/span&gt;Version:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;cgroupns
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;stat&lt;span class="w"&gt; &lt;/span&gt;-fc&lt;span class="w"&gt; &lt;/span&gt;%T&lt;span class="w"&gt; &lt;/span&gt;/sys/fs/cgroup
+cgroup2fs
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If those 2 checks are wrong, fix the host first. Otherwise the cluster may come up, but kube-proxy replacement can fail in confusing ways.&lt;/p&gt;
+&lt;h3&gt;Install Cilium CLI&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;CILIUM_CLI_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;curl&lt;span class="w"&gt; &lt;/span&gt;-s&lt;span class="w"&gt; &lt;/span&gt;https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nv"&gt;CLI_ARCH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;amd64
+&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;uname&lt;span class="w"&gt; &lt;/span&gt;-m&lt;span class="k"&gt;)&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;aarch64&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;||&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;uname&lt;span class="w"&gt; &lt;/span&gt;-m&lt;span class="k"&gt;)&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;arm64&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nv"&gt;CLI_ARCH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;arm64
+&lt;span class="k"&gt;fi&lt;/span&gt;
+
+curl&lt;span class="w"&gt; &lt;/span&gt;-L&lt;span class="w"&gt; &lt;/span&gt;--fail&lt;span class="w"&gt; &lt;/span&gt;--remote-name-all&lt;span class="w"&gt; &lt;/span&gt;https://github.com/cilium/cilium-cli/releases/download/&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CILIUM_CLI_VERSION&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;/cilium-linux-&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CLI_ARCH&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.tar.gz&lt;span class="o"&gt;{&lt;/span&gt;,.sha256sum&lt;span class="o"&gt;}&lt;/span&gt;
+
+sha256sum&lt;span class="w"&gt; &lt;/span&gt;--check&lt;span class="w"&gt; &lt;/span&gt;cilium-linux-&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CLI_ARCH&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.tar.gz.sha256sum
+sudo&lt;span class="w"&gt; &lt;/span&gt;tar&lt;span class="w"&gt; &lt;/span&gt;xzvfC&lt;span class="w"&gt; &lt;/span&gt;cilium-linux-&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CLI_ARCH&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.tar.gz&lt;span class="w"&gt; &lt;/span&gt;/usr/local/bin
+rm&lt;span class="w"&gt; &lt;/span&gt;cilium-linux-&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CLI_ARCH&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;.tar.gz&lt;span class="o"&gt;{&lt;/span&gt;,.sha256sum&lt;span class="o"&gt;}&lt;/span&gt;
+
+cilium&lt;span class="w"&gt; &lt;/span&gt;version&lt;span class="w"&gt; &lt;/span&gt;--client
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected result: the CLI prints a client version successfully.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cilium-linux-amd64.tar.gz:&lt;span class="w"&gt; &lt;/span&gt;OK
+cilium
+cilium-cli:&lt;span class="w"&gt; &lt;/span&gt;v0.19.2&lt;span class="w"&gt; &lt;/span&gt;compiled&lt;span class="w"&gt; &lt;/span&gt;with&lt;span class="w"&gt; &lt;/span&gt;go1.25.5&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;linux/amd64
+cilium&lt;span class="w"&gt; &lt;/span&gt;image&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;default&lt;span class="o"&gt;)&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;v1.19.1
+cilium&lt;span class="w"&gt; &lt;/span&gt;image&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;stable&lt;span class="o"&gt;)&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;v1.19.1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;hr&gt;
+&lt;h2&gt;2. Decoding the Core Concepts&lt;/h2&gt;
+&lt;h3&gt;What exactly is eBPF?&lt;/h3&gt;
+&lt;p&gt;Think of eBPF as a way to run &lt;strong&gt;small, verified programs inside the Linux kernel&lt;/strong&gt;. You do not rebuild the kernel. You do not reboot the machine. You load a program, the kernel verifies it, then attaches it to specific hooks in the networking path.&lt;/p&gt;
+&lt;p&gt;That means packets can be inspected, forwarded, dropped, NATed, or load-balanced &lt;strong&gt;inside kernel space&lt;/strong&gt;, without punting every decision to userspace tools.&lt;/p&gt;
+&lt;h3&gt;What changes when the CNI is Cilium?&lt;/h3&gt;
+&lt;p&gt;With a more traditional K8S setup, the flow often looks like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Pod -&amp;gt; veth -&amp;gt; routing -&amp;gt; kube-proxy / iptables / IPVS -&amp;gt; destination
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;With Cilium, the flow becomes more like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Pod -&amp;gt; veth -&amp;gt; Cilium eBPF datapath -&amp;gt; destination
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;More precisely, Cilium can use &lt;strong&gt;TC(Traffic Control) hooks&lt;/strong&gt;, &lt;strong&gt;socket-level load-balancing&lt;/strong&gt;, and in some cases &lt;strong&gt;XDP(eXpress Data Path)&lt;/strong&gt;, depending on which feature is in play.&lt;/p&gt;
+&lt;h3&gt;Cilium can replace kube-proxy&lt;/h3&gt;
+&lt;p&gt;In a standard cluster, &lt;code&gt;kube-proxy&lt;/code&gt; watches Services and installs iptables or IP Virtual Server (IPVS) rules so &lt;code&gt;ClusterIP&lt;/code&gt;, &lt;code&gt;NodePort&lt;/code&gt;, and friends actually work.&lt;/p&gt;
+&lt;p&gt;In a kube-proxy-free Cilium cluster, Cilium does that job itself. It stores Service and backend mappings in &lt;strong&gt;BPF maps&lt;/strong&gt;, so when traffic hits a Service IP, the translation happens in the eBPF datapath instead of an iptables chain.&lt;/p&gt;
+&lt;p&gt;That is why in this lab we explicitly disable kube-proxy and tell Cilium to take over.&lt;/p&gt;
+&lt;h3&gt;Cilium Identity&lt;/h3&gt;
+&lt;p&gt;This is one of Cilium's killer ideas.&lt;/p&gt;
+&lt;p&gt;Instead of treating workloads as "just IP addresses", Cilium assigns them &lt;strong&gt;security identities&lt;/strong&gt; derived from labels. Policies are then evaluated against identities, not just raw IPs.&lt;/p&gt;
+&lt;p&gt;That matters because Pod IPs are ephemeral. Labels are usually a better description of intent.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;3. Lab: Seeing Cilium in Action&lt;/h2&gt;
+&lt;p&gt;This walkthrough intentionally uses:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Kind&lt;/strong&gt; as the cluster runtime&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;No default CNI&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;No kube-proxy&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cilium as both CNI and Service datapath&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We will also pin the demo pods to &lt;strong&gt;different worker nodes&lt;/strong&gt; so cross-node traffic is guaranteed instead of being left to scheduler luck.&lt;/p&gt;
+&lt;h3&gt;Step 1: Create a Kind cluster for Cilium&lt;/h3&gt;
+&lt;p&gt;Create &lt;code&gt;kind-cilium-config.yaml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;Cluster&lt;/span&gt;
+&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;kind.x-k8s.io/v1alpha4&lt;/span&gt;
+&lt;span class="nt"&gt;networking&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;disableDefaultCNI&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;true&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;kubeProxyMode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;none&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;podSubnet&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10.244.0.0/16&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;serviceSubnet&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10.96.0.0/12&amp;quot;&lt;/span&gt;
+&lt;span class="nt"&gt;nodes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;role&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;control-plane&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;role&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;worker&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;role&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;worker&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Recreate the cluster:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kind&lt;span class="w"&gt; &lt;/span&gt;delete&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;kind&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&amp;gt;/dev/null
+kind&lt;span class="w"&gt; &lt;/span&gt;create&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;--config&lt;span class="w"&gt; &lt;/span&gt;kind-cilium-config.yaml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kind&lt;span class="w"&gt; &lt;/span&gt;create&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;--config&lt;span class="w"&gt; &lt;/span&gt;kind-cilium-config.yaml
+Creating&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;kind&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;...
+&lt;span class="w"&gt; &lt;/span&gt;✓&lt;span class="w"&gt; &lt;/span&gt;Ensuring&lt;span class="w"&gt; &lt;/span&gt;node&lt;span class="w"&gt; &lt;/span&gt;image&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;kindest/node:v1.35.0&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;🖼
+&lt;span class="w"&gt; &lt;/span&gt;✓&lt;span class="w"&gt; &lt;/span&gt;Preparing&lt;span class="w"&gt; &lt;/span&gt;nodes&lt;span class="w"&gt; &lt;/span&gt;📦&lt;span class="w"&gt; &lt;/span&gt;📦&lt;span class="w"&gt; &lt;/span&gt;📦&lt;span class="w"&gt;  &lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;✓&lt;span class="w"&gt; &lt;/span&gt;Writing&lt;span class="w"&gt; &lt;/span&gt;configuration&lt;span class="w"&gt; &lt;/span&gt;📜&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;✓&lt;span class="w"&gt; &lt;/span&gt;Starting&lt;span class="w"&gt; &lt;/span&gt;control-plane&lt;span class="w"&gt; &lt;/span&gt;🕹️&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;✓&lt;span class="w"&gt; &lt;/span&gt;Installing&lt;span class="w"&gt; &lt;/span&gt;StorageClass&lt;span class="w"&gt; &lt;/span&gt;💾&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;✓&lt;span class="w"&gt; &lt;/span&gt;Joining&lt;span class="w"&gt; &lt;/span&gt;worker&lt;span class="w"&gt; &lt;/span&gt;nodes&lt;span class="w"&gt; &lt;/span&gt;🚜&lt;span class="w"&gt; &lt;/span&gt;
+Set&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;context&lt;span class="w"&gt; &lt;/span&gt;to&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;kind-kind&amp;quot;&lt;/span&gt;
+You&lt;span class="w"&gt; &lt;/span&gt;can&lt;span class="w"&gt; &lt;/span&gt;now&lt;span class="w"&gt; &lt;/span&gt;use&lt;span class="w"&gt; &lt;/span&gt;your&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;with:
+
+kubectl&lt;span class="w"&gt; &lt;/span&gt;cluster-info&lt;span class="w"&gt; &lt;/span&gt;--context&lt;span class="w"&gt; &lt;/span&gt;kind-kind
+
+Have&lt;span class="w"&gt; &lt;/span&gt;a&lt;span class="w"&gt; &lt;/span&gt;nice&lt;span class="w"&gt; &lt;/span&gt;day!&lt;span class="w"&gt; &lt;/span&gt;👋
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Quick checks:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;k&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;nodes
+k&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;ds&lt;span class="w"&gt; &lt;/span&gt;kube-proxy
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Nodes are &lt;code&gt;NotReady&lt;/code&gt; because there is no CNI yet&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;kube-proxy&lt;/code&gt; is absent because we explicitly disabled it&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;k&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;nodes
+NAME&lt;span class="w"&gt;                 &lt;/span&gt;STATUS&lt;span class="w"&gt;     &lt;/span&gt;ROLES&lt;span class="w"&gt;           &lt;/span&gt;AGE&lt;span class="w"&gt;   &lt;/span&gt;VERSION
+kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;NotReady&lt;span class="w"&gt;   &lt;/span&gt;control-plane&lt;span class="w"&gt;   &lt;/span&gt;32s&lt;span class="w"&gt;   &lt;/span&gt;v1.35.0
+kind-worker&lt;span class="w"&gt;          &lt;/span&gt;NotReady&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;          &lt;/span&gt;18s&lt;span class="w"&gt;   &lt;/span&gt;v1.35.0
+kind-worker2&lt;span class="w"&gt;         &lt;/span&gt;NotReady&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;          &lt;/span&gt;18s&lt;span class="w"&gt;   &lt;/span&gt;v1.35.0
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;k&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;ds&lt;span class="w"&gt; &lt;/span&gt;kube-proxy
+Error&lt;span class="w"&gt; &lt;/span&gt;from&lt;span class="w"&gt; &lt;/span&gt;server&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;NotFound&lt;span class="o"&gt;)&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;daemonsets.apps&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;kube-proxy&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;not&lt;span class="w"&gt; &lt;/span&gt;found
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Step 2: Install Cilium in kube-proxy-free mode&lt;/h3&gt;
+&lt;p&gt;This is the most important step, so be explicit instead of relying on defaults.&lt;/p&gt;
+&lt;p&gt;First, get the control-plane container IP. In kube-proxy-free mode, Cilium needs a direct API server address from the start:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;API_SERVER_IP&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;docker&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kind-control-plane&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$API_SERVER_IP&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;API_SERVER_IP&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;docker&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kind-control-plane&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$API_SERVER_IP&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="m"&gt;172&lt;/span&gt;.21.0.4
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;docker&lt;span class="w"&gt; &lt;/span&gt;ps
+CONTAINER&lt;span class="w"&gt; &lt;/span&gt;ID&lt;span class="w"&gt;   &lt;/span&gt;IMAGE&lt;span class="w"&gt;                  &lt;/span&gt;COMMAND&lt;span class="w"&gt;                  &lt;/span&gt;CREATED&lt;span class="w"&gt;              &lt;/span&gt;STATUS&lt;span class="w"&gt;              &lt;/span&gt;PORTS&lt;span class="w"&gt;                       &lt;/span&gt;NAMES
+c4f449135b8a&lt;span class="w"&gt;   &lt;/span&gt;kindest/node:v1.35.0&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/usr/local/bin/entr…&amp;quot;&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;About&lt;span class="w"&gt; &lt;/span&gt;a&lt;span class="w"&gt; &lt;/span&gt;minute&lt;span class="w"&gt; &lt;/span&gt;ago&lt;span class="w"&gt;   &lt;/span&gt;Up&lt;span class="w"&gt; &lt;/span&gt;About&lt;span class="w"&gt; &lt;/span&gt;a&lt;span class="w"&gt; &lt;/span&gt;minute&lt;span class="w"&gt;                               &lt;/span&gt;kind-worker
+8d1c2dc19bf7&lt;span class="w"&gt;   &lt;/span&gt;kindest/node:v1.35.0&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/usr/local/bin/entr…&amp;quot;&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;About&lt;span class="w"&gt; &lt;/span&gt;a&lt;span class="w"&gt; &lt;/span&gt;minute&lt;span class="w"&gt; &lt;/span&gt;ago&lt;span class="w"&gt;   &lt;/span&gt;Up&lt;span class="w"&gt; &lt;/span&gt;About&lt;span class="w"&gt; &lt;/span&gt;a&lt;span class="w"&gt; &lt;/span&gt;minute&lt;span class="w"&gt;                               &lt;/span&gt;kind-worker2
+b3b9d1736252&lt;span class="w"&gt;   &lt;/span&gt;kindest/node:v1.35.0&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/usr/local/bin/entr…&amp;quot;&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;About&lt;span class="w"&gt; &lt;/span&gt;a&lt;span class="w"&gt; &lt;/span&gt;minute&lt;span class="w"&gt; &lt;/span&gt;ago&lt;span class="w"&gt;   &lt;/span&gt;Up&lt;span class="w"&gt; &lt;/span&gt;About&lt;span class="w"&gt; &lt;/span&gt;a&lt;span class="w"&gt; &lt;/span&gt;minute&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;127&lt;/span&gt;.0.0.1:39803-&amp;gt;6443/tcp&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now install Cilium, you will notice why cilium cli is able to interact without K8s cluster?
+It used the same way as &lt;code&gt;kubectl&lt;/code&gt; or &lt;code&gt;helm&lt;/code&gt; interact with K8s cluster.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cilium&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--set&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;kubeProxyReplacement&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;true&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--set&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;k8sServiceHost&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;API_SERVER_IP&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--set&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;k8sServicePort&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;6443&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--set&lt;span class="w"&gt; &lt;/span&gt;ipam.mode&lt;span class="o"&gt;=&lt;/span&gt;kubernetes
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;🔮&lt;span class="w"&gt; &lt;/span&gt;Auto-detected&lt;span class="w"&gt; &lt;/span&gt;Kubernetes&lt;span class="w"&gt; &lt;/span&gt;kind:&lt;span class="w"&gt; &lt;/span&gt;kind
+ℹ️&lt;span class="w"&gt;  &lt;/span&gt;Using&lt;span class="w"&gt; &lt;/span&gt;Cilium&lt;span class="w"&gt; &lt;/span&gt;version&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.19.1
+🔮&lt;span class="w"&gt; &lt;/span&gt;Auto-detected&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;name:&lt;span class="w"&gt; &lt;/span&gt;kind-kind
+ℹ️&lt;span class="w"&gt;  &lt;/span&gt;Detecting&lt;span class="w"&gt; &lt;/span&gt;real&lt;span class="w"&gt; &lt;/span&gt;Kubernetes&lt;span class="w"&gt; &lt;/span&gt;API&lt;span class="w"&gt; &lt;/span&gt;server&lt;span class="w"&gt; &lt;/span&gt;addr&lt;span class="w"&gt; &lt;/span&gt;and&lt;span class="w"&gt; &lt;/span&gt;port&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;Kind
+🔮&lt;span class="w"&gt; &lt;/span&gt;Auto-detected&lt;span class="w"&gt; &lt;/span&gt;kube-proxy&lt;span class="w"&gt; &lt;/span&gt;has&lt;span class="w"&gt; &lt;/span&gt;not&lt;span class="w"&gt; &lt;/span&gt;been&lt;span class="w"&gt; &lt;/span&gt;installed
+ℹ️&lt;span class="w"&gt;  &lt;/span&gt;Cilium&lt;span class="w"&gt; &lt;/span&gt;will&lt;span class="w"&gt; &lt;/span&gt;fully&lt;span class="w"&gt; &lt;/span&gt;replace&lt;span class="w"&gt; &lt;/span&gt;all&lt;span class="w"&gt; &lt;/span&gt;functionalities&lt;span class="w"&gt; &lt;/span&gt;of&lt;span class="w"&gt; &lt;/span&gt;kube-proxy
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Wait for it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cilium&lt;span class="w"&gt; &lt;/span&gt;status&lt;span class="w"&gt; &lt;/span&gt;--wait
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;cilium&lt;span class="w"&gt; &lt;/span&gt;status
+&lt;span class="w"&gt;    &lt;/span&gt;/¯¯&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;/¯¯&lt;span class="se"&gt;\_&lt;/span&gt;_/¯¯&lt;span class="se"&gt;\ &lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;Cilium:&lt;span class="w"&gt;             &lt;/span&gt;OK
+&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\_&lt;/span&gt;_/¯¯&lt;span class="se"&gt;\_&lt;/span&gt;_/&lt;span class="w"&gt;    &lt;/span&gt;Operator:&lt;span class="w"&gt;           &lt;/span&gt;OK
+&lt;span class="w"&gt; &lt;/span&gt;/¯¯&lt;span class="se"&gt;\_&lt;/span&gt;_/¯¯&lt;span class="se"&gt;\ &lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;Envoy&lt;span class="w"&gt; &lt;/span&gt;DaemonSet:&lt;span class="w"&gt;    &lt;/span&gt;OK
+&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\_&lt;/span&gt;_/¯¯&lt;span class="se"&gt;\_&lt;/span&gt;_/&lt;span class="w"&gt;    &lt;/span&gt;Hubble&lt;span class="w"&gt; &lt;/span&gt;Relay:&lt;span class="w"&gt;       &lt;/span&gt;disabled
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="se"&gt;\_&lt;/span&gt;_/&lt;span class="w"&gt;       &lt;/span&gt;ClusterMesh:&lt;span class="w"&gt;        &lt;/span&gt;disabled
+
+DaemonSet&lt;span class="w"&gt;              &lt;/span&gt;cilium&lt;span class="w"&gt;                   &lt;/span&gt;Desired:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;,&lt;span class="w"&gt; &lt;/span&gt;Ready:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;/3,&lt;span class="w"&gt; &lt;/span&gt;Available:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;/3
+DaemonSet&lt;span class="w"&gt;              &lt;/span&gt;cilium-envoy&lt;span class="w"&gt;             &lt;/span&gt;Desired:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;,&lt;span class="w"&gt; &lt;/span&gt;Ready:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;/3,&lt;span class="w"&gt; &lt;/span&gt;Available:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;/3
+Deployment&lt;span class="w"&gt;             &lt;/span&gt;cilium-operator&lt;span class="w"&gt;          &lt;/span&gt;Desired:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;,&lt;span class="w"&gt; &lt;/span&gt;Ready:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1,&lt;span class="w"&gt; &lt;/span&gt;Available:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1
+Containers:&lt;span class="w"&gt;            &lt;/span&gt;cilium&lt;span class="w"&gt;                   &lt;/span&gt;Running:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;
+&lt;span class="w"&gt;                       &lt;/span&gt;cilium-envoy&lt;span class="w"&gt;             &lt;/span&gt;Running:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;
+&lt;span class="w"&gt;                       &lt;/span&gt;cilium-operator&lt;span class="w"&gt;          &lt;/span&gt;Running:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;
+&lt;span class="w"&gt;                       &lt;/span&gt;clustermesh-apiserver&lt;span class="w"&gt;    &lt;/span&gt;
+&lt;span class="w"&gt;                       &lt;/span&gt;hubble-relay&lt;span class="w"&gt;             &lt;/span&gt;
+Cluster&lt;span class="w"&gt; &lt;/span&gt;Pods:&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;/3&lt;span class="w"&gt; &lt;/span&gt;managed&lt;span class="w"&gt; &lt;/span&gt;by&lt;span class="w"&gt; &lt;/span&gt;Cilium
+Helm&lt;span class="w"&gt; &lt;/span&gt;chart&lt;span class="w"&gt; &lt;/span&gt;version:&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.19.1
+Image&lt;span class="w"&gt; &lt;/span&gt;versions&lt;span class="w"&gt;         &lt;/span&gt;cilium&lt;span class="w"&gt;             &lt;/span&gt;quay.io/cilium/cilium:v1.19.1@sha256:41f1f74a0000de8656f1de4088ea00c8f2d49d6edea579034c73c5fd5fe01792:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;
+&lt;span class="w"&gt;                       &lt;/span&gt;cilium-envoy&lt;span class="w"&gt;       &lt;/span&gt;quay.io/cilium/cilium-envoy:v1.35.9-1770979049-232ed4a26881e4ab4f766f251f258ed424fff663@sha256:8188114a2768b5f49d6ce58e168b20d765e0fbc64eee0d83241aa2b150ccd788:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;
+&lt;span class="w"&gt;                       &lt;/span&gt;cilium-operator&lt;span class="w"&gt;    &lt;/span&gt;quay.io/cilium/operator-generic:v1.19.1@sha256:e7278d763e448bf6c184b0682cf98cdca078d58a27e1b2f3c906792670aa211a:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Then verify the cluster is alive:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;k&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;nodes
+k&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;wide
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected result:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;All nodes become &lt;code&gt;Ready&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;You see a Cilium agent pod on each node&lt;/li&gt;
+&lt;li&gt;You see the Cilium operator running&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;k&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;nodes
+NAME&lt;span class="w"&gt;                 &lt;/span&gt;STATUS&lt;span class="w"&gt;   &lt;/span&gt;ROLES&lt;span class="w"&gt;           &lt;/span&gt;AGE&lt;span class="w"&gt;     &lt;/span&gt;VERSION
+kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;Ready&lt;span class="w"&gt;    &lt;/span&gt;control-plane&lt;span class="w"&gt;   &lt;/span&gt;4m41s&lt;span class="w"&gt;   &lt;/span&gt;v1.35.0
+kind-worker&lt;span class="w"&gt;          &lt;/span&gt;Ready&lt;span class="w"&gt;    &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;          &lt;/span&gt;4m27s&lt;span class="w"&gt;   &lt;/span&gt;v1.35.0
+kind-worker2&lt;span class="w"&gt;         &lt;/span&gt;Ready&lt;span class="w"&gt;    &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;          &lt;/span&gt;4m27s&lt;span class="w"&gt;   &lt;/span&gt;v1.35.0
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;k&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;wide
+NAME&lt;span class="w"&gt;                                         &lt;/span&gt;READY&lt;span class="w"&gt;   &lt;/span&gt;STATUS&lt;span class="w"&gt;    &lt;/span&gt;RESTARTS&lt;span class="w"&gt;   &lt;/span&gt;AGE&lt;span class="w"&gt;     &lt;/span&gt;IP&lt;span class="w"&gt;             &lt;/span&gt;NODE&lt;span class="w"&gt;                 &lt;/span&gt;NOMINATED&lt;span class="w"&gt; &lt;/span&gt;NODE&lt;span class="w"&gt;   &lt;/span&gt;READINESS&lt;span class="w"&gt; &lt;/span&gt;GATES
+cilium-24nnn&lt;span class="w"&gt;                                 &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;2m14s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.21.0.3&lt;span class="w"&gt;     &lt;/span&gt;kind-worker&lt;span class="w"&gt;          &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+cilium-envoy-72wgk&lt;span class="w"&gt;                           &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;2m14s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.21.0.3&lt;span class="w"&gt;     &lt;/span&gt;kind-worker&lt;span class="w"&gt;          &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+cilium-envoy-dd9c8&lt;span class="w"&gt;                           &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;2m14s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.21.0.4&lt;span class="w"&gt;     &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+cilium-envoy-m9jsq&lt;span class="w"&gt;                           &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;2m14s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.21.0.2&lt;span class="w"&gt;     &lt;/span&gt;kind-worker2&lt;span class="w"&gt;         &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+cilium-k8lp8&lt;span class="w"&gt;                                 &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;2m14s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.21.0.4&lt;span class="w"&gt;     &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+cilium-operator-8d68cc6b5-78dnv&lt;span class="w"&gt;              &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;2m14s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.21.0.3&lt;span class="w"&gt;     &lt;/span&gt;kind-worker&lt;span class="w"&gt;          &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+cilium-pxks9&lt;span class="w"&gt;                                 &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;2m14s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.21.0.2&lt;span class="w"&gt;     &lt;/span&gt;kind-worker2&lt;span class="w"&gt;         &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+coredns-7d764666f9-l8rth&lt;span class="w"&gt;                     &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;4m36s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.0.96&lt;span class="w"&gt;    &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+coredns-7d764666f9-pmbvr&lt;span class="w"&gt;                     &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;4m36s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.0.108&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+etcd-kind-control-plane&lt;span class="w"&gt;                      &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;4m44s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.21.0.4&lt;span class="w"&gt;     &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+kube-apiserver-kind-control-plane&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;4m43s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.21.0.4&lt;span class="w"&gt;     &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+kube-controller-manager-kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;4m43s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.21.0.4&lt;span class="w"&gt;     &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+kube-scheduler-kind-control-plane&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;4m44s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.21.0.4&lt;span class="w"&gt;     &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Step 2.1: Run a smoke test before going deeper&lt;/h3&gt;
+&lt;p&gt;TLDR: &lt;strong&gt;Don't run it unless you want to see a wall of text and time consuming. LOLL&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Command to create wall of text and time consuming:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cilium&lt;span class="w"&gt; &lt;/span&gt;connectivity&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;test&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected output (holy fucking shit, wall of text and time consuming, so I only put some here):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;cilium&lt;span class="w"&gt; &lt;/span&gt;connectivity&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;test&lt;/span&gt;
+ℹ️&lt;span class="w"&gt;  &lt;/span&gt;Monitor&lt;span class="w"&gt; &lt;/span&gt;aggregation&lt;span class="w"&gt; &lt;/span&gt;detected,&lt;span class="w"&gt; &lt;/span&gt;will&lt;span class="w"&gt; &lt;/span&gt;skip&lt;span class="w"&gt; &lt;/span&gt;some&lt;span class="w"&gt; &lt;/span&gt;flow&lt;span class="w"&gt; &lt;/span&gt;validation&lt;span class="w"&gt; &lt;/span&gt;steps
+✨&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;kind-kind&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Creating&lt;span class="w"&gt; &lt;/span&gt;namespace&lt;span class="w"&gt; &lt;/span&gt;cilium-test-1&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;connectivity&lt;span class="w"&gt; &lt;/span&gt;check...
+✨&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;kind-kind&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Deploying&lt;span class="w"&gt; &lt;/span&gt;echo-same-node&lt;span class="w"&gt; &lt;/span&gt;service...
+✨&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;kind-kind&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Deploying&lt;span class="w"&gt; &lt;/span&gt;DNS&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;test&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;server&lt;span class="w"&gt; &lt;/span&gt;configmap...
+✨&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;kind-kind&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Deploying&lt;span class="w"&gt; &lt;/span&gt;same-node&lt;span class="w"&gt; &lt;/span&gt;deployment...
+..................................................................
+&lt;span class="o"&gt;[=]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;cilium-test-1&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Skipping&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;test&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;no-policies-from-outside&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;/130&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;skipped&lt;span class="w"&gt; &lt;/span&gt;by&lt;span class="w"&gt; &lt;/span&gt;condition&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="o"&gt;[=]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;cilium-test-1&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Test&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;no-policies-extra&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;/130&lt;span class="o"&gt;]&lt;/span&gt;
+....................................................................
+&lt;span class="o"&gt;[=]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;cilium-test-1&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Skipping&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;test&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;seq-from-cidr-host-netns&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;36&lt;/span&gt;/130&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;skipped&lt;span class="w"&gt; &lt;/span&gt;by&lt;span class="w"&gt; &lt;/span&gt;condition&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="o"&gt;[=]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;cilium-test-1&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Test&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;echo-ingress-from-other-client-deny&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;37&lt;/span&gt;/130&lt;span class="o"&gt;]&lt;/span&gt;
+....................................................................
+&lt;span class="o"&gt;[=]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;cilium-test-1&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Skipping&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;test&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;client-egress-tls-sni-random-wildcard-denied&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;80&lt;/span&gt;/130&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;requires&lt;span class="w"&gt; &lt;/span&gt;Cilium&lt;span class="w"&gt; &lt;/span&gt;version&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.20.0&lt;span class="w"&gt; &lt;/span&gt;but&lt;span class="w"&gt; &lt;/span&gt;running&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.19.1&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="o"&gt;[=]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;cilium-test-1&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Test&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;client-egress-tls-sni-double-wildcard&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;81&lt;/span&gt;/130&lt;span class="o"&gt;]&lt;/span&gt;
+.........................
+✅&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;cilium-test-1&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;All&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;80&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;tests&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;695&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;actions&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;successful,&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;50&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;tests&lt;span class="w"&gt; &lt;/span&gt;skipped,&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;scenarios&lt;span class="w"&gt; &lt;/span&gt;skipped.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is the cheapest failure detector in the whole lab but it is time consuming. It validates common paths like:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;pod-to-pod on the same node&lt;/li&gt;
+&lt;li&gt;pod-to-pod across nodes&lt;/li&gt;
+&lt;li&gt;pod-to-service&lt;/li&gt;
+&lt;li&gt;DNS&lt;/li&gt;
+&lt;li&gt;policy paths&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;If this fails, stop and fix the installation first. Do not continue to the tracing section while the base connectivity test is red.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;4. Prove That Cilium Replaced kube-proxy&lt;/h2&gt;
+&lt;p&gt;We want an explicit signal, not guesswork.&lt;/p&gt;
+&lt;p&gt;Pick any Cilium agent pod:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;CILIUM_POD&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;k8s-app&lt;span class="o"&gt;=&lt;/span&gt;cilium&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;jsonpath&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{.items[0].metadata.name}&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CILIUM_POD&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;CILIUM_POD&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;k8s-app&lt;span class="o"&gt;=&lt;/span&gt;cilium&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;jsonpath&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{.items[0].metadata.name}&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CILIUM_POD&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+cilium-24nnn
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Any agent pod is fine for cluster-wide views like &lt;code&gt;status&lt;/code&gt;, &lt;code&gt;bpf lb list&lt;/code&gt;, or &lt;code&gt;identity list&lt;/code&gt;. Those views should be consistent across agents. The node-specific nuance shows up later when we trace packets.&lt;/p&gt;
+&lt;p&gt;Now inspect the agent status:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CILIUM_POD&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--&lt;span class="w"&gt; &lt;/span&gt;cilium-dbg&lt;span class="w"&gt; &lt;/span&gt;status&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;grep&lt;span class="w"&gt; &lt;/span&gt;KubeProxyReplacement
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CILIUM_POD&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--&lt;span class="w"&gt; &lt;/span&gt;cilium-dbg&lt;span class="w"&gt; &lt;/span&gt;status&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;grep&lt;span class="w"&gt; &lt;/span&gt;KubeProxyReplacement
+KubeProxyReplacement:&lt;span class="w"&gt;    &lt;/span&gt;True&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;eth0&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.21.0.3&lt;span class="w"&gt; &lt;/span&gt;fc00:f853:ccd:e793::3&lt;span class="w"&gt; &lt;/span&gt;fe80::3016:cff:fe09:cb71&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;Direct&lt;span class="w"&gt; &lt;/span&gt;Routing&lt;span class="o"&gt;)]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That line is much stronger evidence than "iptables looks short today".&lt;/p&gt;
+&lt;h3&gt;A note about iptables&lt;/h3&gt;
+&lt;p&gt;You can still inspect iptables if you want, but use it as a side observation, not as the primary proof:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;docker&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kind-control-plane&lt;span class="w"&gt; &lt;/span&gt;iptables&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;nat&lt;span class="w"&gt; &lt;/span&gt;-L&lt;span class="w"&gt; &lt;/span&gt;-n
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You may still see some rules depending on the environment. That does &lt;strong&gt;not&lt;/strong&gt; invalidate the point. What matters is whether Kubernetes Service handling and policy enforcement are happening in the Cilium datapath.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;5. Create Deterministic Cross-Node Workloads&lt;/h2&gt;
+&lt;p&gt;Instead of &lt;code&gt;kubectl run&lt;/code&gt; and hoping the scheduler spreads the pods out, pin them yourself for this lab.&lt;/p&gt;
+&lt;p&gt;Create &lt;code&gt;cilium-demo.yaml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;v1&lt;/span&gt;
+&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;Pod&lt;/span&gt;
+&lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;nginx-server&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;labels&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;app&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;nginx-server&lt;/span&gt;
+&lt;span class="nt"&gt;spec&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;nodeName&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;kind-worker&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;containers&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;nginx&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;nginx:stable&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;containerPort&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;80&lt;/span&gt;
+&lt;span class="nn"&gt;---&lt;/span&gt;
+&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;v1&lt;/span&gt;
+&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;Pod&lt;/span&gt;
+&lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;curl-client&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;labels&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;app&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;curl-client&lt;/span&gt;
+&lt;span class="nt"&gt;spec&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;nodeName&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;kind-worker2&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;containers&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;curl&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;curlimages/curl&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p p-Indicator"&gt;[&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;sleep&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;quot;3600&amp;quot;&lt;/span&gt;&lt;span class="p p-Indicator"&gt;]&lt;/span&gt;
+&lt;span class="nn"&gt;---&lt;/span&gt;
+&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;v1&lt;/span&gt;
+&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;Service&lt;/span&gt;
+&lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;nginx-svc&lt;/span&gt;
+&lt;span class="nt"&gt;spec&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;selector&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;app&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;nginx-server&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;port&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;80&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;targetPort&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;80&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Apply it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;k&lt;span class="w"&gt; &lt;/span&gt;apply&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;cilium-demo.yaml&lt;span class="w"&gt; &lt;/span&gt;
+pod/nginx-server&lt;span class="w"&gt; &lt;/span&gt;created
+pod/curl-client&lt;span class="w"&gt; &lt;/span&gt;created
+service/nginx-svc&lt;span class="w"&gt; &lt;/span&gt;created
+&lt;span class="c1"&gt;# Wait and check&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;wide
+kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;svc&lt;span class="w"&gt; &lt;/span&gt;nginx-svc
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;wide
+NAME&lt;span class="w"&gt;           &lt;/span&gt;READY&lt;span class="w"&gt;   &lt;/span&gt;STATUS&lt;span class="w"&gt;    &lt;/span&gt;RESTARTS&lt;span class="w"&gt;   &lt;/span&gt;AGE&lt;span class="w"&gt;   &lt;/span&gt;IP&lt;span class="w"&gt;             &lt;/span&gt;NODE&lt;span class="w"&gt;           &lt;/span&gt;NOMINATED&lt;span class="w"&gt; &lt;/span&gt;NODE&lt;span class="w"&gt;   &lt;/span&gt;READINESS&lt;span class="w"&gt; &lt;/span&gt;GATES
+curl-client&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;49s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.1.65&lt;span class="w"&gt;    &lt;/span&gt;kind-worker2&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+nginx-server&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;49s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.2.187&lt;span class="w"&gt;   &lt;/span&gt;kind-worker&lt;span class="w"&gt;    &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;svc&lt;span class="w"&gt; &lt;/span&gt;nginx-svc
+NAME&lt;span class="w"&gt;        &lt;/span&gt;TYPE&lt;span class="w"&gt;        &lt;/span&gt;CLUSTER-IP&lt;span class="w"&gt;     &lt;/span&gt;EXTERNAL-IP&lt;span class="w"&gt;   &lt;/span&gt;PORT&lt;span class="o"&gt;(&lt;/span&gt;S&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;AGE
+nginx-svc&lt;span class="w"&gt;   &lt;/span&gt;ClusterIP&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.108.51.80&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="m"&gt;80&lt;/span&gt;/TCP&lt;span class="w"&gt;    &lt;/span&gt;57s
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;nginx-server&lt;/code&gt; runs on &lt;code&gt;kind-worker&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;curl-client&lt;/code&gt; runs on &lt;code&gt;kind-worker2&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;nginx-svc&lt;/code&gt; gets a &lt;code&gt;ClusterIP&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2&gt;6. Inspect the eBPF Service Map&lt;/h2&gt;
+&lt;p&gt;Now that a real Service exists, inspect how Cilium programs it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CILIUM_POD&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--&lt;span class="w"&gt; &lt;/span&gt;cilium-dbg&lt;span class="w"&gt; &lt;/span&gt;bpf&lt;span class="w"&gt; &lt;/span&gt;lb&lt;span class="w"&gt; &lt;/span&gt;list
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You should see entries for:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the Kubernetes API Service&lt;/li&gt;
+&lt;li&gt;CoreDNS&lt;/li&gt;
+&lt;li&gt;your &lt;code&gt;nginx-svc&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The exact output varies, but conceptually it will look like:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;SERVICE ADDRESS               BACKEND ADDRESS (REVNAT_ID) (SLOT)
+0.0.0.0:4000/TCP (0)          0.0.0.0:0 (18) (0) [HostPort, non-routable]                   
+10.100.124.85:0/ANY (0)       0.0.0.0:0 (0) (0) [ClusterIP, non-routable]                   
+0.0.0.0:4000/TCP (1)          10.244.2.191:8080/TCP (18) (1)                                
+10.108.51.80:80/TCP (0)       0.0.0.0:0 (20) (0) [ClusterIP, non-routable]                  
+
+...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That is the interesting bit: Service frontends and backends are in BPF maps, which is how Cilium can do Service translation without kube-proxy.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;7. Trace Cross-Node Traffic&lt;/h2&gt;
+&lt;p&gt;We want to prove 2 things:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;direct Pod IP traffic across nodes&lt;/li&gt;
+&lt;li&gt;Service traffic through the eBPF load-balancer&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Find the Cilium agent on the destination node and, optionally, on the source node:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;CILIUM_POD_ON_DEST&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;k8s-app&lt;span class="o"&gt;=&lt;/span&gt;cilium&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;wide&lt;span class="w"&gt; &lt;/span&gt;--no-headers&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;awk&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$7==&amp;quot;kind-worker&amp;quot;{print $1}&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nv"&gt;CILIUM_POD_ON_SRC&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;k8s-app&lt;span class="o"&gt;=&lt;/span&gt;cilium&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;wide&lt;span class="w"&gt; &lt;/span&gt;--no-headers&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;awk&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$7==&amp;quot;kind-worker2&amp;quot;{print $1}&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CILIUM_POD_ON_DEST&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CILIUM_POD_ON_SRC&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Why 2 pods?&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Monitor on &lt;code&gt;kind-worker&lt;/code&gt; to inspect ingress handling and policy enforcement at the destination (&lt;code&gt;nginx-server&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Monitor on &lt;code&gt;kind-worker2&lt;/code&gt; if you also want to catch &lt;code&gt;ClusterIP -&amp;gt; Pod IP&lt;/code&gt; translation, because Socket LB can translate the Service on the source node before the packet leaves it&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;If you only want one monitor, start with the destination-side one. If you want the full picture for the Service request, run both.&lt;/p&gt;
+&lt;p&gt;Open &lt;strong&gt;Terminal 1&lt;/strong&gt; and start the destination-side monitor:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-it&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CILIUM_POD_ON_DEST&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;cilium-dbg&lt;span class="w"&gt; &lt;/span&gt;monitor&lt;span class="w"&gt; &lt;/span&gt;--type&lt;span class="w"&gt; &lt;/span&gt;trace&lt;span class="w"&gt; &lt;/span&gt;--type&lt;span class="w"&gt; &lt;/span&gt;drop&lt;span class="w"&gt; &lt;/span&gt;--type&lt;span class="w"&gt; &lt;/span&gt;policy-verdict
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Optional: open &lt;strong&gt;Terminal 1B&lt;/strong&gt; if you also want to watch the earlier source-side Service translation:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-it&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CILIUM_POD_ON_SRC&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;cilium-dbg&lt;span class="w"&gt; &lt;/span&gt;monitor&lt;span class="w"&gt; &lt;/span&gt;--type&lt;span class="w"&gt; &lt;/span&gt;trace&lt;span class="w"&gt; &lt;/span&gt;--type&lt;span class="w"&gt; &lt;/span&gt;drop&lt;span class="w"&gt; &lt;/span&gt;--type&lt;span class="w"&gt; &lt;/span&gt;policy-verdict
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Open &lt;strong&gt;Terminal 2&lt;/strong&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;NGINX_IP&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pod&lt;span class="w"&gt; &lt;/span&gt;nginx-server&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;jsonpath&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{.status.podIP}&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nv"&gt;SVC_IP&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;svc&lt;span class="w"&gt; &lt;/span&gt;nginx-svc&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;jsonpath&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{.spec.clusterIP}&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+
+kubectl&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;curl-client&lt;span class="w"&gt; &lt;/span&gt;--&lt;span class="w"&gt; &lt;/span&gt;curl&lt;span class="w"&gt; &lt;/span&gt;-sS&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;/dev/null&lt;span class="w"&gt; &lt;/span&gt;-w&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;podIP:%{http_code}\n&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;http://&lt;span class="nv"&gt;$NGINX_IP&lt;/span&gt;
+kubectl&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;curl-client&lt;span class="w"&gt; &lt;/span&gt;--&lt;span class="w"&gt; &lt;/span&gt;curl&lt;span class="w"&gt; &lt;/span&gt;-sS&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;/dev/null&lt;span class="w"&gt; &lt;/span&gt;-w&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;svcIP:%{http_code}\n&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;http://&lt;span class="nv"&gt;$SVC_IP&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podIP:200
+svcIP:200
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;What this proves:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;podIP:200&lt;/code&gt; shows &lt;strong&gt;cross-node Pod routing&lt;/strong&gt; works&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;svcIP:200&lt;/code&gt; shows &lt;strong&gt;Service translation&lt;/strong&gt; works with kube-proxy removed&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;If you only run the destination-side monitor, you will mainly see the ingress path and policy verdicts near &lt;code&gt;nginx-server&lt;/code&gt;. If you also run the source-side monitor, the &lt;code&gt;svcIP&lt;/code&gt; request becomes more interesting because you can catch the earlier Service translation phase there.&lt;/p&gt;
+&lt;p&gt;Do not try to match the output 1:1 with some screenshot on the internet because monitor output changes across versions. The important thing is:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;traffic is visible in the Cilium datapath&lt;/li&gt;
+&lt;li&gt;the request succeeds&lt;/li&gt;
+&lt;li&gt;no kube-proxy exists in the cluster&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That combination is the real proof.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;8. IPAM in This Lab&lt;/h2&gt;
+&lt;p&gt;This lab uses:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ipam.mode=kubernetes
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That means Cilium uses the &lt;strong&gt;PodCIDRs assigned by Kubernetes on the &lt;code&gt;Node&lt;/code&gt; objects&lt;/strong&gt;. I chose this mode because it keeps the mental model simple on Kind.&lt;/p&gt;
+&lt;p&gt;Check it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;nodes&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;custom-columns&lt;span class="o"&gt;=&lt;/span&gt;NODE:.metadata.name,PODCIDR:.spec.podCIDR
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;NODE&lt;span class="w"&gt;                 &lt;/span&gt;PODCIDR
+kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.0.0/24
+kind-worker&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.1.0/24
+kind-worker2&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.244.2.0/24
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;So the mental model for this lab is:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Kubernetes gives each node a PodCIDR&lt;/li&gt;
+&lt;li&gt;Cilium allocates Pod IPs from that per-node range&lt;/li&gt;
+&lt;li&gt;Cilium still enforces policy and does Service load-balancing in eBPF&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3&gt;Wait, I thought Cilium uses &lt;code&gt;CiliumNode&lt;/code&gt; CRDs for IPAM?&lt;/h3&gt;
+&lt;p&gt;That is also true, but &lt;strong&gt;not in this exact lab mode&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;On many generic Cilium installs, the default is &lt;strong&gt;cluster-pool IPAM&lt;/strong&gt;, where Cilium Operator assigns per-node PodCIDRs and you inspect that through &lt;code&gt;CiliumNode&lt;/code&gt; resources.&lt;/p&gt;
+&lt;p&gt;If you want to explore that mode in another lab, &lt;code&gt;kubectl get ciliumnodes -o yaml&lt;/code&gt; is a great command. But for this Kind walkthrough, &lt;code&gt;ipam.mode=kubernetes&lt;/code&gt; is the cleaner path.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;9. Identity-Based Network Policy&lt;/h2&gt;
+&lt;p&gt;Now let's use labels, not IPs, to block traffic.&lt;/p&gt;
+&lt;p&gt;First, inspect identities:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;kube-system&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CILIUM_POD&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--&lt;span class="w"&gt; &lt;/span&gt;cilium-dbg&lt;span class="w"&gt; &lt;/span&gt;identity&lt;span class="w"&gt; &lt;/span&gt;list
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You should find identities associated with labels similar to:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;app=nginx-server&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;app=curl-client&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Now create &lt;code&gt;deny-curl.yaml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;cilium.io/v2&lt;/span&gt;
+&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;CiliumNetworkPolicy&lt;/span&gt;
+&lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;deny-curl-to-nginx&lt;/span&gt;
+&lt;span class="nt"&gt;spec&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;endpointSelector&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;matchLabels&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;app&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;nginx-server&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;ingressDeny&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;fromEndpoints&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;matchLabels&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;app&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;curl-client&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Apply it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;apply&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;deny-curl.yaml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Important nuance: this policy does &lt;strong&gt;not&lt;/strong&gt; put &lt;code&gt;nginx-server&lt;/code&gt; into a full ingress default-deny posture. &lt;code&gt;ingressDeny&lt;/code&gt; only adds an explicit deny for traffic from &lt;code&gt;app=curl-client&lt;/code&gt; here. Because we did not add any &lt;code&gt;ingress&lt;/code&gt; allow section, other sources remain allowed unless another policy restricts them.&lt;/p&gt;
+&lt;p&gt;Test again:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;curl-client&lt;span class="w"&gt; &lt;/span&gt;--&lt;span class="w"&gt; &lt;/span&gt;curl&lt;span class="w"&gt; &lt;/span&gt;-sS&lt;span class="w"&gt; &lt;/span&gt;--connect-timeout&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;5&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--max-time&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;5&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;http://&lt;span class="nv"&gt;$NGINX_IP&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$?&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Expected result:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the request fails&lt;/li&gt;
+&lt;li&gt;the exit code is non-zero&lt;/li&gt;
+&lt;li&gt;in the Cilium monitor, you should see &lt;code&gt;drop&lt;/code&gt; or &lt;code&gt;policy-verdict&lt;/code&gt; events&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That is the cool part: the policy decision is attached to the workload identity, not some fragile Pod IP you have to keep chasing after reschedules.&lt;/p&gt;
+&lt;p&gt;Clean up:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;delete&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;deny-curl.yaml
+kubectl&lt;span class="w"&gt; &lt;/span&gt;delete&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;cilium-demo.yaml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;hr&gt;
+&lt;h2&gt;10. Summary&lt;/h2&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Aspect&lt;/th&gt;
+&lt;th&gt;Traditional CNI + kube-proxy&lt;/th&gt;
+&lt;th&gt;Cilium in this lab&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;CNI contract&lt;/td&gt;
+&lt;td&gt;Binary + env vars + JSON&lt;/td&gt;
+&lt;td&gt;Binary + env vars + JSON&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Datapath&lt;/td&gt;
+&lt;td&gt;Linux routing + iptables/IPVS heavy lifting&lt;/td&gt;
+&lt;td&gt;eBPF datapath&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Service routing&lt;/td&gt;
+&lt;td&gt;kube-proxy&lt;/td&gt;
+&lt;td&gt;Cilium eBPF load-balancer&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Network policy&lt;/td&gt;
+&lt;td&gt;Often iptables-based&lt;/td&gt;
+&lt;td&gt;Identity-aware eBPF policy&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;IPAM&lt;/td&gt;
+&lt;td&gt;Plugin-specific (&lt;code&gt;host-local&lt;/code&gt;, etc.)&lt;/td&gt;
+&lt;td&gt;Kubernetes PodCIDR mode in this lab&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Observability&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;tcpdump&lt;/code&gt;, iptables logs&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;cilium-dbg monitor&lt;/code&gt;, Hubble&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;The important takeaway is this:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Cilium does not replace the CNI spec&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cilium replaces what happens behind that spec&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Kubelet still says, "Hey CNI plugin, wire this Pod up." But once the Pod exists, Cilium can take over the interesting parts:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Service translation&lt;/li&gt;
+&lt;li&gt;policy enforcement&lt;/li&gt;
+&lt;li&gt;cross-node datapath&lt;/li&gt;
+&lt;li&gt;observability&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;And when kube-proxy is removed, Cilium is not just "another CNI plugin". It becomes the thing driving a large part of the cluster network data plane.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;11. Cilium Certified Associate (CCA) Exam&lt;/h2&gt;
+&lt;p&gt;In case you are interest with, you can go to this link (my blog also xD):&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://blackmetalz.github.io/prepare-for-the-cilium-certified-associate-cca-exam.html"&gt;Prepare for the Cilium Certified Associate (CCA) Exam&lt;/a&gt;&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.cilium.io/"&gt;Cilium Documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.cilium.io/en/stable/installation/kind/"&gt;Installation Using Kind&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/"&gt;Kubernetes Without kube-proxy&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.cilium.io/en/stable/network/kubernetes/ipam-cluster-pool.html"&gt;CRD-Backed by Cilium Cluster-Pool IPAM&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.cilium.io/en/latest/network/concepts/ipam/cluster-pool/"&gt;Cluster Scope IPAM&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.cilium.io/en/latest/cmdref/cilium_install.html"&gt;cilium install&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.cilium.io/en/latest/cmdref/cilium_connectivity_test/"&gt;cilium connectivity test&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.cilium.io/en/latest/cmdref/cilium-dbg_monitor.html"&gt;cilium-dbg monitor&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.cilium.io/en/stable/cmdref/cilium-dbg_bpf_lb_list.html"&gt;cilium-dbg bpf lb list&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.cilium.io/en/latest/cmdref/cilium-dbg_identity_list.html"&gt;cilium-dbg identity list&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="networking"/><category term="container"/><category term="k8s"/><category term="cilium"/></entry><entry><title>[Container Networking Series - Part 3] Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network</title><link href="https://blackmetalz.github.io/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html" rel="alternate"/><published>2026-03-21T00:00:00+07:00</published><updated>2026-03-21T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-21:/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Demystifying Docker Networking: A Deep Dive into Bridge &amp;amp; veth&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Demystifying Docker Networking Egress: The Masquerade Magic&lt;/a&gt;&lt;/li&gt;
@@ -8,7 +625,7 @@
 &lt;/ul&gt;
 &lt;p&gt;In the previous two posts, we performed a deep dive into Docker's &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Ingress Flow&lt;/a&gt; and &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Egress Flow&lt;/a&gt; by manually tinkering with &lt;code&gt;veth&lt;/code&gt;, &lt;code&gt;iptables&lt;/code&gt;, and &lt;code&gt;nsenter&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;But in Kubernetes (K8s), thousands of Pods are created and destroyed continuously. Kubelet can't afford the manual labor of typing those commands for every single Pod. It needs an "assistant" to do the heavy lifting. That assistant is the &lt;strong&gt;CNI (Container Network Interface)&lt;/strong&gt;.&lt;/p&gt;
-&lt;p&gt;Today, we will "strip down" CNI by running it manually (by hand), without using any sophisticated CNI suites like Calico or Cilium.&lt;/p&gt;
+&lt;p&gt;Today, we will learn about CNI by running it manually (by hand), without using any sophisticated CNI suites like Calico or Cilium.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;1. Prerequisites (Setup)&lt;/h2&gt;
 &lt;p&gt;To follow this lab on &lt;strong&gt;Ubuntu 24.04&lt;/strong&gt;, you will need:&lt;/p&gt;
@@ -314,7 +931,7 @@ kube-system&lt;span class="w"&gt;          &lt;/span&gt;coredns-7d764666f9-p94hv
 local-path-storage&lt;span class="w"&gt;   &lt;/span&gt;local-path-provisioner-67b8995b4b-qxhwt&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Error&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;6&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;2m10s&lt;span class="w"&gt; &lt;/span&gt;ago&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;2m35s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.3&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;So, we know where the IP assigned from!&lt;/p&gt;
+&lt;p&gt;So, we know where the IP is assigned from!&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;The Pod lives! Here is what just happened:&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt="cni flow" src="./images/2026/03/08.png"&gt;&lt;/p&gt;
 &lt;ol&gt;
