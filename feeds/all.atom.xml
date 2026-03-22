@@ -33,7 +33,7 @@ sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;u
 &lt;hr&gt;
 &lt;h2&gt;2. Decoding the "Core" Concepts&lt;/h2&gt;
 &lt;h3&gt;What exactly is CNI?&lt;/h3&gt;
-&lt;p&gt;It's not a background service. CNI is actually just a &lt;strong&gt;Specification&lt;/strong&gt; that defines how Kubelet calls &lt;strong&gt;binaries&lt;/strong&gt; located in &lt;code&gt;/opt/cni/bin/&lt;/code&gt;. Kubelet feeds it JSON, the Binary executes the task and returns the result.&lt;/p&gt;
+&lt;p&gt;It's not a background service. CNI is actually just a &lt;strong&gt;Specification&lt;/strong&gt; that defines how the Container Runtime (like containerd) calls &lt;strong&gt;binaries&lt;/strong&gt; located in &lt;code&gt;/opt/cni/bin/&lt;/code&gt;. The runtime feeds it JSON, the Binary executes the task and returns the result.&lt;/p&gt;
 &lt;h3&gt;IPAM (IP Address Management)&lt;/h3&gt;
 &lt;p&gt;If the main CNI Plugin (like &lt;code&gt;bridge&lt;/code&gt; or &lt;code&gt;ptp&lt;/code&gt;) handles "plugging the wires," then &lt;strong&gt;IPAM&lt;/strong&gt; handles the "ledgering" and decides &lt;em&gt;which&lt;/em&gt; IP to use.&lt;/p&gt;
 &lt;ul&gt;
@@ -90,7 +90,7 @@ CONTAINER&lt;span class="w"&gt; &lt;/span&gt;ID&lt;span class="w"&gt;   &lt;/spa
 e174ac300eb9&lt;span class="w"&gt;   &lt;/span&gt;kindest/node:v1.35.0&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/usr/local/bin/entr…&amp;quot;&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;minutes&lt;span class="w"&gt; &lt;/span&gt;ago&lt;span class="w"&gt;   &lt;/span&gt;Up&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;minutes&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;127&lt;/span&gt;.0.0.1:43013-&amp;gt;6443/tcp&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h3&gt;Step 2: Create a Pod — Witness Kubelet's "Helplessness"&lt;/h3&gt;
+&lt;h3&gt;Step 2: Create a Pod — Witness the Scheduler's "Helplessness"&lt;/h3&gt;
 &lt;p&gt;Try to create a Pod &lt;strong&gt;WITHOUT&lt;/strong&gt; any CNI config:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;run&lt;span class="w"&gt; &lt;/span&gt;nginx-test&lt;span class="w"&gt; &lt;/span&gt;--image&lt;span class="o"&gt;=&lt;/span&gt;nginx
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -116,7 +116,7 @@ NAME&lt;span class="w"&gt;                 &lt;/span&gt;STATUS&lt;span class="w"
 kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;NotReady&lt;span class="w"&gt;   &lt;/span&gt;control-plane&lt;span class="w"&gt;   &lt;/span&gt;13s&lt;span class="w"&gt;   &lt;/span&gt;v1.35.0
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;strong&gt;Why?&lt;/strong&gt; No CNI config → Kubelet marks the Node as &lt;code&gt;NotReady&lt;/code&gt; (as seen in Step 1) → The Node is tainted with &lt;code&gt;node.kubernetes.io/not-ready:NoSchedule&lt;/code&gt; → The Scheduler cannot place the Pod on any Node → The Pod stays in &lt;code&gt;Pending&lt;/code&gt; indefinitely.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Why?&lt;/strong&gt; No CNI config → The &lt;a href="https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#installation"&gt;Container Runtime is responsible for loading CNI plugins&lt;/a&gt;. In this setup, containerd finds no valid config in its CNI conf directory and reports &lt;code&gt;NetworkReady=false&lt;/code&gt; via the CRI Status API → Kubelet polls this status and marks the Node as &lt;code&gt;NotReady&lt;/code&gt; → The Node is tainted with &lt;code&gt;node.kubernetes.io/not-ready:NoSchedule&lt;/code&gt; → The Scheduler cannot place the Pod on any Node → The Pod stays in &lt;code&gt;Pending&lt;/code&gt; indefinitely.&lt;/p&gt;
 &lt;h3&gt;Step 3: Call the CNI Binary Manually — Exposing the Truth&lt;/h3&gt;
 &lt;p&gt;Now, we will prove that CNI is just: &lt;strong&gt;a binary + environment variables + JSON via stdin&lt;/strong&gt;. No magic involved. But let's me show you complete flows first (made with Mermaid)&lt;/p&gt;
 &lt;p&gt;&lt;img alt="cni flow" src="./images/2026/03/07.png"&gt;&lt;/p&gt;
@@ -236,7 +236,7 @@ root@kind-control-plane:/#&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="
 &lt;span class="m"&gt;10&lt;/span&gt;.249.0.2&lt;span class="w"&gt;  &lt;/span&gt;last_reserved_ip.0&lt;span class="w"&gt;  &lt;/span&gt;lock
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;strong&gt;Boom!&lt;/strong&gt; With just a binary call + env vars + JSON stdin, we created a functional network interface with an IP for a namespace. This is &lt;strong&gt;exactly&lt;/strong&gt; what Kubelet does behind the scenes whenever it creates a Pod.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Boom!&lt;/strong&gt; With just a binary call + env vars + JSON stdin, we created a functional network interface with an IP for a namespace. This is &lt;strong&gt;exactly&lt;/strong&gt; what the Container Runtime does behind the scenes whenever it creates a Pod Sandbox.&lt;/p&gt;
 &lt;p&gt;Clean up the demo namespace, so we will have to do this everytime when we create new namespace, that is why we are heading to step 4 for automation. But please clear old namespace first:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Call DEL to release the assigned IP (returning it to IPAM)&lt;/span&gt;
 &lt;span class="c1"&gt;# The assigned IP WAS 10.249.0.2&lt;/span&gt;
@@ -268,8 +268,8 @@ root@kind-control-plane:/#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class=
 &lt;span class="m"&gt;10&lt;/span&gt;.249.0.2
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h3&gt;Step 4: "Rescuing" the Pod — Letting Kubelet Call CNI&lt;/h3&gt;
-&lt;p&gt;Now, let's create a CNI config file so Kubelet knows which plugin to use:&lt;/p&gt;
+&lt;h3&gt;Step 4: "Rescuing" the Pod — Letting CRI Execute CNI&lt;/h3&gt;
+&lt;p&gt;Now, let's create a CNI config file so the Container Runtime (CRI) knows which plugin to load:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Still inside the Kind node&lt;/span&gt;
 mkdir&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;/etc/cni/net.d/
 
@@ -297,8 +297,8 @@ root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;kubectl&lt;span 
 NAME&lt;span class="w"&gt;         &lt;/span&gt;READY&lt;span class="w"&gt;   &lt;/span&gt;STATUS&lt;span class="w"&gt;    &lt;/span&gt;RESTARTS&lt;span class="w"&gt;   &lt;/span&gt;AGE
 nginx-test&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;2m28s
 root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;k&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pod&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;wide
-NAME&lt;span class="w"&gt;         &lt;/span&gt;READY&lt;span class="w"&gt;   &lt;/span&gt;STATUS&lt;span class="w"&gt;    &lt;/span&gt;RESTARTS&lt;span class="w"&gt;   &lt;/span&gt;AGE&lt;span class="w"&gt;   &lt;/span&gt;IP&lt;span class="w"&gt;           &lt;/span&gt;NODE&lt;span class="w"&gt;                 &lt;/span&gt;NOMINATED&lt;span class="w"&gt; &lt;/span&gt;NODE&lt;span class="w"&gt;   &lt;/span&gt;READINESS&lt;span class="w"&gt; &lt;/span&gt;GATES
-nginx-test&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;87m&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.4&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+NAME&lt;span class="w"&gt;         &lt;/span&gt;READY&lt;span class="w"&gt;   &lt;/span&gt;STATUS&lt;span class="w"&gt;    &lt;/span&gt;RESTARTS&lt;span class="w"&gt;   &lt;/span&gt;AGE&lt;span class="w"&gt;     &lt;/span&gt;IP&lt;span class="w"&gt;           &lt;/span&gt;NODE&lt;span class="w"&gt;                 &lt;/span&gt;NOMINATED&lt;span class="w"&gt; &lt;/span&gt;NODE&lt;span class="w"&gt;   &lt;/span&gt;READINESS&lt;span class="w"&gt; &lt;/span&gt;GATES
+nginx-test&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;          &lt;/span&gt;2m30s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.4&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Check how many IP it assigned inside control plane&lt;/p&gt;
@@ -308,21 +308,21 @@ nginx-test&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span
 
 &lt;p&gt;Ok, we see IP &lt;code&gt;10.249.0.4&lt;/code&gt;. How about other IPs? Easy AF, get all pod and grep! (forget about &lt;code&gt;local-path-provisioner&lt;/code&gt; xD)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;k&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pod&lt;span class="w"&gt; &lt;/span&gt;-owide&lt;span class="w"&gt; &lt;/span&gt;-A&lt;span class="p"&gt;|&lt;/span&gt;grep&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249
-default&lt;span class="w"&gt;              &lt;/span&gt;nginx-test&lt;span class="w"&gt;                                   &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;               &lt;/span&gt;91m&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.4&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
-kube-system&lt;span class="w"&gt;          &lt;/span&gt;coredns-7d764666f9-hdwlt&lt;span class="w"&gt;                     &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;               &lt;/span&gt;91m&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.2&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
-kube-system&lt;span class="w"&gt;          &lt;/span&gt;coredns-7d764666f9-p94hv&lt;span class="w"&gt;                     &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;               &lt;/span&gt;91m&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.5&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
-local-path-storage&lt;span class="w"&gt;   &lt;/span&gt;local-path-provisioner-67b8995b4b-qxhwt&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Error&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;6&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;3m45s&lt;span class="w"&gt; &lt;/span&gt;ago&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;91m&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.3&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+default&lt;span class="w"&gt;              &lt;/span&gt;nginx-test&lt;span class="w"&gt;                                   &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;               &lt;/span&gt;2m35s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.4&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+kube-system&lt;span class="w"&gt;          &lt;/span&gt;coredns-7d764666f9-hdwlt&lt;span class="w"&gt;                     &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;               &lt;/span&gt;2m35s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.2&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+kube-system&lt;span class="w"&gt;          &lt;/span&gt;coredns-7d764666f9-p94hv&lt;span class="w"&gt;                     &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Running&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;               &lt;/span&gt;2m35s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.5&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
+local-path-storage&lt;span class="w"&gt;   &lt;/span&gt;local-path-provisioner-67b8995b4b-qxhwt&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;/1&lt;span class="w"&gt;     &lt;/span&gt;Error&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;6&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;2m10s&lt;span class="w"&gt; &lt;/span&gt;ago&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;2m35s&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.249.0.3&lt;span class="w"&gt;   &lt;/span&gt;kind-control-plane&lt;span class="w"&gt;   &lt;/span&gt;&amp;lt;none&amp;gt;&lt;span class="w"&gt;           &lt;/span&gt;&amp;lt;none&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;So, we know where the IP assigned from!&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;The Pod lives! Here is what just happened:&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt="cni flow" src="./images/2026/03/08.png"&gt;&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;Kubelet detects the new config file and initializes its network state.&lt;/li&gt;
+&lt;li&gt;The Container Runtime (containerd) successfully loads a valid CNI config and reports &lt;code&gt;NetworkReady&lt;/code&gt; to Kubelet.&lt;/li&gt;
 &lt;li&gt;Kubelet updates the Node's status to &lt;strong&gt;&lt;code&gt;Ready&lt;/code&gt;&lt;/strong&gt; (removing the &lt;code&gt;NotReady&lt;/code&gt; taint).&lt;/li&gt;
 &lt;li&gt;The Kubernetes &lt;strong&gt;Scheduler&lt;/strong&gt; sees a &lt;code&gt;Ready&lt;/code&gt; Node and finally schedules our pending &lt;code&gt;nginx-test&lt;/code&gt; Pod to &lt;code&gt;kind-control-plane&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;Kubelet receives the assigned Pod and tells containerd to create the Pod Sandbox.&lt;/li&gt;
-&lt;li&gt;containerd calls /opt/cni/bin/ptp (exactly as we did in Step 3) → Network setup succeeds → Pod transitions to &lt;code&gt;Running&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Kubelet receives the assigned Pod and requests containerd to create the Pod Sandbox.&lt;/li&gt;
+&lt;li&gt;containerd calls &lt;code&gt;/opt/cni/bin/ptp&lt;/code&gt; (exactly as we did in Step 3) → Network setup succeeds → Pod transitions to &lt;code&gt;Running&lt;/code&gt;.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;Verify using &lt;code&gt;crictl&lt;/code&gt; + &lt;code&gt;nsenter&lt;/code&gt;:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;docker&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-it&lt;span class="w"&gt; &lt;/span&gt;kind-control-plane&lt;span class="w"&gt; &lt;/span&gt;bash
@@ -344,9 +344,9 @@ nsenter&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt
 &lt;span class="w"&gt;       &lt;/span&gt;valid_lft&lt;span class="w"&gt; &lt;/span&gt;forever&lt;span class="w"&gt; &lt;/span&gt;preferred_lft&lt;span class="w"&gt; &lt;/span&gt;forever
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Kubelet did &lt;strong&gt;exactly&lt;/strong&gt; what we did manually in Step 3: set env vars → piped JSON into the binary → received the IP.&lt;/p&gt;
+&lt;p&gt;The Container Runtime (containerd) did &lt;strong&gt;exactly&lt;/strong&gt; what we did manually in Step 3: set env vars → piped JSON into the binary → received the IP.&lt;/p&gt;
 &lt;hr&gt;
-&lt;h2&gt;4. Summary&lt;/h2&gt;
+&lt;h2&gt;4. Summary &amp;amp; The "Gotcha"&lt;/h2&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -357,7 +357,7 @@ nsenter&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;No CNI config&lt;/td&gt;
-&lt;td&gt;Kubelet is helpless, Node is NotReady, Pod is stuck in &lt;code&gt;Pending&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;CRI reports &lt;code&gt;NetworkReady=false&lt;/code&gt;, Kubelet marks Node as NotReady, Scheduler cannot schedule, Pod is stuck in &lt;code&gt;Pending&lt;/code&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;Manual CNI execution&lt;/td&gt;
@@ -365,20 +365,32 @@ nsenter&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;Create config file&lt;/td&gt;
-&lt;td&gt;Kubelet automates the process for every Pod&lt;/td&gt;
+&lt;td&gt;The CRI (containerd) automates the process for every Pod upon Kubelet's request&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
+&lt;h3&gt;The Truth about the Flow&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;CNI&lt;/strong&gt; isn't magic; it's a coordination between a &lt;strong&gt;Binary&lt;/strong&gt; (execution) and &lt;strong&gt;JSON&lt;/strong&gt; (declaration).&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;IPAM&lt;/strong&gt; (&lt;code&gt;host-local&lt;/code&gt;) manages IP addresses — stored directly on disk at &lt;code&gt;/var/lib/cni/networks/&lt;/code&gt; to prevent conflicts.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Kubelet&lt;/strong&gt; is just a middleman — reading config from &lt;code&gt;/etc/cni/net.d/&lt;/code&gt;, setting env vars, then calling the binary. That's it.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kubelet vs Container Runtime:&lt;/strong&gt; It's important to note that &lt;strong&gt;Kubelet does NOT call the CNI binary itself&lt;/strong&gt;. Kubelet tells the CRI (Container Runtime, like containerd) to create the Pod sandbox. It is the &lt;strong&gt;CRI&lt;/strong&gt; that reads &lt;code&gt;/etc/cni/net.d/&lt;/code&gt;, sets the environment variables, and executes the CNI binary.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Understanding how CNI operates "by hand" will take the fear out of networking errors. In the next post, we'll see how &lt;strong&gt;Cilium&lt;/strong&gt; levels up this game using &lt;strong&gt;eBPF&lt;/strong&gt;.&lt;/p&gt;
+&lt;h3&gt;The Big Disclaimer&lt;/h3&gt;
+&lt;p&gt;Does this setup mean our cluster network is fully functional? &lt;strong&gt;Absolutely not!&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Look closely at the output from earlier: at that moment, &lt;code&gt;coredns&lt;/code&gt; is &lt;code&gt;0/1 Running&lt;/code&gt;, and &lt;code&gt;local-path-provisioner&lt;/code&gt; is in &lt;code&gt;Error&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;By using the bare &lt;code&gt;ptp&lt;/code&gt; plugin, we only proved that the CRI can call a CNI plugin and assign an IP to a Pod locally on this node. That does &lt;strong&gt;not&lt;/strong&gt; prove the full Kubernetes networking stack is healthy.&lt;/p&gt;
+&lt;p&gt;As the output shows, &lt;code&gt;coredns&lt;/code&gt; is stuck at &lt;code&gt;0/1 Running&lt;/code&gt; — a strong signal that Service connectivity is likely incomplete, since CoreDNS depends on reaching the Kubernetes API via a ClusterIP Service. Meanwhile, &lt;code&gt;local-path-provisioner&lt;/code&gt; being in &lt;code&gt;Error&lt;/code&gt; simply confirms the cluster is not fully healthy. This minimal &lt;code&gt;ptp&lt;/code&gt; setup lacks critical pieces — such as Service-to-Pod routing (normally handled by &lt;code&gt;kube-proxy&lt;/code&gt;) and proper masquerading — that system components likely depend on. This setup does not prove that Service connectivity or the full cluster networking path is working end to end.&lt;/p&gt;
+&lt;p&gt;On top of that, if we had multiple nodes, &lt;strong&gt;Pods on different nodes still cannot communicate with each other&lt;/strong&gt; because there is no cross-node routing or overlay network configured.&lt;/p&gt;
+&lt;p&gt;To get a fully functional K8s network where system components thrive and cross-node traffic succeeds, we need a more complete networking stack: a CNI implementation that satisfies the Kubernetes network model plus the components responsible for Service handling and cross-node traffic.&lt;/p&gt;
+&lt;p&gt;Understanding how CNI operates "by hand" will take the fear out of networking errors. In the next post, we'll see how a real-world CNI like &lt;strong&gt;Cilium&lt;/strong&gt; levels up this game using &lt;strong&gt;eBPF&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://www.cni.dev/docs/spec/#cni-operations"&gt;CNI Operations Spec&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://kind.sigs.k8s.io/docs/user/quick-start/"&gt;Kind Quick Start Guide&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/"&gt;Kubernetes Network Plugins&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://claude.ai/"&gt;https://claude.ai/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="chatgpt.com"&gt;chatgpt.com&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://gemini.google.com/"&gt;https://gemini.google.com/&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;</content><category term="Knowledge Base"/><category term="networking"/><category term="container"/><category term="k8s"/></entry><entry><title>[Container Networking Series - Part 2] Demystifying Docker Networking: Outbound Traffic &amp; The Masquerade Magic</title><link href="https://blackmetalz.github.io/container-networking-series-part-2-demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html" rel="alternate"/><published>2026-03-16T00:00:00+07:00</published><updated>2026-03-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-16:/container-networking-series-part-2-demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Demystifying Docker Networking: A Deep Dive into Bridge &amp;amp; veth&lt;/a&gt;&lt;/li&gt;

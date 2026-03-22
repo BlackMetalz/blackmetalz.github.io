@@ -112,7 +112,7 @@ sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </
 <hr>
 <h2>2. Decoding the "Core" Concepts</h2>
 <h3>What exactly is CNI?</h3>
-<p>It's not a background service. CNI is actually just a <strong>Specification</strong> that defines how Kubelet calls <strong>binaries</strong> located in <code>/opt/cni/bin/</code>. Kubelet feeds it JSON, the Binary executes the task and returns the result.</p>
+<p>It's not a background service. CNI is actually just a <strong>Specification</strong> that defines how the Container Runtime (like containerd) calls <strong>binaries</strong> located in <code>/opt/cni/bin/</code>. The runtime feeds it JSON, the Binary executes the task and returns the result.</p>
 <h3>IPAM (IP Address Management)</h3>
 <p>If the main CNI Plugin (like <code>bridge</code> or <code>ptp</code>) handles "plugging the wires," then <strong>IPAM</strong> handles the "ledgering" and decides <em>which</em> IP to use.</p>
 <ul>
@@ -169,7 +169,7 @@ CONTAINER<span class="w"> </span>ID<span class="w">   </span>IMAGE<span class="w
 e174ac300eb9<span class="w">   </span>kindest/node:v1.35.0<span class="w">   </span><span class="s2">&quot;/usr/local/bin/entr…&quot;</span><span class="w">   </span><span class="m">4</span><span class="w"> </span>minutes<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">4</span><span class="w"> </span>minutes<span class="w">   </span><span class="m">127</span>.0.0.1:43013-&gt;6443/tcp<span class="w">   </span>kind-control-plane
 </code></pre></div>
 
-<h3>Step 2: Create a Pod — Witness Kubelet's "Helplessness"</h3>
+<h3>Step 2: Create a Pod — Witness the Scheduler's "Helplessness"</h3>
 <p>Try to create a Pod <strong>WITHOUT</strong> any CNI config:</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>run<span class="w"> </span>nginx-test<span class="w"> </span>--image<span class="o">=</span>nginx
 </code></pre></div>
@@ -195,7 +195,7 @@ NAME<span class="w">                 </span>STATUS<span class="w">     </span>RO
 kind-control-plane<span class="w">   </span>NotReady<span class="w">   </span>control-plane<span class="w">   </span>13s<span class="w">   </span>v1.35.0
 </code></pre></div>
 
-<p><strong>Why?</strong> No CNI config → Kubelet marks the Node as <code>NotReady</code> (as seen in Step 1) → The Node is tainted with <code>node.kubernetes.io/not-ready:NoSchedule</code> → The Scheduler cannot place the Pod on any Node → The Pod stays in <code>Pending</code> indefinitely.</p>
+<p><strong>Why?</strong> No CNI config → The <a href="https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#installation">Container Runtime is responsible for loading CNI plugins</a>. In this setup, containerd finds no valid config in its CNI conf directory and reports <code>NetworkReady=false</code> via the CRI Status API → Kubelet polls this status and marks the Node as <code>NotReady</code> → The Node is tainted with <code>node.kubernetes.io/not-ready:NoSchedule</code> → The Scheduler cannot place the Pod on any Node → The Pod stays in <code>Pending</code> indefinitely.</p>
 <h3>Step 3: Call the CNI Binary Manually — Exposing the Truth</h3>
 <p>Now, we will prove that CNI is just: <strong>a binary + environment variables + JSON via stdin</strong>. No magic involved. But let's me show you complete flows first (made with Mermaid)</p>
 <p><img alt="cni flow" src="./images/2026/03/07.png"></p>
@@ -315,7 +315,7 @@ root@kind-control-plane:/#<span class="w"> </span>ls<span class="w"> </span>/var
 <span class="m">10</span>.249.0.2<span class="w">  </span>last_reserved_ip.0<span class="w">  </span>lock
 </code></pre></div>
 
-<p><strong>Boom!</strong> With just a binary call + env vars + JSON stdin, we created a functional network interface with an IP for a namespace. This is <strong>exactly</strong> what Kubelet does behind the scenes whenever it creates a Pod.</p>
+<p><strong>Boom!</strong> With just a binary call + env vars + JSON stdin, we created a functional network interface with an IP for a namespace. This is <strong>exactly</strong> what the Container Runtime does behind the scenes whenever it creates a Pod Sandbox.</p>
 <p>Clean up the demo namespace, so we will have to do this everytime when we create new namespace, that is why we are heading to step 4 for automation. But please clear old namespace first:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Call DEL to release the assigned IP (returning it to IPAM)</span>
 <span class="c1"># The assigned IP WAS 10.249.0.2</span>
@@ -347,8 +347,8 @@ root@kind-control-plane:/#<span class="w"> </span>cat<span class="w"> </span>/va
 <span class="m">10</span>.249.0.2
 </code></pre></div>
 
-<h3>Step 4: "Rescuing" the Pod — Letting Kubelet Call CNI</h3>
-<p>Now, let's create a CNI config file so Kubelet knows which plugin to use:</p>
+<h3>Step 4: "Rescuing" the Pod — Letting CRI Execute CNI</h3>
+<p>Now, let's create a CNI config file so the Container Runtime (CRI) knows which plugin to load:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Still inside the Kind node</span>
 mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/cni/net.d/
 
@@ -376,8 +376,8 @@ root@kienlt-lab-utilities:~#<span class="w"> </span>kubectl<span class="w"> </sp
 NAME<span class="w">         </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE
 nginx-test<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>2m28s
 root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>-o<span class="w"> </span>wide
-NAME<span class="w">         </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE<span class="w">   </span>IP<span class="w">           </span>NODE<span class="w">                 </span>NOMINATED<span class="w"> </span>NODE<span class="w">   </span>READINESS<span class="w"> </span>GATES
-nginx-test<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>87m<span class="w">   </span><span class="m">10</span>.249.0.4<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+NAME<span class="w">         </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE<span class="w">     </span>IP<span class="w">           </span>NODE<span class="w">                 </span>NOMINATED<span class="w"> </span>NODE<span class="w">   </span>READINESS<span class="w"> </span>GATES
+nginx-test<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>2m30s<span class="w">   </span><span class="m">10</span>.249.0.4<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
 </code></pre></div>
 
 <p>Check how many IP it assigned inside control plane</p>
@@ -387,21 +387,21 @@ nginx-test<span class="w">   </span><span class="m">1</span>/1<span class="w">  
 
 <p>Ok, we see IP <code>10.249.0.4</code>. How about other IPs? Easy AF, get all pod and grep! (forget about <code>local-path-provisioner</code> xD)</p>
 <div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>-owide<span class="w"> </span>-A<span class="p">|</span>grep<span class="w"> </span><span class="m">10</span>.249
-default<span class="w">              </span>nginx-test<span class="w">                                   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">               </span>91m<span class="w">   </span><span class="m">10</span>.249.0.4<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
-kube-system<span class="w">          </span>coredns-7d764666f9-hdwlt<span class="w">                     </span><span class="m">0</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">               </span>91m<span class="w">   </span><span class="m">10</span>.249.0.2<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
-kube-system<span class="w">          </span>coredns-7d764666f9-p94hv<span class="w">                     </span><span class="m">0</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">               </span>91m<span class="w">   </span><span class="m">10</span>.249.0.5<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
-local-path-storage<span class="w">   </span>local-path-provisioner-67b8995b4b-qxhwt<span class="w">      </span><span class="m">0</span>/1<span class="w">     </span>Error<span class="w">     </span><span class="m">6</span><span class="w"> </span><span class="o">(</span>3m45s<span class="w"> </span>ago<span class="o">)</span><span class="w">   </span>91m<span class="w">   </span><span class="m">10</span>.249.0.3<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+default<span class="w">              </span>nginx-test<span class="w">                                   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">               </span>2m35s<span class="w">   </span><span class="m">10</span>.249.0.4<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+kube-system<span class="w">          </span>coredns-7d764666f9-hdwlt<span class="w">                     </span><span class="m">0</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">               </span>2m35s<span class="w">   </span><span class="m">10</span>.249.0.2<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+kube-system<span class="w">          </span>coredns-7d764666f9-p94hv<span class="w">                     </span><span class="m">0</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">               </span>2m35s<span class="w">   </span><span class="m">10</span>.249.0.5<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+local-path-storage<span class="w">   </span>local-path-provisioner-67b8995b4b-qxhwt<span class="w">      </span><span class="m">0</span>/1<span class="w">     </span>Error<span class="w">     </span><span class="m">6</span><span class="w"> </span><span class="o">(</span>2m10s<span class="w"> </span>ago<span class="o">)</span><span class="w">   </span>2m35s<span class="w">   </span><span class="m">10</span>.249.0.3<span class="w">   </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
 </code></pre></div>
 
 <p>So, we know where the IP assigned from!</p>
 <p><strong>The Pod lives! Here is what just happened:</strong></p>
 <p><img alt="cni flow" src="./images/2026/03/08.png"></p>
 <ol>
-<li>Kubelet detects the new config file and initializes its network state.</li>
+<li>The Container Runtime (containerd) successfully loads a valid CNI config and reports <code>NetworkReady</code> to Kubelet.</li>
 <li>Kubelet updates the Node's status to <strong><code>Ready</code></strong> (removing the <code>NotReady</code> taint).</li>
 <li>The Kubernetes <strong>Scheduler</strong> sees a <code>Ready</code> Node and finally schedules our pending <code>nginx-test</code> Pod to <code>kind-control-plane</code>.</li>
-<li>Kubelet receives the assigned Pod and tells containerd to create the Pod Sandbox.</li>
-<li>containerd calls /opt/cni/bin/ptp (exactly as we did in Step 3) → Network setup succeeds → Pod transitions to <code>Running</code>.</li>
+<li>Kubelet receives the assigned Pod and requests containerd to create the Pod Sandbox.</li>
+<li>containerd calls <code>/opt/cni/bin/ptp</code> (exactly as we did in Step 3) → Network setup succeeds → Pod transitions to <code>Running</code>.</li>
 </ol>
 <p>Verify using <code>crictl</code> + <code>nsenter</code>:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>kind-control-plane<span class="w"> </span>bash
@@ -423,9 +423,9 @@ nsenter<span class="w"> </span>-t<span class="w"> </span><span class="nv">$PID</
 <span class="w">       </span>valid_lft<span class="w"> </span>forever<span class="w"> </span>preferred_lft<span class="w"> </span>forever
 </code></pre></div>
 
-<p>Kubelet did <strong>exactly</strong> what we did manually in Step 3: set env vars → piped JSON into the binary → received the IP.</p>
+<p>The Container Runtime (containerd) did <strong>exactly</strong> what we did manually in Step 3: set env vars → piped JSON into the binary → received the IP.</p>
 <hr>
-<h2>4. Summary</h2>
+<h2>4. Summary &amp; The "Gotcha"</h2>
 <table>
 <thead>
 <tr>
@@ -436,7 +436,7 @@ nsenter<span class="w"> </span>-t<span class="w"> </span><span class="nv">$PID</
 <tbody>
 <tr>
 <td>No CNI config</td>
-<td>Kubelet is helpless, Node is NotReady, Pod is stuck in <code>Pending</code></td>
+<td>CRI reports <code>NetworkReady=false</code>, Kubelet marks Node as NotReady, Scheduler cannot schedule, Pod is stuck in <code>Pending</code></td>
 </tr>
 <tr>
 <td>Manual CNI execution</td>
@@ -444,20 +444,32 @@ nsenter<span class="w"> </span>-t<span class="w"> </span><span class="nv">$PID</
 </tr>
 <tr>
 <td>Create config file</td>
-<td>Kubelet automates the process for every Pod</td>
+<td>The CRI (containerd) automates the process for every Pod upon Kubelet's request</td>
 </tr>
 </tbody>
 </table>
+<h3>The Truth about the Flow</h3>
 <ul>
 <li><strong>CNI</strong> isn't magic; it's a coordination between a <strong>Binary</strong> (execution) and <strong>JSON</strong> (declaration).</li>
 <li><strong>IPAM</strong> (<code>host-local</code>) manages IP addresses — stored directly on disk at <code>/var/lib/cni/networks/</code> to prevent conflicts.</li>
-<li><strong>Kubelet</strong> is just a middleman — reading config from <code>/etc/cni/net.d/</code>, setting env vars, then calling the binary. That's it.</li>
+<li><strong>Kubelet vs Container Runtime:</strong> It's important to note that <strong>Kubelet does NOT call the CNI binary itself</strong>. Kubelet tells the CRI (Container Runtime, like containerd) to create the Pod sandbox. It is the <strong>CRI</strong> that reads <code>/etc/cni/net.d/</code>, sets the environment variables, and executes the CNI binary.</li>
 </ul>
-<p>Understanding how CNI operates "by hand" will take the fear out of networking errors. In the next post, we'll see how <strong>Cilium</strong> levels up this game using <strong>eBPF</strong>.</p>
+<h3>The Big Disclaimer</h3>
+<p>Does this setup mean our cluster network is fully functional? <strong>Absolutely not!</strong></p>
+<p>Look closely at the output from earlier: at that moment, <code>coredns</code> is <code>0/1 Running</code>, and <code>local-path-provisioner</code> is in <code>Error</code>.</p>
+<p>By using the bare <code>ptp</code> plugin, we only proved that the CRI can call a CNI plugin and assign an IP to a Pod locally on this node. That does <strong>not</strong> prove the full Kubernetes networking stack is healthy.</p>
+<p>As the output shows, <code>coredns</code> is stuck at <code>0/1 Running</code> — a strong signal that Service connectivity is likely incomplete, since CoreDNS depends on reaching the Kubernetes API via a ClusterIP Service. Meanwhile, <code>local-path-provisioner</code> being in <code>Error</code> simply confirms the cluster is not fully healthy. This minimal <code>ptp</code> setup lacks critical pieces — such as Service-to-Pod routing (normally handled by <code>kube-proxy</code>) and proper masquerading — that system components likely depend on. This setup does not prove that Service connectivity or the full cluster networking path is working end to end.</p>
+<p>On top of that, if we had multiple nodes, <strong>Pods on different nodes still cannot communicate with each other</strong> because there is no cross-node routing or overlay network configured.</p>
+<p>To get a fully functional K8s network where system components thrive and cross-node traffic succeeds, we need a more complete networking stack: a CNI implementation that satisfies the Kubernetes network model plus the components responsible for Service handling and cross-node traffic.</p>
+<p>Understanding how CNI operates "by hand" will take the fear out of networking errors. In the next post, we'll see how a real-world CNI like <strong>Cilium</strong> levels up this game using <strong>eBPF</strong>.</p>
 <p><strong>References:</strong></p>
 <ul>
 <li><a href="https://www.cni.dev/docs/spec/#cni-operations">CNI Operations Spec</a></li>
 <li><a href="https://kind.sigs.k8s.io/docs/user/quick-start/">Kind Quick Start Guide</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/">Kubernetes Network Plugins</a></li>
+<li><a href="https://claude.ai/">https://claude.ai/</a></li>
+<li><a href="chatgpt.com">chatgpt.com</a></li>
+<li><a href="https://gemini.google.com/">https://gemini.google.com/</a></li>
 </ul>
 
 
