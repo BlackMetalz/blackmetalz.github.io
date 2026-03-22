@@ -1,0 +1,14 @@
+# 1
+```
+  flowchart TB
+    A["Pod is scheduled to one node"]
+    B["Local kubelet / containerd calls Cilium CNI"]
+    C["Local cilium-agent programs that node<br/>veth, Pod IP, endpoint state"]
+    D["Other nodes learn how to reach<br/>and identify this Pod"]
+    E["They update routing, Service,<br/>and Policy state as needed"]
+    F["Pod traffic goes through the eBPF datapath"]
+    G["eBPF handles routing, Service LB, and Policy"]
+
+    A --> B --> C --> D --> E --> F --> G
+
+```
