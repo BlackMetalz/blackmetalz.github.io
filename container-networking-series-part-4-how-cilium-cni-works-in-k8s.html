@@ -147,6 +147,8 @@ cilium<span class="w"> </span>image<span class="w"> </span><span class="o">(</sp
 
 <hr>
 <h2>2. Decoding the Core Concepts</h2>
+<h3>Pod Networking Flow with Cilium</h3>
+<p><img alt="cilium flow overview" src="./images/2026/03/09.png"></p>
 <h3>What exactly is eBPF?</h3>
 <p>Think of eBPF as a way to run <strong>small, verified programs inside the Linux kernel</strong>. You do not rebuild the kernel. You do not reboot the machine. You load a program, the kernel verifies it, then attaches it to specific hooks in the networking path.</p>
 <p>That means packets can be inspected, forwarded, dropped, NATed, or load-balanced <strong>inside kernel space</strong>, without punting every decision to userspace tools.</p>
@@ -164,6 +166,7 @@ cilium<span class="w"> </span>image<span class="w"> </span><span class="o">(</sp
 <p>In a standard cluster, <code>kube-proxy</code> watches Services and installs iptables or IP Virtual Server (IPVS) rules so <code>ClusterIP</code>, <code>NodePort</code>, and friends actually work.</p>
 <p>In a kube-proxy-free Cilium cluster, Cilium does that job itself. It stores Service and backend mappings in <strong>BPF maps</strong>, so when traffic hits a Service IP, the translation happens in the eBPF datapath instead of an iptables chain.</p>
 <p>That is why in this lab we explicitly disable kube-proxy and tell Cilium to take over.</p>
+<p>Important: Cilium deploys an agent on every Kubernetes node as a DaemonSet. The CNI plugin is invoked during Pod setup, and the local cilium-agent maintains endpoint state and programs the eBPF datapath on that node.</p>
 <h3>Cilium Identity</h3>
 <p>This is one of Cilium's killer ideas.</p>
 <p>Instead of treating workloads as "just IP addresses", Cilium assigns them <strong>security identities</strong> derived from labels. Policies are then evaluated against identities, not just raw IPs.</p>

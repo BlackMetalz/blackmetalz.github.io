@@ -68,6 +68,8 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;image&lt;span class="w"&gt; &lt;/span&
 
 &lt;hr&gt;
 &lt;h2&gt;2. Decoding the Core Concepts&lt;/h2&gt;
+&lt;h3&gt;Pod Networking Flow with Cilium&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="cilium flow overview" src="./images/2026/03/09.png"&gt;&lt;/p&gt;
 &lt;h3&gt;What exactly is eBPF?&lt;/h3&gt;
 &lt;p&gt;Think of eBPF as a way to run &lt;strong&gt;small, verified programs inside the Linux kernel&lt;/strong&gt;. You do not rebuild the kernel. You do not reboot the machine. You load a program, the kernel verifies it, then attaches it to specific hooks in the networking path.&lt;/p&gt;
 &lt;p&gt;That means packets can be inspected, forwarded, dropped, NATed, or load-balanced &lt;strong&gt;inside kernel space&lt;/strong&gt;, without punting every decision to userspace tools.&lt;/p&gt;
@@ -85,6 +87,7 @@ cilium&lt;span class="w"&gt; &lt;/span&gt;image&lt;span class="w"&gt; &lt;/span&
 &lt;p&gt;In a standard cluster, &lt;code&gt;kube-proxy&lt;/code&gt; watches Services and installs iptables or IP Virtual Server (IPVS) rules so &lt;code&gt;ClusterIP&lt;/code&gt;, &lt;code&gt;NodePort&lt;/code&gt;, and friends actually work.&lt;/p&gt;
 &lt;p&gt;In a kube-proxy-free Cilium cluster, Cilium does that job itself. It stores Service and backend mappings in &lt;strong&gt;BPF maps&lt;/strong&gt;, so when traffic hits a Service IP, the translation happens in the eBPF datapath instead of an iptables chain.&lt;/p&gt;
 &lt;p&gt;That is why in this lab we explicitly disable kube-proxy and tell Cilium to take over.&lt;/p&gt;
+&lt;p&gt;Important: Cilium deploys an agent on every Kubernetes node as a DaemonSet. The CNI plugin is invoked during Pod setup, and the local cilium-agent maintains endpoint state and programs the eBPF datapath on that node.&lt;/p&gt;
 &lt;h3&gt;Cilium Identity&lt;/h3&gt;
 &lt;p&gt;This is one of Cilium's killer ideas.&lt;/p&gt;
 &lt;p&gt;Instead of treating workloads as "just IP addresses", Cilium assigns them &lt;strong&gt;security identities&lt;/strong&gt; derived from labels. Policies are then evaluated against identities, not just raw IPs.&lt;/p&gt;
