@@ -1,5 +1,399 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-03-22T00:00:00+07:00</updated><entry><title>[Container Networking Series - Part 4] How Cilium CNI works in K8S</title><link href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html" rel="alternate"/><published>2026-03-22T00:00:00+07:00</published><updated>2026-03-22T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-22:/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-03-23T00:00:00+07:00</updated><entry><title>Containers Are Just Linux Primitives: Namespaces, Cgroups, OverlayFS, and Podman</title><link href="https://blackmetalz.github.io/containers-are-just-linux-primitives-namespaces-cgroups-overlayfs-and-podman.html" rel="alternate"/><published>2026-03-23T00:00:00+07:00</published><updated>2026-03-23T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-23:/containers-are-just-linux-primitives-namespaces-cgroups-overlayfs-and-podman.html</id><summary type="html"/><content type="html">&lt;p&gt;If you stay in the container world long enough, you will hear people say things like:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;"A container is just a lightweight VM"&lt;/li&gt;
+&lt;li&gt;"Docker created containers"&lt;/li&gt;
+&lt;li&gt;"Containers are magic"&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;All 3 are wrong enough to be dangerous.&lt;/p&gt;
+&lt;p&gt;A container is still just a &lt;strong&gt;Linux process&lt;/strong&gt; (or process tree).&lt;/p&gt;
+&lt;p&gt;What makes that process feel like a tiny isolated machine is not magic. It is a combination of &lt;strong&gt;Linux primitives&lt;/strong&gt;. If I have to compress that story into one teaching-friendly mental model, I would call these the &lt;strong&gt;3 common Linux primitives used by containers&lt;/strong&gt;:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Namespaces&lt;/strong&gt; for isolation&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cgroups&lt;/strong&gt; for resource control&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;A layered root filesystem&lt;/strong&gt; for the container's file view, often implemented with &lt;strong&gt;OverlayFS&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;This article uses &lt;strong&gt;Podman&lt;/strong&gt; for the demos, because Podman is close enough to Docker to feel familiar, but transparent enough that we can still see the Linux pieces underneath.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;1. What exactly is Podman?&lt;/h2&gt;
+&lt;p&gt;If you are coming from Docker, the shortest accurate version is:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Podman is a daemonless container engine&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;It speaks a &lt;strong&gt;Docker-like CLI&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;It uses an OCI runtime like &lt;strong&gt;&lt;code&gt;crun&lt;/code&gt;&lt;/strong&gt; or &lt;strong&gt;&lt;code&gt;runc&lt;/code&gt;&lt;/strong&gt; underneath&lt;/li&gt;
+&lt;li&gt;It supports both &lt;strong&gt;rootful&lt;/strong&gt; and &lt;strong&gt;rootless&lt;/strong&gt; containers&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The word &lt;strong&gt;daemonless&lt;/strong&gt; matters.&lt;/p&gt;
+&lt;p&gt;With Docker, the usual mental model is:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;docker CLI -&amp;gt; dockerd -&amp;gt; containerd -&amp;gt; OCI runtime -&amp;gt; kernel
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;With Podman, the normal local mental model is simpler:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman CLI -&amp;gt; libpod -&amp;gt; OCI runtime -&amp;gt; kernel
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That does &lt;strong&gt;not&lt;/strong&gt; mean Podman is "just a client". It is still a full container engine. It just does not require a long-lived central daemon like &lt;code&gt;dockerd&lt;/code&gt; for normal local usage.&lt;/p&gt;
+&lt;p&gt;Strictly speaking, Podman also uses helper components such as &lt;code&gt;conmon&lt;/code&gt;, but the simplified flow above is the right mental model for this article.&lt;/p&gt;
+&lt;p&gt;That is why Podman is a good teaching tool for this topic: it gets out of the way faster.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;2. The 3 Common Linux Primitives Behind Containers&lt;/h2&gt;
+&lt;h3&gt;Primitive 1: Namespaces&lt;/h3&gt;
+&lt;p&gt;Namespaces give a process its &lt;strong&gt;own view&lt;/strong&gt; of specific system resources.&lt;/p&gt;
+&lt;p&gt;Common namespace types you will meet in containers:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;PID namespace&lt;/strong&gt;: the process gets its own process tree&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;NET namespace&lt;/strong&gt;: its own network stack, interfaces, routes, ports&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MNT namespace&lt;/strong&gt;: its own mount table&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;UTS namespace&lt;/strong&gt;: its own hostname&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;IPC namespace&lt;/strong&gt;: its own shared memory / semaphores&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;USER namespace&lt;/strong&gt;: user and group ID remapping, especially important for rootless containers&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;There are also &lt;strong&gt;cgroup&lt;/strong&gt; and &lt;strong&gt;time&lt;/strong&gt; namespaces, but the ones above are the types you will encounter most often in container discussions.&lt;/p&gt;
+&lt;p&gt;This is why process &lt;code&gt;12345&lt;/code&gt; on the host can look like &lt;strong&gt;PID 1&lt;/strong&gt; inside the container. It is the same underlying kernel, but the process is looking through a different namespace view.&lt;/p&gt;
+&lt;h3&gt;Primitive 2: Cgroups&lt;/h3&gt;
+&lt;p&gt;Namespaces isolate what a process can &lt;strong&gt;see&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Cgroups control how much of the machine a process can &lt;strong&gt;consume&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;That includes things like:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;CPU time&lt;/li&gt;
+&lt;li&gt;Memory&lt;/li&gt;
+&lt;li&gt;Number of processes&lt;/li&gt;
+&lt;li&gt;I/O accounting and limits&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Without cgroups, a "container" could still exist as an isolated process, but it would be terrible for multi-tenant systems because one noisy workload could starve everything else.&lt;/p&gt;
+&lt;h3&gt;Primitive 3: A Layered Root Filesystem&lt;/h3&gt;
+&lt;p&gt;Every container needs a filesystem view:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;/bin/sh&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/etc&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/usr&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;application files&lt;/li&gt;
+&lt;li&gt;libraries&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That is the job of the container root filesystem.&lt;/p&gt;
+&lt;p&gt;In modern Linux container engines, this filesystem is often built from &lt;strong&gt;image layers&lt;/strong&gt; plus a &lt;strong&gt;writable container layer&lt;/strong&gt;. A very common implementation is &lt;strong&gt;OverlayFS&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;That gives us the classic model:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;lower layers (image) + upper layer (container writes) -&amp;gt; merged view
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Important nuance: &lt;strong&gt;OverlayFS is common, but not mandatory&lt;/strong&gt;. The deeper primitive is "a container-specific root filesystem view". OverlayFS is simply one of the most common ways to implement it on Linux.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;3. Lab Setup&lt;/h2&gt;
+&lt;p&gt;To follow this lab on &lt;strong&gt;Ubuntu 24.04&lt;/strong&gt;, install:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Podman&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;jq&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;util-linux&lt;/strong&gt; for &lt;code&gt;nsenter&lt;/code&gt; and related tools&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;iproute2&lt;/strong&gt; for &lt;code&gt;ip addr&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;update
+sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;-y&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;util-linux&lt;span class="w"&gt; &lt;/span&gt;iproute2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Quick checks:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;version
+podman&lt;span class="w"&gt; &lt;/span&gt;info&lt;span class="w"&gt; &lt;/span&gt;--format&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;rootless={{.Host.Security.Rootless}} cgroupVersion={{.Host.CgroupVersion}} graphDriver={{.Store.GraphDriverName}} ociRuntime={{.Host.OCIRuntime.Name}}&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;On a healthy modern host, you usually want to see:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;cgroupVersion=v2&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;an OCI runtime such as &lt;code&gt;crun&lt;/code&gt; or &lt;code&gt;runc&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;a storage driver such as &lt;code&gt;overlay&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For this article, I will use &lt;strong&gt;rootful Podman&lt;/strong&gt; in the low-level inspection steps because it makes namespace and filesystem introspection simpler. Podman absolutely supports rootless mode too, and we will talk about that near the end.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;4. Step 1: Run One Real Container&lt;/h2&gt;
+&lt;p&gt;Let us create a tiny container with very visible limits:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;run&lt;span class="w"&gt; &lt;/span&gt;-d&lt;span class="w"&gt; &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--hostname&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--memory&lt;span class="w"&gt; &lt;/span&gt;128m&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--cpus&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.5&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--pids-limit&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;64&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;docker.io/library/alpine:3.22&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Check it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;ps
+sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;--format&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{.State.Status}}&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Grab the host PID of the container's main process:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;PID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{.State.Pid}}&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is the key mental flip:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;primitive-lab&lt;/code&gt; is &lt;strong&gt;not&lt;/strong&gt; a mini-VM. It is just a process (or process tree) on the host. Podman simply created it with a different set of namespaces, cgroups, and mounts.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;5. Step 2: Prove the Namespace Story&lt;/h2&gt;
+&lt;p&gt;List the namespaces associated with that process:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;lsns&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You will typically see namespace types like:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mnt&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;uts&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ipc&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pid&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;net&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cgroup&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Now look at the namespace handles directly:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;readlink&lt;span class="w"&gt; &lt;/span&gt;/proc/&lt;span class="nv"&gt;$PID&lt;/span&gt;/ns/mnt
+sudo&lt;span class="w"&gt; &lt;/span&gt;readlink&lt;span class="w"&gt; &lt;/span&gt;/proc/&lt;span class="nv"&gt;$PID&lt;/span&gt;/ns/uts
+sudo&lt;span class="w"&gt; &lt;/span&gt;readlink&lt;span class="w"&gt; &lt;/span&gt;/proc/&lt;span class="nv"&gt;$PID&lt;/span&gt;/ns/pid
+sudo&lt;span class="w"&gt; &lt;/span&gt;readlink&lt;span class="w"&gt; &lt;/span&gt;/proc/&lt;span class="nv"&gt;$PID&lt;/span&gt;/ns/net
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Those &lt;code&gt;ns:[...]&lt;/code&gt; IDs are the kernel objects behind the isolation.&lt;/p&gt;
+&lt;p&gt;Enter the container's namespaces from the host:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;nsenter&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-m&lt;span class="w"&gt; &lt;/span&gt;-u&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now run these commands &lt;strong&gt;inside&lt;/strong&gt; that namespace view:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;hostname
+ip&lt;span class="w"&gt; &lt;/span&gt;addr
+ps&lt;span class="w"&gt; &lt;/span&gt;-ef
+mount&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;head
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;What you should notice:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;hostname&lt;/code&gt; is &lt;code&gt;primitive-lab&lt;/code&gt;, not the host hostname&lt;/li&gt;
+&lt;li&gt;the process list is tiny compared with the host&lt;/li&gt;
+&lt;li&gt;the network interfaces and routes are container-specific&lt;/li&gt;
+&lt;li&gt;the mount table is not the same as the host mount table&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Exit the namespace shell:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;exit&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That is namespaces in one line:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The process is still on the same kernel, but it sees a different world.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h2&gt;6. Step 3: Prove the Cgroup Story&lt;/h2&gt;
+&lt;p&gt;We started the container with:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;--memory 128m&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;--cpus 0.5&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;--pids-limit 64&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Now let us see where those limits live.&lt;/p&gt;
+&lt;p&gt;First, inspect the cgroup path:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/proc/&lt;span class="nv"&gt;$PID&lt;/span&gt;/cgroup
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;On a cgroup v2 host, the interesting line usually looks like:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;0::/some/cgroup/path
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Capture it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;CGROUP_REL&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;awk&lt;span class="w"&gt; &lt;/span&gt;-F:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;$1==&amp;quot;0&amp;quot;{print $3}&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;/proc/&lt;span class="nv"&gt;$PID&lt;/span&gt;/cgroup&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nv"&gt;CGROUP_DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/sys/fs/cgroup&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CGROUP_REL&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now inspect the actual cgroup files:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;/memory.max&amp;quot;&lt;/span&gt;
+sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;/cpu.max&amp;quot;&lt;/span&gt;
+sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;/pids.max&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You should see values that correspond to the limits we gave Podman.&lt;/p&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;memory.max&lt;/code&gt; should be around &lt;code&gt;134217728&lt;/code&gt; bytes for &lt;code&gt;128m&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pids.max&lt;/code&gt; should be &lt;code&gt;64&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cpu.max&lt;/code&gt; should show a quota/period pair that approximates &lt;code&gt;0.5 CPU&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This is the second mental flip:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Podman did not invent resource limits. It translated your CLI flags into cgroup settings the Linux kernel already understands.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;You can also look at live usage:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;stats&lt;span class="w"&gt; &lt;/span&gt;--no-stream&lt;span class="w"&gt; &lt;/span&gt;primitive-lab
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Again, the container is not special. It is just a process tree attached to a cgroup subtree.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;7. Step 4: Prove the Layered Filesystem Story&lt;/h2&gt;
+&lt;p&gt;Now let us inspect the container filesystem driver:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.[0].GraphDriver&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;On many modern Linux hosts, the interesting shape looks like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;overlay&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;Data&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;LowerDir&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;...&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;UpperDir&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;...&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;WorkDir&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;...&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;MergedDir&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;...&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That maps directly to OverlayFS concepts:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;LowerDir&lt;/strong&gt;: read-only image layers&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;UpperDir&lt;/strong&gt;: writable layer for this container&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;WorkDir&lt;/strong&gt;: OverlayFS bookkeeping&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MergedDir&lt;/strong&gt;: the final mounted root filesystem the process sees&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Extract those paths:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;LOWER_DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.[0].GraphDriver.Data.LowerDir&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nv"&gt;UPPER_DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.[0].GraphDriver.Data.UpperDir&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nv"&gt;MERGED_DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.[0].GraphDriver.Data.MergedDir&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;LOWER_DIR=&lt;/span&gt;&lt;span class="nv"&gt;$LOWER_DIR&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;UPPER_DIR=&lt;/span&gt;&lt;span class="nv"&gt;$UPPER_DIR&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;MERGED_DIR=&lt;/span&gt;&lt;span class="nv"&gt;$MERGED_DIR&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Now write a file from inside the container:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;sh&lt;span class="w"&gt; &lt;/span&gt;-c&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;echo &amp;quot;hello from upperdir&amp;quot; &amp;gt; /root/hello.txt&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Check the merged filesystem view:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$MERGED_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello.txt&amp;quot;&lt;/span&gt;
+sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$MERGED_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello.txt&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Then inspect the upper layer:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$UPPER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello.txt&amp;quot;&lt;/span&gt;
+sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$UPPER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello.txt&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That file was not baked into the image. It landed in the &lt;strong&gt;writable upper layer&lt;/strong&gt; of this specific container.&lt;/p&gt;
+&lt;p&gt;So the third mental flip is:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A container image is not one giant mutable disk. It is usually a stack of read-only layers plus one writable layer on top.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;That is why containers can start fast and why many containers can share the same base image efficiently.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;8. Put the 3 Pieces Together&lt;/h2&gt;
+&lt;p&gt;By now, the "container magic" should look much more boring:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Podman CLI
+  -&amp;gt; asks an OCI runtime to start a process
+  -&amp;gt; that process gets new namespaces
+  -&amp;gt; that process is attached to cgroups
+  -&amp;gt; that process sees a merged root filesystem
+  -&amp;gt; done
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;So when somebody says "a container is lightweight", the kernel-level translation is closer to:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;no second kernel&lt;/li&gt;
+&lt;li&gt;no hardware virtualization boundary&lt;/li&gt;
+&lt;li&gt;no emulated machine&lt;/li&gt;
+&lt;li&gt;just a process with isolation, limits, and a filesystem view&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That is the reason containers are usually lighter than VMs.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;9. Where Podman Fits In&lt;/h2&gt;
+&lt;p&gt;At this point, we can describe Podman more accurately.&lt;/p&gt;
+&lt;p&gt;Podman is not "the thing that makes containers possible".&lt;/p&gt;
+&lt;p&gt;Linux already had the primitives.&lt;/p&gt;
+&lt;p&gt;Podman is the tool that:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;pulls images&lt;/li&gt;
+&lt;li&gt;creates container metadata&lt;/li&gt;
+&lt;li&gt;sets up mounts&lt;/li&gt;
+&lt;li&gt;invokes an OCI runtime&lt;/li&gt;
+&lt;li&gt;gives you a human-friendly CLI for all of that&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Roughly, when you type &lt;code&gt;podman run&lt;/code&gt;, the flow looks something like this:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman run
+  -&amp;gt; prepare container metadata and OCI spec
+  -&amp;gt; set up the OverlayFS mount (lower + upper + merged)
+  -&amp;gt; prepare networking (typically via netavark; rootless setups often use slirp4netns or pasta)
+  -&amp;gt; call OCI runtime (crun/runc) with the spec
+  -&amp;gt; OCI runtime creates the process with new namespaces
+  -&amp;gt; attach the process to its cgroup
+  -&amp;gt; switch root into the merged filesystem
+  -&amp;gt; exec the entrypoint
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This is a simplified view. The real implementation has more moving parts. But the point is: every step maps back to one of the 3 primitives we just proved.&lt;/p&gt;
+&lt;p&gt;In other words, Podman is the &lt;strong&gt;orchestrator of the local container lifecycle&lt;/strong&gt;, not the source of the underlying kernel features.&lt;/p&gt;
+&lt;p&gt;That is also why Docker, Podman, containerd, and CRI-O can all feel different at the UX layer while still relying on the same Linux building blocks underneath.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;10. Bonus: Rootless Podman Is Where User Namespaces Get Fun&lt;/h2&gt;
+&lt;p&gt;One thing Podman does especially well is &lt;strong&gt;rootless containers&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;In rootless mode:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;you can run containers as a regular user&lt;/li&gt;
+&lt;li&gt;Podman uses &lt;strong&gt;user namespaces&lt;/strong&gt; to map container IDs&lt;/li&gt;
+&lt;li&gt;container storage usually lives under your home directory&lt;/li&gt;
+&lt;li&gt;networking may use helpers such as &lt;strong&gt;slirp4netns&lt;/strong&gt; or &lt;strong&gt;pasta&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Quick check:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;info&lt;span class="w"&gt; &lt;/span&gt;--format&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{.Host.Security.Rootless}}&amp;#39;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If you want to peek into the rootless user namespace mapping:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;unshare&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/proc/self/uid_map
+podman&lt;span class="w"&gt; &lt;/span&gt;unshare&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/proc/self/gid_map
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;But the real "aha" moment is this: &lt;strong&gt;root inside the container, non-root outside&lt;/strong&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Run a rootless container&lt;/span&gt;
+podman&lt;span class="w"&gt; &lt;/span&gt;run&lt;span class="w"&gt; &lt;/span&gt;-d&lt;span class="w"&gt; &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;rootless-test&lt;span class="w"&gt; &lt;/span&gt;alpine&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
+
+&lt;span class="c1"&gt;# Inside the container, the process thinks it is root&lt;/span&gt;
+podman&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;rootless-test&lt;span class="w"&gt; &lt;/span&gt;whoami&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="c1"&gt;# -&amp;gt; root&lt;/span&gt;
+podman&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;rootless-test&lt;span class="w"&gt; &lt;/span&gt;id&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="c1"&gt;# -&amp;gt; uid=0(root)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# But on the host, the PID runs as YOUR user&lt;/span&gt;
+&lt;span class="nv"&gt;RPID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{.State.Pid}}&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;rootless-test&lt;span class="k"&gt;)&lt;/span&gt;
+ps&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;user,pid,cmd&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$RPID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="c1"&gt;# -&amp;gt; your_username, not root&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Clean up&lt;/span&gt;
+podman&lt;span class="w"&gt; &lt;/span&gt;rm&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;rootless-test
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That is user namespaces doing the mapping. The container sees UID 0, but the kernel knows the real UID is your unprivileged user.&lt;/p&gt;
+&lt;p&gt;That is a great next topic once you are comfortable with the 3 primitives from this article.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;11. Summary&lt;/h2&gt;
+&lt;p&gt;If you want one sentence to remember, make it this:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A container is just a Linux process built from namespaces, cgroups, and a container-specific root filesystem.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;And if you want the Podman version:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Podman is a daemonless container engine that packages those Linux primitives into a clean, Docker-like workflow.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So yes, "namespaces + cgroups + OverlayFS" is a useful teaching shortcut.&lt;/p&gt;
+&lt;p&gt;But the most precise version is:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Namespaces&lt;/strong&gt; provide isolation&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cgroups&lt;/strong&gt; provide resource control&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;A layered root filesystem&lt;/strong&gt; provides the file view&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;OverlayFS&lt;/strong&gt; is a very common implementation of that last part&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Once you internalize that, containers stop looking magical and start looking like what they really are:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;well-packaged Linux processes (or process trees)&lt;/strong&gt;.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2&gt;12. Cleanup&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;rm&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;primitive-lab
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;hr&gt;
+&lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.podman.io/en/stable/"&gt;Podman: What is Podman?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.podman.io/en/stable/markdown/podman.1.html"&gt;Podman rootless mode&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.kernel.org/admin-guide/cgroup-v2.html"&gt;Linux cgroup v2 documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.kernel.org/filesystems/overlayfs.html"&gt;Linux OverlayFS documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://man7.org/linux/man-pages/man7/namespaces.7.html"&gt;Linux namespaces overview&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://man7.org/linux/man-pages/man1/nsenter.1.html"&gt;Linux &lt;code&gt;nsenter&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="container"/><category term="podman"/><category term="namespaces"/><category term="cgroups"/><category term="overlayfs"/></entry><entry><title>[Container Networking Series - Part 4] How Cilium CNI works in K8S</title><link href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html" rel="alternate"/><published>2026-03-22T00:00:00+07:00</published><updated>2026-03-22T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-22:/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/container-networking-series-part-1-demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Demystifying Docker Networking: A Deep Dive into Bridge &amp;amp; veth&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/container-networking-series-part-2-demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Demystifying Docker Networking Egress: The Masquerade Magic&lt;/a&gt;&lt;/li&gt;

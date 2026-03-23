@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="linux, container, podman, namespaces, cgroups, overlayfs, Knowledge Base, " />
+
+<meta property="og:title" content="Containers Are Just Linux Primitives: Namespaces, Cgroups, OverlayFS, and Podman "/>
+<meta property="og:url" content="https://blackmetalz.github.io/containers-are-just-linux-primitives-namespaces-cgroups-overlayfs-and-podman.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2026-03-23T00:00:00+07:00" />
+<meta name="twitter:title" content="Containers Are Just Linux Primitives: Namespaces, Cgroups, OverlayFS, and Podman ">
+<meta name="twitter:description" content="">
+
+        <title>Containers Are Just Linux Primitives: Namespaces, Cgroups, OverlayFS, and Podman  · Kienlt&#39;s notebook
+</title>
+        <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://blackmetalz.github.io/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://blackmetalz.github.io
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://blackmetalz.github.io/categories.html">Categories</a></li>
+                                <li ><a href="https://blackmetalz.github.io/tags.html">Tags</a></li>
+                                <li ><a href="https://blackmetalz.github.io/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://blackmetalz.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://blackmetalz.github.io/containers-are-just-linux-primitives-namespaces-cgroups-overlayfs-and-podman.html">
+                Containers Are Just Linux Primitives: Namespaces, Cgroups, OverlayFS, and Podman
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>If you stay in the container world long enough, you will hear people say things like:</p>
+<ul>
+<li>"A container is just a lightweight VM"</li>
+<li>"Docker created containers"</li>
+<li>"Containers are magic"</li>
+</ul>
+<p>All 3 are wrong enough to be dangerous.</p>
+<p>A container is still just a <strong>Linux process</strong> (or process tree).</p>
+<p>What makes that process feel like a tiny isolated machine is not magic. It is a combination of <strong>Linux primitives</strong>. If I have to compress that story into one teaching-friendly mental model, I would call these the <strong>3 common Linux primitives used by containers</strong>:</p>
+<ol>
+<li><strong>Namespaces</strong> for isolation</li>
+<li><strong>Cgroups</strong> for resource control</li>
+<li><strong>A layered root filesystem</strong> for the container's file view, often implemented with <strong>OverlayFS</strong></li>
+</ol>
+<p>This article uses <strong>Podman</strong> for the demos, because Podman is close enough to Docker to feel familiar, but transparent enough that we can still see the Linux pieces underneath.</p>
+<hr>
+<h2>1. What exactly is Podman?</h2>
+<p>If you are coming from Docker, the shortest accurate version is:</p>
+<ul>
+<li><strong>Podman is a daemonless container engine</strong></li>
+<li>It speaks a <strong>Docker-like CLI</strong></li>
+<li>It uses an OCI runtime like <strong><code>crun</code></strong> or <strong><code>runc</code></strong> underneath</li>
+<li>It supports both <strong>rootful</strong> and <strong>rootless</strong> containers</li>
+</ul>
+<p>The word <strong>daemonless</strong> matters.</p>
+<p>With Docker, the usual mental model is:</p>
+<div class="highlight"><pre><span></span><code>docker CLI -&gt; dockerd -&gt; containerd -&gt; OCI runtime -&gt; kernel
+</code></pre></div>
+
+<p>With Podman, the normal local mental model is simpler:</p>
+<div class="highlight"><pre><span></span><code>podman CLI -&gt; libpod -&gt; OCI runtime -&gt; kernel
+</code></pre></div>
+
+<p>That does <strong>not</strong> mean Podman is "just a client". It is still a full container engine. It just does not require a long-lived central daemon like <code>dockerd</code> for normal local usage.</p>
+<p>Strictly speaking, Podman also uses helper components such as <code>conmon</code>, but the simplified flow above is the right mental model for this article.</p>
+<p>That is why Podman is a good teaching tool for this topic: it gets out of the way faster.</p>
+<hr>
+<h2>2. The 3 Common Linux Primitives Behind Containers</h2>
+<h3>Primitive 1: Namespaces</h3>
+<p>Namespaces give a process its <strong>own view</strong> of specific system resources.</p>
+<p>Common namespace types you will meet in containers:</p>
+<ul>
+<li><strong>PID namespace</strong>: the process gets its own process tree</li>
+<li><strong>NET namespace</strong>: its own network stack, interfaces, routes, ports</li>
+<li><strong>MNT namespace</strong>: its own mount table</li>
+<li><strong>UTS namespace</strong>: its own hostname</li>
+<li><strong>IPC namespace</strong>: its own shared memory / semaphores</li>
+<li><strong>USER namespace</strong>: user and group ID remapping, especially important for rootless containers</li>
+</ul>
+<p>There are also <strong>cgroup</strong> and <strong>time</strong> namespaces, but the ones above are the types you will encounter most often in container discussions.</p>
+<p>This is why process <code>12345</code> on the host can look like <strong>PID 1</strong> inside the container. It is the same underlying kernel, but the process is looking through a different namespace view.</p>
+<h3>Primitive 2: Cgroups</h3>
+<p>Namespaces isolate what a process can <strong>see</strong>.</p>
+<p>Cgroups control how much of the machine a process can <strong>consume</strong>.</p>
+<p>That includes things like:</p>
+<ul>
+<li>CPU time</li>
+<li>Memory</li>
+<li>Number of processes</li>
+<li>I/O accounting and limits</li>
+</ul>
+<p>Without cgroups, a "container" could still exist as an isolated process, but it would be terrible for multi-tenant systems because one noisy workload could starve everything else.</p>
+<h3>Primitive 3: A Layered Root Filesystem</h3>
+<p>Every container needs a filesystem view:</p>
+<ul>
+<li><code>/bin/sh</code></li>
+<li><code>/etc</code></li>
+<li><code>/usr</code></li>
+<li>application files</li>
+<li>libraries</li>
+</ul>
+<p>That is the job of the container root filesystem.</p>
+<p>In modern Linux container engines, this filesystem is often built from <strong>image layers</strong> plus a <strong>writable container layer</strong>. A very common implementation is <strong>OverlayFS</strong>.</p>
+<p>That gives us the classic model:</p>
+<div class="highlight"><pre><span></span><code>lower layers (image) + upper layer (container writes) -&gt; merged view
+</code></pre></div>
+
+<p>Important nuance: <strong>OverlayFS is common, but not mandatory</strong>. The deeper primitive is "a container-specific root filesystem view". OverlayFS is simply one of the most common ways to implement it on Linux.</p>
+<hr>
+<h2>3. Lab Setup</h2>
+<p>To follow this lab on <strong>Ubuntu 24.04</strong>, install:</p>
+<ol>
+<li><strong>Podman</strong></li>
+<li><strong>jq</strong></li>
+<li><strong>util-linux</strong> for <code>nsenter</code> and related tools</li>
+<li><strong>iproute2</strong> for <code>ip addr</code></li>
+</ol>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>podman<span class="w"> </span>jq<span class="w"> </span>util-linux<span class="w"> </span>iproute2
+</code></pre></div>
+
+<p>Quick checks:</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>version
+podman<span class="w"> </span>info<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;rootless={{.Host.Security.Rootless}} cgroupVersion={{.Host.CgroupVersion}} graphDriver={{.Store.GraphDriverName}} ociRuntime={{.Host.OCIRuntime.Name}}&#39;</span>
+</code></pre></div>
+
+<p>On a healthy modern host, you usually want to see:</p>
+<ul>
+<li><code>cgroupVersion=v2</code></li>
+<li>an OCI runtime such as <code>crun</code> or <code>runc</code></li>
+<li>a storage driver such as <code>overlay</code></li>
+</ul>
+<p>For this article, I will use <strong>rootful Podman</strong> in the low-level inspection steps because it makes namespace and filesystem introspection simpler. Podman absolutely supports rootless mode too, and we will talk about that near the end.</p>
+<hr>
+<h2>4. Step 1: Run One Real Container</h2>
+<p>Let us create a tiny container with very visible limits:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>podman<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>primitive-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--hostname<span class="w"> </span>primitive-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--memory<span class="w"> </span>128m<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--cpus<span class="w"> </span><span class="m">0</span>.5<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--pids-limit<span class="w"> </span><span class="m">64</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>docker.io/library/alpine:3.22<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>sleep<span class="w"> </span>infinity
+</code></pre></div>
+
+<p>Check it:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>podman<span class="w"> </span>ps
+sudo<span class="w"> </span>podman<span class="w"> </span>inspect<span class="w"> </span>primitive-lab<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;{{.State.Status}}&#39;</span>
+</code></pre></div>
+
+<p>Grab the host PID of the container's main process:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">PID</span><span class="o">=</span><span class="k">$(</span>sudo<span class="w"> </span>podman<span class="w"> </span>inspect<span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;{{.State.Pid}}&#39;</span><span class="w"> </span>primitive-lab<span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PID</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<p>This is the key mental flip:</p>
+<p><code>primitive-lab</code> is <strong>not</strong> a mini-VM. It is just a process (or process tree) on the host. Podman simply created it with a different set of namespaces, cgroups, and mounts.</p>
+<hr>
+<h2>5. Step 2: Prove the Namespace Story</h2>
+<p>List the namespaces associated with that process:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>lsns<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PID</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<p>You will typically see namespace types like:</p>
+<ul>
+<li><code>mnt</code></li>
+<li><code>uts</code></li>
+<li><code>ipc</code></li>
+<li><code>pid</code></li>
+<li><code>net</code></li>
+<li><code>cgroup</code></li>
+</ul>
+<p>Now look at the namespace handles directly:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>readlink<span class="w"> </span>/proc/<span class="nv">$PID</span>/ns/mnt
+sudo<span class="w"> </span>readlink<span class="w"> </span>/proc/<span class="nv">$PID</span>/ns/uts
+sudo<span class="w"> </span>readlink<span class="w"> </span>/proc/<span class="nv">$PID</span>/ns/pid
+sudo<span class="w"> </span>readlink<span class="w"> </span>/proc/<span class="nv">$PID</span>/ns/net
+</code></pre></div>
+
+<p>Those <code>ns:[...]</code> IDs are the kernel objects behind the isolation.</p>
+<p>Enter the container's namespaces from the host:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>nsenter<span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PID</span><span class="s2">&quot;</span><span class="w"> </span>-m<span class="w"> </span>-u<span class="w"> </span>-i<span class="w"> </span>-n<span class="w"> </span>-p<span class="w"> </span>sh
+</code></pre></div>
+
+<p>Now run these commands <strong>inside</strong> that namespace view:</p>
+<div class="highlight"><pre><span></span><code>hostname
+ip<span class="w"> </span>addr
+ps<span class="w"> </span>-ef
+mount<span class="w"> </span><span class="p">|</span><span class="w"> </span>head
+</code></pre></div>
+
+<p>What you should notice:</p>
+<ul>
+<li><code>hostname</code> is <code>primitive-lab</code>, not the host hostname</li>
+<li>the process list is tiny compared with the host</li>
+<li>the network interfaces and routes are container-specific</li>
+<li>the mount table is not the same as the host mount table</li>
+</ul>
+<p>Exit the namespace shell:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">exit</span>
+</code></pre></div>
+
+<p>That is namespaces in one line:</p>
+<blockquote>
+<p>The process is still on the same kernel, but it sees a different world.</p>
+</blockquote>
+<hr>
+<h2>6. Step 3: Prove the Cgroup Story</h2>
+<p>We started the container with:</p>
+<ul>
+<li><code>--memory 128m</code></li>
+<li><code>--cpus 0.5</code></li>
+<li><code>--pids-limit 64</code></li>
+</ul>
+<p>Now let us see where those limits live.</p>
+<p>First, inspect the cgroup path:</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>/proc/<span class="nv">$PID</span>/cgroup
+</code></pre></div>
+
+<p>On a cgroup v2 host, the interesting line usually looks like:</p>
+<div class="highlight"><pre><span></span><code>0::/some/cgroup/path
+</code></pre></div>
+
+<p>Capture it:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">CGROUP_REL</span><span class="o">=</span><span class="k">$(</span>awk<span class="w"> </span>-F:<span class="w"> </span><span class="s1">&#39;$1==&quot;0&quot;{print $3}&#39;</span><span class="w"> </span>/proc/<span class="nv">$PID</span>/cgroup<span class="k">)</span>
+<span class="nv">CGROUP_DIR</span><span class="o">=</span><span class="s2">&quot;/sys/fs/cgroup</span><span class="si">${</span><span class="nv">CGROUP_REL</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CGROUP_DIR</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<p>Now inspect the actual cgroup files:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CGROUP_DIR</span><span class="s2">/memory.max&quot;</span>
+sudo<span class="w"> </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CGROUP_DIR</span><span class="s2">/cpu.max&quot;</span>
+sudo<span class="w"> </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CGROUP_DIR</span><span class="s2">/pids.max&quot;</span>
+</code></pre></div>
+
+<p>You should see values that correspond to the limits we gave Podman.</p>
+<p>For example:</p>
+<ul>
+<li><code>memory.max</code> should be around <code>134217728</code> bytes for <code>128m</code></li>
+<li><code>pids.max</code> should be <code>64</code></li>
+<li><code>cpu.max</code> should show a quota/period pair that approximates <code>0.5 CPU</code></li>
+</ul>
+<p>This is the second mental flip:</p>
+<blockquote>
+<p>Podman did not invent resource limits. It translated your CLI flags into cgroup settings the Linux kernel already understands.</p>
+</blockquote>
+<p>You can also look at live usage:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>podman<span class="w"> </span>stats<span class="w"> </span>--no-stream<span class="w"> </span>primitive-lab
+</code></pre></div>
+
+<p>Again, the container is not special. It is just a process tree attached to a cgroup subtree.</p>
+<hr>
+<h2>7. Step 4: Prove the Layered Filesystem Story</h2>
+<p>Now let us inspect the container filesystem driver:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>podman<span class="w"> </span>inspect<span class="w"> </span>primitive-lab<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.[0].GraphDriver&#39;</span>
+</code></pre></div>
+
+<p>On many modern Linux hosts, the interesting shape looks like this:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;overlay&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;LowerDir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;UpperDir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;WorkDir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;MergedDir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>That maps directly to OverlayFS concepts:</p>
+<ul>
+<li><strong>LowerDir</strong>: read-only image layers</li>
+<li><strong>UpperDir</strong>: writable layer for this container</li>
+<li><strong>WorkDir</strong>: OverlayFS bookkeeping</li>
+<li><strong>MergedDir</strong>: the final mounted root filesystem the process sees</li>
+</ul>
+<p>Extract those paths:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">LOWER_DIR</span><span class="o">=</span><span class="k">$(</span>sudo<span class="w"> </span>podman<span class="w"> </span>inspect<span class="w"> </span>primitive-lab<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.[0].GraphDriver.Data.LowerDir&#39;</span><span class="k">)</span>
+<span class="nv">UPPER_DIR</span><span class="o">=</span><span class="k">$(</span>sudo<span class="w"> </span>podman<span class="w"> </span>inspect<span class="w"> </span>primitive-lab<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.[0].GraphDriver.Data.UpperDir&#39;</span><span class="k">)</span>
+<span class="nv">MERGED_DIR</span><span class="o">=</span><span class="k">$(</span>sudo<span class="w"> </span>podman<span class="w"> </span>inspect<span class="w"> </span>primitive-lab<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.[0].GraphDriver.Data.MergedDir&#39;</span><span class="k">)</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;LOWER_DIR=</span><span class="nv">$LOWER_DIR</span><span class="s2">&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;UPPER_DIR=</span><span class="nv">$UPPER_DIR</span><span class="s2">&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;MERGED_DIR=</span><span class="nv">$MERGED_DIR</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<p>Now write a file from inside the container:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>primitive-lab<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;echo &quot;hello from upperdir&quot; &gt; /root/hello.txt&#39;</span>
+</code></pre></div>
+
+<p>Check the merged filesystem view:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>ls<span class="w"> </span>-l<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$MERGED_DIR</span><span class="s2">/root/hello.txt&quot;</span>
+sudo<span class="w"> </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$MERGED_DIR</span><span class="s2">/root/hello.txt&quot;</span>
+</code></pre></div>
+
+<p>Then inspect the upper layer:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>ls<span class="w"> </span>-l<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$UPPER_DIR</span><span class="s2">/root/hello.txt&quot;</span>
+sudo<span class="w"> </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$UPPER_DIR</span><span class="s2">/root/hello.txt&quot;</span>
+</code></pre></div>
+
+<p>That file was not baked into the image. It landed in the <strong>writable upper layer</strong> of this specific container.</p>
+<p>So the third mental flip is:</p>
+<blockquote>
+<p>A container image is not one giant mutable disk. It is usually a stack of read-only layers plus one writable layer on top.</p>
+</blockquote>
+<p>That is why containers can start fast and why many containers can share the same base image efficiently.</p>
+<hr>
+<h2>8. Put the 3 Pieces Together</h2>
+<p>By now, the "container magic" should look much more boring:</p>
+<div class="highlight"><pre><span></span><code>Podman CLI
+  -&gt; asks an OCI runtime to start a process
+  -&gt; that process gets new namespaces
+  -&gt; that process is attached to cgroups
+  -&gt; that process sees a merged root filesystem
+  -&gt; done
+</code></pre></div>
+
+<p>So when somebody says "a container is lightweight", the kernel-level translation is closer to:</p>
+<ul>
+<li>no second kernel</li>
+<li>no hardware virtualization boundary</li>
+<li>no emulated machine</li>
+<li>just a process with isolation, limits, and a filesystem view</li>
+</ul>
+<p>That is the reason containers are usually lighter than VMs.</p>
+<hr>
+<h2>9. Where Podman Fits In</h2>
+<p>At this point, we can describe Podman more accurately.</p>
+<p>Podman is not "the thing that makes containers possible".</p>
+<p>Linux already had the primitives.</p>
+<p>Podman is the tool that:</p>
+<ul>
+<li>pulls images</li>
+<li>creates container metadata</li>
+<li>sets up mounts</li>
+<li>invokes an OCI runtime</li>
+<li>gives you a human-friendly CLI for all of that</li>
+</ul>
+<p>Roughly, when you type <code>podman run</code>, the flow looks something like this:</p>
+<div class="highlight"><pre><span></span><code>podman run
+  -&gt; prepare container metadata and OCI spec
+  -&gt; set up the OverlayFS mount (lower + upper + merged)
+  -&gt; prepare networking (typically via netavark; rootless setups often use slirp4netns or pasta)
+  -&gt; call OCI runtime (crun/runc) with the spec
+  -&gt; OCI runtime creates the process with new namespaces
+  -&gt; attach the process to its cgroup
+  -&gt; switch root into the merged filesystem
+  -&gt; exec the entrypoint
+</code></pre></div>
+
+<p>This is a simplified view. The real implementation has more moving parts. But the point is: every step maps back to one of the 3 primitives we just proved.</p>
+<p>In other words, Podman is the <strong>orchestrator of the local container lifecycle</strong>, not the source of the underlying kernel features.</p>
+<p>That is also why Docker, Podman, containerd, and CRI-O can all feel different at the UX layer while still relying on the same Linux building blocks underneath.</p>
+<hr>
+<h2>10. Bonus: Rootless Podman Is Where User Namespaces Get Fun</h2>
+<p>One thing Podman does especially well is <strong>rootless containers</strong>.</p>
+<p>In rootless mode:</p>
+<ul>
+<li>you can run containers as a regular user</li>
+<li>Podman uses <strong>user namespaces</strong> to map container IDs</li>
+<li>container storage usually lives under your home directory</li>
+<li>networking may use helpers such as <strong>slirp4netns</strong> or <strong>pasta</strong></li>
+</ul>
+<p>Quick check:</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>info<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;{{.Host.Security.Rootless}}&#39;</span>
+</code></pre></div>
+
+<p>If you want to peek into the rootless user namespace mapping:</p>
+<div class="highlight"><pre><span></span><code>podman<span class="w"> </span>unshare<span class="w"> </span>cat<span class="w"> </span>/proc/self/uid_map
+podman<span class="w"> </span>unshare<span class="w"> </span>cat<span class="w"> </span>/proc/self/gid_map
+</code></pre></div>
+
+<p>But the real "aha" moment is this: <strong>root inside the container, non-root outside</strong>.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Run a rootless container</span>
+podman<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>rootless-test<span class="w"> </span>alpine<span class="w"> </span>sleep<span class="w"> </span>infinity
+
+<span class="c1"># Inside the container, the process thinks it is root</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>rootless-test<span class="w"> </span>whoami<span class="w">    </span><span class="c1"># -&gt; root</span>
+podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>rootless-test<span class="w"> </span>id<span class="w">        </span><span class="c1"># -&gt; uid=0(root)</span>
+
+<span class="c1"># But on the host, the PID runs as YOUR user</span>
+<span class="nv">RPID</span><span class="o">=</span><span class="k">$(</span>podman<span class="w"> </span>inspect<span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;{{.State.Pid}}&#39;</span><span class="w"> </span>rootless-test<span class="k">)</span>
+ps<span class="w"> </span>-o<span class="w"> </span>user,pid,cmd<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$RPID</span><span class="s2">&quot;</span><span class="w">      </span><span class="c1"># -&gt; your_username, not root</span>
+
+<span class="c1"># Clean up</span>
+podman<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>rootless-test
+</code></pre></div>
+
+<p>That is user namespaces doing the mapping. The container sees UID 0, but the kernel knows the real UID is your unprivileged user.</p>
+<p>That is a great next topic once you are comfortable with the 3 primitives from this article.</p>
+<hr>
+<h2>11. Summary</h2>
+<p>If you want one sentence to remember, make it this:</p>
+<blockquote>
+<p>A container is just a Linux process built from namespaces, cgroups, and a container-specific root filesystem.</p>
+</blockquote>
+<p>And if you want the Podman version:</p>
+<blockquote>
+<p>Podman is a daemonless container engine that packages those Linux primitives into a clean, Docker-like workflow.</p>
+</blockquote>
+<p>So yes, "namespaces + cgroups + OverlayFS" is a useful teaching shortcut.</p>
+<p>But the most precise version is:</p>
+<ul>
+<li><strong>Namespaces</strong> provide isolation</li>
+<li><strong>Cgroups</strong> provide resource control</li>
+<li><strong>A layered root filesystem</strong> provides the file view</li>
+<li><strong>OverlayFS</strong> is a very common implementation of that last part</li>
+</ul>
+<p>Once you internalize that, containers stop looking magical and start looking like what they really are:</p>
+<p><strong>well-packaged Linux processes (or process trees)</strong>.</p>
+<hr>
+<h2>12. Cleanup</h2>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>podman<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>primitive-lab
+</code></pre></div>
+
+<hr>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://docs.podman.io/en/stable/">Podman: What is Podman?</a></li>
+<li><a href="https://docs.podman.io/en/stable/markdown/podman.1.html">Podman rootless mode</a></li>
+<li><a href="https://docs.kernel.org/admin-guide/cgroup-v2.html">Linux cgroup v2 documentation</a></li>
+<li><a href="https://docs.kernel.org/filesystems/overlayfs.html">Linux OverlayFS documentation</a></li>
+<li><a href="https://man7.org/linux/man-pages/man7/namespaces.7.html">Linux namespaces overview</a></li>
+<li><a href="https://man7.org/linux/man-pages/man1/nsenter.1.html">Linux <code>nsenter</code></a></li>
+</ul>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2026-03-23T00:00:00+07:00">Mon 23 March 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://blackmetalz.github.io/tags.html#cgroups-ref">cgroups
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#container-ref">container
+                    <span class="superscript">5</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#linux-ref">linux
+                    <span class="superscript">2</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#namespaces-ref">namespaces
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#overlayfs-ref">overlayfs
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#podman-ref">podman
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://blackmetalz.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
