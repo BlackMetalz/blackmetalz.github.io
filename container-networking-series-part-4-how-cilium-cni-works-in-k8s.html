@@ -86,7 +86,7 @@
 <li><strong>How Cilium CNI works in K8S</strong> <em>(You are here)</em></li>
 </ul>
 <hr>
-<p>In <a href="https://blackmetalz.github.io/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html">Part 3</a>, we stripped the CNI flow down to bare metal: <strong>a binary + env vars + JSON on stdin</strong>. That contract does not change with Cilium. Kubelet still calls a CNI plugin. What changes is what the plugin and its agent do after that call.</p>
+<p>In <a href="https://blackmetalz.github.io/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html">Part 3</a>, we stripped the CNI flow down to bare metal: <strong>a binary + env vars + JSON on stdin</strong>. That contract does not change with Cilium. container runtime/CRI still calls a CNI plugin. What changes is what the plugin and its agent do after that call.</p>
 <p>If you want a easier Kubernetes networking refresher before going deeper, I also wrote another intro-level post <a href="https://blackmetalz.github.io/sharing-what-ive-learned-about-kubernetes-networking-part-2.html">back in 01-2025</a>. Even beginner level can read it pretty well (I'm bad at that time xD)</p>
 <p>One correction before we start: "Cilium means iptables is gone" is too simplistic. The more accurate version is:</p>
 <ul>
@@ -492,6 +492,22 @@ nginx-svc<span class="w">   </span>ClusterIP<span class="w">   </span><span clas
 </code></pre></div>
 
 <p>That is the interesting bit: Service frontends and backends are in BPF maps, which is how Cilium can do Service translation without kube-proxy.</p>
+<p>Well, for inspect I want to put this example here</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>-o<span class="w"> </span>wide<span class="p">|</span>grep<span class="w"> </span><span class="m">10</span>.110.49.77
+nginx-svc<span class="w">    </span>ClusterIP<span class="w">   </span><span class="m">10</span>.110.49.77<span class="w">   </span>&lt;none&gt;<span class="w">        </span><span class="m">80</span>/TCP<span class="w">    </span>54s<span class="w">   </span><span class="nv">app</span><span class="o">=</span>nginx-server
+root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>-owide
+NAME<span class="w">           </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE<span class="w">   </span>IP<span class="w">             </span>NODE<span class="w">           </span>NOMINATED<span class="w"> </span>NODE<span class="w">   </span>READINESS<span class="w"> </span>GATES
+curl-client<span class="w">    </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>81s<span class="w">   </span><span class="m">10</span>.244.1.41<span class="w">    </span>kind-worker2<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+nginx-server<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>81s<span class="w">   </span><span class="m">10</span>.244.2.122<span class="w">   </span>kind-worker<span class="w">    </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+root@kienlt-lab-utilities:~#<span class="w"> </span>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span>cilium-dbg<span class="w"> </span>bpf<span class="w"> </span>lb<span class="w"> </span>list<span class="p">|</span>grep<span class="w"> </span><span class="m">10</span>.110.49.77
+SERVICE<span class="w"> </span>ADDRESS<span class="w">               </span>BACKEND<span class="w"> </span>ADDRESS<span class="w"> </span><span class="o">(</span>REVNAT_ID<span class="o">)</span><span class="w"> </span><span class="o">(</span>SLOT<span class="o">)</span>
+<span class="m">10</span>.110.49.77:80/TCP<span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="o">)</span><span class="w">       </span><span class="m">10</span>.244.2.122:80/TCP<span class="w"> </span><span class="o">(</span><span class="m">21</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="o">)</span>
+<span class="m">10</span>.110.49.77:80/TCP<span class="w"> </span><span class="o">(</span><span class="m">0</span><span class="o">)</span><span class="w">       </span><span class="m">0</span>.0.0.0:0<span class="w"> </span><span class="o">(</span><span class="m">21</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="m">0</span><span class="o">)</span><span class="w"> </span><span class="o">[</span>ClusterIP,<span class="w"> </span>non-routable<span class="o">]</span>
+<span class="m">10</span>.110.49.77:0/ANY<span class="w"> </span><span class="o">(</span><span class="m">0</span><span class="o">)</span><span class="w">        </span><span class="m">0</span>.0.0.0:0<span class="w"> </span><span class="o">(</span><span class="m">0</span><span class="o">)</span><span class="w"> </span><span class="o">(</span><span class="m">0</span><span class="o">)</span><span class="w"> </span><span class="o">[</span>ClusterIP,<span class="w"> </span>non-routable<span class="o">]</span>
+</code></pre></div>
+
+<p>So we can see service <code>10.110.49.77:80</code> is mapped to pod <code>10.244.2.122:80</code>. Kinda great for me, we would able to see which service is map to which backend address without kubectl, only need cilium-dbg bpf command xD.</p>
+<p>kubectl get svc shows the Kubernetes intent. cilium-dbg bpf lb list shows the datapath truth actually programmed into the kernel.</p>
 <hr>
 <h2>7. Trace Cross-Node Traffic</h2>
 <p>We want to prove 2 things:</p>
