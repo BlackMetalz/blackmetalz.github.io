@@ -638,7 +638,7 @@ kubectl&lt;span class="w"&gt; &lt;/span&gt;delete&lt;span class="w"&gt; &lt;/spa
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Demystifying Docker Networking: A Deep Dive into Bridge &amp;amp; veth&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Demystifying Docker Networking Egress: The Masquerade Magic&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network&lt;/strong&gt; &lt;em&gt;(You are here)&lt;/em&gt;&lt;/li&gt;
-&lt;li&gt;How Cilium CNI works in K8S &lt;em&gt;(In coming)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html"&gt;How Cilium CNI works in K8S&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;In the previous two posts, we performed a deep dive into Docker's &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Ingress Flow&lt;/a&gt; and &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Egress Flow&lt;/a&gt; by manually tinkering with &lt;code&gt;veth&lt;/code&gt;, &lt;code&gt;iptables&lt;/code&gt;, and &lt;code&gt;nsenter&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;But in Kubernetes (K8s), thousands of Pods are created and destroyed continuously. Kubelet can't afford the manual labor of typing those commands for every single Pod. It needs an "assistant" to do the heavy lifting. That assistant is the &lt;strong&gt;CNI (Container Network Interface)&lt;/strong&gt;.&lt;/p&gt;
@@ -1030,7 +1030,7 @@ nsenter&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Demystifying Docker Networking: A Deep Dive into Bridge &amp;amp; veth&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Demystifying Docker Networking Egress: The Masquerade Magic&lt;/strong&gt; &lt;em&gt;(You are here)&lt;/em&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html"&gt;Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;How Cilium CNI works in K8S &lt;em&gt;(In coming)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html"&gt;How Cilium CNI works in K8S&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;In the &lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;previous post&lt;/a&gt;, we explored how external requests find their way into a container via DNAT. But there is a flip side to that coin: When a container needs to download a package or call an external API, how does it "break out" to the internet when it only has a private, internal IP?&lt;/p&gt;
 &lt;p&gt;Today, we are diving deep into the fucking &lt;code&gt;Egress Flow&lt;/code&gt;.&lt;/p&gt;
@@ -1264,7 +1264,7 @@ So for System/DB Admin: &lt;/p&gt;
 &lt;li&gt;&lt;strong&gt;Demystifying Docker Networking: A Deep Dive into Bridge &amp;amp; veth&lt;/strong&gt; &lt;em&gt;(You are here)&lt;/em&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Demystifying Docker Networking Egress: The Masquerade Magic&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html"&gt;Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;How Cilium CNI works in K8S &lt;em&gt;(In coming)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html"&gt;How Cilium CNI works in K8S&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;I guess I'm not the only one who gets confused with Docker networking. Let's try to understand it better!&lt;/p&gt;
 &lt;h2&gt;Prerequisites&lt;/h2&gt;

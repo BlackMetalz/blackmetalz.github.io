@@ -83,7 +83,7 @@
 <li><a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html">Demystifying Docker Networking: A Deep Dive into Bridge &amp; veth</a></li>
 <li><strong>Demystifying Docker Networking Egress: The Masquerade Magic</strong> <em>(You are here)</em></li>
 <li><a href="https://blackmetalz.github.io/demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html">Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network</a></li>
-<li>How Cilium CNI works in K8S <em>(In coming)</em></li>
+<li><a href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html">How Cilium CNI works in K8S</a></li>
 </ul>
 <p>In the <a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html">previous post</a>, we explored how external requests find their way into a container via DNAT. But there is a flip side to that coin: When a container needs to download a package or call an external API, how does it "break out" to the internet when it only has a private, internal IP?</p>
 <p>Today, we are diving deep into the fucking <code>Egress Flow</code>.</p>

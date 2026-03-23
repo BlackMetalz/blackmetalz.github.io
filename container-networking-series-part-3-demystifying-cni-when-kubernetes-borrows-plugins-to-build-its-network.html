@@ -83,7 +83,7 @@
 <li><a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html">Demystifying Docker Networking: A Deep Dive into Bridge &amp; veth</a></li>
 <li><a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html">Demystifying Docker Networking Egress: The Masquerade Magic</a></li>
 <li><strong>Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network</strong> <em>(You are here)</em></li>
-<li>How Cilium CNI works in K8S <em>(In coming)</em></li>
+<li><a href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html">How Cilium CNI works in K8S</a></li>
 </ul>
 <p>In the previous two posts, we performed a deep dive into Docker's <a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html">Ingress Flow</a> and <a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html">Egress Flow</a> by manually tinkering with <code>veth</code>, <code>iptables</code>, and <code>nsenter</code>.</p>
 <p>But in Kubernetes (K8s), thousands of Pods are created and destroyed continuously. Kubelet can't afford the manual labor of typing those commands for every single Pod. It needs an "assistant" to do the heavy lifting. That assistant is the <strong>CNI (Container Network Interface)</strong>.</p>
