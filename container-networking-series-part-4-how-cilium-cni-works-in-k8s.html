@@ -641,6 +641,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> 
 
 <hr>
 <h2>10. Summary</h2>
+<p>Not really a summary but here you go.</p>
 <table>
 <thead>
 <tr>
@@ -699,6 +700,21 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> 
 <h2>11. Cilium Certified Associate (CCA) Exam</h2>
 <p>In case you are interest with, you can go to this link (my blog also xD):</p>
 <p><a href="https://blackmetalz.github.io/prepare-for-the-cilium-certified-associate-cca-exam.html">Prepare for the Cilium Certified Associate (CCA) Exam</a></p>
+<h2>12. eBPF explain in Cilium context</h2>
+<p>To be honest, I still messed up with this, can not explain meaning I'm not fully understand.</p>
+<p>So all I know is that Cilium uses eBPF to replace kube-proxy and policy enforcement. But it is not enough to explain how it works. So again, what the fuck is eBPF? </p>
+<p>eBPF = extended Berkeley Packet Filter (packet filter, remember this damn word!). It allows you write a small program (C is the most common language to write eBPF program, then compile to bytecode), load into kernel, kernel verify that fucking program (make sure no fucking infinite loop, no memory leak, and so on..) then attach it into 1 specific <code>hook point</code></p>
+<h3>Hook point</h3>
+<p>I will try to write down small part, if fully, it will be overload for me.</p>
+<div class="highlight"><pre><span></span><code><span class="n">Packet</span><span class="w"> </span><span class="n">into</span><span class="w"> </span><span class="n">NIC</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">XDP</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">TC</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Socket</span><span class="o">-</span><span class="n">level</span><span class="w"> </span><span class="n">hooks</span>
+</code></pre></div>
+
+<ul>
+<li>XDP: earliest hook point, before kernel create sk_buff (socket buffer). Cilium use for DDos mitigation, early drop</li>
+<li>TC: Traffic Control, hook point after XDP, after having sk_buff, Cilium attach eBPF program here for Policy enforcement (ingress/egress), Service DNAT (clusterIP --&gt; podIP),routing decision.</li>
+<li>Socket-level hooks: Cilium use Socket LB for translate service IP before packet create --&gt; avoid DNAT completely.</li>
+</ul>
+<p>That is what I understand, but Linux network look like fun if I deep dive more. But that's it for now!</p>
 <hr>
 <p><strong>References:</strong></p>
 <ul>
