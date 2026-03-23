@@ -583,6 +583,12 @@ kind-worker2<span class="w">         </span><span class="m">10</span>.244.2.0/24
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span>cilium-dbg<span class="w"> </span>identity<span class="w"> </span>list
 </code></pre></div>
 
+<p>Expected output with filter</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span>cilium-dbg<span class="w"> </span>identity<span class="w"> </span>list<span class="p">|</span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;app=nginx-server|app=curl-client&quot;</span>
+<span class="m">750</span><span class="w">     </span>k8s:app<span class="o">=</span>nginx-server
+<span class="m">31622</span><span class="w">   </span>k8s:app<span class="o">=</span>curl-client
+</code></pre></div>
+
 <p>You should find identities associated with labels similar to:</p>
 <ul>
 <li><code>app=nginx-server</code></li>
@@ -611,6 +617,14 @@ kind-worker2<span class="w">         </span><span class="m">10</span>.244.2.0/24
 <p>Test again:</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>curl-client<span class="w"> </span>--<span class="w"> </span>curl<span class="w"> </span>-sS<span class="w"> </span>--connect-timeout<span class="w"> </span><span class="m">5</span><span class="w"> </span>--max-time<span class="w"> </span><span class="m">5</span><span class="w"> </span>http://<span class="nv">$NGINX_IP</span>
 <span class="nb">echo</span><span class="w"> </span><span class="nv">$?</span>
+</code></pre></div>
+
+<p>Expected output:</p>
+<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>curl-client<span class="w"> </span>--<span class="w"> </span>curl<span class="w"> </span>-sS<span class="w"> </span>--connect-timeout<span class="w"> </span><span class="m">5</span><span class="w"> </span>--max-time<span class="w"> </span><span class="m">5</span><span class="w"> </span>http://<span class="nv">$NGINX_IP</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$?</span>
+curl:<span class="w"> </span><span class="o">(</span><span class="m">28</span><span class="o">)</span><span class="w"> </span>Connection<span class="w"> </span>timed<span class="w"> </span>out<span class="w"> </span>after<span class="w"> </span><span class="m">5001</span><span class="w"> </span>milliseconds
+<span class="nb">command</span><span class="w"> </span>terminated<span class="w"> </span>with<span class="w"> </span><span class="nb">exit</span><span class="w"> </span>code<span class="w"> </span><span class="m">28</span>
+<span class="m">28</span>
 </code></pre></div>
 
 <p>Expected result:</p>
