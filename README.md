@@ -5,9 +5,16 @@ sudo apt install pelican -y
 python -m pip install "pelican[markdown]"
 ```
 
-- Themes:
+Install via venv:
 ```
-# git clone https://github.com/Pelican-Elegant/elegant.git themes/elegant
+python3 -m venv venv
+source venv/bin/activate
+pip install  "pelican[markdown]"
+```
+
+- Themes: Required!
+```
+git clone https://github.com/Pelican-Elegant/elegant.git themes/elegant
 git submodule init
 git submodule update
 ```
