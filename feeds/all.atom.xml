@@ -44,8 +44,8 @@
 &lt;hr&gt;
 &lt;h2&gt;2. The 3 Common Linux Primitives Behind Containers&lt;/h2&gt;
 &lt;h3&gt;Primitive 1: Namespaces&lt;/h3&gt;
-&lt;p&gt;Namespaces give a process its &lt;strong&gt;own view&lt;/strong&gt; of specific system resources.&lt;/p&gt;
-&lt;p&gt;Common namespace types you will meet in containers:&lt;/p&gt;
+&lt;p&gt;Isolation is what I understand about namespaces in Linux. It gives a process its &lt;strong&gt;own view&lt;/strong&gt; of specific system resources.&lt;/p&gt;
+&lt;p&gt;Common namespace types you will meet in containers, detail in &lt;a href="https://www.redhat.com/en/blog/7-linux-namespaces"&gt;Redhat blog&lt;/a&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;PID namespace&lt;/strong&gt;: the process gets its own process tree&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;NET namespace&lt;/strong&gt;: its own network stack, interfaces, routes, ports&lt;/li&gt;
@@ -66,15 +66,14 @@
 &lt;li&gt;Number of processes&lt;/li&gt;
 &lt;li&gt;I/O accounting and limits&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Without cgroups, a "container" could still exist as an isolated process, but it would be terrible for multi-tenant systems because one noisy workload could starve everything else.&lt;/p&gt;
+&lt;p&gt;Without cgroups, a "container" could still exist as an isolated process, but it would be terrible for multi-tenant systems because one noisy workload could fucked up everything else.&lt;/p&gt;
 &lt;h3&gt;Primitive 3: A Layered Root Filesystem&lt;/h3&gt;
 &lt;p&gt;Every container needs a filesystem view:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;/bin/sh&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;/etc&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;/usr&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;application files&lt;/li&gt;
-&lt;li&gt;libraries&lt;/li&gt;
+&lt;li&gt;and so on...&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;That is the job of the container root filesystem.&lt;/p&gt;
 &lt;p&gt;In modern Linux container engines, this filesystem is often built from &lt;strong&gt;image layers&lt;/strong&gt; plus a &lt;strong&gt;writable container layer&lt;/strong&gt;. A very common implementation is &lt;strong&gt;OverlayFS&lt;/strong&gt;.&lt;/p&gt;
@@ -82,7 +81,6 @@
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;lower layers (image) + upper layer (container writes) -&amp;gt; merged view
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Important nuance: &lt;strong&gt;OverlayFS is common, but not mandatory&lt;/strong&gt;. The deeper primitive is "a container-specific root filesystem view". OverlayFS is simply one of the most common ways to implement it on Linux.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;3. Lab Setup&lt;/h2&gt;
 &lt;p&gt;To follow this lab on &lt;strong&gt;Ubuntu 24.04&lt;/strong&gt;, install:&lt;/p&gt;
@@ -98,21 +96,31 @@ sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;i
 
 &lt;p&gt;Quick checks:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;version
-podman&lt;span class="w"&gt; &lt;/span&gt;info&lt;span class="w"&gt; &lt;/span&gt;--format&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;rootless={{.Host.Security.Rootless}} cgroupVersion={{.Host.CgroupVersion}} graphDriver={{.Store.GraphDriverName}} ociRuntime={{.Host.OCIRuntime.Name}}&amp;#39;&lt;/span&gt;
+podman&lt;span class="w"&gt; &lt;/span&gt;info&lt;span class="w"&gt; &lt;/span&gt;--format&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;OCI_Runtime={{.Host.OCIRuntime.Name}} Cgroup_Manager={{.Host.CgroupManager}}  Storage_Driver={{.Store.GraphDriverName}} Rootless={{.Host.Security.Rootless}}&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;On a healthy modern host, you usually want to see:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;cgroupVersion=v2&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;an OCI runtime such as &lt;code&gt;crun&lt;/code&gt; or &lt;code&gt;runc&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;a storage driver such as &lt;code&gt;overlay&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;For this article, I will use &lt;strong&gt;rootful Podman&lt;/strong&gt; in the low-level inspection steps because it makes namespace and filesystem introspection simpler. Podman absolutely supports rootless mode too, and we will talk about that near the end.&lt;/p&gt;
+&lt;p&gt;Expected output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Version&lt;/span&gt;
+Client:&lt;span class="w"&gt;       &lt;/span&gt;Podman&lt;span class="w"&gt; &lt;/span&gt;Engine
+Version:&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt;.9.3
+API&lt;span class="w"&gt; &lt;/span&gt;Version:&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt;.9.3
+Go&lt;span class="w"&gt; &lt;/span&gt;Version:&lt;span class="w"&gt;   &lt;/span&gt;go1.22.2
+Built:&lt;span class="w"&gt;        &lt;/span&gt;Thu&lt;span class="w"&gt; &lt;/span&gt;Jan&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;08&lt;/span&gt;:00:00&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1970&lt;/span&gt;
+OS/Arch:&lt;span class="w"&gt;      &lt;/span&gt;linux/amd64
+
+&lt;span class="c1"&gt;# Info&lt;/span&gt;
+&lt;span class="nv"&gt;OCI_Runtime&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;runc&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="nv"&gt;Cgroup_Manager&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;systemd&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="nv"&gt;Storage_Driver&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;overlay&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="nv"&gt;Rootless&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;false&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;For this article, I will use &lt;strong&gt;rootful Podman&lt;/strong&gt; in the low-level inspection steps because it makes namespace and filesystem introspection simpler. Podman absolutely supports rootless mode too, and we will not talk about it in this article xD&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;4. Step 1: Run One Real Container&lt;/h2&gt;
 &lt;p&gt;Let us create a tiny container with very visible limits:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;run&lt;span class="w"&gt; &lt;/span&gt;-d&lt;span class="w"&gt; &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
-&lt;span class="w"&gt;  &lt;/span&gt;--hostname&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;run&lt;span class="w"&gt; &lt;/span&gt;-d&lt;span class="w"&gt; &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--hostname&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;--memory&lt;span class="w"&gt; &lt;/span&gt;128m&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;--cpus&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.5&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;--pids-limit&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;64&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
@@ -121,42 +129,69 @@ podman&lt;span class="w"&gt; &lt;/span&gt;info&lt;span class="w"&gt; &lt;/span&g
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Check it:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;ps
-sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;--format&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{.State.Status}}&amp;#39;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;ps
+&lt;span class="c1"&gt;# Output&lt;/span&gt;
+CONTAINER&lt;span class="w"&gt; &lt;/span&gt;ID&lt;span class="w"&gt;  &lt;/span&gt;IMAGE&lt;span class="w"&gt;                          &lt;/span&gt;COMMAND&lt;span class="w"&gt;         &lt;/span&gt;CREATED&lt;span class="w"&gt;         &lt;/span&gt;STATUS&lt;span class="w"&gt;         &lt;/span&gt;PORTS&lt;span class="w"&gt;       &lt;/span&gt;NAMES
+71d926d3c61c&lt;span class="w"&gt;  &lt;/span&gt;docker.io/library/alpine:3.22&lt;span class="w"&gt;  &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;13&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;seconds&lt;span class="w"&gt; &lt;/span&gt;ago&lt;span class="w"&gt;  &lt;/span&gt;Up&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;seconds&lt;span class="w"&gt;              &lt;/span&gt;kienlt-lab
+podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;--format&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{.State.Status}}&amp;#39;&lt;/span&gt;
+&lt;span class="c1"&gt;# Output&lt;/span&gt;
+running
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Grab the host PID of the container's main process:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;PID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{.State.Pid}}&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;p&gt;Get the host PID of the container's main process:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;PID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{.State.Pid}}&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="k"&gt;)&lt;/span&gt;
 &lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="c1"&gt;# Example output:&lt;/span&gt;
+&lt;span class="c1"&gt;# 890812&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;This is the key mental flip:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;primitive-lab&lt;/code&gt; is &lt;strong&gt;not&lt;/strong&gt; a mini-VM. It is just a process (or process tree) on the host. Podman simply created it with a different set of namespaces, cgroups, and mounts.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;kienlt-lab&lt;/code&gt; is &lt;strong&gt;not&lt;/strong&gt; a mini-VM. It is just a process (or process tree) on the host. Podman simply created it with a different set of namespaces, cgroups, and mounts. Here is the proof&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;ps&lt;span class="w"&gt; &lt;/span&gt;-ef
+PID&lt;span class="w"&gt;   &lt;/span&gt;USER&lt;span class="w"&gt;     &lt;/span&gt;TIME&lt;span class="w"&gt;  &lt;/span&gt;COMMAND
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;:00&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="m"&gt;6&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;:00&lt;span class="w"&gt; &lt;/span&gt;ps&lt;span class="w"&gt; &lt;/span&gt;-ef
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;top&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab
+USER&lt;span class="w"&gt;        &lt;/span&gt;PID&lt;span class="w"&gt;         &lt;/span&gt;PPID&lt;span class="w"&gt;        &lt;/span&gt;%CPU&lt;span class="w"&gt;        &lt;/span&gt;ELAPSED&lt;span class="w"&gt;          &lt;/span&gt;TTY&lt;span class="w"&gt;         &lt;/span&gt;TIME&lt;span class="w"&gt;        &lt;/span&gt;COMMAND
+root&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.000&lt;span class="w"&gt;       &lt;/span&gt;6m12.258388147s&lt;span class="w"&gt;  &lt;/span&gt;?&lt;span class="w"&gt;           &lt;/span&gt;0s&lt;span class="w"&gt;          &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity&lt;span class="w"&gt; &lt;/span&gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;ps&lt;span class="w"&gt; &lt;/span&gt;-ef&lt;span class="p"&gt;|&lt;/span&gt;grep&lt;span class="w"&gt; &lt;/span&gt;sleep
+root&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;890812&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;890800&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:50&lt;span class="w"&gt; &lt;/span&gt;?&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
+&lt;span class="c1"&gt;# Or even better grep&lt;/span&gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;ps&lt;span class="w"&gt; &lt;/span&gt;-fp&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;pgrep&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;sleep infinity&amp;quot;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+UID&lt;span class="w"&gt;          &lt;/span&gt;PID&lt;span class="w"&gt;    &lt;/span&gt;PPID&lt;span class="w"&gt;  &lt;/span&gt;C&lt;span class="w"&gt; &lt;/span&gt;STIME&lt;span class="w"&gt; &lt;/span&gt;TTY&lt;span class="w"&gt;          &lt;/span&gt;TIME&lt;span class="w"&gt; &lt;/span&gt;CMD
+root&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;890812&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;890800&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:50&lt;span class="w"&gt; &lt;/span&gt;?&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Let's see detail of process &lt;code&gt;890812&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;pstree&lt;span class="w"&gt; &lt;/span&gt;-aps&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;890812&lt;/span&gt;
+systemd,1&lt;span class="w"&gt; &lt;/span&gt;--system&lt;span class="w"&gt; &lt;/span&gt;--deserialize&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;81&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;└─conmon,890800&lt;span class="w"&gt; &lt;/span&gt;--api-version&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-c&lt;span class="w"&gt; &lt;/span&gt;71d926d3c61c8c4a9beecc7d1a81a516d247dcf1c541bb71e9a39fb89721b7d5&lt;span class="w"&gt; &lt;/span&gt;-u&lt;span class="w"&gt; &lt;/span&gt;71d926d3c61c8c4a9beecc7d1a81a516d247dcf1c541bb71e9a39fb89721b7d5&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;/usr/bin/runc&lt;span class="w"&gt; &lt;/span&gt;-b...
+&lt;span class="w"&gt;      &lt;/span&gt;└─sleep,890812&lt;span class="w"&gt; &lt;/span&gt;infinity
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Yes, &lt;code&gt;/usr/bin/runc&lt;/code&gt;... the OCI runtime&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;5. Step 2: Prove the Namespace Story&lt;/h2&gt;
 &lt;p&gt;List the namespaces associated with that process:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;lsns&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;lsns&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;You will typically see namespace types like:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;mnt&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;uts&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ipc&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;pid&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;net&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;cgroup&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Now look at the namespace handles directly:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;readlink&lt;span class="w"&gt; &lt;/span&gt;/proc/&lt;span class="nv"&gt;$PID&lt;/span&gt;/ns/mnt
-sudo&lt;span class="w"&gt; &lt;/span&gt;readlink&lt;span class="w"&gt; &lt;/span&gt;/proc/&lt;span class="nv"&gt;$PID&lt;/span&gt;/ns/uts
-sudo&lt;span class="w"&gt; &lt;/span&gt;readlink&lt;span class="w"&gt; &lt;/span&gt;/proc/&lt;span class="nv"&gt;$PID&lt;/span&gt;/ns/pid
-sudo&lt;span class="w"&gt; &lt;/span&gt;readlink&lt;span class="w"&gt; &lt;/span&gt;/proc/&lt;span class="nv"&gt;$PID&lt;/span&gt;/ns/net
+&lt;p&gt;You will typically see namespace with types like time,user,net....&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;lsns&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;NS&lt;span class="w"&gt; &lt;/span&gt;TYPE&lt;span class="w"&gt;   &lt;/span&gt;NPROCS&lt;span class="w"&gt;    &lt;/span&gt;PID&lt;span class="w"&gt; &lt;/span&gt;USER&lt;span class="w"&gt; &lt;/span&gt;COMMAND
+&lt;span class="m"&gt;4026531834&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;time&lt;/span&gt;&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;226&lt;/span&gt;&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;/usr/lib/systemd/systemd&lt;span class="w"&gt; &lt;/span&gt;--system&lt;span class="w"&gt; &lt;/span&gt;--deserialize&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;81&lt;/span&gt;
+&lt;span class="m"&gt;4026531837&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;user&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;225&lt;/span&gt;&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;/usr/lib/systemd/systemd&lt;span class="w"&gt; &lt;/span&gt;--system&lt;span class="w"&gt; &lt;/span&gt;--deserialize&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;81&lt;/span&gt;
+&lt;span class="m"&gt;4026533601&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;net&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;890812&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
+&lt;span class="m"&gt;4026533660&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;mnt&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;890812&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
+&lt;span class="m"&gt;4026533661&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;uts&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;890812&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
+&lt;span class="m"&gt;4026533662&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;ipc&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;890812&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
+&lt;span class="m"&gt;4026533663&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;pid&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;890812&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
+&lt;span class="m"&gt;4026533664&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;cgroup&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;890812&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Those &lt;code&gt;ns:[...]&lt;/code&gt; IDs are the kernel objects behind the isolation.&lt;/p&gt;
 &lt;p&gt;Enter the container's namespaces from the host:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;nsenter&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-m&lt;span class="w"&gt; &lt;/span&gt;-u&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;sh
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;nsenter&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-m&lt;span class="w"&gt; &lt;/span&gt;-u&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;sh
+&lt;span class="c1"&gt;# Or shorter way to enter namespace with PID...&lt;/span&gt;
+nsenter&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-a&lt;span class="w"&gt; &lt;/span&gt;sh
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Now run these commands &lt;strong&gt;inside&lt;/strong&gt; that namespace view:&lt;/p&gt;
@@ -166,21 +201,54 @@ ps&lt;span class="w"&gt; &lt;/span&gt;-ef
 mount&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;head
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;Expected output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;nsenter&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-m&lt;span class="w"&gt; &lt;/span&gt;-u&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;sh
+/&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# ps -ef&lt;/span&gt;
+PID&lt;span class="w"&gt;   &lt;/span&gt;USER&lt;span class="w"&gt;     &lt;/span&gt;TIME&lt;span class="w"&gt;  &lt;/span&gt;COMMAND
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;:00&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# This is the main process of container&lt;/span&gt;
+&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;11&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;:00&lt;span class="w"&gt; &lt;/span&gt;sh&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# This is the shell I&amp;#39;m using&lt;/span&gt;
+&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;12&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;:00&lt;span class="w"&gt; &lt;/span&gt;ps&lt;span class="w"&gt; &lt;/span&gt;-ef&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# And this is the command I&amp;#39;m running&lt;/span&gt;
+/&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# hostname&lt;/span&gt;
+kienlt-lab
+/&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# ip addr&lt;/span&gt;
+&lt;span class="m"&gt;1&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;lo:&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;LOOPBACK,UP,LOWER_UP&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;mtu&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;65536&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;qdisc&lt;span class="w"&gt; &lt;/span&gt;noqueue&lt;span class="w"&gt; &lt;/span&gt;state&lt;span class="w"&gt; &lt;/span&gt;UNKNOWN&lt;span class="w"&gt; &lt;/span&gt;qlen&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1000&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;link/loopback&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00:00:00:00&lt;span class="w"&gt; &lt;/span&gt;brd&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00:00:00:00
+&lt;span class="w"&gt;    &lt;/span&gt;inet&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;127&lt;/span&gt;.0.0.1/8&lt;span class="w"&gt; &lt;/span&gt;scope&lt;span class="w"&gt; &lt;/span&gt;host&lt;span class="w"&gt; &lt;/span&gt;lo
+&lt;span class="w"&gt;       &lt;/span&gt;valid_lft&lt;span class="w"&gt; &lt;/span&gt;forever&lt;span class="w"&gt; &lt;/span&gt;preferred_lft&lt;span class="w"&gt; &lt;/span&gt;forever
+&lt;span class="w"&gt;    &lt;/span&gt;inet6&lt;span class="w"&gt; &lt;/span&gt;::1/128&lt;span class="w"&gt; &lt;/span&gt;scope&lt;span class="w"&gt; &lt;/span&gt;host&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="w"&gt;       &lt;/span&gt;valid_lft&lt;span class="w"&gt; &lt;/span&gt;forever&lt;span class="w"&gt; &lt;/span&gt;preferred_lft&lt;span class="w"&gt; &lt;/span&gt;forever
+&lt;span class="m"&gt;2&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;eth0@if38:&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;mtu&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1500&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;qdisc&lt;span class="w"&gt; &lt;/span&gt;noqueue&lt;span class="w"&gt; &lt;/span&gt;state&lt;span class="w"&gt; &lt;/span&gt;UP&lt;span class="w"&gt; &lt;/span&gt;qlen&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1000&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;link/ether&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;92&lt;/span&gt;:62:ee:30:ce:4d&lt;span class="w"&gt; &lt;/span&gt;brd&lt;span class="w"&gt; &lt;/span&gt;ff:ff:ff:ff:ff:ff
+&lt;span class="w"&gt;    &lt;/span&gt;inet&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.88.0.2/16&lt;span class="w"&gt; &lt;/span&gt;brd&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.88.255.255&lt;span class="w"&gt; &lt;/span&gt;scope&lt;span class="w"&gt; &lt;/span&gt;global&lt;span class="w"&gt; &lt;/span&gt;eth0
+&lt;span class="w"&gt;       &lt;/span&gt;valid_lft&lt;span class="w"&gt; &lt;/span&gt;forever&lt;span class="w"&gt; &lt;/span&gt;preferred_lft&lt;span class="w"&gt; &lt;/span&gt;forever
+&lt;span class="w"&gt;    &lt;/span&gt;inet6&lt;span class="w"&gt; &lt;/span&gt;fe80::9062:eeff:fe30:ce4d/64&lt;span class="w"&gt; &lt;/span&gt;scope&lt;span class="w"&gt; &lt;/span&gt;link&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="w"&gt;       &lt;/span&gt;valid_lft&lt;span class="w"&gt; &lt;/span&gt;forever&lt;span class="w"&gt; &lt;/span&gt;preferred_lft&lt;span class="w"&gt; &lt;/span&gt;forever
+/&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# mount|head&lt;/span&gt;
+overlay&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;/&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;overlay&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;rw,relatime,lowerdir&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/containers/storage/overlay/l/OZSBEMCB4NRVVXNZV5W5NJS2HM,upperdir&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/containers/storage/overlay/10fd7e8145ead961bd9f42c8402410974548da353e02474a93e5428d30962c5f/diff,workdir&lt;span class="o"&gt;=&lt;/span&gt;/var/lib/containers/storage/overlay/10fd7e8145ead961bd9f42c8402410974548da353e02474a93e5428d30962c5f/work,uuid&lt;span class="o"&gt;=&lt;/span&gt;on,nouserxattr&lt;span class="o"&gt;)&lt;/span&gt;
+proc&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;/proc&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;proc&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;rw,nosuid,nodev,noexec,relatime&lt;span class="o"&gt;)&lt;/span&gt;
+tmpfs&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;/dev&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;tmpfs&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;rw,nosuid,size&lt;span class="o"&gt;=&lt;/span&gt;65536k,mode&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;755&lt;/span&gt;,inode64&lt;span class="o"&gt;)&lt;/span&gt;
+sysfs&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;/sys&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;sysfs&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;ro,nosuid,nodev,noexec,relatime&lt;span class="o"&gt;)&lt;/span&gt;
+devpts&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;/dev/pts&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;devpts&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;rw,nosuid,noexec,relatime,gid&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;5&lt;/span&gt;,mode&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;620&lt;/span&gt;,ptmxmode&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;666&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+mqueue&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;/dev/mqueue&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;mqueue&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;rw,nosuid,nodev,noexec,relatime&lt;span class="o"&gt;)&lt;/span&gt;
+tmpfs&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;/run/.containerenv&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;tmpfs&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;rw,nosuid,nodev,noexec,relatime,size&lt;span class="o"&gt;=&lt;/span&gt;813152k,mode&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;755&lt;/span&gt;,inode64&lt;span class="o"&gt;)&lt;/span&gt;
+tmpfs&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;/etc/hostname&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;tmpfs&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;rw,nosuid,nodev,noexec,relatime,size&lt;span class="o"&gt;=&lt;/span&gt;813152k,mode&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;755&lt;/span&gt;,inode64&lt;span class="o"&gt;)&lt;/span&gt;
+tmpfs&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;/etc/resolv.conf&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;tmpfs&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;rw,nosuid,nodev,noexec,relatime,size&lt;span class="o"&gt;=&lt;/span&gt;813152k,mode&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;755&lt;/span&gt;,inode64&lt;span class="o"&gt;)&lt;/span&gt;
+tmpfs&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;/etc/hosts&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;tmpfs&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;rw,nosuid,nodev,noexec,relatime,size&lt;span class="o"&gt;=&lt;/span&gt;813152k,mode&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;755&lt;/span&gt;,inode64&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="c1"&gt;# xD&lt;/span&gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;ifconfig&lt;span class="w"&gt; &lt;/span&gt;podman0
+podman0:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;flags&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;4163&lt;/span&gt;&amp;lt;UP,BROADCAST,RUNNING,MULTICAST&amp;gt;&lt;span class="w"&gt;  &lt;/span&gt;mtu&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1500&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;inet&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.88.0.1&lt;span class="w"&gt;  &lt;/span&gt;netmask&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;255&lt;/span&gt;.255.0.0&lt;span class="w"&gt;  &lt;/span&gt;broadcast&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;.88.255.255
+&lt;span class="w"&gt;        &lt;/span&gt;inet6&lt;span class="w"&gt; &lt;/span&gt;fe80::50ff:afff:fea1:ed7c&lt;span class="w"&gt;  &lt;/span&gt;prefixlen&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;64&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;scopeid&lt;span class="w"&gt; &lt;/span&gt;0x20&amp;lt;link&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;What you should notice:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;hostname&lt;/code&gt; is &lt;code&gt;primitive-lab&lt;/code&gt;, not the host hostname&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;hostname&lt;/code&gt; is &lt;code&gt;kienlt-lab&lt;/code&gt;, not the host hostname&lt;/li&gt;
 &lt;li&gt;the process list is tiny compared with the host&lt;/li&gt;
 &lt;li&gt;the network interfaces and routes are container-specific&lt;/li&gt;
 &lt;li&gt;the mount table is not the same as the host mount table&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Exit the namespace shell:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;exit&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;That is namespaces in one line:&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;The process is still on the same kernel, but it sees a different world.&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;That is namespaces which is able to explain in one line: The process is still on the same kernel, but it sees a different world.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;6. Step 3: Prove the Cgroup Story&lt;/h2&gt;
 &lt;p&gt;We started the container with:&lt;/p&gt;
@@ -194,8 +262,8 @@ mount&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/proc/&lt;span class="nv"&gt;$PID&lt;/span&gt;/cgroup
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;On a cgroup v2 host, the interesting line usually looks like:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;0::/some/cgroup/path
+&lt;p&gt;Expected output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;0::/machine.slice/libpod-71d926d3c61c8c4a9beecc7d1a81a516d247dcf1c541bb71e9a39fb89721b7d5.scope
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Capture it:&lt;/p&gt;
@@ -205,41 +273,58 @@ mount&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Now inspect the actual cgroup files:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;/memory.max&amp;quot;&lt;/span&gt;
-sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;/cpu.max&amp;quot;&lt;/span&gt;
-sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;/pids.max&amp;quot;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;/memory.max&amp;quot;&lt;/span&gt;
+cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;/cpu.max&amp;quot;&lt;/span&gt;
+cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;/pids.max&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;You should see values that correspond to the limits we gave Podman.&lt;/p&gt;
 &lt;p&gt;For example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Not related but you will undetrstand where is the fucking CGROUP_REL comes from!&lt;/span&gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/proc/890812/cgroup
+&lt;span class="m"&gt;0&lt;/span&gt;::/machine.slice/libpod-71d926d3c61c8c4a9beecc7d1a81a516d247dcf1c541bb71e9a39fb89721b7d5.scope
+&lt;span class="c1"&gt;# And then&lt;/span&gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;/memory.max&amp;quot;&lt;/span&gt;
+&lt;span class="m"&gt;134217728&lt;/span&gt;
+&lt;span class="c1"&gt;# Lets calculate xD&lt;/span&gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;bytes&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;134217728&lt;/span&gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;mib&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$((&lt;/span&gt;&lt;span class="nv"&gt;bytes&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1024&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1024&lt;/span&gt;&lt;span class="k"&gt;))&lt;/span&gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;mib&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt; MB&amp;quot;&lt;/span&gt;
+&lt;span class="m"&gt;128&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;MB
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;/cpu.max&amp;quot;&lt;/span&gt;
+&lt;span class="m"&gt;50000&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;100000&lt;/span&gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$CGROUP_DIR&lt;/span&gt;&lt;span class="s2"&gt;/pids.max&amp;quot;&lt;/span&gt;
+&lt;span class="m"&gt;64&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;memory.max&lt;/code&gt; should be around &lt;code&gt;134217728&lt;/code&gt; bytes for &lt;code&gt;128m&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;pids.max&lt;/code&gt; should be &lt;code&gt;64&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;cpu.max&lt;/code&gt; should show a quota/period pair that approximates &lt;code&gt;0.5 CPU&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;This is the second mental flip:&lt;/p&gt;
-&lt;blockquote&gt;
 &lt;p&gt;Podman did not invent resource limits. It translated your CLI flags into cgroup settings the Linux kernel already understands.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;You can also look at live usage:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;stats&lt;span class="w"&gt; &lt;/span&gt;--no-stream&lt;span class="w"&gt; &lt;/span&gt;primitive-lab
+&lt;p&gt;You can also look at live usage (like command &lt;code&gt;docker stats&lt;/code&gt;):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;stats&lt;span class="w"&gt; &lt;/span&gt;--no-stream&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab
+ID&lt;span class="w"&gt;            &lt;/span&gt;NAME&lt;span class="w"&gt;        &lt;/span&gt;CPU&lt;span class="w"&gt; &lt;/span&gt;%&lt;span class="w"&gt;       &lt;/span&gt;MEM&lt;span class="w"&gt; &lt;/span&gt;USAGE&lt;span class="w"&gt; &lt;/span&gt;/&lt;span class="w"&gt; &lt;/span&gt;LIMIT&lt;span class="w"&gt;  &lt;/span&gt;MEM&lt;span class="w"&gt; &lt;/span&gt;%&lt;span class="w"&gt;       &lt;/span&gt;NET&lt;span class="w"&gt; &lt;/span&gt;IO&lt;span class="w"&gt;          &lt;/span&gt;BLOCK&lt;span class="w"&gt; &lt;/span&gt;IO&lt;span class="w"&gt;    &lt;/span&gt;PIDS&lt;span class="w"&gt;        &lt;/span&gt;CPU&lt;span class="w"&gt; &lt;/span&gt;TIME&lt;span class="w"&gt;    &lt;/span&gt;AVG&lt;span class="w"&gt; &lt;/span&gt;CPU&lt;span class="w"&gt; &lt;/span&gt;%
+8c68368d643d&lt;span class="w"&gt;  &lt;/span&gt;kienlt-lab&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.01%&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="m"&gt;53&lt;/span&gt;.25kB&lt;span class="w"&gt; &lt;/span&gt;/&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;134&lt;/span&gt;.2MB&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.04%&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.626kB&lt;span class="w"&gt; &lt;/span&gt;/&lt;span class="w"&gt; &lt;/span&gt;936B&lt;span class="w"&gt;  &lt;/span&gt;0B&lt;span class="w"&gt; &lt;/span&gt;/&lt;span class="w"&gt; &lt;/span&gt;0B&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="m"&gt;34&lt;/span&gt;.723ms&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.01%
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Again, the container is not special. It is just a process tree attached to a cgroup subtree.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;7. Step 4: Prove the Layered Filesystem Story&lt;/h2&gt;
+&lt;p&gt;This section is fucking great for me, I see overlayfs for a lot of fucking time, but I never really understand what the fuck are they!&lt;/p&gt;
 &lt;p&gt;Now let us inspect the container filesystem driver:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.[0].GraphDriver&amp;#39;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.[0].GraphDriver&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;On many modern Linux hosts, the interesting shape looks like this:&lt;/p&gt;
+&lt;p&gt;Expected output:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;{&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;Name&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;overlay&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;Data&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;LowerDir&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;...&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;UpperDir&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;...&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;WorkDir&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;...&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;MergedDir&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;...&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;LowerDir&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/var/lib/containers/storage/overlay/cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987/diff&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;MergedDir&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/var/lib/containers/storage/overlay/10fd7e8145ead961bd9f42c8402410974548da353e02474a93e5428d30962c5f/merged&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;UpperDir&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/var/lib/containers/storage/overlay/10fd7e8145ead961bd9f42c8402410974548da353e02474a93e5428d30962c5f/diff&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;WorkDir&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/var/lib/containers/storage/overlay/10fd7e8145ead961bd9f42c8402410974548da353e02474a93e5428d30962c5f/work&amp;quot;&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -252,9 +337,9 @@ sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&
 &lt;li&gt;&lt;strong&gt;MergedDir&lt;/strong&gt;: the final mounted root filesystem the process sees&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Extract those paths:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;LOWER_DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.[0].GraphDriver.Data.LowerDir&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
-&lt;span class="nv"&gt;UPPER_DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.[0].GraphDriver.Data.UpperDir&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
-&lt;span class="nv"&gt;MERGED_DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.[0].GraphDriver.Data.MergedDir&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;LOWER_DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.[0].GraphDriver.Data.LowerDir&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nv"&gt;UPPER_DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.[0].GraphDriver.Data.UpperDir&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nv"&gt;MERGED_DIR&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;.[0].GraphDriver.Data.MergedDir&amp;#39;&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
 
 &lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;LOWER_DIR=&lt;/span&gt;&lt;span class="nv"&gt;$LOWER_DIR&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
 &lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;UPPER_DIR=&lt;/span&gt;&lt;span class="nv"&gt;$UPPER_DIR&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
@@ -262,28 +347,41 @@ sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Now write a file from inside the container:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;primitive-lab&lt;span class="w"&gt; &lt;/span&gt;sh&lt;span class="w"&gt; &lt;/span&gt;-c&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;echo &amp;quot;hello from upperdir&amp;quot; &amp;gt; /root/hello.txt&amp;#39;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;sh&lt;span class="w"&gt; &lt;/span&gt;-c&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;echo &amp;quot;hello from upperdir&amp;quot; &amp;gt; /root/hello_overlayfs.txt&amp;#39;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Check the merged filesystem view:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$MERGED_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello.txt&amp;quot;&lt;/span&gt;
-sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$MERGED_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello.txt&amp;quot;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$MERGED_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
+cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$MERGED_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Then inspect the upper layer:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$UPPER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello.txt&amp;quot;&lt;/span&gt;
-sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$UPPER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello.txt&amp;quot;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$UPPER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
+cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$UPPER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Output in action:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$MERGED_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
+-rw-r--r--&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;20&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Mar&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;25&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;01&lt;/span&gt;:08&lt;span class="w"&gt; &lt;/span&gt;/var/lib/containers/storage/overlay/10fd7e8145ead961bd9f42c8402410974548da353e02474a93e5428d30962c5f/merged/root/hello_overlayfs.txt
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$MERGED_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
+hello&lt;span class="w"&gt; &lt;/span&gt;from&lt;span class="w"&gt; &lt;/span&gt;upperdir
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$UPPER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
+-rw-r--r--&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;20&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Mar&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;25&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;01&lt;/span&gt;:08&lt;span class="w"&gt; &lt;/span&gt;/var/lib/containers/storage/overlay/10fd7e8145ead961bd9f42c8402410974548da353e02474a93e5428d30962c5f/diff/root/hello_overlayfs.txt
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$UPPER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
+hello&lt;span class="w"&gt; &lt;/span&gt;from&lt;span class="w"&gt; &lt;/span&gt;upperdir
+&lt;span class="c1"&gt;# You can see clearly that the file is not in the lowerdir which is read-only&lt;/span&gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$LOWER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
+cat:&lt;span class="w"&gt; &lt;/span&gt;/var/lib/containers/storage/overlay/cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987/diff/root/hello_overlayfs.txt:&lt;span class="w"&gt; &lt;/span&gt;No&lt;span class="w"&gt; &lt;/span&gt;such&lt;span class="w"&gt; &lt;/span&gt;file&lt;span class="w"&gt; &lt;/span&gt;or&lt;span class="w"&gt; &lt;/span&gt;directory
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$LOWER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
+ls:&lt;span class="w"&gt; &lt;/span&gt;cannot&lt;span class="w"&gt; &lt;/span&gt;access&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;/var/lib/containers/storage/overlay/cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987/diff/root/hello_overlayfs.txt&amp;#39;&lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;No&lt;span class="w"&gt; &lt;/span&gt;such&lt;span class="w"&gt; &lt;/span&gt;file&lt;span class="w"&gt; &lt;/span&gt;or&lt;span class="w"&gt; &lt;/span&gt;directory
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;That file was not baked into the image. It landed in the &lt;strong&gt;writable upper layer&lt;/strong&gt; of this specific container.&lt;/p&gt;
-&lt;p&gt;So the third mental flip is:&lt;/p&gt;
-&lt;blockquote&gt;
 &lt;p&gt;A container image is not one giant mutable disk. It is usually a stack of read-only layers plus one writable layer on top.&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;p&gt;That is why containers can start fast and why many containers can share the same base image efficiently.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;8. Put the 3 Pieces Together&lt;/h2&gt;
-&lt;p&gt;By now, the "container magic" should look much more boring:&lt;/p&gt;
+&lt;p&gt;The fucking flow:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Podman CLI
   -&amp;gt; asks an OCI runtime to start a process
   -&amp;gt; that process gets new namespaces
@@ -292,114 +390,36 @@ sudo&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&
   -&amp;gt; done
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;So when somebody says "a container is lightweight", the kernel-level translation is closer to:&lt;/p&gt;
+&lt;p&gt;Reason containers are usually lighter than VMs:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;no second kernel&lt;/li&gt;
 &lt;li&gt;no hardware virtualization boundary&lt;/li&gt;
 &lt;li&gt;no emulated machine&lt;/li&gt;
 &lt;li&gt;just a process with isolation, limits, and a filesystem view&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;That is the reason containers are usually lighter than VMs.&lt;/p&gt;
 &lt;hr&gt;
-&lt;h2&gt;9. Where Podman Fits In&lt;/h2&gt;
-&lt;p&gt;At this point, we can describe Podman more accurately.&lt;/p&gt;
-&lt;p&gt;Podman is not "the thing that makes containers possible".&lt;/p&gt;
-&lt;p&gt;Linux already had the primitives.&lt;/p&gt;
-&lt;p&gt;Podman is the tool that:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;pulls images&lt;/li&gt;
-&lt;li&gt;creates container metadata&lt;/li&gt;
-&lt;li&gt;sets up mounts&lt;/li&gt;
-&lt;li&gt;invokes an OCI runtime&lt;/li&gt;
-&lt;li&gt;gives you a human-friendly CLI for all of that&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Roughly, when you type &lt;code&gt;podman run&lt;/code&gt;, the flow looks something like this:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman run
-  -&amp;gt; prepare container metadata and OCI spec
-  -&amp;gt; set up the OverlayFS mount (lower + upper + merged)
-  -&amp;gt; prepare networking (typically via netavark; rootless setups often use slirp4netns or pasta)
-  -&amp;gt; call OCI runtime (crun/runc) with the spec
-  -&amp;gt; OCI runtime creates the process with new namespaces
-  -&amp;gt; attach the process to its cgroup
-  -&amp;gt; switch root into the merged filesystem
-  -&amp;gt; exec the entrypoint
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This is a simplified view. The real implementation has more moving parts. But the point is: every step maps back to one of the 3 primitives we just proved.&lt;/p&gt;
-&lt;p&gt;In other words, Podman is the &lt;strong&gt;orchestrator of the local container lifecycle&lt;/strong&gt;, not the source of the underlying kernel features.&lt;/p&gt;
-&lt;p&gt;That is also why Docker, Podman, containerd, and CRI-O can all feel different at the UX layer while still relying on the same Linux building blocks underneath.&lt;/p&gt;
-&lt;hr&gt;
-&lt;h2&gt;10. Bonus: Rootless Podman Is Where User Namespaces Get Fun&lt;/h2&gt;
-&lt;p&gt;One thing Podman does especially well is &lt;strong&gt;rootless containers&lt;/strong&gt;.&lt;/p&gt;
-&lt;p&gt;In rootless mode:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;you can run containers as a regular user&lt;/li&gt;
-&lt;li&gt;Podman uses &lt;strong&gt;user namespaces&lt;/strong&gt; to map container IDs&lt;/li&gt;
-&lt;li&gt;container storage usually lives under your home directory&lt;/li&gt;
-&lt;li&gt;networking may use helpers such as &lt;strong&gt;slirp4netns&lt;/strong&gt; or &lt;strong&gt;pasta&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Quick check:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;info&lt;span class="w"&gt; &lt;/span&gt;--format&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{.Host.Security.Rootless}}&amp;#39;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;If you want to peek into the rootless user namespace mapping:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;unshare&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/proc/self/uid_map
-podman&lt;span class="w"&gt; &lt;/span&gt;unshare&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/proc/self/gid_map
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;But the real "aha" moment is this: &lt;strong&gt;root inside the container, non-root outside&lt;/strong&gt;.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Run a rootless container&lt;/span&gt;
-podman&lt;span class="w"&gt; &lt;/span&gt;run&lt;span class="w"&gt; &lt;/span&gt;-d&lt;span class="w"&gt; &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;rootless-test&lt;span class="w"&gt; &lt;/span&gt;alpine&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
-
-&lt;span class="c1"&gt;# Inside the container, the process thinks it is root&lt;/span&gt;
-podman&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;rootless-test&lt;span class="w"&gt; &lt;/span&gt;whoami&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="c1"&gt;# -&amp;gt; root&lt;/span&gt;
-podman&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;rootless-test&lt;span class="w"&gt; &lt;/span&gt;id&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="c1"&gt;# -&amp;gt; uid=0(root)&lt;/span&gt;
-
-&lt;span class="c1"&gt;# But on the host, the PID runs as YOUR user&lt;/span&gt;
-&lt;span class="nv"&gt;RPID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{.State.Pid}}&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;rootless-test&lt;span class="k"&gt;)&lt;/span&gt;
-ps&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;user,pid,cmd&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$RPID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="c1"&gt;# -&amp;gt; your_username, not root&lt;/span&gt;
-
-&lt;span class="c1"&gt;# Clean up&lt;/span&gt;
-podman&lt;span class="w"&gt; &lt;/span&gt;rm&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;rootless-test
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;That is user namespaces doing the mapping. The container sees UID 0, but the kernel knows the real UID is your unprivileged user.&lt;/p&gt;
-&lt;p&gt;That is a great next topic once you are comfortable with the 3 primitives from this article.&lt;/p&gt;
-&lt;hr&gt;
-&lt;h2&gt;11. Summary&lt;/h2&gt;
-&lt;p&gt;If you want one sentence to remember, make it this:&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;A container is just a Linux process built from namespaces, cgroups, and a container-specific root filesystem.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;And if you want the Podman version:&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;Podman is a daemonless container engine that packages those Linux primitives into a clean, Docker-like workflow.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;So yes, "namespaces + cgroups + OverlayFS" is a useful teaching shortcut.&lt;/p&gt;
+&lt;h2&gt;9. Summary&lt;/h2&gt;
+&lt;p&gt;If you want one sentence to remember, make it this: A container is just a Linux process built from namespaces, cgroups, and a container-specific root filesystem.&lt;/p&gt;
+&lt;p&gt;So yes, "namespaces + cgroups + OverlayFS" is a useful teaching shortcut or telling your friend xD&lt;/p&gt;
 &lt;p&gt;But the most precise version is:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Namespaces&lt;/strong&gt; provide isolation&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Cgroups&lt;/strong&gt; provide resource control&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;A layered root filesystem&lt;/strong&gt; provides the file view&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;OverlayFS&lt;/strong&gt; is a very common implementation of that last part&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Once you internalize that, containers stop looking magical and start looking like what they really are:&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;well-packaged Linux processes (or process trees)&lt;/strong&gt;.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;12. Cleanup&lt;/h2&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;rm&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;primitive-lab
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;rm&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;hr&gt;
-&lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://docs.podman.io/en/stable/"&gt;Podman: What is Podman?&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://docs.podman.io/en/stable/markdown/podman.1.html"&gt;Podman rootless mode&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://docs.kernel.org/admin-guide/cgroup-v2.html"&gt;Linux cgroup v2 documentation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://docs.kernel.org/filesystems/overlayfs.html"&gt;Linux OverlayFS documentation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://man7.org/linux/man-pages/man7/namespaces.7.html"&gt;Linux namespaces overview&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://man7.org/linux/man-pages/man1/nsenter.1.html"&gt;Linux &lt;code&gt;nsenter&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="container"/><category term="podman"/><category term="namespaces"/><category term="cgroups"/><category term="overlayfs"/></entry><entry><title>[Container Networking Series - Part 4] How Cilium CNI works in K8S</title><link href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html" rel="alternate"/><published>2026-03-22T00:00:00+07:00</published><updated>2026-03-22T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-22:/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;
+* &lt;a href="https://www.redhat.com/en/blog/containers-are-linux"&gt;Containers are Linux&lt;/a&gt;
+* &lt;a href="https://docs.podman.io/en/stable/"&gt;Podman: What is Podman?&lt;/a&gt;
+* &lt;a href="https://docs.kernel.org/admin-guide/cgroup-v2.html"&gt;Linux cgroup v2 documentation&lt;/a&gt;
+* &lt;a href="https://docs.kernel.org/filesystems/overlayfs.html"&gt;Linux OverlayFS documentation&lt;/a&gt;
+* &lt;a href="https://man7.org/linux/man-pages/man7/namespaces.7.html"&gt;Linux namespaces overview&lt;/a&gt;
+* &lt;a href="https://man7.org/linux/man-pages/man1/nsenter.1.html"&gt;Linux &lt;code&gt;nsenter&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="container"/><category term="podman"/><category term="namespaces"/><category term="cgroups"/><category term="overlayfs"/></entry><entry><title>[Container Networking Series - Part 4] How Cilium CNI works in K8S</title><link href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html" rel="alternate"/><published>2026-03-22T00:00:00+07:00</published><updated>2026-03-22T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-22:/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/container-networking-series-part-1-demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Demystifying Docker Networking: A Deep Dive into Bridge &amp;amp; veth&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/container-networking-series-part-2-demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Demystifying Docker Networking Egress: The Masquerade Magic&lt;/a&gt;&lt;/li&gt;
