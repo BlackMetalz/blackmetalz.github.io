@@ -408,6 +408,7 @@ ID<span class="w">            </span>NAME<span class="w">        </span>CPU<span
 <span class="p">}</span>
 </code></pre></div>
 
+<p><code>cce9267....</code> and <code>10fd7e8145....</code> are SHA256 of uncompressed image layers?</p>
 <p>That maps directly to OverlayFS concepts:</p>
 <ul>
 <li><strong>LowerDir</strong>: read-only image layers</li>
@@ -448,7 +449,7 @@ root@kienlt-lab-utilities:~#<span class="w"> </span>ls<span class="w"> </span>-l
 -rw-r--r--<span class="w"> </span><span class="m">1</span><span class="w"> </span>root<span class="w"> </span>root<span class="w"> </span><span class="m">20</span><span class="w"> </span>Mar<span class="w"> </span><span class="m">25</span><span class="w"> </span><span class="m">01</span>:08<span class="w"> </span>/var/lib/containers/storage/overlay/10fd7e8145ead961bd9f42c8402410974548da353e02474a93e5428d30962c5f/diff/root/hello_overlayfs.txt
 root@kienlt-lab-utilities:~#<span class="w"> </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$UPPER_DIR</span><span class="s2">/root/hello_overlayfs.txt&quot;</span>
 hello<span class="w"> </span>from<span class="w"> </span>upperdir
-<span class="c1"># You can see clearly that the file is not in the lowerdir which is read-only</span>
+<span class="c1"># You can see clearly that the file is not in the lowerdir which is read-only. That is why echo to file in container doesn&#39;t show in lowerdir!</span>
 root@kienlt-lab-utilities:~#<span class="w"> </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$LOWER_DIR</span><span class="s2">/root/hello_overlayfs.txt&quot;</span>
 cat:<span class="w"> </span>/var/lib/containers/storage/overlay/cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987/diff/root/hello_overlayfs.txt:<span class="w"> </span>No<span class="w"> </span>such<span class="w"> </span>file<span class="w"> </span>or<span class="w"> </span>directory
 root@kienlt-lab-utilities:~#<span class="w"> </span>ls<span class="w"> </span>-l<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$LOWER_DIR</span><span class="s2">/root/hello_overlayfs.txt&quot;</span>
@@ -457,7 +458,8 @@ ls:<span class="w"> </span>cannot<span class="w"> </span>access<span class="w"> 
 
 <p>That file was not baked into the image. It landed in the <strong>writable upper layer</strong> of this specific container.</p>
 <p>A container image is not one giant mutable disk. It is usually a stack of read-only layers plus one writable layer on top.</p>
-<p>That is why containers can start fast and why many containers can share the same base image efficiently.</p>
+<p>A picture for easier imagination from <a href="https://blogs.cisco.com/developer/373-containerimages-03">blogs of cisco</a>:</p>
+<p><img alt="overlayFS" src="./images/2026/03/10.png"></p>
 <hr>
 <h2>8. Put the 3 Pieces Together</h2>
 <p>The fucking flow:</p>
@@ -492,13 +494,18 @@ ls:<span class="w"> </span>cannot<span class="w"> </span>access<span class="w"> 
 </code></pre></div>
 
 <hr>
-<p><strong>References:</strong>
-* <a href="https://www.redhat.com/en/blog/containers-are-linux">Containers are Linux</a>
-* <a href="https://docs.podman.io/en/stable/">Podman: What is Podman?</a>
-* <a href="https://docs.kernel.org/admin-guide/cgroup-v2.html">Linux cgroup v2 documentation</a>
-* <a href="https://docs.kernel.org/filesystems/overlayfs.html">Linux OverlayFS documentation</a>
-* <a href="https://man7.org/linux/man-pages/man7/namespaces.7.html">Linux namespaces overview</a>
-* <a href="https://man7.org/linux/man-pages/man1/nsenter.1.html">Linux <code>nsenter</code></a></p>
+<p><strong>References:</strong></p>
+<ul>
+<li><a href="https://www.redhat.com/en/blog/containers-are-linux">Containers are Linux</a></li>
+<li><a href="https://blog.quarkslab.com/digging-into-the-oci-image-specification.html">Digging into the OCI Image Specification</a></li>
+<li><a href="https://docs.docker.com/engine/storage/drivers/overlayfs-driver/">OverlayFS driver</a></li>
+<li><a href="https://blogs.cisco.com/developer/373-containerimages-03">Container images</a></li>
+<li><a href="https://docs.podman.io/en/stable/">Podman: What is Podman?</a></li>
+<li><a href="https://docs.kernel.org/admin-guide/cgroup-v2.html">Linux cgroup v2 documentation</a></li>
+<li><a href="https://docs.kernel.org/filesystems/overlayfs.html">Linux OverlayFS documentation</a></li>
+<li><a href="https://man7.org/linux/man-pages/man7/namespaces.7.html">Linux namespaces overview</a></li>
+<li><a href="https://man7.org/linux/man-pages/man1/nsenter.1.html">Linux <code>nsenter</code></a></li>
+</ul>
 
 
              

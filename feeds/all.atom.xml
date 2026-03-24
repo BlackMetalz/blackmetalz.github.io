@@ -329,6 +329,7 @@ ID&lt;span class="w"&gt;            &lt;/span&gt;NAME&lt;span class="w"&gt;     
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;&lt;code&gt;cce9267....&lt;/code&gt; and &lt;code&gt;10fd7e8145....&lt;/code&gt; are SHA256 of uncompressed image layers?&lt;/p&gt;
 &lt;p&gt;That maps directly to OverlayFS concepts:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;LowerDir&lt;/strong&gt;: read-only image layers&lt;/li&gt;
@@ -369,7 +370,7 @@ root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class
 -rw-r--r--&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;20&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Mar&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;25&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;01&lt;/span&gt;:08&lt;span class="w"&gt; &lt;/span&gt;/var/lib/containers/storage/overlay/10fd7e8145ead961bd9f42c8402410974548da353e02474a93e5428d30962c5f/diff/root/hello_overlayfs.txt
 root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$UPPER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
 hello&lt;span class="w"&gt; &lt;/span&gt;from&lt;span class="w"&gt; &lt;/span&gt;upperdir
-&lt;span class="c1"&gt;# You can see clearly that the file is not in the lowerdir which is read-only&lt;/span&gt;
+&lt;span class="c1"&gt;# You can see clearly that the file is not in the lowerdir which is read-only. That is why echo to file in container doesn&amp;#39;t show in lowerdir!&lt;/span&gt;
 root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$LOWER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
 cat:&lt;span class="w"&gt; &lt;/span&gt;/var/lib/containers/storage/overlay/cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987/diff/root/hello_overlayfs.txt:&lt;span class="w"&gt; &lt;/span&gt;No&lt;span class="w"&gt; &lt;/span&gt;such&lt;span class="w"&gt; &lt;/span&gt;file&lt;span class="w"&gt; &lt;/span&gt;or&lt;span class="w"&gt; &lt;/span&gt;directory
 root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$LOWER_DIR&lt;/span&gt;&lt;span class="s2"&gt;/root/hello_overlayfs.txt&amp;quot;&lt;/span&gt;
@@ -378,7 +379,8 @@ ls:&lt;span class="w"&gt; &lt;/span&gt;cannot&lt;span class="w"&gt; &lt;/span&gt
 
 &lt;p&gt;That file was not baked into the image. It landed in the &lt;strong&gt;writable upper layer&lt;/strong&gt; of this specific container.&lt;/p&gt;
 &lt;p&gt;A container image is not one giant mutable disk. It is usually a stack of read-only layers plus one writable layer on top.&lt;/p&gt;
-&lt;p&gt;That is why containers can start fast and why many containers can share the same base image efficiently.&lt;/p&gt;
+&lt;p&gt;A picture for easier imagination from &lt;a href="https://blogs.cisco.com/developer/373-containerimages-03"&gt;blogs of cisco&lt;/a&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="overlayFS" src="./images/2026/03/10.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;8. Put the 3 Pieces Together&lt;/h2&gt;
 &lt;p&gt;The fucking flow:&lt;/p&gt;
@@ -413,13 +415,18 @@ ls:&lt;span class="w"&gt; &lt;/span&gt;cannot&lt;span class="w"&gt; &lt;/span&gt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;hr&gt;
-&lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;
-* &lt;a href="https://www.redhat.com/en/blog/containers-are-linux"&gt;Containers are Linux&lt;/a&gt;
-* &lt;a href="https://docs.podman.io/en/stable/"&gt;Podman: What is Podman?&lt;/a&gt;
-* &lt;a href="https://docs.kernel.org/admin-guide/cgroup-v2.html"&gt;Linux cgroup v2 documentation&lt;/a&gt;
-* &lt;a href="https://docs.kernel.org/filesystems/overlayfs.html"&gt;Linux OverlayFS documentation&lt;/a&gt;
-* &lt;a href="https://man7.org/linux/man-pages/man7/namespaces.7.html"&gt;Linux namespaces overview&lt;/a&gt;
-* &lt;a href="https://man7.org/linux/man-pages/man1/nsenter.1.html"&gt;Linux &lt;code&gt;nsenter&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="container"/><category term="podman"/><category term="namespaces"/><category term="cgroups"/><category term="overlayfs"/></entry><entry><title>[Container Networking Series - Part 4] How Cilium CNI works in K8S</title><link href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html" rel="alternate"/><published>2026-03-22T00:00:00+07:00</published><updated>2026-03-22T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-22:/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.redhat.com/en/blog/containers-are-linux"&gt;Containers are Linux&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blog.quarkslab.com/digging-into-the-oci-image-specification.html"&gt;Digging into the OCI Image Specification&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/engine/storage/drivers/overlayfs-driver/"&gt;OverlayFS driver&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blogs.cisco.com/developer/373-containerimages-03"&gt;Container images&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.podman.io/en/stable/"&gt;Podman: What is Podman?&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.kernel.org/admin-guide/cgroup-v2.html"&gt;Linux cgroup v2 documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.kernel.org/filesystems/overlayfs.html"&gt;Linux OverlayFS documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://man7.org/linux/man-pages/man7/namespaces.7.html"&gt;Linux namespaces overview&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://man7.org/linux/man-pages/man1/nsenter.1.html"&gt;Linux &lt;code&gt;nsenter&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="linux"/><category term="container"/><category term="podman"/><category term="namespaces"/><category term="cgroups"/><category term="overlayfs"/></entry><entry><title>[Container Networking Series - Part 4] How Cilium CNI works in K8S</title><link href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html" rel="alternate"/><published>2026-03-22T00:00:00+07:00</published><updated>2026-03-22T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-22:/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html</id><summary type="html"/><content type="html">&lt;p&gt;&lt;strong&gt;Series: Container Networking Deep Dive&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/container-networking-series-part-1-demystifying-docker-networking-a-deep-dive-into-bridge-veth.html"&gt;Demystifying Docker Networking: A Deep Dive into Bridge &amp;amp; veth&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://blackmetalz.github.io/container-networking-series-part-2-demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html"&gt;Demystifying Docker Networking Egress: The Masquerade Magic&lt;/a&gt;&lt;/li&gt;
