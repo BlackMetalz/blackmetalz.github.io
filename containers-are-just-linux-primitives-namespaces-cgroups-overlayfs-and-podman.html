@@ -78,42 +78,48 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p>If you stay in the container world long enough, you will hear people say things like:</p>
-<ul>
-<li>"A container is just a lightweight VM"</li>
-<li>"Docker created containers"</li>
-<li>"Containers are magic"</li>
-</ul>
-<p>All 3 are wrong enough to be dangerous.</p>
-<p>A container is still just a <strong>Linux process</strong> (or process tree).</p>
-<p>What makes that process feel like a tiny isolated machine is not magic. It is a combination of <strong>Linux primitives</strong>. If I have to compress that story into one teaching-friendly mental model, I would call these the <strong>3 common Linux primitives used by containers</strong>:</p>
+            <p>Containers Are Just <strong><a href="https://www.youtube.com/watch?v=7CKCWqUkMJ4">Linux process</a></strong> (or process tree).</p>
+<p>It is a combination of <strong>Linux primitives</strong>. I would call these the <strong>3 common Linux primitives used by containers</strong>:</p>
 <ol>
 <li><strong>Namespaces</strong> for isolation</li>
 <li><strong>Cgroups</strong> for resource control</li>
-<li><strong>A layered root filesystem</strong> for the container's file view, often implemented with <strong>OverlayFS</strong></li>
+<li><strong>A layered root filesystem</strong> for the container's file view, often implemented with <strong>OverlayFS</strong> (for a simple reflection)</li>
 </ol>
-<p>This article uses <strong>Podman</strong> for the demos, because Podman is close enough to Docker to feel familiar, but transparent enough that we can still see the Linux pieces underneath.</p>
+<p>This article uses <strong>Podman</strong> for the demos, because Podman is close enough to Docker to feel familiar, but transparent enough that we can still see the Linux primitives.</p>
+<hr>
+<h2>0. What is OCI?</h2>
+<p>It has 2 parts: OCI and OCI Runtime</p>
+<h3>OCI</h3>
+<p>From what I understand, OCI is a <strong>standard</strong> for container. With this standard, an image built with Docker can be run pretty well in Podman or Kubernetes and vice versa.</p>
+<h3>OCI Runtime</h3>
+<p>The OCI Runtime is the implementation that communicates with the kernel to expand the image into a container xD</p>
 <hr>
 <h2>1. What exactly is Podman?</h2>
-<p>If you are coming from Docker, the shortest accurate version is:</p>
+<p>If you are coming from Docker, you can think of Podman as:</p>
 <ul>
-<li><strong>Podman is a daemonless container engine</strong></li>
+<li><strong>A daemonless container engine</strong></li>
 <li>It speaks a <strong>Docker-like CLI</strong></li>
-<li>It uses an OCI runtime like <strong><code>crun</code></strong> or <strong><code>runc</code></strong> underneath</li>
-<li>It supports both <strong>rootful</strong> and <strong>rootless</strong> containers</li>
+<li>It uses an <a href="https://opencontainers.org/">Open Container Initiative (OCI)</a> runtime like <strong><a href="https://github.com/containers/crun">crun</a></strong> or <strong><a href="https://github.com/opencontainers/runc">runc</a></strong> underneath</li>
+<li>No need service running in background.</li>
 </ul>
-<p>The word <strong>daemonless</strong> matters.</p>
-<p>With Docker, the usual mental model is:</p>
-<div class="highlight"><pre><span></span><code>docker CLI -&gt; dockerd -&gt; containerd -&gt; OCI runtime -&gt; kernel
+<p>The word <strong>daemonless</strong> is important!.</p>
+<p>Let's me show you a quick example but not really related to container, but it's about daemonless vs daemon xD</p>
+<p>Gitlab CI with Docker:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">build_docker</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker:latest</span>
+<span class="w">  </span><span class="nt">services</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker:dind</span><span class="w">          </span><span class="c1"># Required for Docker daemon</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker build -t image-name .</span>
 </code></pre></div>
 
-<p>With Podman, the normal local mental model is simpler:</p>
-<div class="highlight"><pre><span></span><code>podman CLI -&gt; libpod -&gt; OCI runtime -&gt; kernel
+<p>Gitlab CI with Podman:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">build_podman</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quay.io/podman/stable:latest</span>
+<span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">podman build -t image-name .</span>
 </code></pre></div>
 
-<p>That does <strong>not</strong> mean Podman is "just a client". It is still a full container engine. It just does not require a long-lived central daemon like <code>dockerd</code> for normal local usage.</p>
-<p>Strictly speaking, Podman also uses helper components such as <code>conmon</code>, but the simplified flow above is the right mental model for this article.</p>
-<p>That is why Podman is a good teaching tool for this topic: it gets out of the way faster.</p>
 <hr>
 <h2>2. The 3 Common Linux Primitives Behind Containers</h2>
 <h3>Primitive 1: Namespaces</h3>
