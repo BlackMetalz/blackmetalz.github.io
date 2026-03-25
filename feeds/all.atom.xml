@@ -11,7 +11,11 @@
 &lt;h2&gt;0. What is OCI?&lt;/h2&gt;
 &lt;p&gt;It has 2 parts: OCI and OCI Runtime&lt;/p&gt;
 &lt;h3&gt;OCI&lt;/h3&gt;
-&lt;p&gt;From what I understand, OCI is a &lt;strong&gt;standard&lt;/strong&gt; for container. With this standard, an image built with Docker can be run pretty well in Podman or Kubernetes and vice versa.&lt;/p&gt;
+&lt;p&gt;From what I understand, &lt;a href="https://opencontainers.org/"&gt;Open Container Initiative (OCI)&lt;/a&gt; is a &lt;strong&gt;standard&lt;/strong&gt; for container. With this standard, an image built with Docker can be run pretty well in Podman or Kubernetes and vice versa.&lt;/p&gt;
+&lt;p&gt;Content copy from homepage of OCI:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;The OCI currently contains three specifications: the Runtime Specification (runtime-spec), the Image Specification (image-spec) and the Distribution Specification (distribution-spec). The Runtime Specification outlines how to run a “filesystem bundle” that is unpacked on disk. At a high-level an OCI implementation would download an OCI Image then unpack that image into an OCI Runtime filesystem bundle. At this point the OCI Runtime Bundle would be run by an OCI Runtime.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;h3&gt;OCI Runtime&lt;/h3&gt;
 &lt;p&gt;The OCI Runtime is the implementation that communicates with the kernel to expand the image into a container xD&lt;/p&gt;
 &lt;hr&gt;
@@ -20,7 +24,7 @@
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;A daemonless container engine&lt;/strong&gt;&lt;/li&gt;
 &lt;li&gt;It speaks a &lt;strong&gt;Docker-like CLI&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;It uses an &lt;a href="https://opencontainers.org/"&gt;Open Container Initiative (OCI)&lt;/a&gt; runtime like &lt;strong&gt;&lt;a href="https://github.com/containers/crun"&gt;crun&lt;/a&gt;&lt;/strong&gt; or &lt;strong&gt;&lt;a href="https://github.com/opencontainers/runc"&gt;runc&lt;/a&gt;&lt;/strong&gt; underneath&lt;/li&gt;
+&lt;li&gt;It uses an OCI runtime like &lt;strong&gt;&lt;a href="https://github.com/containers/crun"&gt;crun&lt;/a&gt;&lt;/strong&gt; or &lt;strong&gt;&lt;a href="https://github.com/opencontainers/runc"&gt;runc&lt;/a&gt;&lt;/strong&gt; underneath&lt;/li&gt;
 &lt;li&gt;No need service running in background.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;The word &lt;strong&gt;daemonless&lt;/strong&gt; is important!.&lt;/p&gt;
@@ -57,8 +61,7 @@
 &lt;p&gt;There are also &lt;strong&gt;cgroup&lt;/strong&gt; and &lt;strong&gt;time&lt;/strong&gt; namespaces, but the ones above are the types you will encounter most often in container discussions.&lt;/p&gt;
 &lt;p&gt;This is why process &lt;code&gt;12345&lt;/code&gt; on the host can look like &lt;strong&gt;PID 1&lt;/strong&gt; inside the container. It is the same underlying kernel, but the process is looking through a different namespace view.&lt;/p&gt;
 &lt;h3&gt;Primitive 2: Cgroups&lt;/h3&gt;
-&lt;p&gt;Namespaces isolate what a process can &lt;strong&gt;see&lt;/strong&gt;.&lt;/p&gt;
-&lt;p&gt;Cgroups control how much of the machine a process can &lt;strong&gt;consume&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;While namespaces isolate what a process can &lt;strong&gt;see&lt;/strong&gt;. Cgroups control how much of the machine a process can &lt;strong&gt;consume&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;That includes things like:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;CPU time&lt;/li&gt;
@@ -66,7 +69,7 @@
 &lt;li&gt;Number of processes&lt;/li&gt;
 &lt;li&gt;I/O accounting and limits&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Without cgroups, a "container" could still exist as an isolated process, but it would be terrible for multi-tenant systems because one noisy workload could fucked up everything else.&lt;/p&gt;
+&lt;p&gt;Without cgroups, a "container" could still exist as an isolated process, but it would be terrible for multi-tenant systems because one noisy workload could fucked up everything else. That is why resource limit is the fucking important!&lt;/p&gt;
 &lt;h3&gt;Primitive 3: A Layered Root Filesystem&lt;/h3&gt;
 &lt;p&gt;Every container needs a filesystem view:&lt;/p&gt;
 &lt;ul&gt;
@@ -115,10 +118,10 @@ OS/Arch:&lt;span class="w"&gt;      &lt;/span&gt;linux/amd64
 &lt;span class="nv"&gt;Rootless&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;false&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;For this article, I will use &lt;strong&gt;rootful Podman&lt;/strong&gt; in the low-level inspection steps because it makes namespace and filesystem introspection simpler. Podman absolutely supports rootless mode too, and we will not talk about it in this article xD&lt;/p&gt;
+&lt;p&gt;For this article, I will use &lt;strong&gt;rootful Podman&lt;/strong&gt; in the low-level inspection steps because it makes namespace and filesystem introspection simpler. Podman supports rootless mode too, but we will not talk about it in this article xD&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;4. Step 1: Run One Real Container&lt;/h2&gt;
-&lt;p&gt;Let us create a tiny container with very visible limits:&lt;/p&gt;
+&lt;p&gt;Let us create a tiny container with very visible limits, it will has fully explained in the next steps:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;podman&lt;span class="w"&gt; &lt;/span&gt;run&lt;span class="w"&gt; &lt;/span&gt;-d&lt;span class="w"&gt; &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;--hostname&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;--memory&lt;span class="w"&gt; &lt;/span&gt;128m&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
@@ -146,13 +149,15 @@ running
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;code&gt;kienlt-lab&lt;/code&gt; is &lt;strong&gt;not&lt;/strong&gt; a mini-VM. It is just a process (or process tree) on the host. Podman simply created it with a different set of namespaces, cgroups, and mounts. Here is the proof&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;ps&lt;span class="w"&gt; &lt;/span&gt;-ef
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Inside the container&lt;/span&gt;
+root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="w"&gt; &lt;/span&gt;ps&lt;span class="w"&gt; &lt;/span&gt;-ef
 PID&lt;span class="w"&gt;   &lt;/span&gt;USER&lt;span class="w"&gt;     &lt;/span&gt;TIME&lt;span class="w"&gt;  &lt;/span&gt;COMMAND
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;:00&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="m"&gt;6&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;root&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;:00&lt;span class="w"&gt; &lt;/span&gt;ps&lt;span class="w"&gt; &lt;/span&gt;-ef
 root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;top&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab
 USER&lt;span class="w"&gt;        &lt;/span&gt;PID&lt;span class="w"&gt;         &lt;/span&gt;PPID&lt;span class="w"&gt;        &lt;/span&gt;%CPU&lt;span class="w"&gt;        &lt;/span&gt;ELAPSED&lt;span class="w"&gt;          &lt;/span&gt;TTY&lt;span class="w"&gt;         &lt;/span&gt;TIME&lt;span class="w"&gt;        &lt;/span&gt;COMMAND
 root&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.000&lt;span class="w"&gt;       &lt;/span&gt;6m12.258388147s&lt;span class="w"&gt;  &lt;/span&gt;?&lt;span class="w"&gt;           &lt;/span&gt;0s&lt;span class="w"&gt;          &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="c1"&gt;# On the host&lt;/span&gt;
 root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;ps&lt;span class="w"&gt; &lt;/span&gt;-ef&lt;span class="p"&gt;|&lt;/span&gt;grep&lt;span class="w"&gt; &lt;/span&gt;sleep
 root&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="m"&gt;890812&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;890800&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:50&lt;span class="w"&gt; &lt;/span&gt;?&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="m"&gt;00&lt;/span&gt;:00:00&lt;span class="w"&gt; &lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infinity
 &lt;span class="c1"&gt;# Or even better grep&lt;/span&gt;
@@ -280,7 +285,7 @@ cat&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/spa
 
 &lt;p&gt;You should see values that correspond to the limits we gave Podman.&lt;/p&gt;
 &lt;p&gt;For example:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Not related but you will undetrstand where is the fucking CGROUP_REL comes from!&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Not related but you will understand where is the fucking CGROUP_REL comes from!&lt;/span&gt;
 root@kienlt-lab-utilities:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/proc/890812/cgroup
 &lt;span class="m"&gt;0&lt;/span&gt;::/machine.slice/libpod-71d926d3c61c8c4a9beecc7d1a81a516d247dcf1c541bb71e9a39fb89721b7d5.scope
 &lt;span class="c1"&gt;# And then&lt;/span&gt;
@@ -309,7 +314,7 @@ ID&lt;span class="w"&gt;            &lt;/span&gt;NAME&lt;span class="w"&gt;     
 8c68368d643d&lt;span class="w"&gt;  &lt;/span&gt;kienlt-lab&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.01%&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="m"&gt;53&lt;/span&gt;.25kB&lt;span class="w"&gt; &lt;/span&gt;/&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;134&lt;/span&gt;.2MB&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.04%&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;.626kB&lt;span class="w"&gt; &lt;/span&gt;/&lt;span class="w"&gt; &lt;/span&gt;936B&lt;span class="w"&gt;  &lt;/span&gt;0B&lt;span class="w"&gt; &lt;/span&gt;/&lt;span class="w"&gt; &lt;/span&gt;0B&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="m"&gt;34&lt;/span&gt;.723ms&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.01%
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Again, the container is not special. It is just a process tree attached to a cgroup subtree.&lt;/p&gt;
+&lt;p&gt;Again, the container is not that fucking special. It is just a process tree attached to a cgroup subtree.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2&gt;7. Step 4: Prove the Layered Filesystem Story&lt;/h2&gt;
 &lt;p&gt;This section is fucking great for me, I see overlayfs for a lot of fucking time, but I never really understand what the fuck are they!&lt;/p&gt;

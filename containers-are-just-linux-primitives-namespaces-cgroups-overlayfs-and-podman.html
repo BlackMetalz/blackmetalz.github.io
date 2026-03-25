@@ -90,7 +90,11 @@
 <h2>0. What is OCI?</h2>
 <p>It has 2 parts: OCI and OCI Runtime</p>
 <h3>OCI</h3>
-<p>From what I understand, OCI is a <strong>standard</strong> for container. With this standard, an image built with Docker can be run pretty well in Podman or Kubernetes and vice versa.</p>
+<p>From what I understand, <a href="https://opencontainers.org/">Open Container Initiative (OCI)</a> is a <strong>standard</strong> for container. With this standard, an image built with Docker can be run pretty well in Podman or Kubernetes and vice versa.</p>
+<p>Content copy from homepage of OCI:</p>
+<div class="highlight"><pre><span></span><code>The OCI currently contains three specifications: the Runtime Specification (runtime-spec), the Image Specification (image-spec) and the Distribution Specification (distribution-spec). The Runtime Specification outlines how to run a “filesystem bundle” that is unpacked on disk. At a high-level an OCI implementation would download an OCI Image then unpack that image into an OCI Runtime filesystem bundle. At this point the OCI Runtime Bundle would be run by an OCI Runtime.
+</code></pre></div>
+
 <h3>OCI Runtime</h3>
 <p>The OCI Runtime is the implementation that communicates with the kernel to expand the image into a container xD</p>
 <hr>
@@ -99,7 +103,7 @@
 <ul>
 <li><strong>A daemonless container engine</strong></li>
 <li>It speaks a <strong>Docker-like CLI</strong></li>
-<li>It uses an <a href="https://opencontainers.org/">Open Container Initiative (OCI)</a> runtime like <strong><a href="https://github.com/containers/crun">crun</a></strong> or <strong><a href="https://github.com/opencontainers/runc">runc</a></strong> underneath</li>
+<li>It uses an OCI runtime like <strong><a href="https://github.com/containers/crun">crun</a></strong> or <strong><a href="https://github.com/opencontainers/runc">runc</a></strong> underneath</li>
 <li>No need service running in background.</li>
 </ul>
 <p>The word <strong>daemonless</strong> is important!.</p>
@@ -136,8 +140,7 @@
 <p>There are also <strong>cgroup</strong> and <strong>time</strong> namespaces, but the ones above are the types you will encounter most often in container discussions.</p>
 <p>This is why process <code>12345</code> on the host can look like <strong>PID 1</strong> inside the container. It is the same underlying kernel, but the process is looking through a different namespace view.</p>
 <h3>Primitive 2: Cgroups</h3>
-<p>Namespaces isolate what a process can <strong>see</strong>.</p>
-<p>Cgroups control how much of the machine a process can <strong>consume</strong>.</p>
+<p>While namespaces isolate what a process can <strong>see</strong>. Cgroups control how much of the machine a process can <strong>consume</strong>.</p>
 <p>That includes things like:</p>
 <ul>
 <li>CPU time</li>
@@ -145,7 +148,7 @@
 <li>Number of processes</li>
 <li>I/O accounting and limits</li>
 </ul>
-<p>Without cgroups, a "container" could still exist as an isolated process, but it would be terrible for multi-tenant systems because one noisy workload could fucked up everything else.</p>
+<p>Without cgroups, a "container" could still exist as an isolated process, but it would be terrible for multi-tenant systems because one noisy workload could fucked up everything else. That is why resource limit is the fucking important!</p>
 <h3>Primitive 3: A Layered Root Filesystem</h3>
 <p>Every container needs a filesystem view:</p>
 <ul>
@@ -194,10 +197,10 @@ OS/Arch:<span class="w">      </span>linux/amd64
 <span class="nv">Rootless</span><span class="o">=</span><span class="nb">false</span>
 </code></pre></div>
 
-<p>For this article, I will use <strong>rootful Podman</strong> in the low-level inspection steps because it makes namespace and filesystem introspection simpler. Podman absolutely supports rootless mode too, and we will not talk about it in this article xD</p>
+<p>For this article, I will use <strong>rootful Podman</strong> in the low-level inspection steps because it makes namespace and filesystem introspection simpler. Podman supports rootless mode too, but we will not talk about it in this article xD</p>
 <hr>
 <h2>4. Step 1: Run One Real Container</h2>
-<p>Let us create a tiny container with very visible limits:</p>
+<p>Let us create a tiny container with very visible limits, it will has fully explained in the next steps:</p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>kienlt-lab<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--hostname<span class="w"> </span>kienlt-lab<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--memory<span class="w"> </span>128m<span class="w"> </span><span class="se">\</span>
@@ -225,13 +228,15 @@ running
 </code></pre></div>
 
 <p><code>kienlt-lab</code> is <strong>not</strong> a mini-VM. It is just a process (or process tree) on the host. Podman simply created it with a different set of namespaces, cgroups, and mounts. Here is the proof</p>
-<div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>kienlt-lab<span class="w"> </span>ps<span class="w"> </span>-ef
+<div class="highlight"><pre><span></span><code><span class="c1"># Inside the container</span>
+root@kienlt-lab-utilities:~#<span class="w"> </span>podman<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>kienlt-lab<span class="w"> </span>ps<span class="w"> </span>-ef
 PID<span class="w">   </span>USER<span class="w">     </span>TIME<span class="w">  </span>COMMAND
 <span class="w">    </span><span class="m">1</span><span class="w"> </span>root<span class="w">      </span><span class="m">0</span>:00<span class="w"> </span>sleep<span class="w"> </span>infinity
 <span class="w">    </span><span class="m">6</span><span class="w"> </span>root<span class="w">      </span><span class="m">0</span>:00<span class="w"> </span>ps<span class="w"> </span>-ef
 root@kienlt-lab-utilities:~#<span class="w"> </span>podman<span class="w"> </span>top<span class="w"> </span>kienlt-lab
 USER<span class="w">        </span>PID<span class="w">         </span>PPID<span class="w">        </span>%CPU<span class="w">        </span>ELAPSED<span class="w">          </span>TTY<span class="w">         </span>TIME<span class="w">        </span>COMMAND
 root<span class="w">        </span><span class="m">1</span><span class="w">           </span><span class="m">0</span><span class="w">           </span><span class="m">0</span>.000<span class="w">       </span>6m12.258388147s<span class="w">  </span>?<span class="w">           </span>0s<span class="w">          </span>sleep<span class="w"> </span>infinity<span class="w"> </span>
+<span class="c1"># On the host</span>
 root@kienlt-lab-utilities:~#<span class="w"> </span>ps<span class="w"> </span>-ef<span class="p">|</span>grep<span class="w"> </span>sleep
 root<span class="w">      </span><span class="m">890812</span><span class="w">  </span><span class="m">890800</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">00</span>:50<span class="w"> </span>?<span class="w">        </span><span class="m">00</span>:00:00<span class="w"> </span>sleep<span class="w"> </span>infinity
 <span class="c1"># Or even better grep</span>
@@ -359,7 +364,7 @@ cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CGROU
 
 <p>You should see values that correspond to the limits we gave Podman.</p>
 <p>For example:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Not related but you will undetrstand where is the fucking CGROUP_REL comes from!</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Not related but you will understand where is the fucking CGROUP_REL comes from!</span>
 root@kienlt-lab-utilities:~#<span class="w"> </span>cat<span class="w"> </span>/proc/890812/cgroup
 <span class="m">0</span>::/machine.slice/libpod-71d926d3c61c8c4a9beecc7d1a81a516d247dcf1c541bb71e9a39fb89721b7d5.scope
 <span class="c1"># And then</span>
@@ -388,7 +393,7 @@ ID<span class="w">            </span>NAME<span class="w">        </span>CPU<span
 8c68368d643d<span class="w">  </span>kienlt-lab<span class="w">  </span><span class="m">0</span>.01%<span class="w">       </span><span class="m">53</span>.25kB<span class="w"> </span>/<span class="w"> </span><span class="m">134</span>.2MB<span class="w">  </span><span class="m">0</span>.04%<span class="w">       </span><span class="m">1</span>.626kB<span class="w"> </span>/<span class="w"> </span>936B<span class="w">  </span>0B<span class="w"> </span>/<span class="w"> </span>0B<span class="w">     </span><span class="m">1</span><span class="w">           </span><span class="m">34</span>.723ms<span class="w">    </span><span class="m">0</span>.01%
 </code></pre></div>
 
-<p>Again, the container is not special. It is just a process tree attached to a cgroup subtree.</p>
+<p>Again, the container is not that fucking special. It is just a process tree attached to a cgroup subtree.</p>
 <hr>
 <h2>7. Step 4: Prove the Layered Filesystem Story</h2>
 <p>This section is fucking great for me, I see overlayfs for a lot of fucking time, but I never really understand what the fuck are they!</p>
