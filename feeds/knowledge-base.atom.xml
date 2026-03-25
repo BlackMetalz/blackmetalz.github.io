@@ -52,7 +52,7 @@
 &lt;p&gt;Common namespace types you will meet in containers, detail in &lt;a href="https://www.redhat.com/en/blog/7-linux-namespaces"&gt;Redhat blog&lt;/a&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;PID namespace&lt;/strong&gt;: the process gets its own process tree&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;NET namespace&lt;/strong&gt;: its own network stack, interfaces, routes, ports&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;NET namespace&lt;/strong&gt;: its own network stack, interfaces, routes, ports. For example, a container in a new NET namespace gets its own private network (its own &lt;code&gt;localhost&lt;/code&gt;), its own IP address (like &lt;code&gt;10.88.0.2&lt;/code&gt;), and its own virtual network devices (like &lt;code&gt;eth0&lt;/code&gt;), completely isolated from the host machine's networking.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;MNT namespace&lt;/strong&gt;: its own mount table&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;UTS namespace&lt;/strong&gt;: its own hostname&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;IPC namespace&lt;/strong&gt;: its own shared memory / semaphores&lt;/li&gt;
@@ -93,8 +93,8 @@
 &lt;li&gt;&lt;strong&gt;util-linux&lt;/strong&gt; for &lt;code&gt;nsenter&lt;/code&gt; and related tools&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;iproute2&lt;/strong&gt; for &lt;code&gt;ip addr&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;update
-sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;-y&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;util-linux&lt;span class="w"&gt; &lt;/span&gt;iproute2
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;apt&lt;span class="w"&gt; &lt;/span&gt;update
+apt&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;-y&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;util-linux&lt;span class="w"&gt; &lt;/span&gt;iproute2
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Quick checks:&lt;/p&gt;
@@ -142,7 +142,7 @@ running
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Get the host PID of the container's main process:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;PID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{.State.Pid}}&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nv"&gt;PID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;podman&lt;span class="w"&gt; &lt;/span&gt;inspect&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;{{.State.Pid}}&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kienlt-lab&lt;span class="k"&gt;)&lt;/span&gt;
 &lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$PID&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
 &lt;span class="c1"&gt;# Example output:&lt;/span&gt;
 &lt;span class="c1"&gt;# 890812&lt;/span&gt;

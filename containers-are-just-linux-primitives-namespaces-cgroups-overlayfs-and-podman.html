@@ -131,7 +131,7 @@
 <p>Common namespace types you will meet in containers, detail in <a href="https://www.redhat.com/en/blog/7-linux-namespaces">Redhat blog</a></p>
 <ul>
 <li><strong>PID namespace</strong>: the process gets its own process tree</li>
-<li><strong>NET namespace</strong>: its own network stack, interfaces, routes, ports</li>
+<li><strong>NET namespace</strong>: its own network stack, interfaces, routes, ports. For example, a container in a new NET namespace gets its own private network (its own <code>localhost</code>), its own IP address (like <code>10.88.0.2</code>), and its own virtual network devices (like <code>eth0</code>), completely isolated from the host machine's networking.</li>
 <li><strong>MNT namespace</strong>: its own mount table</li>
 <li><strong>UTS namespace</strong>: its own hostname</li>
 <li><strong>IPC namespace</strong>: its own shared memory / semaphores</li>
@@ -172,8 +172,8 @@
 <li><strong>util-linux</strong> for <code>nsenter</code> and related tools</li>
 <li><strong>iproute2</strong> for <code>ip addr</code></li>
 </ol>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>update
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>podman<span class="w"> </span>jq<span class="w"> </span>util-linux<span class="w"> </span>iproute2
+<div class="highlight"><pre><span></span><code>apt<span class="w"> </span>update
+apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>podman<span class="w"> </span>jq<span class="w"> </span>util-linux<span class="w"> </span>iproute2
 </code></pre></div>
 
 <p>Quick checks:</p>
@@ -221,7 +221,7 @@ running
 </code></pre></div>
 
 <p>Get the host PID of the container's main process:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">PID</span><span class="o">=</span><span class="k">$(</span>sudo<span class="w"> </span>podman<span class="w"> </span>inspect<span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;{{.State.Pid}}&#39;</span><span class="w"> </span>kienlt-lab<span class="k">)</span>
+<div class="highlight"><pre><span></span><code><span class="nv">PID</span><span class="o">=</span><span class="k">$(</span>podman<span class="w"> </span>inspect<span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;{{.State.Pid}}&#39;</span><span class="w"> </span>kienlt-lab<span class="k">)</span>
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PID</span><span class="s2">&quot;</span>
 <span class="c1"># Example output:</span>
 <span class="c1"># 890812</span>
