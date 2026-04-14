@@ -1,0 +1,2 @@
+[     258ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://127.0.0.1:8000/theme/img/glyphicons-halflings.png:0
+[     391ms] [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE @ http://127.0.0.1:8000/favicon.ico:0

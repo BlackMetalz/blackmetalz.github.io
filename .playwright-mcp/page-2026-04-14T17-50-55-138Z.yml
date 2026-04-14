@@ -1,0 +1,379 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e5]:
+      - link "Kienlt's notebook" [ref=e10] [cursor=pointer]:
+        - /url: /
+      - list [ref=e11]:
+        - listitem [ref=e12]:
+          - link "Home" [ref=e13] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e14]:
+          - link "Categories" [ref=e15] [cursor=pointer]:
+            - /url: /categories.html
+        - listitem [ref=e16]:
+          - link "Tags" [ref=e17] [cursor=pointer]:
+            - /url: /tags.html
+        - listitem [ref=e18]:
+          - link "Archives" [ref=e19] [cursor=pointer]:
+            - /url: /archives.html
+        - listitem [ref=e20]:
+          - textbox "Search" [ref=e22]
+    - generic [ref=e29]:
+      - banner [ref=e30]:
+        - heading "Recent Posts all posts" [level=1] [ref=e31]:
+          - text: Recent Posts
+          - link "all posts" [ref=e32] [cursor=pointer]:
+            - /url: /archives.html
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - link "Some notes during Claude code in action course" [ref=e35] [cursor=pointer]:
+            - /url: /some-notes-during-claude-code-in-action-course.html
+          - generic [ref=e36]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e37] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e38]: Wed 15 April 2026
+        - generic [ref=e39]:
+          - 'link "Containers Are Just Linux Primitives: Namespaces, Cgroups, OverlayFS, and Podman" [ref=e40] [cursor=pointer]':
+            - /url: /containers-are-just-linux-primitives-namespaces-cgroups-overlayfs-and-podman.html
+          - generic [ref=e41]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e42] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e43]: Mon 23 March 2026
+        - generic [ref=e44]:
+          - link "[Container Networking Series - Part 4] How Cilium CNI works in K8S" [ref=e45] [cursor=pointer]:
+            - /url: /container-networking-series-part-4-how-cilium-cni-works-in-k8s.html
+          - generic [ref=e46]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e47] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e48]: Sun 22 March 2026
+        - generic [ref=e49]:
+          - 'link "[Container Networking Series - Part 3] Demystifying CNI: When Kubernetes \"Borrows\" Plugins to Build Its Network" [ref=e50] [cursor=pointer]':
+            - /url: /container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html
+          - generic [ref=e51]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e52] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e53]: Sat 21 March 2026
+        - generic [ref=e54]:
+          - 'link "[Container Networking Series - Part 2] Demystifying Docker Networking: Outbound Traffic & The Masquerade Magic" [ref=e55] [cursor=pointer]':
+            - /url: /container-networking-series-part-2-demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html
+          - generic [ref=e56]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e57] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e58]: Mon 16 March 2026
+        - generic [ref=e59]:
+          - link "Mysql - ACID Principle" [ref=e60] [cursor=pointer]:
+            - /url: /mysql-acid-principle.html
+          - generic [ref=e61]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e62] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e63]: Mon 16 March 2026
+        - generic [ref=e64]:
+          - 'link "[Container Networking Series - Part 1] Demystifying Docker Networking: A Deep Dive into Bridge & veth" [ref=e65] [cursor=pointer]':
+            - /url: /container-networking-series-part-1-demystifying-docker-networking-a-deep-dive-into-bridge-veth.html
+          - generic [ref=e66]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e67] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e68]: Sun 15 March 2026
+        - generic [ref=e69]:
+          - link "Live Clone MySQL Replication using Percona XtraBackup" [ref=e70] [cursor=pointer]:
+            - /url: /live-clone-mysql-replication-using-percona-xtrabackup.html
+          - generic [ref=e71]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e72] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e73]: Wed 11 March 2026
+        - generic [ref=e74]:
+          - link "Sample Streamlit Integration with Keycloak for Authentication" [ref=e75] [cursor=pointer]:
+            - /url: /sample-streamlit-integration-with-keycloak-for-authentication.html
+          - generic [ref=e76]:
+            - text: posted in
+            - link "Coding" [ref=e77] [cursor=pointer]:
+              - /url: /categories.html#coding-ref
+            - time [ref=e78]: Sun 22 February 2026
+        - generic [ref=e79]:
+          - link "Difference between pre-allocate and allocate in Go" [ref=e80] [cursor=pointer]:
+            - /url: /difference-between-pre-allocate-and-allocate-in-go.html
+          - generic [ref=e81]:
+            - text: posted in
+            - link "Coding" [ref=e82] [cursor=pointer]:
+              - /url: /categories.html#coding-ref
+            - time [ref=e83]: Sat 21 February 2026
+        - generic [ref=e84]:
+          - 'link "Learn Go by doing project: Change K8S Contexts CLI" [ref=e85] [cursor=pointer]':
+            - /url: /learn-go-by-doing-project-change-k8s-contexts-cli.html
+          - generic [ref=e86]:
+            - text: posted in
+            - link "Coding" [ref=e87] [cursor=pointer]:
+              - /url: /categories.html#coding-ref
+            - time [ref=e88]: Fri 20 February 2026
+        - generic [ref=e89]:
+          - link "No Vault? No GitOps? No Problem - Securing K8s Secrets with SOPS" [ref=e90] [cursor=pointer]:
+            - /url: /no-vault-no-gitops-no-problem-securing-k8s-secrets-with-sops.html
+          - generic [ref=e91]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e92] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e93]: Sat 31 January 2026
+        - generic [ref=e94]:
+          - 'link "OWASP Top 10 Security Risks: Personal Study Notes" [ref=e95] [cursor=pointer]':
+            - /url: /owasp-top-10-security-risks-personal-study-notes.html
+          - generic [ref=e96]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e97] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e98]: Tue 13 January 2026
+        - generic [ref=e99]:
+          - 'link "My journey: from Kubestronaut to Golden Kubestronaut in 30 days" [ref=e100] [cursor=pointer]':
+            - /url: /my-journey-from-kubestronaut-to-golden-kubestronaut-in-30-days.html
+          - generic [ref=e101]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e102] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e103]: Sat 10 January 2026
+        - generic [ref=e104]:
+          - link "Prepare for the Istio Certified Associate (ICA) Exam" [ref=e105] [cursor=pointer]:
+            - /url: /prepare-for-the-istio-certified-associate-ica-exam.html
+          - generic [ref=e106]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e107] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e108]: Wed 31 December 2025
+        - generic [ref=e109]:
+          - link "[WIP] Setup K8s with Kubespray" [ref=e110] [cursor=pointer]:
+            - /url: /wip-setup-k8s-with-kubespray.html
+          - generic [ref=e111]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e112] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e113]: Wed 31 December 2025
+        - generic [ref=e114]:
+          - link "Prepare for Linux Foundation Certified System Administrator (LFCS)" [ref=e115] [cursor=pointer]:
+            - /url: /prepare-for-linux-foundation-certified-system-administrator-lfcs.html
+          - generic [ref=e116]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e117] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e118]: Mon 29 December 2025
+        - generic [ref=e119]:
+          - link "Prepare for the Cilium Certified Associate (CCA) Exam" [ref=e120] [cursor=pointer]:
+            - /url: /prepare-for-the-cilium-certified-associate-cca-exam.html
+          - generic [ref=e121]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e122] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e123]: Sun 28 December 2025
+        - generic [ref=e124]:
+          - link "Prepare for the OpenTelemetry Certified Associate (OTCA) exam" [ref=e125] [cursor=pointer]:
+            - /url: /prepare-for-the-opentelemetry-certified-associate-otca-exam.html
+          - generic [ref=e126]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e127] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e128]: Sat 20 December 2025
+        - generic [ref=e129]:
+          - link "Prepare for the Kyverno Certified Associate (KCA) exam" [ref=e130] [cursor=pointer]:
+            - /url: /prepare-for-the-kyverno-certified-associate-kca-exam.html
+          - generic [ref=e131]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e132] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e133]: Thu 18 December 2025
+        - generic [ref=e134]:
+          - link "Prepare for the Certified Argo Project Associate (CAPA) exam" [ref=e135] [cursor=pointer]:
+            - /url: /prepare-for-the-certified-argo-project-associate-capa-exam.html
+          - generic [ref=e136]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e137] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e138]: Wed 17 December 2025
+        - generic [ref=e139]:
+          - link "How I Passed the Prometheus Certified Associate (PCA) Exam" [ref=e140] [cursor=pointer]:
+            - /url: /how-i-passed-the-prometheus-certified-associate-pca-exam.html
+          - generic [ref=e141]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e142] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e143]: Mon 15 December 2025
+        - generic [ref=e144]:
+          - link "Prepare for the Certified Cloud Native Platform Associate (CNPA) Exam" [ref=e145] [cursor=pointer]:
+            - /url: /how-i-passed-cnpa-certification.html
+          - generic [ref=e146]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e147] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e148]: Sat 13 December 2025
+        - generic [ref=e149]:
+          - link "Mastering GitOps & Crushing the Certified GitOps Associate (CGOA) Exam" [ref=e150] [cursor=pointer]:
+            - /url: /mastering-gitops-crushing-the-certified-gitops-associate-cgoa-exam.html
+          - generic [ref=e151]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e152] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e153]: Fri 12 December 2025
+        - generic [ref=e154]:
+          - 'link "My Platform Engineering Journey #2: Getting Started with Backstage - Internal Developer Portal and Prepare for Certified Backstage Associate Exam" [ref=e155] [cursor=pointer]':
+            - /url: /my-platform-engineering-journey-2-getting-started-with-backstage-internal-developer-portal-and-prepare-for-certified-backstage-associate-exam.html
+          - generic [ref=e156]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e157] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e158]: Mon 08 December 2025
+        - generic [ref=e159]:
+          - 'link "My Platform Engineering Journey #1: The Beginning" [ref=e160] [cursor=pointer]':
+            - /url: /my-platform-engineering-journey-1-the-beginning.html
+          - generic [ref=e161]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e162] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e163]: Sat 15 November 2025
+        - generic [ref=e164]:
+          - 'link "Lab: MySQL Galera Cluster Reliability" [ref=e165] [cursor=pointer]':
+            - /url: /lab-mysql-galera-cluster-reliability.html
+          - generic [ref=e166]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e167] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e168]: Thu 13 November 2025
+        - generic [ref=e169]:
+          - 'link "My journey with GitLab CI: friendly and effective!" [ref=e170] [cursor=pointer]':
+            - /url: /my-journey-with-gitlab-ci-friendly-and-effective.html
+          - generic [ref=e171]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e172] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e173]: Sat 08 November 2025
+        - generic [ref=e174]:
+          - link "Prepare for the Terraform Associate (003) Certification Exam in 2025" [ref=e175] [cursor=pointer]:
+            - /url: /prepare-for-the-terraform-associate-003-certification-exam-in-2025.html
+          - generic [ref=e176]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e177] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e178]: Sun 02 November 2025
+        - generic [ref=e179]:
+          - link "Prepare for the Certified Kubernetes Security Specialist (CKS) exam in 2025" [ref=e180] [cursor=pointer]:
+            - /url: /prepare-for-the-certified-kubernetes-security-specialist-cks-exam-in-2025.html
+          - generic [ref=e181]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e182] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e183]: Tue 19 August 2025
+        - generic [ref=e184]:
+          - 'link "K8S: little note with node restriction in admission controller" [ref=e185] [cursor=pointer]':
+            - /url: /k8s-little-note-with-node-restriction-in-admission-controller.html
+          - generic [ref=e186]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e187] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e188]: Sat 26 July 2025
+        - generic [ref=e189]:
+          - 'link "VictoriaLogs: The Space-Efficient Alternative to Elasticsearch for Log Management" [ref=e190] [cursor=pointer]':
+            - /url: /victorialogs-the-space-efficient-alternative-to-elasticsearch-for-log-management.html
+          - generic [ref=e191]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e192] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e193]: Sun 30 March 2025
+        - generic [ref=e194]:
+          - 'link "Why I Switched to VictoriaMetrics: Scaling from Small Business to Enterprise." [ref=e195] [cursor=pointer]':
+            - /url: /why-i-switched-to-victoriametrics-scaling-from-small-business-to-enterprise.html
+          - generic [ref=e196]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e197] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e198]: Sun 23 March 2025
+        - generic [ref=e199]:
+          - link "Canary/Blue-Green deployment with Argo Rollouts" [ref=e200] [cursor=pointer]:
+            - /url: /canaryblue-green-deployment-with-argo-rollouts.html
+          - generic [ref=e201]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e202] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e203]: Mon 10 March 2025
+        - generic [ref=e204]:
+          - link "What is SLA-SLO-SLI? SLO Generator introduction - Sloth and dynamic rules for SLO" [ref=e205] [cursor=pointer]:
+            - /url: /what-is-sla-slo-sli-slo-generator-introduction-sloth-and-dynamic-rules-for-slo.html
+          - generic [ref=e206]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e207] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e208]: Sat 08 March 2025
+        - generic [ref=e209]:
+          - 'link "My journey with observability: Opentelemetry" [ref=e210] [cursor=pointer]':
+            - /url: /my-journey-with-observability-opentelemetry.html
+          - generic [ref=e211]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e212] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e213]: Mon 03 March 2025
+        - generic [ref=e214]:
+          - 'link "Practical DevSecOps: Automating Security, Integrating DevSecOps into CI/CD with Jenkins and Golang application - Part 3" [ref=e215] [cursor=pointer]':
+            - /url: /practical-devsecops-automating-security-integrating-devsecops-into-cicd-with-jenkins-and-golang-application-part-3.html
+          - generic [ref=e216]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e217] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e218]: Sun 23 February 2025
+        - generic [ref=e219]:
+          - 'link "Practical DevSecOps: Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps - Part 2" [ref=e220] [cursor=pointer]':
+            - /url: /practical-devsecops-hardening-and-monitoring-benchmarking-and-runtime-security-in-devsecops-part-2.html
+          - generic [ref=e221]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e222] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e223]: Mon 17 February 2025
+        - generic [ref=e224]:
+          - 'link "Practical DevSecOps: Securing the Pipeline from Code to Deployment - Part 1" [ref=e225] [cursor=pointer]':
+            - /url: /practical-devsecops-securing-the-pipeline-from-code-to-deployment-part-1.html
+          - generic [ref=e226]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e227] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e228]: Mon 10 February 2025
+        - generic [ref=e229]:
+          - 'link "Getting Started with Helm Templates: A Practical Guide to Kubernetes Manifests" [ref=e230] [cursor=pointer]':
+            - /url: /getting-started-with-helm-templates-a-practical-guide-to-kubernetes-manifests.html
+          - generic [ref=e231]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e232] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e233]: Thu 06 February 2025
+        - generic [ref=e234]:
+          - 'link "Kustomize: Quick Introduction and Integration with Other Tools and Examples" [ref=e235] [cursor=pointer]':
+            - /url: /kustomize-quick-introduction-and-integration-with-other-tools-and-examples.html
+          - generic [ref=e236]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e237] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e238]: Mon 03 February 2025
+        - generic [ref=e239]:
+          - link "Sharing What I've Learned About Kubernetes Networking - Part 2" [ref=e240] [cursor=pointer]:
+            - /url: /sharing-what-ive-learned-about-kubernetes-networking-part-2.html
+          - generic [ref=e241]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e242] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e243]: Mon 20 January 2025
+        - generic [ref=e244]:
+          - link "Sharing What I've Learned About Kubernetes Networking - Part 1" [ref=e245] [cursor=pointer]:
+            - /url: /sharing-what-ive-learned-about-kubernetes-networking-part-1.html
+          - generic [ref=e246]:
+            - text: posted in
+            - link "Knowledge Base" [ref=e247] [cursor=pointer]:
+              - /url: /categories.html#knowledge-base-ref
+            - time [ref=e248]: Fri 17 January 2025
+  - contentinfo [ref=e250]:
+    - generic [ref=e251]:
+      - text: "Powered by:"
+      - link "Pelican" [ref=e252] [cursor=pointer]:
+        - /url: http://getpelican.com/
+      - text: "Theme:"
+      - link "Elegant" [ref=e253] [cursor=pointer]:
+        - /url: https://elegant.oncrashreboot.com/
