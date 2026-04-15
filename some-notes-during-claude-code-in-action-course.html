@@ -190,12 +190,12 @@ description: A clear description of what this skill does and when to use it
 <p>Note: Permission setup can be little confused or taking time, but only need 1 time setup.</p>
 <hr>
 <h1>Hooks and the SDK</h1>
-<h3>Hooks</h3>
+<h3>Hooks Introduction</h3>
 <p>Run a command before or after Claude Code does something. Optionally can block Claude's action.</p>
 <p><img alt="Hooks" src="./images/2026/04/04.png"></p>
-<p>There are some hooks type: <code>PreToolUse</code> (Hooks that run before a tool is called), <code>PostToolUse</code> (Hooks that after before a tool is called)</p>
+<p>There are some hooks type: <code>PreToolUse</code> (Hooks that run before a tool is called), <code>PostToolUse</code> (Hooks that run after a tool is called)</p>
 <p>Defination, same for skill if can be global, project or project but not gonna commit.</p>
-<p><img alt="Hooks Definitions" src="./images/2026/04/04.png"></p>
+<p><img alt="Hooks Definations" src="./images/2026/04/04.png"></p>
 <p>I would give a sample setting for <code>PostToolUse</code> in my Go projects: <a href="https://github.com/BlackMetalz/kienlt-scripts/blob/main/claude-settings/go-project.json#L70">Full in here</a> . </p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;hooks&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;PostToolUse&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
@@ -214,9 +214,69 @@ description: A clear description of what this skill does and when to use it
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 
-<p>So it will format (go fmt) and do static analysis tool (go vet). After any of tool in matcher list (Write|Edit|MultiEdit) was used. It can be Claude fix bug before telling us it is finished.</p>
+<p>So it will format (go fmt) and do static analysis tool (go vet). After any of tool in matcher list (Write|Edit|MultiEdit) was used. This can catch issue before Claude tells us it's finished, giving it a chance to fix them automatically!</p>
 <p>The course did too good to explain, here is why:</p>
 <p><img alt="Hooks" src="./images/2026/04/06.png"></p>
+<h3>Defining hooks</h3>
+<p>First of all, we need to take a look at <a href="https://code.claude.com/docs/en/tools-reference">tools</a>, you often see this during claude code session. Here is the list of tools in that course mentioned</p>
+<p><img alt="Hooks" src="./images/2026/04/07.png"></p>
+<p>And here is live action I took from my Claude Code session</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Fetch tool</span>
+<span class="err">⏺</span><span class="w"> </span><span class="n">Fetch</span><span class="p">(</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">BlackMetalz</span><span class="o">/</span><span class="n">lazy</span><span class="o">-</span><span class="n">hole</span><span class="o">/</span><span class="n">tree</span><span class="o">/</span><span class="n">main</span><span class="o">/.</span><span class="n">github</span><span class="o">/</span><span class="n">workflows</span><span class="p">)</span>
+<span class="w">  </span><span class="err">⎿</span><span class="w">  </span><span class="n">Received</span><span class="w"> </span><span class="mf">217.5</span><span class="n">KB</span><span class="w"> </span><span class="p">(</span><span class="mi">200</span><span class="w"> </span><span class="n">OK</span><span class="p">)</span>
+<span class="err">⏺</span><span class="w"> </span><span class="n">Fetch</span><span class="p">(</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">BlackMetalz</span><span class="o">/</span><span class="n">lazy</span><span class="o">-</span><span class="n">hole</span><span class="o">/</span><span class="n">main</span><span class="o">/.</span><span class="n">github</span><span class="o">/</span><span class="n">workflows</span><span class="o">/</span><span class="n">release</span><span class="o">.</span><span class="n">yaml</span><span class="p">)</span>
+<span class="w">  </span><span class="err">⎿</span><span class="w">  </span><span class="n">Received</span><span class="w"> </span><span class="mf">1.3</span><span class="n">KB</span><span class="w"> </span><span class="p">(</span><span class="mi">200</span><span class="w"> </span><span class="n">OK</span><span class="p">)</span>
+<span class="c1"># Bash tool</span>
+<span class="n">Bash</span><span class="p">(</span><span class="n">mkdir</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">kienlt</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">es</span><span class="o">-</span><span class="n">cli</span><span class="o">/.</span><span class="n">github</span><span class="o">/</span><span class="n">workflows</span><span class="p">)</span>
+<span class="w">  </span><span class="err">⎿</span><span class="w">  </span><span class="n">Done</span>
+<span class="err">⏺</span><span class="w"> </span><span class="n">Bash</span><span class="p">(</span><span class="n">swift</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="o">-</span><span class="n">c</span><span class="w"> </span><span class="n">release</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;&amp;</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">  </span><span class="err">⎿</span><span class="w">  </span><span class="n">Building</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">production</span><span class="o">...</span>
+<span class="w">     </span><span class="p">[</span><span class="mi">0</span><span class="o">/</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="n">Write</span><span class="w"> </span><span class="n">sources</span>
+<span class="w">     </span><span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="n">Write</span><span class="w"> </span><span class="n">swift</span><span class="o">-</span><span class="n">version</span><span class="o">--</span><span class="mi">1</span><span class="n">AB21518FC5DEDBE</span><span class="o">.</span><span class="n">txt</span>
+<span class="w">     </span><span class="err">…</span><span class="w"> </span><span class="o">+</span><span class="mi">4</span><span class="w"> </span><span class="n">lines</span><span class="w"> </span><span class="p">(</span><span class="n">ctrl</span><span class="o">+</span><span class="n">o</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">expand</span><span class="p">)</span>
+<span class="w">  </span><span class="err">⎿</span><span class="w">  </span><span class="p">(</span><span class="n">timeout</span><span class="w"> </span><span class="mi">2</span><span class="n">m</span><span class="p">)</span>
+<span class="c1"># Write tool</span>
+<span class="err">⏺</span><span class="w"> </span><span class="n">Write</span><span class="p">(</span><span class="o">.</span><span class="n">github</span><span class="o">/</span><span class="n">workflows</span><span class="o">/</span><span class="n">cleanup</span><span class="o">-</span><span class="n">releases</span><span class="o">.</span><span class="n">yaml</span><span class="p">)</span>
+<span class="w">  </span><span class="err">⎿</span><span class="w">  </span><span class="n">Wrote</span><span class="w"> </span><span class="mi">29</span><span class="w"> </span><span class="n">lines</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="o">.</span><span class="n">github</span><span class="o">/</span><span class="n">workflows</span><span class="o">/</span><span class="n">cleanup</span><span class="o">-</span><span class="n">releases</span><span class="o">.</span><span class="n">yaml</span>
+<span class="w">       </span><span class="mi">1</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">Cleanup</span><span class="w"> </span><span class="n">Old</span><span class="w"> </span><span class="n">Releases</span>
+<span class="w">       </span><span class="mi">2</span>
+<span class="w">       </span><span class="mi">3</span><span class="w"> </span><span class="n">on</span><span class="p">:</span>
+<span class="w">       </span><span class="mi">4</span><span class="w">   </span><span class="n">workflow_run</span><span class="p">:</span>
+<span class="w">       </span><span class="mi">5</span><span class="w">     </span><span class="n">workflows</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Release&quot;</span><span class="p">]</span>
+<span class="w">       </span><span class="mi">6</span><span class="w">     </span><span class="n">types</span><span class="p">:</span>
+<span class="w">       </span><span class="mi">7</span><span class="w">       </span><span class="o">-</span><span class="w"> </span><span class="n">completed</span>
+<span class="w">       </span><span class="mi">8</span><span class="w">   </span><span class="n">workflow_dispatch</span><span class="p">:</span>
+<span class="w">       </span><span class="mi">9</span><span class="w">     </span><span class="n">inputs</span><span class="p">:</span>
+<span class="w">      </span><span class="mi">10</span><span class="w">       </span><span class="n">keep_latest</span><span class="p">:</span>
+<span class="w">     </span><span class="err">…</span><span class="w"> </span><span class="o">+</span><span class="mi">19</span><span class="w"> </span><span class="n">lines</span><span class="w"> </span><span class="p">(</span><span class="n">ctrl</span><span class="o">+</span><span class="n">o</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">expand</span><span class="p">)</span>
+<span class="c1"># Edit/ MultiEdit tool</span>
+<span class="err">⏺</span><span class="w"> </span><span class="n">Update</span><span class="p">(</span><span class="o">.</span><span class="n">github</span><span class="o">/</span><span class="n">workflows</span><span class="o">/</span><span class="n">release</span><span class="o">.</span><span class="n">yaml</span><span class="p">)</span>
+<span class="w">  </span><span class="err">⎿</span><span class="w">  </span><span class="n">Removed</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="n">lines</span>
+<span class="w">      </span><span class="mi">22</span><span class="w">        </span><span class="n">with</span><span class="p">:</span>
+<span class="w">      </span><span class="mi">23</span><span class="w">          </span><span class="n">go</span><span class="o">-</span><span class="n">version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;1.26.1&#39;</span>
+<span class="w">      </span><span class="mi">24</span>
+<span class="w">      </span><span class="mi">25</span><span class="w"> </span><span class="o">-</span><span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">Run</span><span class="w"> </span><span class="n">tests</span>
+<span class="w">      </span><span class="mi">26</span><span class="w"> </span><span class="o">-</span><span class="w">      </span><span class="n">run</span><span class="p">:</span><span class="w"> </span><span class="n">go</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="o">-</span><span class="n">race</span><span class="w"> </span><span class="o">./...</span>
+<span class="w">      </span><span class="mi">27</span><span class="w"> </span><span class="o">-</span>
+<span class="w">      </span><span class="mi">25</span><span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="n">Build</span><span class="w"> </span><span class="n">Linux</span><span class="w"> </span><span class="n">amd64</span>
+<span class="w">      </span><span class="mi">26</span><span class="w">        </span><span class="n">run</span><span class="p">:</span><span class="w"> </span><span class="n">GOOS</span><span class="o">=</span><span class="n">linux</span><span class="w"> </span><span class="n">GOARCH</span><span class="o">=</span><span class="n">amd64</span><span class="w"> </span><span class="n">go</span><span class="w"> </span><span class="n">build</span><span class="w"> </span><span class="o">-</span><span class="n">ldflags</span><span class="w"> </span><span class="s2">&quot;-s -w -X main.version=${{ github.ref_name }}&quot;</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="n">es</span><span class="o">-</span><span class="n">cli</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">amd64</span><span class="w"> </span><span class="o">./</span><span class="n">cmd</span><span class="o">/</span><span class="n">es</span><span class="o">-</span><span class="n">cli</span>
+</code></pre></div>
+
+<p>And for tool call data which we can think of as payload when working with API. We send it via <code>stdin</code> to our command</p>
+<p>Here is example of tool call data</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;session_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;transcript_path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;hook_event_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;PreToolUse&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;tool_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Read&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;tool_input&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;file_path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;~/workspace/code/.env&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3>Implementing a hook</h3>
+<p>So let's try to to achieve goal which prevent Claude Code read <code>.env</code> file</p>
 
 
              
