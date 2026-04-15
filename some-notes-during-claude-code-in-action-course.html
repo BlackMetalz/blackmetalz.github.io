@@ -95,6 +95,26 @@
 <li>Project: <code>.claude/skills/&lt;skill-name-here&gt;/SKILL.md</code></li>
 <li>Personal (for global): <code>~/.claude/skills/&lt;skill-name-here&gt;/SKILL.md</code></li>
 </ul>
+<p>You can take a look here: <a href="https://github.com/anthropics/skills">https://github.com/anthropics/skills</a></p>
+<p>Example skill defination that I take from link above: </p>
+<div class="highlight"><pre><span></span><code>---
+name: my-skill-name
+description: A clear description of what this skill does and when to use it
+---
+
+# My Skill Name
+
+[Add your instructions here that Claude will follow when this skill is active]
+
+## Examples
+- Example usage 1
+- Example usage 2
+
+## Guidelines
+- Guideline 1
+- Guideline 2
+</code></pre></div>
+
 <p>It does support argument which already mentioned in course: <code>$ARGUMENTS</code> in markdown file. Example: <code>/holy-fuck 123</code> will replace <code>$ARGUMENTS</code> to be <code>123</code>. That is basic, no idea about <code>$0</code>, <code>$1</code> right now xD</p>
 <p>Important: Project skills override personal skills when skill name is duplicated!</p>
 <p>Conclusion: custom command = skill = shortcut for instruction!</p>
@@ -170,7 +190,33 @@
 <p>Note: Permission setup can be little confused or taking time, but only need 1 time setup.</p>
 <hr>
 <h1>Hooks and the SDK</h1>
-<p>Time to sleep. Still have <code>Hooks and the SDK</code> to do.</p>
+<h3>Hooks</h3>
+<p>Run a command before or after Claude Code does something. Optionally can block Claude's action.</p>
+<p><img alt="Hooks" src="./images/2026/04/04.png"></p>
+<p>There are some hooks type: <code>PreToolUse</code> (Hooks that run before a tool is called), <code>PostToolUse</code> (Hooks that after before a tool is called)</p>
+<p>Defination, same for skill if can be global, project or project but not gonna commit.</p>
+<p><img alt="Hooks Definitions" src="./images/2026/04/04.png"></p>
+<p>I would give a sample setting for <code>PostToolUse</code> in my Go projects: <a href="https://github.com/BlackMetalz/kienlt-scripts/blob/main/claude-settings/go-project.json#L70">Full in here</a> . </p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;hooks&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;PostToolUse&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;matcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Write|Edit|MultiEdit&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;hooks&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;command&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;f=$(jq -r &#39;(.tool_input.file_path // .tool_input.edits[0].file_path // empty)&#39; | grep &#39;\\.go$&#39;); if [ -n \&quot;$f\&quot; ] &amp;&amp; [ -f \&quot;$f\&quot; ]; then (goimports -w \&quot;$f\&quot; 2&gt;/dev/null || gofmt -w \&quot;$f\&quot;) &amp;&amp; (cd \&quot;$(dirname \&quot;$f\&quot;)\&quot; &amp;&amp; go vet ./... 2&gt;&amp;1 | head -10); fi || true&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;timeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;statusMessage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Refining Go code (fmt + vet)...&quot;</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+
+<p>So it will format (go fmt) and do static analysis tool (go vet). After any of tool in matcher list (Write|Edit|MultiEdit) was used. It can be Claude fix bug before telling us it is finished.</p>
+<p>The course did too good to explain, here is why:</p>
+<p><img alt="Hooks" src="./images/2026/04/06.png"></p>
 
 
              

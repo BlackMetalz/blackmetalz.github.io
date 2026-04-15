@@ -16,6 +16,26 @@
 &lt;li&gt;Project: &lt;code&gt;.claude/skills/&amp;lt;skill-name-here&amp;gt;/SKILL.md&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;Personal (for global): &lt;code&gt;~/.claude/skills/&amp;lt;skill-name-here&amp;gt;/SKILL.md&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;You can take a look here: &lt;a href="https://github.com/anthropics/skills"&gt;https://github.com/anthropics/skills&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Example skill defination that I take from link above: &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;---
+name: my-skill-name
+description: A clear description of what this skill does and when to use it
+---
+
+# My Skill Name
+
+[Add your instructions here that Claude will follow when this skill is active]
+
+## Examples
+- Example usage 1
+- Example usage 2
+
+## Guidelines
+- Guideline 1
+- Guideline 2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;It does support argument which already mentioned in course: &lt;code&gt;$ARGUMENTS&lt;/code&gt; in markdown file. Example: &lt;code&gt;/holy-fuck 123&lt;/code&gt; will replace &lt;code&gt;$ARGUMENTS&lt;/code&gt; to be &lt;code&gt;123&lt;/code&gt;. That is basic, no idea about &lt;code&gt;$0&lt;/code&gt;, &lt;code&gt;$1&lt;/code&gt; right now xD&lt;/p&gt;
 &lt;p&gt;Important: Project skills override personal skills when skill name is duplicated!&lt;/p&gt;
 &lt;p&gt;Conclusion: custom command = skill = shortcut for instruction!&lt;/p&gt;
@@ -91,7 +111,33 @@
 &lt;p&gt;Note: Permission setup can be little confused or taking time, but only need 1 time setup.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Hooks and the SDK&lt;/h1&gt;
-&lt;p&gt;Time to sleep. Still have &lt;code&gt;Hooks and the SDK&lt;/code&gt; to do.&lt;/p&gt;</content><category term="Knowledge Base"/><category term="claude"/></entry><entry><title>Containers Are Just Linux Primitives: Namespaces, Cgroups, OverlayFS, and Podman</title><link href="https://blackmetalz.github.io/containers-are-just-linux-primitives-namespaces-cgroups-overlayfs-and-podman.html" rel="alternate"/><published>2026-03-23T00:00:00+07:00</published><updated>2026-03-23T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-23:/containers-are-just-linux-primitives-namespaces-cgroups-overlayfs-and-podman.html</id><summary type="html"/><content type="html">&lt;p&gt;Containers Are Just &lt;strong&gt;&lt;a href="https://www.youtube.com/watch?v=7CKCWqUkMJ4"&gt;Linux process&lt;/a&gt;&lt;/strong&gt; (or process tree).&lt;/p&gt;
+&lt;h3&gt;Hooks&lt;/h3&gt;
+&lt;p&gt;Run a command before or after Claude Code does something. Optionally can block Claude's action.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Hooks" src="./images/2026/04/04.png"&gt;&lt;/p&gt;
+&lt;p&gt;There are some hooks type: &lt;code&gt;PreToolUse&lt;/code&gt; (Hooks that run before a tool is called), &lt;code&gt;PostToolUse&lt;/code&gt; (Hooks that after before a tool is called)&lt;/p&gt;
+&lt;p&gt;Defination, same for skill if can be global, project or project but not gonna commit.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Hooks Definitions" src="./images/2026/04/04.png"&gt;&lt;/p&gt;
+&lt;p&gt;I would give a sample setting for &lt;code&gt;PostToolUse&lt;/code&gt; in my Go projects: &lt;a href="https://github.com/BlackMetalz/kienlt-scripts/blob/main/claude-settings/go-project.json#L70"&gt;Full in here&lt;/a&gt; . &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;hooks&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;PostToolUse&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;matcher&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Write|Edit|MultiEdit&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;hooks&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;
+&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;type&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;command&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;command&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;f=$(jq -r &amp;#39;(.tool_input.file_path // .tool_input.edits[0].file_path // empty)&amp;#39; | grep &amp;#39;\\.go$&amp;#39;); if [ -n \&amp;quot;$f\&amp;quot; ] &amp;amp;&amp;amp; [ -f \&amp;quot;$f\&amp;quot; ]; then (goimports -w \&amp;quot;$f\&amp;quot; 2&amp;gt;/dev/null || gofmt -w \&amp;quot;$f\&amp;quot;) &amp;amp;&amp;amp; (cd \&amp;quot;$(dirname \&amp;quot;$f\&amp;quot;)\&amp;quot; &amp;amp;&amp;amp; go vet ./... 2&amp;gt;&amp;amp;1 | head -10); fi || true&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;timeout&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;&amp;quot;statusMessage&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Refining Go code (fmt + vet)...&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;So it will format (go fmt) and do static analysis tool (go vet). After any of tool in matcher list (Write|Edit|MultiEdit) was used. It can be Claude fix bug before telling us it is finished.&lt;/p&gt;
+&lt;p&gt;The course did too good to explain, here is why:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Hooks" src="./images/2026/04/06.png"&gt;&lt;/p&gt;</content><category term="Knowledge Base"/><category term="claude"/></entry><entry><title>Containers Are Just Linux Primitives: Namespaces, Cgroups, OverlayFS, and Podman</title><link href="https://blackmetalz.github.io/containers-are-just-linux-primitives-namespaces-cgroups-overlayfs-and-podman.html" rel="alternate"/><published>2026-03-23T00:00:00+07:00</published><updated>2026-03-23T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-03-23:/containers-are-just-linux-primitives-namespaces-cgroups-overlayfs-and-podman.html</id><summary type="html"/><content type="html">&lt;p&gt;Containers Are Just &lt;strong&gt;&lt;a href="https://www.youtube.com/watch?v=7CKCWqUkMJ4"&gt;Linux process&lt;/a&gt;&lt;/strong&gt; (or process tree).&lt;/p&gt;
 &lt;p&gt;It is a combination of &lt;strong&gt;Linux primitives&lt;/strong&gt;. I would call these the &lt;strong&gt;3 common Linux primitives used by containers&lt;/strong&gt;:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;strong&gt;Namespaces&lt;/strong&gt; for isolation&lt;/li&gt;
