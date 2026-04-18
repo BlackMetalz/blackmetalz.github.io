@@ -462,7 +462,18 @@ nsenter<span class="w"> </span>-t<span class="w"> </span><span class="nv">$PID</
 <p>On top of that, if we had multiple nodes, <strong>Pods on different nodes still cannot communicate with each other</strong> because there is no cross-node routing or overlay network configured.</p>
 <p>To get a fully functional K8s network where system components thrive and cross-node traffic succeeds, we need a more complete networking stack: a CNI implementation that satisfies the Kubernetes network model plus the components responsible for Service handling and cross-node traffic.</p>
 <p>Understanding how CNI operates "by hand" will take the fear out of networking errors. In the next post, we'll see how a real-world CNI like <strong>Cilium</strong> levels up this game using <strong>eBPF</strong>.</p>
-<p><strong>References:</strong></p>
+<hr>
+<h2>5. Simple flow for creating a pod</h2>
+<p>When we submit a request to create a pod to the API Server:</p>
+<ul>
+<li>Kubelet watch API Server via watch mechanism, see the fucking pod has been scheduled to Kubelet's node, then pull the pod spec to handle pod creation.</li>
+<li>Kubelet calls the CRI plugin (e.g., Containerd) to create a container. Note: CRI (Container Runtime Interface) is the interface, Containerd is one implementation of it.</li>
+<li>Containerd finishes creating the container and calls the CNI binary for network setup.</li>
+<li>The runtime passes config (JSON) via stdin + network info via env vars.</li>
+<li>CNI binary processes the config, sets up networking, and returns the result via stdout (JSON).</li>
+</ul>
+<hr>
+<h2>References:</h2>
 <ul>
 <li><a href="https://www.cni.dev/docs/spec/#cni-operations">CNI Operations Spec</a></li>
 <li><a href="https://kind.sigs.k8s.io/docs/user/quick-start/">Kind Quick Start Guide</a></li>

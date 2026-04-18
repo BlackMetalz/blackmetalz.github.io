@@ -318,6 +318,38 @@ description: A clear description of what this skill does and when to use it
 </code></pre></div>
 
 <p>You might be curious about <code>exit 2</code>. This isn't just a generic error code — in Claude Code hooks, exit code <code>2</code> is a special convention: it <strong>blocks</strong> the action and pipes stderr back to Claude so it knows why it was blocked. Other non-zero codes (1, 3, ...) only show a warning without blocking. So <code>exit 2</code> is the magic number for "stop, don't do this".</p>
+<h3>Useful Hooks</h3>
+<p>Holy fucking shit, in this section I realized I understood it before with my previous Go project. </p>
+<p>Here is an example taken from course</p>
+<p><img alt="Useful hooks" src="./images/2026/04/10.png"></p>
+<p>And here is a real example I used for Go project:</p>
+<p><a href="https://github.com/BlackMetalz/kienlt-scripts/blob/main/claude-settings/go-project.json#L71">https://github.com/BlackMetalz/kienlt-scripts/blob/main/claude-settings/go-project.json#L71</a></p>
+<p>And for more useful hooks, please visit the course: <a href="https://anthropic.skilljar.com/claude-code-in-action/312427">https://anthropic.skilljar.com/claude-code-in-action/312427</a></p>
+<h3>Claude Code SDK</h3>
+<p>Ohh, fun section to watch. So as I understand, it is same as using CLI but integrated into your code.</p>
+<ul>
+<li>CLI: <code>claude -p "Why I'm so bad at coding, thinking?"</code></li>
+<li>With SDK:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">anthropic_claude_code</span> <span class="k">as</span> <span class="nn">sdk</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">sdk</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;Why I&#39;m so bad at coding, thinking?&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p>So we can make a reflection with k8s or put it in k8s terms:</p>
+<ul>
+<li>CLI = <code>kubectl</code></li>
+<li>SDK = <a href="https://github.com/kubernetes/client-go">client-go</a> library</li>
+</ul>
+<p>Here is picture taken from the course, really great to explain how SDK works for me xD</p>
+<p><img alt="SDK" src="./images/2026/04/11.png"></p>
+<h1>Quiz</h1>
+<p>I finished the quiz with 1st try, I personally think I understand 30-40% the course content (I was using claude code a lot before take this course xD)</p>
+<p><img alt="Quiz" src="./images/2026/04/12.png"></p>
+<h1>Conclusion</h1>
+<p>Learn this course and it won't waste your time, believe me xD</p>
+<p>Btw, my older brother told me: First, understand what we need AI to do and why. Then choose the right technology and optimize it. Don't just throw random skills and workflows at AI — instead, open the right doors so AI can easily access context and help us validate whether we're doing the right thing</p>
+<p>Example: If you need AI to test and fix API endpoints, you could write an MCP Server for that API. The agent can then understand its features and test it easily.</p>
 
 
              
