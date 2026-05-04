@@ -1,0 +1,24 @@
+Mermaid js
+
+```
+flowchart TD
+    A["push code → aks-lab-app/main"] -->|trigger| B
+
+    subgraph B["Stage Build"]
+        B1["docker build & push"]
+    end
+
+    B -->|"tag = $(Build.BuildId)"| ACR["ACR"]
+    B --> C
+
+    subgraph C["Stage UpdateGitOps"]
+        C1["clone gitops repo"]
+        C2["yq image.tag = newId"]
+        C3["git commit + push"]
+        C1 --> C2 --> C3
+    end
+
+    C -->|push| GITOPS["aks-lab-gitops/main"]
+    GITOPS --> D["ArgoCD auto-sync"]
+    D --> E["Pod with new image running"]
+```
