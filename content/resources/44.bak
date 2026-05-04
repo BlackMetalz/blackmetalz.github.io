@@ -1,0 +1,31 @@
+### Mermaid overview
+
+```
+flowchart TB
+    laptop["💻 Laptop (kubectl)"]
+    inet1((Internet))
+    api["AKS API Server<br/>(Azure managed control plane)<br/>Free tier — no node"]
+
+    subgraph snet["snet-aks (10.10.1.0/24)"]
+        node["AKS Node<br/>Standard_D2s_v3 (2 vCPU)"]
+        ksys["kube-system pods"]
+        upods["user pods (nginx demo)"]
+        node --- ksys
+        node --- upods
+    end
+
+    acr["ACR (Basic SKU)<br/>AKS auth via ACR role"]
+
+    laptop -->|"HTTPS :443<br/>allowlist IP"| inet1
+    inet1 --> api
+    api -->|"kubelet, image pull"| node
+    node -->|"image pull via<br/>managed identity"| acr
+
+    inet2((Internet))
+    slb["Standard Load Balancer<br/>(auto create by Service type=LoadBalancer)"]
+    pnginx["Pod nginx (cluster IP)"]
+
+    inet2 --> slb
+    slb --> pnginx
+
+```
