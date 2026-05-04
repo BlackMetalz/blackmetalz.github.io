@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="azure, devops, Knowledge Base, " />
+
+<meta property="og:title" content="My experience on learning Azure Devops - Part 1: ACR + AKS "/>
+<meta property="og:url" content="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-1-acr-aks.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2026-05-04T00:00:00+07:00" />
+<meta name="twitter:title" content="My experience on learning Azure Devops - Part 1: ACR + AKS ">
+<meta name="twitter:description" content="">
+
+        <title>My experience on learning Azure Devops - Part 1: ACR + AKS  · Kienlt&#39;s notebook
+</title>
+        <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://blackmetalz.github.io/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://blackmetalz.github.io
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://blackmetalz.github.io/categories.html">Categories</a></li>
+                                <li ><a href="https://blackmetalz.github.io/tags.html">Tags</a></li>
+                                <li ><a href="https://blackmetalz.github.io/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://blackmetalz.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-1-acr-aks.html">
+                My experience on learning Azure Devops - Part 1: ACR + AKS
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h1>Introduction</h1>
+<p>I was tried to learn Azure to prepare for certification AZ-104, but really get bored while watching video in Udemy course. So I decide to learn a real project from basic to a little level higher than basic xD (not really advanced)</p>
+<hr>
+<h1>Prerequisite</h1>
+<p>This is not introduction to Azure so I'm assume you have little knowledge related to Azure with following sections:</p>
+<ul>
+<li>Azure CLI!</li>
+<li>VNet (Virtual Network): Subnet, NSG (Network Security Group)...</li>
+<li>Azure Container Registry (ACR)</li>
+<li>Kubernetes Service (AKS)</li>
+<li>and so on...</li>
+</ul>
+<p>Also I'm using trial account with 200$ credit and very very limit resource quota for this lab!</p>
+<p><code>Standard_D2s_v3</code> is only SKU I can use for this lab. </p>
+<hr>
+<h1>Resource Creation</h1>
+<h3>Step 1: create resource group</h3>
+<p>Azure Resource Group(RG) is a logical container that holds related resources (VMs, databases, web apps) for an Azure solution. When you delete a RG, all resource in that RG will gone, remember this xD</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>group<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>rg-aks-lab<span class="w"> </span>-l<span class="w"> </span>southeastasia<span class="w"> </span>--tags<span class="w"> </span><span class="nv">Project</span><span class="o">=</span>aks-lab<span class="w"> </span><span class="nv">Owner</span><span class="o">=</span>kien<span class="w"> </span><span class="nv">Environment</span><span class="o">=</span>lab
+</code></pre></div>
+
+<h3>Step 2: Create VNet + subnet for AKS</h3>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>network<span class="w"> </span>vnet<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-n<span class="w"> </span>vnet-aks<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--location<span class="w"> </span>southeastasia<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--address-prefix<span class="w"> </span><span class="m">10</span>.10.0.0/16<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--subnet-name<span class="w"> </span>snet-aks<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--subnet-prefix<span class="w"> </span><span class="m">10</span>.10.1.0/24<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--tags<span class="w"> </span><span class="nv">Project</span><span class="o">=</span>aks-lab<span class="w"> </span><span class="nv">Owner</span><span class="o">=</span>kien<span class="w"> </span><span class="nv">Environment</span><span class="o">=</span>lab
+</code></pre></div>
+
+<p>subnet <code>snet-aks: 10.10.1.0/24</code> I'm gonna use for AKS.</p>
+<p>Verify subnet creation:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>network<span class="w"> </span>vnet<span class="w"> </span>subnet<span class="w"> </span>list<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--vnet-name<span class="w"> </span>vnet-aks<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--query<span class="w"> </span><span class="s2">&quot;[].{Name:name, CIDR:addressPrefix}&quot;</span><span class="w"> </span>-o<span class="w"> </span>table
+<span class="c1"># Expected output</span>
+Name<span class="w">      </span>CIDR
+--------<span class="w">  </span>------------
+snet-aks<span class="w">  </span><span class="m">10</span>.10.1.0/24
+</code></pre></div>
+
+<p>Save Subnet ID in a variable</p>
+<div class="highlight"><pre><span></span><code><span class="nv">SUBNET_ID</span><span class="o">=</span><span class="k">$(</span>az<span class="w"> </span>network<span class="w"> </span>vnet<span class="w"> </span>subnet<span class="w"> </span>show<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--vnet-name<span class="w"> </span>vnet-aks<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-n<span class="w"> </span>snet-aks<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--query<span class="w"> </span>id<span class="w"> </span>-o<span class="w"> </span>tsv<span class="k">)</span>
+</code></pre></div>
+
+<h3>Step 3: Create ACR</h3>
+<p>Generate unique name:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">ACR_NAME</span><span class="o">=</span><span class="s2">&quot;acrakslab</span><span class="nv">$RANDOM</span><span class="s2">&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;ACR name will be: </span><span class="nv">$ACR_NAME</span><span class="s2">&quot;</span>
+<span class="c1"># ACR name will be: acrakslab20546</span>
+</code></pre></div>
+
+<p>Create ACR Basic:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>acr<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-n<span class="w"> </span><span class="nv">$ACR_NAME</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--sku<span class="w"> </span>Basic<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--location<span class="w"> </span>southeastasia<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--tags<span class="w"> </span><span class="nv">Project</span><span class="o">=</span>aks-lab<span class="w"> </span><span class="nv">Owner</span><span class="o">=</span>kien<span class="w"> </span><span class="nv">Environment</span><span class="o">=</span>lab
+</code></pre></div>
+
+<p>Show ACR Info:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>acr<span class="w"> </span>show<span class="w"> </span>-n<span class="w"> </span><span class="nv">$ACR_NAME</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--query<span class="w"> </span><span class="s2">&quot;{name:name, loginServer:loginServer, sku:sku.name, status:provisioningState}&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>jsonc
+</code></pre></div>
+
+<p>Expected output of ACR info:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;loginServer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;acrakslab20546.azurecr.io&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;acrakslab20546&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;sku&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Basic&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Succeeded&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>For login later to container registry:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">ACR_LOGIN_SERVER</span><span class="o">=</span><span class="k">$(</span>az<span class="w"> </span>acr<span class="w"> </span>show<span class="w"> </span>-n<span class="w"> </span><span class="nv">$ACR_NAME</span><span class="w"> </span>--query<span class="w"> </span>loginServer<span class="w"> </span>-o<span class="w"> </span>tsv<span class="k">)</span>
+</code></pre></div>
+
+<p>Test login container registry:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>acr<span class="w"> </span>login<span class="w"> </span>-n<span class="w"> </span><span class="nv">$ACR_NAME</span>
+<span class="c1"># Login Succeeded</span>
+</code></pre></div>
+
+<h3>Step 4: Create AKS</h3>
+<p>Make sure Microsoft.ContainerService registered for subscription</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>provider<span class="w"> </span>register<span class="w"> </span>--namespace<span class="w"> </span>Microsoft.ContainerService
+az<span class="w"> </span>provider<span class="w"> </span>register<span class="w"> </span>--namespace<span class="w"> </span>Microsoft.ContainerRegistry
+</code></pre></div>
+
+<p>Verify by:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>provider<span class="w"> </span>show<span class="w"> </span>-n<span class="w"> </span>Microsoft.ContainerService<span class="w"> </span>--query<span class="w"> </span>registrationState<span class="w"> </span>-o<span class="w"> </span>tsv
+</code></pre></div>
+
+<p>Get your public IP for whitelist access to K8s api server:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">MYIP</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://api.ipify.org<span class="k">)</span>
+</code></pre></div>
+
+<p>Create AKS command:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--resource-group<span class="w"> </span>rg-aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--location<span class="w"> </span>southeastasia<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--tier<span class="w"> </span>free<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--kubernetes-version<span class="w"> </span><span class="m">1</span>.35.0<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--node-count<span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--node-vm-size<span class="w"> </span>Standard_D2s_v3<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--vnet-subnet-id<span class="w"> </span><span class="nv">$SUBNET_ID</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--network-plugin<span class="w"> </span>azure<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--network-plugin-mode<span class="w"> </span>overlay<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pod-cidr<span class="w"> </span><span class="m">10</span>.244.0.0/16<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--service-cidr<span class="w"> </span><span class="m">10</span>.20.0.0/16<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--dns-service-ip<span class="w"> </span><span class="m">10</span>.20.0.10<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--enable-managed-identity<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--attach-acr<span class="w"> </span><span class="nv">$ACR_NAME</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--api-server-authorized-ip-ranges<span class="w"> </span><span class="nv">$MYIP</span>/32<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--generate-ssh-keys<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--tags<span class="w"> </span><span class="nv">Project</span><span class="o">=</span>aks-lab<span class="w"> </span><span class="nv">Owner</span><span class="o">=</span>kien<span class="w"> </span><span class="nv">Environment</span><span class="o">=</span>lab
+</code></pre></div>
+
+<blockquote>
+<p>Note regarding <code>--network-plugin azure --network-plugin-mode overlay</code>: This is <strong>Azure CNI Overlay</strong>, different from regular Azure CNI (each pod occupies 1 IP from the VNet subnet). Overlay mode uses its own <code>--pod-cidr</code> (10.244.0.0/16) so pods don't consume IPs from the <code>snet-aks</code> subnet → saving IPs, allowing for easy scaling of multiple pods without worrying about running out of subnet IPs. Suitable for small labs and production.</p>
+</blockquote>
+<p>If there something fucked up related to version of k8s: <code>az aks get-versions -l southeastasia</code> try to change to other version (latest for example!). It will tooks about 5-10 minutes</p>
+<p>Verify by:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>show<span class="w"> </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span>-n<span class="w"> </span>aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--query<span class="w"> </span><span class="s2">&quot;{name:name, state:provisioningState, k8s:kubernetesVersion}&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>jsonc
+<span class="c1"># Expected output</span>
+<span class="o">{</span>
+<span class="w">  </span><span class="s2">&quot;k8s&quot;</span>:<span class="w"> </span><span class="s2">&quot;1.35.0&quot;</span>,
+<span class="w">  </span><span class="s2">&quot;name&quot;</span>:<span class="w"> </span><span class="s2">&quot;aks-lab&quot;</span>,
+<span class="w">  </span><span class="s2">&quot;state&quot;</span>:<span class="w"> </span><span class="s2">&quot;Succeeded&quot;</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>K8S cluster Info:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>show<span class="w"> </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span>-n<span class="w"> </span>aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--query<span class="w"> </span><span class="s2">&quot;{name:name, fqdn:fqdn, k8s:kubernetesVersion, nodeRG:nodeResourceGroup, identity:identity.type}&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>jsonc
+</code></pre></div>
+
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;fqdn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aks-lab-rg-aks-lab-6ffa29-svgtoxzi.hcp.southeastasia.azmk8s.io&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SystemAssigned&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;k8s&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.35.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aks-lab&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;nodeRG&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MC_rg-aks-lab_aks-lab_southeastasia&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<blockquote>
+<p>Note: AKS auto created 1 RG named MC_<rg><em><aks></em><region> that contains VM, NSG, LB, Public IP. Don't touch this fucking RG, AKS will delete this auto when we delete AKS</p>
+</blockquote>
+<p>Check role assignment in ACR:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">ACR_ID</span><span class="o">=</span><span class="k">$(</span>az<span class="w"> </span>acr<span class="w"> </span>show<span class="w"> </span>-n<span class="w"> </span><span class="nv">$ACR_NAME</span><span class="w"> </span>--query<span class="w"> </span>id<span class="w"> </span>-o<span class="w"> </span>tsv<span class="k">)</span>
+az<span class="w"> </span>role<span class="w"> </span>assignment<span class="w"> </span>list<span class="w"> </span>--scope<span class="w"> </span><span class="nv">$ACR_ID</span><span class="w"> </span>-o<span class="w"> </span>table<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>AcrPull
+<span class="c1"># Output</span>
+.....Microsoft.ContainerRegistry/registries/acrakslab20546
+</code></pre></div>
+
+<p>If in this scenario, <strong>--attach-acr</strong> not working, you can run:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>update<span class="w"> </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span>-n<span class="w"> </span>aks-lab<span class="w"> </span>--attach-acr<span class="w"> </span><span class="nv">$ACR_NAME</span>
+</code></pre></div>
+
+<p>Verify:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>get-credentials<span class="w"> </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span>-n<span class="w"> </span>aks-lab
+<span class="c1"># Merged &quot;aks-lab&quot; as current context in /Users/kienlt/.kube/config</span>
+<span class="c1"># kctx installed here: https://github.com/BlackMetalz/ChgK8sCtx</span>
+kctx
+<span class="c1"># Using default kubeconfig path: /Users/kienlt/.kube/config</span>
+<span class="c1"># ✔ aks-lab(current-context)</span>
+<span class="c1"># You already selected this context!</span>
+k<span class="w"> </span>get<span class="w"> </span>nodes
+<span class="c1"># NAME                                STATUS   ROLES    AGE     VERSION</span>
+<span class="c1"># aks-nodepool1-22202873-vmss000000   Ready    &lt;none&gt;   7m23s   v1.35.0</span>
+</code></pre></div>
+
+<p>Here is overview after created above resources:</p>
+<p><img alt="overview" src="./images/2026/05/01.png"></p>
+<p>Architecture diagram (network flow):</p>
+<h2><img alt="diagram" src="./images/2026/05/03.png"></h2>
+<h1>Deploy, Interact with K8S cluster</h1>
+<h3>Step 5: kubectl + ACR build/push</h3>
+<p>Here is demo repo of mine after a lot of modify: <a href="https://gitlab.com/devops-azure/aks-lab-app">https://gitlab.com/devops-azure/aks-lab-app</a> but I updated a lot to final version so you only see 1 init commit.</p>
+<p>Build local because <code>az acr build</code> will not work on trial subscription. And why I used to build multiple platform? because I'm using Mac to build, not Ubuntu (linux/amd64)</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>acr<span class="w"> </span>login<span class="w"> </span>-n<span class="w"> </span><span class="nv">$ACR_NAME</span>
+<span class="c1"># Login Succeeded</span>
+docker<span class="w"> </span>buildx<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--platform<span class="w"> </span>linux/amd64,linux/arm64<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--tag<span class="w"> </span><span class="nv">$ACR_LOGIN_SERVER</span>/hello-aks:v1<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--tag<span class="w"> </span><span class="nv">$ACR_LOGIN_SERVER</span>/hello-aks:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--push<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>.
+</code></pre></div>
+
+<p>Verify by: <code>az acr repository show-tags -n $ACR_NAME --repository hello-aks -o table</code></p>
+<div class="highlight"><pre><span></span><code>Result
+--------
+latest
+v1
+</code></pre></div>
+
+<p>Verify via Portal:</p>
+<p><img alt="acr portal" src="./images/2026/05/02.png"></p>
+<h3>Step 6: Deploy APP into AKS</h3>
+<p>Go to folder <code>aks-lab-app</code> and deploy manifests: </p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>manifests
+k<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span><span class="m">01</span>.deploy.yaml
+</code></pre></div>
+
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code>k<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>-owide
+NAME<span class="w">                        </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE<span class="w">   </span>IP<span class="w">             </span>NODE<span class="w">                                </span>NOMINATED<span class="w"> </span>NODE<span class="w">   </span>READINESS<span class="w"> </span>GATES
+hello-aks-58d5fbc6b-8krf4<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>24s<span class="w">   </span><span class="m">10</span>.244.0.155<span class="w">   </span>aks-nodepool1-22202873-vmss000000<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+hello-aks-58d5fbc6b-gqxrz<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>26s<span class="w">   </span><span class="m">10</span>.244.0.167<span class="w">   </span>aks-nodepool1-22202873-vmss000000<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+hello-aks-58d5fbc6b-j2qdl<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>22s<span class="w">   </span><span class="m">10</span>.244.0.132<span class="w">   </span>aks-nodepool1-22202873-vmss000000<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+</code></pre></div>
+
+<h3>Step 7 — Expose app via LoadBalancer Service (We can skip this section)</h3>
+<p><code>svc.yaml</code> manifest:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-aks</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-aks</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">      </span><span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TCP</span>
+</code></pre></div>
+
+<p>Verify Azure resource created:</p>
+<ul>
+<li>Public IP for LoadBalancer in nodeRG: </li>
+</ul>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>network<span class="w"> </span>public-ip<span class="w"> </span>list<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-g<span class="w"> </span>MC_rg-aks-lab_aks-lab_southeastasia<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--query<span class="w"> </span><span class="s2">&quot;[].{name:name, ip:ipAddress, sku:sku.name}&quot;</span><span class="w"> </span>-o<span class="w"> </span>table
+<span class="c1"># output (2 rows)</span>
+Name<span class="w">                                         </span>Ip<span class="w">             </span>Sku
+-------------------------------------------<span class="w">  </span>-------------<span class="w">  </span>--------
+</code></pre></div>
+
+<ul>
+<li>Standard LB:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>network<span class="w"> </span>lb<span class="w"> </span>list<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-g<span class="w"> </span>MC_rg-aks-lab_aks-lab_southeastasia<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--query<span class="w"> </span><span class="s2">&quot;[].{name:name, sku:sku.name, frontends:frontendIpConfigurations[].name}&quot;</span><span class="w"> </span>-o<span class="w"> </span>table
+
+Name<span class="w">        </span>Sku
+----------<span class="w">  </span>--------
+kubernetes<span class="w">  </span>Standard
+</code></pre></div>
+
+<p>Get external IP to test: </p>
+<div class="highlight"><pre><span></span><code><span class="nv">EXTERNAL_IP</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>get<span class="w"> </span>svc<span class="w"> </span>hello-aks<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.loadBalancer.ingress[0].ip}&#39;</span><span class="k">)</span>
+</code></pre></div>
+
+<p>Testing time:</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">{</span><span class="m">1</span>..6<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;--- Request </span><span class="nv">$i</span><span class="s2"> ---&quot;</span>
+<span class="w">    </span>curl<span class="w"> </span>-s<span class="w"> </span>http://<span class="nv">$EXTERNAL_IP</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;pod\&quot;&gt;&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/&lt;[^&gt;]*&gt;//g&#39;</span>
+<span class="w">  </span><span class="k">done</span>
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">1</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-lgt2w
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">2</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-lgt2w
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">3</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-bljl8
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">4</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-bljl8
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">5</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-bljl8
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">6</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-th8tp
+</code></pre></div>
+
+<h3>Step 8 - Scale AKS worker node</h3>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>nodepool<span class="w"> </span>scale<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--resource-group<span class="w"> </span>rg-aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--cluster-name<span class="w"> </span>aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--name<span class="w"> </span>nodepool1<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--node-count<span class="w"> </span><span class="m">2</span>
+</code></pre></div>
+
+<p>Verify:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+NAME<span class="w">                                </span>STATUS<span class="w">   </span>ROLES<span class="w">    </span>AGE<span class="w">    </span>VERSION
+aks-nodepool1-22202873-vmss000000<span class="w">   </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">   </span>121m<span class="w">   </span>v1.35.0
+aks-nodepool1-22202873-vmss000001<span class="w">   </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">   </span>14m<span class="w">    </span>v1.35.0
+</code></pre></div>
+
+<p>Test again with 10 pods:</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">{</span><span class="m">1</span>..10<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;--- Request </span><span class="nv">$i</span><span class="s2"> ---&quot;</span>
+<span class="w">    </span>curl<span class="w"> </span>-s<span class="w"> </span>http://<span class="nv">$EXTERNAL_IP</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;pod\&quot;&gt;&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/&lt;[^&gt;]*&gt;//g&#39;</span>
+<span class="w">  </span><span class="k">done</span>
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">1</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-75ppz
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">2</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-9956v
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">3</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-v5fmt
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">4</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-9956v
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">5</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-v5fmt
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">6</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-bwcz5
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">7</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-75ppz
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">8</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-v5fmt
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">9</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-7js52
+---<span class="w"> </span>Request<span class="w"> </span><span class="m">10</span><span class="w"> </span>---
+hello-aks-7fd4ff6c4f-th8tp
+</code></pre></div>
+
+<h3>Step 9 - Static IP for Service (Skip this section also, same reason for step 7)</h3>
+<div class="highlight"><pre><span></span><code><span class="nv">NODE_RG</span><span class="o">=</span><span class="k">$(</span>az<span class="w"> </span>aks<span class="w"> </span>show<span class="w"> </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span>-n<span class="w"> </span>aks-lab<span class="w"> </span>--query<span class="w"> </span>nodeResourceGroup<span class="w"> </span>-o<span class="w"> </span>tsv<span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Node RG: </span><span class="nv">$NODE_RG</span><span class="s2">&quot;</span>
+az<span class="w"> </span>network<span class="w"> </span>public-ip<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-g<span class="w"> </span><span class="nv">$NODE_RG</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-n<span class="w"> </span>pip-hello-aks<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--location<span class="w"> </span>southeastasia<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--sku<span class="w"> </span>Standard<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--allocation-method<span class="w"> </span>Static
+
+<span class="nv">STATIC_IP</span><span class="o">=</span><span class="k">$(</span>az<span class="w"> </span>network<span class="w"> </span>public-ip<span class="w"> </span>show<span class="w"> </span>-g<span class="w"> </span><span class="nv">$NODE_RG</span><span class="w"> </span>-n<span class="w"> </span>pip-hello-aks<span class="w"> </span>--query<span class="w"> </span>ipAddress<span class="w"> </span>-o<span class="w"> </span>tsv<span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Static IP: </span><span class="nv">$STATIC_IP</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<p>Manifest:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Service</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-aks</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">service.beta.kubernetes.io/azure-load-balancer-resource-group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MC_rg-aks-lab_aks-lab_southeastasia</span>
+<span class="w">    </span><span class="nt">service.beta.kubernetes.io/azure-pip-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip-hello-aks</span>
+<span class="w">    </span><span class="c1"># Bonus: provide DNS Azure</span>
+<span class="w">    </span><span class="nt">service.beta.kubernetes.io/azure-dns-label-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-aks-kien</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">LoadBalancer</span>
+<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-aks</span>
+<span class="w">  </span><span class="nt">ports</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<span class="w">      </span><span class="nt">targetPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+
+<p>Apply: <code>k apply -f svc-static.yaml</code></p>
+<p>This is example, for better example we could use Ingress Nginx</p>
+<h1>AKS App Routing - Nginx Ingress</h1>
+<h3>Step 10 - AKS App Routing (Practical for ingress)</h3>
+<p>Enable it by:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>approuting<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span>-n<span class="w"> </span>aks-lab
+</code></pre></div>
+
+<p>Verify:</p>
+<div class="highlight"><pre><span></span><code>k<span class="w"> </span>get<span class="w"> </span>pod<span class="w"> </span>-n<span class="w"> </span>app-routing-system
+NAME<span class="w">                     </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE
+nginx-78ff99b4ff-h6f7t<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>3m57s
+nginx-78ff99b4ff-wjq2t<span class="w">   </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>4m11s
+</code></pre></div>
+
+<blockquote>
+<p>Note: The delete <code>pip-hello-aks</code> section below only applies if you perform Step 9 (static IP for the service). If you skip Step 9, you will always skip this cleanup.</p>
+</blockquote>
+<p>Need to delete previous public-ip created for LB:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># List first</span>
+az<span class="w"> </span>network<span class="w"> </span>public-ip<span class="w"> </span>list<span class="w"> </span>-g<span class="w"> </span><span class="nv">$NODE_RG</span><span class="w"> </span>-o<span class="w"> </span>table
+Name<span class="w">                                         </span>ResourceGroup<span class="w">                        </span>Location<span class="w">       </span>Zones<span class="w">    </span>Address<span class="w">        </span>IdleTimeoutInMinutes<span class="w">    </span>ProvisioningState
+-------------------------------------------<span class="w">  </span>-----------------------------------<span class="w">  </span>-------------<span class="w">  </span>-------<span class="w">  </span>-------------<span class="w">  </span>----------------------<span class="w">  </span>-------------------
+e8da99b3-8a95-4685-aa9e-8949a9d7f39b<span class="w">         </span>MC_rg-aks-lab_aks-lab_southeastasia<span class="w">  </span>southeastasia<span class="w">  </span><span class="m">213</span><span class="w">      </span><span class="m">20</span>.10.10.1<span class="w">     </span><span class="m">4</span><span class="w">                       </span>Succeeded
+kubernetes-afdc67b3ca4d3445ba9d6beeaeed1884<span class="w">  </span>mc_rg-aks-lab_aks-lab_southeastasia<span class="w">  </span>southeastasia<span class="w">  </span><span class="m">213</span><span class="w">      </span><span class="m">20</span>.10.10.2<span class="w">     </span><span class="m">4</span><span class="w">                       </span>Succeeded
+pip-hello-aks<span class="w">                                </span>MC_rg-aks-lab_aks-lab_southeastasia<span class="w">  </span>southeastasia<span class="w">           </span><span class="m">20</span>.10.10.3<span class="w">     </span><span class="m">4</span><span class="w">                       </span>Succeeded
+</code></pre></div>
+
+<p>We should delete <code>pip-hello-aks</code> which we created via svc: <code>k delete svc hello-aks</code></p>
+<p>Check it attached to anything:</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>network<span class="w"> </span>public-ip<span class="w"> </span>show<span class="w"> </span>-g<span class="w"> </span><span class="nv">$NODE_RG</span><span class="w"> </span>-n<span class="w"> </span>pip-hello-aks<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--query<span class="w"> </span><span class="s2">&quot;{name:name, ip:ipAddress, attachedTo:ipConfiguration}&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>jsonc
+<span class="o">{</span>
+<span class="w">  </span><span class="s2">&quot;attachedTo&quot;</span>:<span class="w"> </span>null,
+<span class="w">  </span><span class="s2">&quot;ip&quot;</span>:<span class="w"> </span><span class="s2">&quot;20.10.10.3&quot;</span>,
+<span class="w">  </span><span class="s2">&quot;name&quot;</span>:<span class="w"> </span><span class="s2">&quot;pip-hello-aks&quot;</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>Ok, null. Time to delete: <code>az network public-ip delete -g $NODE_RG -n pip-hello-aks</code></p>
+<p>Make static public IP in nodeRG.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">NODE_RG</span><span class="o">=</span><span class="k">$(</span>az<span class="w"> </span>aks<span class="w"> </span>show<span class="w"> </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span>-n<span class="w"> </span>aks-lab<span class="w"> </span>--query<span class="w"> </span>nodeResourceGroup<span class="w"> </span>-o<span class="w"> </span>tsv<span class="k">)</span>
+az<span class="w"> </span>network<span class="w"> </span>public-ip<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-g<span class="w"> </span><span class="nv">$NODE_RG</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-n<span class="w"> </span>pip-ingress<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--location<span class="w"> </span>southeastasia<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--sku<span class="w"> </span>Standard<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--allocation-method<span class="w"> </span>Static<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--dns-name<span class="w"> </span>hello-aks-kienlt
+
+<span class="nv">INGRESS_IP</span><span class="o">=</span><span class="k">$(</span>az<span class="w"> </span>network<span class="w"> </span>public-ip<span class="w"> </span>show<span class="w"> </span>-g<span class="w"> </span><span class="nv">$NODE_RG</span><span class="w"> </span>-n<span class="w"> </span>pip-ingress<span class="w"> </span>--query<span class="w"> </span>ipAddress<span class="w"> </span>-o<span class="w"> </span>tsv<span class="k">)</span>
+<span class="nv">INGRESS_FQDN</span><span class="o">=</span><span class="k">$(</span>az<span class="w"> </span>network<span class="w"> </span>public-ip<span class="w"> </span>show<span class="w"> </span>-g<span class="w"> </span><span class="nv">$NODE_RG</span><span class="w"> </span>-n<span class="w"> </span>pip-ingress<span class="w"> </span>--query<span class="w"> </span>dnsSettings.fqdn<span class="w"> </span>-o<span class="w"> </span>tsv<span class="k">)</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Static IP:   </span><span class="nv">$INGRESS_IP</span><span class="s2">&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Azure FQDN:  </span><span class="nv">$INGRESS_FQDN</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<p>Configure App Routing to use this Static IP by creating <code>nginx-ingress.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">approuting.kubernetes.azure.com/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NginxIngressController</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webapprouting.kubernetes.azure.com</span>
+<span class="w">  </span><span class="nt">controllerNamePrefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nginx</span>
+<span class="w">  </span><span class="nt">loadBalancerAnnotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">service.beta.kubernetes.io/azure-load-balancer-resource-group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MC_rg-aks-lab_aks-lab_southeastasia</span>
+<span class="w">    </span><span class="nt">service.beta.kubernetes.io/azure-pip-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip-ingress</span>
+</code></pre></div>
+
+<p><code>ingress.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="w">  </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="w">  </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-aks</span>
+<span class="w">    </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">nginx.ingress.kubernetes.io/rewrite-target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">  </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webapprouting.kubernetes.azure.com</span>
+<span class="w">    </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kienlt.com</span><span class="w">    </span><span class="c1"># Your domain here.</span>
+<span class="w">        </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">              </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">              </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">                  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hello-aks</span>
+<span class="w">                  </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">                    </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</code></pre></div>
+
+<p>Apply the configuration:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>nginx-ingress.yaml
+</code></pre></div>
+
+<p>Ok. Make a CNAME via Azure FQDN then test</p>
+<h3>Step 11 - Whitelist IP access to API Server</h3>
+<p>There is no fucking NSG for managed K8S, check which address currently allowed</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>show<span class="w"> </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span>-n<span class="w"> </span>aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--query<span class="w"> </span><span class="s2">&quot;apiServerAccessProfile&quot;</span><span class="w"> </span>-o<span class="w"> </span>jsonc
+</code></pre></div>
+
+<p>Create a fake rule then test you can not connect to API Server via kubectl</p>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>update<span class="w"> </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span>-n<span class="w"> </span>aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--api-server-authorized-ip-ranges<span class="w"> </span><span class="s2">&quot;1.2.3.4/32&quot;</span>
+</code></pre></div>
+
+<p>Restore rule:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">MYIP</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://api.ipify.org<span class="k">)</span>
+az<span class="w"> </span>aks<span class="w"> </span>update<span class="w"> </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span>-n<span class="w"> </span>aks-lab<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--api-server-authorized-ip-ranges<span class="w"> </span><span class="nv">$MYIP</span>/32
+</code></pre></div>
+
+<h1>Conclusion</h1>
+<p>This is not complete article like have no mistake, this is just what I want to save steps I did while learning Azure.</p>
+<p>I personal think this step is great for me, who have no fucking idea about Azure before (Never touch or create account in Azure xD)</p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2026-05-04T00:00:00+07:00">Mon 04 May 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://blackmetalz.github.io/tags.html#azure-ref">azure
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#devops-ref">devops
+                    <span class="superscript">2</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://blackmetalz.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
