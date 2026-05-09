@@ -79,10 +79,10 @@
         <div class="span8 offset2 article-content">
             
             <h1>Introduction</h1>
-<p>I was tried to learn Azure to prepare for certification AZ-104, but really get bored while watching video in Udemy course. So I decide to learn a real project from basic to a little level higher than basic xD (not really advanced)</p>
+<p>I tried to learn Azure to prepare for certification AZ-104, but I really got bored while watching videos in the Udemy course. So I decided to learn a real project from basic to a little level higher than basic xD (not really advanced)</p>
 <hr>
 <h1>Prerequisite</h1>
-<p>This is not introduction to Azure so I'm assume you have little knowledge related to Azure with following sections:</p>
+<p>This is not an introduction to Azure, so I'm assuming you have little knowledge related to Azure with the following sections:</p>
 <ul>
 <li>Azure CLI!</li>
 <li>VNet (Virtual Network): Subnet, NSG (Network Security Group)...</li>
@@ -90,12 +90,12 @@
 <li>Kubernetes Service (AKS)</li>
 <li>and so on...</li>
 </ul>
-<p>Also I'm using trial account with 200$ credit and very very limit resource quota for this lab!</p>
+<p>Also, I'm using a trial account with 200$ credit and a very, very limited resource quota for this lab!</p>
 <p><code>Standard_D2s_v3</code> is only SKU I can use for this lab. </p>
 <hr>
 <h1>Resource Creation</h1>
 <h3>Step 1: create resource group</h3>
-<p>Azure Resource Group(RG) is a logical container that holds related resources (VMs, databases, web apps) for an Azure solution. When you delete a RG, all resource in that RG will gone, remember this xD</p>
+<p>Azure Resource Group(RG) is a logical container that holds related resources (VMs, databases, web apps) for an Azure solution. When you delete a RG, all resources in that RG will be gone, remember this xD</p>
 <div class="highlight"><pre><span></span><code>az<span class="w"> </span>group<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>rg-aks-lab<span class="w"> </span>-l<span class="w"> </span>southeastasia<span class="w"> </span>--tags<span class="w"> </span><span class="nv">Project</span><span class="o">=</span>aks-lab<span class="w"> </span><span class="nv">Owner</span><span class="o">=</span>kien<span class="w"> </span><span class="nv">Environment</span><span class="o">=</span>lab
 </code></pre></div>
 
@@ -110,7 +110,7 @@
 <span class="w">    </span>--tags<span class="w"> </span><span class="nv">Project</span><span class="o">=</span>aks-lab<span class="w"> </span><span class="nv">Owner</span><span class="o">=</span>kien<span class="w"> </span><span class="nv">Environment</span><span class="o">=</span>lab
 </code></pre></div>
 
-<p>subnet <code>snet-aks: 10.10.1.0/24</code> I'm gonna use for AKS.</p>
+<p>subnet <code>snet-aks: 10.10.1.0/24</code> I'm gonna use it for AKS.</p>
 <p>Verify subnet creation:</p>
 <div class="highlight"><pre><span></span><code>az<span class="w"> </span>network<span class="w"> </span>vnet<span class="w"> </span>subnet<span class="w"> </span>list<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span><span class="se">\</span>
@@ -131,7 +131,7 @@ snet-aks<span class="w">  </span><span class="m">10</span>.10.1.0/24
 </code></pre></div>
 
 <h3>Step 3: Create ACR</h3>
-<p>Generate unique name:</p>
+<p>Generate a unique name:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">ACR_NAME</span><span class="o">=</span><span class="s2">&quot;acrakslab</span><span class="nv">$RANDOM</span><span class="s2">&quot;</span>
 <span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;ACR name will be: </span><span class="nv">$ACR_NAME</span><span class="s2">&quot;</span>
 <span class="c1"># ACR name will be: acrakslab20546</span>
@@ -161,7 +161,7 @@ snet-aks<span class="w">  </span><span class="m">10</span>.10.1.0/24
 <span class="p">}</span>
 </code></pre></div>
 
-<p>For login later to container registry:</p>
+<p>For login later to the container registry:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">ACR_LOGIN_SERVER</span><span class="o">=</span><span class="k">$(</span>az<span class="w"> </span>acr<span class="w"> </span>show<span class="w"> </span>-n<span class="w"> </span><span class="nv">$ACR_NAME</span><span class="w"> </span>--query<span class="w"> </span>loginServer<span class="w"> </span>-o<span class="w"> </span>tsv<span class="k">)</span>
 </code></pre></div>
 
@@ -384,7 +384,7 @@ aks-nodepool1-22202873-vmss000000<span class="w">   </span>Ready<span class="w">
 aks-nodepool1-22202873-vmss000001<span class="w">   </span>Ready<span class="w">    </span>&lt;none&gt;<span class="w">   </span>14m<span class="w">    </span>v1.35.0
 </code></pre></div>
 
-<p>Test again with 10 pods:</p>
+<p>Test again with 10 pods (after I scale up):</p>
 <div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">{</span><span class="m">1</span>..10<span class="o">}</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
 <span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;--- Request </span><span class="nv">$i</span><span class="s2"> ---&quot;</span>
 <span class="w">    </span>curl<span class="w"> </span>-s<span class="w"> </span>http://<span class="nv">$EXTERNAL_IP</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;pod\&quot;&gt;&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/&lt;[^&gt;]*&gt;//g&#39;</span>
@@ -445,7 +445,7 @@ az<span class="w"> </span>network<span class="w"> </span>public-ip<span class="w
 </code></pre></div>
 
 <p>Apply: <code>k apply -f svc-static.yaml</code></p>
-<p>This is example, for better example we could use Ingress Nginx</p>
+<p>This is an example. For a better example, we could use Ingress Nginx</p>
 <h1>AKS App Routing - Nginx Ingress</h1>
 <h3>Step 10 - AKS App Routing (Practical for ingress)</h3>
 <p>Enable it by:</p>
@@ -462,7 +462,7 @@ nginx-78ff99b4ff-wjq2t<span class="w">   </span><span class="m">1</span>/1<span 
 <blockquote>
 <p>Note: The delete <code>pip-hello-aks</code> section below only applies if you perform Step 9 (static IP for the service). If you skip Step 9, you will always skip this cleanup.</p>
 </blockquote>
-<p>Need to delete previous public-ip created for LB:</p>
+<p>Need to delete the previous public IP created for LB:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># List first</span>
 az<span class="w"> </span>network<span class="w"> </span>public-ip<span class="w"> </span>list<span class="w"> </span>-g<span class="w"> </span><span class="nv">$NODE_RG</span><span class="w"> </span>-o<span class="w"> </span>table
 Name<span class="w">                                         </span>ResourceGroup<span class="w">                        </span>Location<span class="w">       </span>Zones<span class="w">    </span>Address<span class="w">        </span>IdleTimeoutInMinutes<span class="w">    </span>ProvisioningState
@@ -541,9 +541,9 @@ az<span class="w"> </span>network<span class="w"> </span>public-ip<span class="w
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>nginx-ingress.yaml
 </code></pre></div>
 
-<p>Ok. Make a CNAME via Azure FQDN then test</p>
+<p>Ok. Make a CNAME via Azure FQDN, then test</p>
 <h3>Step 11 - Whitelist IP access to API Server</h3>
-<p>There is no fucking NSG for managed K8S, check which address currently allowed</p>
+<p>There is no fucking NSG for managed K8S, check which address is currently allowed</p>
 <div class="highlight"><pre><span></span><code>az<span class="w"> </span>aks<span class="w"> </span>show<span class="w"> </span>-g<span class="w"> </span>rg-aks-lab<span class="w"> </span>-n<span class="w"> </span>aks-lab<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--query<span class="w"> </span><span class="s2">&quot;apiServerAccessProfile&quot;</span><span class="w"> </span>-o<span class="w"> </span>jsonc
 </code></pre></div>
@@ -559,9 +559,10 @@ az<span class="w"> </span>aks<span class="w"> </span>update<span class="w"> </sp
 <span class="w">    </span>--api-server-authorized-ip-ranges<span class="w"> </span><span class="nv">$MYIP</span>/32
 </code></pre></div>
 
+<hr>
 <h1>Conclusion</h1>
-<p>This is not complete article like have no mistake, this is just what I want to save steps I did while learning Azure.</p>
-<p>I personal think this step is great for me, who have no fucking idea about Azure before (Never touch or create account in Azure xD)</p>
+<p>This is not a complete article like have no mistake, this is just what I want to save the steps I did while learning Azure.</p>
+<p>I personally think this step is great for me, who has no fucking idea about Azure before (Never touched or created an account in Azure xD)</p>
 
 
              

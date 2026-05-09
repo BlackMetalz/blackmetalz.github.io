@@ -106,11 +106,34 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-n<span class="w"> <
 <span class="nb">echo</span><span class="w"> </span><span class="nv">$INGRESS_IP</span>
 </code></pre></div>
 
-<p>Apply manifest for argocd ingress: <code>k apply -f 02-devops-azure/argocd-ingress.yaml</code></p>
+<p>Manifest for argocd-ingress.yaml:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ingress</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd-server</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">nginx.ingress.kubernetes.io/backend-protocol</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;HTTPS&quot;</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webapprouting.kubernetes.azure.com</span>
+<span class="w">  </span><span class="nt">rules</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd.kienlt.com</span>
+<span class="w">    </span><span class="nt">http</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span>
+<span class="w">        </span><span class="nt">pathType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Prefix</span>
+<span class="w">        </span><span class="nt">backend</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">service</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd-server</span>
+<span class="w">            </span><span class="nt">port</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">number</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">443</span>
+</code></pre></div>
+
+<p>Apply manifest for argocd ingress: <code>k apply -f argocd-ingress.yaml</code></p>
 <hr>
 <h1>Step 2: Azure Repos + Helm chart + ArgoCD Application</h1>
 <h3>Create Azure DevOps org + project</h3>
-<p>Create new Org with your current subscription</p>
+<p>Create a new Org with your current subscription</p>
 <p><img alt="New Org" src="./images/2026/05/devops/01.png"></p>
 <p>New project <code>aks-lab</code></p>
 <p><img alt="Create ORG" src="./images/2026/05/devops/02.png"></p>
@@ -119,9 +142,9 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-n<span class="w"> <
 <p><img alt="Create new repos" src="./images/2026/05/devops/04.png"></p>
 <p>Oke, we have 2 new ones plus 1 default xD</p>
 <p><img alt="All repos" src="./images/2026/05/devops/05.png"></p>
-<p>Next we need to setup ssh key for clone without credential xD. Local dev = git clone via SSH. But pipeline needs PAT because self-hosted agent / ArgoCD need HTTPS auth!</p>
+<p>Next, we need to setup ssh key for cloning without credentials xD. Local dev = git clone via SSH. But the pipeline needs PAT because the self-hosted agent / ArgoCD needs HTTPS auth!</p>
 <p><img alt="Add sshkey" src="./images/2026/05/devops/06.png"></p>
-<p>Then clone it, pretty same like other git providers xD</p>
+<p>Then clone it, pretty much the same as other git providers xD</p>
 <div class="highlight"><pre><span></span><code>kienlt@Luongs-MacBook-Pro<span class="w"> </span>dev.azure.com<span class="w"> </span>%<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>git@ssh.dev.azure.com:v3/kienltqn/aks-lab/aks-lab-app
 Cloning<span class="w"> </span>into<span class="w"> </span><span class="s1">&#39;aks-lab-app&#39;</span>...
 Warning:<span class="w"> </span>Permanently<span class="w"> </span>added<span class="w"> </span><span class="s1">&#39;ssh.dev.azure.com&#39;</span><span class="w"> </span><span class="o">(</span>RSA<span class="o">)</span><span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>known<span class="w"> </span>hosts.
@@ -130,7 +153,7 @@ remote:<span class="w"> </span>Found<span class="w"> </span><span class="m">3</s
 Receiving<span class="w"> </span>objects:<span class="w"> </span><span class="m">100</span>%<span class="w"> </span><span class="o">(</span><span class="m">3</span>/3<span class="o">)</span>,<span class="w"> </span><span class="k">done</span>.
 </code></pre></div>
 
-<p>And our repo will have following files from previous project</p>
+<p>And our repo will have the following files from the previous project</p>
 <div class="highlight"><pre><span></span><code>kienlt@Luongs-MacBook-Pro<span class="w"> </span>aks-lab-app<span class="w"> </span>%<span class="w"> </span>ll
 total<span class="w"> </span><span class="m">32</span>
 drwxr-xr-x@<span class="w">  </span><span class="m">8</span><span class="w"> </span>kienlt<span class="w">  </span>staff<span class="w">  </span><span class="m">256</span><span class="w">  </span><span class="m">3</span><span class="w"> </span>May<span class="w"> </span><span class="m">10</span>:05<span class="w"> </span>.
@@ -149,8 +172,8 @@ drwxr-xr-x@<span class="w"> </span><span class="m">8</span><span class="w"> </sp
 -rw-r--r--@<span class="w"> </span><span class="m">1</span><span class="w"> </span>kienlt<span class="w">  </span>staff<span class="w">  </span><span class="m">516</span><span class="w">  </span><span class="m">3</span><span class="w"> </span>May<span class="w"> </span><span class="m">10</span>:03<span class="w"> </span><span class="m">02</span>.ingress.yaml
 </code></pre></div>
 
-<h3>Helm chart and gitops</h3>
-<p>Next clone gitops repo: </p>
+<h3>Helm chart and GitOps</h3>
+<p>Next, clone GitOps repo: </p>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>git@ssh.dev.azure.com:v3/kienltqn/aks-lab/aks-lab-gitops
 Cloning<span class="w"> </span>into<span class="w"> </span><span class="s1">&#39;aks-lab-gitops&#39;</span>...
 remote:<span class="w"> </span>Azure<span class="w"> </span>Repos
@@ -158,7 +181,7 @@ remote:<span class="w"> </span>Found<span class="w"> </span><span class="m">3</s
 Receiving<span class="w"> </span>objects:<span class="w"> </span><span class="m">100</span>%<span class="w"> </span><span class="o">(</span><span class="m">3</span>/3<span class="o">)</span>,<span class="w"> </span><span class="k">done</span>.
 </code></pre></div>
 
-<p>And then we have very very basic....</p>
+<p>And then we have very, very basic....</p>
 <div class="highlight"><pre><span></span><code>aks-lab-gitops/
 └── charts/
     └── hello-aks/
@@ -239,7 +262,7 @@ ingress.networking.k8s.io<span class="w"> </span><span class="s2">&quot;hello-ak
 </code></pre></div>
 
 <h3>ArgoCD</h3>
-<p>We need to create PAT (Personal Access Token) to give Argocd permission to sync...</p>
+<p>We need to create a PAT (Personal Access Token) to give Argocd permission to sync…</p>
 <p><img alt="Create PAT" src="./images/2026/05/devops/07.png"></p>
 <p>Yeah, full access for this fucking demo xD or serious with Scopes: Custom defined → tick Code → Read</p>
 <p><img alt="Full access PAT" src="./images/2026/05/devops/08.png"></p>
@@ -288,14 +311,14 @@ curl<span class="w"> </span>-sI<span class="w"> </span>-u<span class="w"> </span
 <hr>
 <h1>Step 3: Azure Pipeline build -&gt; push ACR -&gt; bump tag GitOps</h1>
 <h3>Create Service Connection for ACR</h3>
-<p>Pipeline needs to auth into ACR to push image. The recommended way is Service connection using Service Principal.</p>
+<p>Pipeline needs to authenticate into ACR to push the image. The recommended way is Service connection using Service Principal</p>
 <p>Project Settings --&gt; Service Connections --&gt; New Service Connections --&gt; Docker Registry</p>
 <p><img alt="Create service connection" src="./images/2026/05/devops/12.png"></p>
 <p>After that: </p>
 <ul>
 <li>Registry type: Azure Container Registry</li>
 <li>Authentication Type: Service Principal</li>
-<li>Subscription: pick subscription that contains ACR</li>
+<li>Subscription: pick a subscription that contains ACR</li>
 <li>Azure container registry: your ACR</li>
 <li>Service connection name: acr-aks-lab</li>
 <li>Grant access permission to all pipelines</li>
@@ -303,8 +326,8 @@ curl<span class="w"> </span>-sI<span class="w"> </span>-u<span class="w"> </span
 <p><img alt="Grant Service Connection" src="./images/2026/05/devops/13.png"></p>
 <p>Output:</p>
 <p><img alt="Output" src="./images/2026/05/devops/14.png"></p>
-<h3>Grant access for Build Service push into gitops repo</h3>
-<p>Project Settings -&gt; Repositories -&gt; aks-lab-gitops -&gt; tab Security -&gt; find user like: aks-lab Build Service (kienltqn). Then set following permission to "Allow"
+<h3>Grant access for the Build Service push into the GitOps repo</h3>
+<p>Project Settings -&gt; Repositories -&gt; aks-lab-gitops -&gt; tab Security -&gt; find user like: aks-lab Build Service (kienltqn). Then set the following permission to "Allow"
 - Contribute
 - Create branch</p>
 <p><img alt="Output" src="./images/2026/05/devops/15.png"></p>
@@ -423,7 +446,7 @@ curl<span class="w"> </span>-sI<span class="w"> </span>-u<span class="w"> </span
 <li>Expiration: 90 days</li>
 <li>Scopes: Custom defined → Agent Pools → tick Read &amp; manage</li>
 </ul>
-<h3>Install and config agent in local mac</h3>
+<h3>Install and configure the agent on a local Mac</h3>
 <p><img alt="Install and config agent" src="./images/2026/05/devops/20.png"></p>
 <p>Need to run: <code>brew install docker-buildx</code> for Mac Local and symlink</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.docker/cli-plugins
@@ -431,45 +454,45 @@ ln<span class="w"> </span>-sfn<span class="w"> </span><span class="k">$(</span>b
 <span class="w">        </span>~/.docker/cli-plugins/docker-buildx
 </code></pre></div>
 
-<p>Follow instruction and finally, we have following thing below, remember PAT is what we just created above.</p>
-<div class="highlight"><pre><span></span><code><span class="n">kienlt</span><span class="err">@</span><span class="n">Luongs</span><span class="o">-</span><span class="n">MacBook</span><span class="o">-</span><span class="n">Pro</span><span class="w"> </span><span class="n">azp</span><span class="o">-</span><span class="n">agent</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="o">./</span><span class="n">config</span><span class="o">.</span><span class="n">sh</span>
+<p>Follow the instructions, and finally, we have the following thing below. Remember PAT is what we just created above.</p>
+<div class="highlight"><pre><span></span><code>kienlt@Luongs-MacBook-Pro<span class="w"> </span>azp-agent<span class="w"> </span>%<span class="w"> </span>./config.sh
 
-<span class="w">  </span><span class="n">___</span><span class="w">                      </span><span class="n">______</span><span class="w"> </span><span class="n">_</span><span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="n">_</span>
-<span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">_</span><span class="w"> </span>\<span class="w">                     </span><span class="o">|</span><span class="w"> </span><span class="n">___</span><span class="w"> </span><span class="p">(</span><span class="n">_</span><span class="p">)</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
-<span class="o">/</span><span class="w"> </span><span class="o">/</span><span class="n">_</span>\<span class="w"> </span>\<span class="n">_____</span><span class="w">   </span><span class="n">_</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="n">__</span><span class="w"> </span><span class="n">___</span><span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="n">_</span><span class="o">/</span><span class="w"> </span><span class="o">/</span><span class="n">_</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="n">__</span><span class="w">   </span><span class="n">___</span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="n">_</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="n">__</span><span class="w">   </span><span class="n">___</span><span class="w">  </span><span class="n">___</span>
-<span class="o">|</span><span class="w">  </span><span class="n">_</span><span class="w">  </span><span class="o">|</span><span class="n">_</span><span class="w">  </span><span class="o">/</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;__/ _ \ |  __/| | &#39;</span><span class="n">_</span><span class="w"> </span>\<span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">_</span><span class="w"> </span>\<span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s1">&#39;_ \ / _ \/ __|</span>
-<span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|/</span><span class="w"> </span><span class="o">/|</span><span class="w"> </span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w">  </span><span class="n">__</span><span class="o">/</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w">   </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w">  </span><span class="n">__</span><span class="o">/</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="w">  </span><span class="n">__</span><span class="o">/</span>\<span class="n">__</span><span class="w"> </span>\
-\<span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="n">_</span><span class="o">/</span><span class="n">___</span><span class="o">|</span>\<span class="n">__</span><span class="p">,</span><span class="n">_</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w">  </span>\<span class="n">___</span><span class="o">|</span><span class="w"> </span>\<span class="n">_</span><span class="o">|</span><span class="w">   </span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="o">.</span><span class="n">__</span><span class="o">/</span><span class="w"> </span>\<span class="n">___</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="o">|</span><span class="n">_</span><span class="o">|</span>\<span class="n">___</span><span class="o">||</span><span class="n">___</span><span class="o">/</span>
-<span class="w">                                   </span><span class="o">|</span><span class="w"> </span><span class="o">|</span>
-<span class="w">        </span><span class="n">agent</span><span class="w"> </span><span class="n">v4</span><span class="o">.</span><span class="mf">272.0</span><span class="w">             </span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w">          </span><span class="p">(</span><span class="n">commit</span><span class="w"> </span><span class="mf">491e611</span><span class="p">)</span>
+<span class="w">  </span>___<span class="w">                      </span>______<span class="w"> </span>_<span class="w">            </span>_<span class="w"> </span>_
+<span class="w"> </span>/<span class="w"> </span>_<span class="w"> </span><span class="se">\ </span><span class="w">                    </span><span class="p">|</span><span class="w"> </span>___<span class="w"> </span><span class="o">(</span>_<span class="o">)</span><span class="w">          </span><span class="p">|</span><span class="w"> </span><span class="o">(</span>_<span class="o">)</span>
+/<span class="w"> </span>/_<span class="se">\ \_</span>____<span class="w">   </span>_<span class="w"> </span>_<span class="w"> </span>__<span class="w"> </span>___<span class="w">  </span><span class="p">|</span><span class="w"> </span><span class="p">|</span>_/<span class="w"> </span>/_<span class="w"> </span>_<span class="w"> </span>__<span class="w">   </span>___<span class="p">|</span><span class="w"> </span><span class="p">|</span>_<span class="w"> </span>_<span class="w"> </span>__<span class="w">   </span>___<span class="w">  </span>___
+<span class="p">|</span><span class="w">  </span>_<span class="w">  </span><span class="p">|</span>_<span class="w">  </span>/<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="s1">&#39;__/ _ \ |  __/| | &#39;</span>_<span class="w"> </span><span class="se">\ </span>/<span class="w"> </span>_<span class="w"> </span><span class="se">\ </span><span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="err">&#39;</span>_<span class="w"> </span><span class="se">\ </span>/<span class="w"> </span>_<span class="w"> </span><span class="se">\/</span><span class="w"> </span>__<span class="p">|</span>
+<span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="p">|</span>/<span class="w"> </span>/<span class="p">|</span><span class="w"> </span><span class="p">|</span>_<span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w">  </span>__/<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w">   </span><span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="p">|</span>_<span class="o">)</span><span class="w"> </span><span class="p">|</span><span class="w">  </span>__/<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="p">|</span><span class="w">  </span>__/<span class="se">\_</span>_<span class="w"> </span><span class="se">\</span>
+<span class="se">\_</span><span class="p">|</span><span class="w"> </span><span class="p">|</span>_/___<span class="p">|</span><span class="se">\_</span>_,_<span class="p">|</span>_<span class="p">|</span><span class="w">  </span><span class="se">\_</span>__<span class="p">|</span><span class="w"> </span><span class="se">\_</span><span class="p">|</span><span class="w">   </span><span class="p">|</span>_<span class="p">|</span><span class="w"> </span>.__/<span class="w"> </span><span class="se">\_</span>__<span class="p">|</span>_<span class="p">|</span>_<span class="p">|</span>_<span class="p">|</span><span class="w"> </span><span class="p">|</span>_<span class="p">|</span><span class="se">\_</span>__<span class="o">||</span>___/
+<span class="w">                                   </span><span class="p">|</span><span class="w"> </span><span class="p">|</span>
+<span class="w">        </span>agent<span class="w"> </span>v4.272.0<span class="w">             </span><span class="p">|</span>_<span class="p">|</span><span class="w">          </span><span class="o">(</span>commit<span class="w"> </span>491e611<span class="o">)</span>
 
 
-<span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">End</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="n">License</span><span class="w"> </span><span class="n">Agreements</span><span class="p">:</span>
+&gt;&gt;<span class="w"> </span>End<span class="w"> </span>User<span class="w"> </span>License<span class="w"> </span>Agreements:
 
-<span class="n">Building</span><span class="w"> </span><span class="n">sources</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">TFVC</span><span class="w"> </span><span class="n">repository</span><span class="w"> </span><span class="n">requires</span><span class="w"> </span><span class="n">accepting</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Team</span><span class="w"> </span><span class="n">Explorer</span><span class="w"> </span><span class="n">Everywhere</span><span class="w"> </span><span class="n">End</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="n">License</span><span class="w"> </span><span class="n">Agreement</span><span class="o">.</span><span class="w"> </span><span class="n">This</span><span class="w"> </span><span class="n">step</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">required</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">building</span><span class="w"> </span><span class="n">sources</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">Git</span><span class="w"> </span><span class="n">repositories</span><span class="o">.</span>
+Building<span class="w"> </span>sources<span class="w"> </span>from<span class="w"> </span>a<span class="w"> </span>TFVC<span class="w"> </span>repository<span class="w"> </span>requires<span class="w"> </span>accepting<span class="w"> </span>the<span class="w"> </span>Team<span class="w"> </span>Explorer<span class="w"> </span>Everywhere<span class="w"> </span>End<span class="w"> </span>User<span class="w"> </span>License<span class="w"> </span>Agreement.<span class="w"> </span>This<span class="w"> </span>step<span class="w"> </span>is<span class="w"> </span>not<span class="w"> </span>required<span class="w"> </span><span class="k">for</span><span class="w"> </span>building<span class="w"> </span>sources<span class="w"> </span>from<span class="w"> </span>Git<span class="w"> </span>repositories.
 
-<span class="n">A</span><span class="w"> </span><span class="n">copy</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Team</span><span class="w"> </span><span class="n">Explorer</span><span class="w"> </span><span class="n">Everywhere</span><span class="w"> </span><span class="n">license</span><span class="w"> </span><span class="n">agreement</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">found</span><span class="w"> </span><span class="n">at</span><span class="p">:</span>
-<span class="w">  </span><span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">kienlt</span><span class="o">/</span><span class="n">azp</span><span class="o">-</span><span class="n">agent</span><span class="o">/</span><span class="n">license</span><span class="o">.</span><span class="n">html</span>
+A<span class="w"> </span>copy<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>Team<span class="w"> </span>Explorer<span class="w"> </span>Everywhere<span class="w"> </span>license<span class="w"> </span>agreement<span class="w"> </span>can<span class="w"> </span>be<span class="w"> </span>found<span class="w"> </span>at:
+<span class="w">  </span>/Users/kienlt/azp-agent/license.html
 
-<span class="n">Enter</span><span class="w"> </span><span class="p">(</span><span class="n">Y</span><span class="o">/</span><span class="n">N</span><span class="p">)</span><span class="w"> </span><span class="n">Accept</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Team</span><span class="w"> </span><span class="n">Explorer</span><span class="w"> </span><span class="n">Everywhere</span><span class="w"> </span><span class="n">license</span><span class="w"> </span><span class="n">agreement</span><span class="w"> </span><span class="n">now</span><span class="err">?</span><span class="w"> </span><span class="p">(</span><span class="n">press</span><span class="w"> </span><span class="n">enter</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">N</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">Y</span>
+Enter<span class="w"> </span><span class="o">(</span>Y/N<span class="o">)</span><span class="w"> </span>Accept<span class="w"> </span>the<span class="w"> </span>Team<span class="w"> </span>Explorer<span class="w"> </span>Everywhere<span class="w"> </span>license<span class="w"> </span>agreement<span class="w"> </span>now?<span class="w"> </span><span class="o">(</span>press<span class="w"> </span>enter<span class="w"> </span><span class="k">for</span><span class="w"> </span>N<span class="o">)</span><span class="w"> </span>&gt;<span class="w"> </span>Y
 
-<span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">Connect</span><span class="p">:</span>
+&gt;&gt;<span class="w"> </span>Connect:
 
-<span class="n">Enter</span><span class="w"> </span><span class="n">server</span><span class="w"> </span><span class="n">URL</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">dev</span><span class="o">.</span><span class="n">azure</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">kienltqn</span>
-<span class="n">Enter</span><span class="w"> </span><span class="n">authentication</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="p">(</span><span class="n">press</span><span class="w"> </span><span class="n">enter</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">PAT</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">PAT</span>
-<span class="n">Enter</span><span class="w"> </span><span class="n">personal</span><span class="w"> </span><span class="n">access</span><span class="w"> </span><span class="n">token</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">************************************************************************************</span>
-<span class="n">Connecting</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">server</span><span class="w"> </span><span class="o">...</span>
+Enter<span class="w"> </span>server<span class="w"> </span>URL<span class="w"> </span>&gt;<span class="w"> </span>https://dev.azure.com/kienltqn
+Enter<span class="w"> </span>authentication<span class="w"> </span><span class="nb">type</span><span class="w"> </span><span class="o">(</span>press<span class="w"> </span>enter<span class="w"> </span><span class="k">for</span><span class="w"> </span>PAT<span class="o">)</span><span class="w"> </span>&gt;<span class="w"> </span>PAT
+Enter<span class="w"> </span>personal<span class="w"> </span>access<span class="w"> </span>token<span class="w"> </span>&gt;<span class="w"> </span>************************************************************************************
+Connecting<span class="w"> </span>to<span class="w"> </span>server<span class="w"> </span>...
 
-<span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">Register</span><span class="w"> </span><span class="n">Agent</span><span class="p">:</span>
+&gt;&gt;<span class="w"> </span>Register<span class="w"> </span>Agent:
 
-<span class="n">Enter</span><span class="w"> </span><span class="n">agent</span><span class="w"> </span><span class="n">pool</span><span class="w"> </span><span class="p">(</span><span class="n">press</span><span class="w"> </span><span class="n">enter</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">default</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">local</span><span class="o">-</span><span class="n">mac</span>
-<span class="n">Enter</span><span class="w"> </span><span class="n">agent</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">(</span><span class="n">press</span><span class="w"> </span><span class="n">enter</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Luongs</span><span class="o">-</span><span class="n">MacBook</span><span class="o">-</span><span class="n">Pro</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span>
-<span class="n">Scanning</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">tool</span><span class="w"> </span><span class="n">capabilities</span><span class="o">.</span>
-<span class="n">Connecting</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">server</span><span class="o">.</span>
-<span class="n">Successfully</span><span class="w"> </span><span class="n">added</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">agent</span>
-<span class="n">Testing</span><span class="w"> </span><span class="n">agent</span><span class="w"> </span><span class="n">connection</span><span class="o">.</span>
-<span class="n">Enter</span><span class="w"> </span><span class="n">work</span><span class="w"> </span><span class="n">folder</span><span class="w"> </span><span class="p">(</span><span class="n">press</span><span class="w"> </span><span class="n">enter</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">_work</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span>
-<span class="mi">2026</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">03</span><span class="w"> </span><span class="mi">10</span><span class="p">:</span><span class="mi">38</span><span class="p">:</span><span class="mi">46</span><span class="n">Z</span><span class="p">:</span><span class="w"> </span><span class="n">Settings</span><span class="w"> </span><span class="n">Saved</span><span class="o">.</span>
+Enter<span class="w"> </span>agent<span class="w"> </span>pool<span class="w"> </span><span class="o">(</span>press<span class="w"> </span>enter<span class="w"> </span><span class="k">for</span><span class="w"> </span>default<span class="o">)</span><span class="w"> </span>&gt;<span class="w"> </span>local-mac
+Enter<span class="w"> </span>agent<span class="w"> </span>name<span class="w"> </span><span class="o">(</span>press<span class="w"> </span>enter<span class="w"> </span><span class="k">for</span><span class="w"> </span>Luongs-MacBook-Pro<span class="o">)</span><span class="w"> </span>&gt;
+Scanning<span class="w"> </span><span class="k">for</span><span class="w"> </span>tool<span class="w"> </span>capabilities.
+Connecting<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>server.
+Successfully<span class="w"> </span>added<span class="w"> </span>the<span class="w"> </span>agent
+Testing<span class="w"> </span>agent<span class="w"> </span>connection.
+Enter<span class="w"> </span>work<span class="w"> </span>folder<span class="w"> </span><span class="o">(</span>press<span class="w"> </span>enter<span class="w"> </span><span class="k">for</span><span class="w"> </span>_work<span class="o">)</span><span class="w"> </span>&gt;
+<span class="m">2026</span>-05-03<span class="w"> </span><span class="m">10</span>:38:46Z:<span class="w"> </span>Settings<span class="w"> </span>Saved.
 </code></pre></div>
 
 <p>Ok, let's gooooooo:</p>
@@ -523,7 +546,7 @@ Connecting<span class="w"> </span>to<span class="w"> </span>the<span class="w"> 
 <span class="nl">Finishing</span><span class="p">:</span><span class="w"> </span><span class="k">Update</span><span class="w"> </span><span class="k">values</span><span class="p">.</span><span class="n">yaml</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">push</span>
 </code></pre></div>
 
-<p>Time to install yq in my local Mac <code>brew install yq</code>. Remember to delete Environment we created in previous step!</p>
+<p>Time to install yq in my local Mac brew install yq. Remember to delete the environment we created in the previous step!</p>
 <p>Yayyy, finally</p>
 <p><img alt="yooooooo" src="./images/2026/05/devops/26.png"></p>
 <p>Verify in Gitops Repo</p>
