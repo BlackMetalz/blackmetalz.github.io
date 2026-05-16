@@ -8,7 +8,7 @@
 &lt;p&gt;So in this setup ArgoCD is only external component, the rest is managed by Azure!&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Flow chart" src="./images/2026/05/04.png"&gt;&lt;/p&gt;
 &lt;p&gt;I think this is better diagram xD&lt;/p&gt;
-&lt;p&gt;&lt;img alt="Flow chart" src="./images/2026/05/13.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Flow chart" src="./images/2026/05/devops/29.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Step 1: Install ArgoCD&lt;/h1&gt;
 &lt;p&gt;For this fucking lab, no HA — just standalone install.&lt;/p&gt;
