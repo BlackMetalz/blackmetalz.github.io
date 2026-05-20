@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="azure, devops, exam, Knowledge Base, " />
+
+<meta property="og:title" content="[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) "/>
+<meta property="og:url" content="https://blackmetalz.github.io/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2026-05-16T00:00:00+07:00" />
+<meta name="twitter:title" content="[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) ">
+<meta name="twitter:description" content="">
+
+        <title>[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104)  · Kienlt&#39;s notebook
+</title>
+        <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://blackmetalz.github.io/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://blackmetalz.github.io
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://blackmetalz.github.io/categories.html">Categories</a></li>
+                                <li ><a href="https://blackmetalz.github.io/tags.html">Tags</a></li>
+                                <li ><a href="https://blackmetalz.github.io/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://blackmetalz.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://blackmetalz.github.io/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104.html">
+                [WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104)
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>New challenge, acquire all DevOps certifications in 3 popular public cloud providers, Azure is the first target of mine. Let's fucking go!!!</p>
+<p>I will try to refer to AWS as much as I can because AWS is the first cloud I learned.</p>
+<p>This article could contains some wrong information since I'm new to this, correct me if I'm wrong, thanks xD</p>
+<hr>
+<h1>Prepare for the exam</h1>
+<h3>Useful resources:</h3>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/training/paths/az-104-administrator-prerequisites/">https://learn.microsoft.com/en-us/training/paths/az-104-administrator-prerequisites/</a></li>
+<li><a href="https://udemy.com/course/70533-azure/">https://udemy.com/course/70533-azure/</a></li>
+</ul>
+<h3>Some section need to be understand before taking the exam.</h3>
+<ul>
+<li>Domain 1 — Identity &amp; Governance (20–25%)</li>
+<li>Domain 2 — Compute (20–25%)</li>
+<li>Domain 3 — Storage (15–20%)</li>
+<li>Domain 4 — Networking (15–20%)</li>
+<li>Domain 5 — Monitor &amp; Backup (10–15%)</li>
+<li>Exam Tip/Tricks</li>
+<li>Secure Weapons</li>
+</ul>
+<p>Ok, let's take them one by one!</p>
+<hr>
+<h1>Domain 1 - Identity &amp; Governance</h1>
+<h3>Hierarchy</h3>
+<p>We can simply understand it by following (Generated by Sonnet 4.6 xD):</p>
+<p><img alt="Hierarchy" src="./images/2026/05/05.png"></p>
+<h3>RBAC</h3>
+<p>It likes IAM Roles of AWS but can be assign in multiple levels:</p>
+<div class="highlight"><pre><span></span><code>Management Group  →  inherit all belows
+  └── Subscription  →  inherit all Resource Groups belows
+        └── Resource Group  →  inherit all resources belows
+              └── Resource  →  only that resource
+</code></pre></div>
+
+<p>Here are common built-in roles of Azure RBAC:</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Owner</td>
+<td>Full access + assign roles</td>
+</tr>
+<tr>
+<td>Contributor</td>
+<td>Full access, without assign roles</td>
+</tr>
+<tr>
+<td>Reader</td>
+<td>View only</td>
+</tr>
+<tr>
+<td>User Access Administrator</td>
+<td>Manage access only</td>
+</tr>
+</tbody>
+</table>
+<p>Resource reference: 
+<a href="https://learn.microsoft.com/en-us/azure/role-based-access-control/overview">https://learn.microsoft.com/en-us/azure/role-based-access-control/overview</a></p>
+<p>Inheritance: very very very important, assigned 1 time in Management Group, all sub resource inherit.</p>
+<h3>Azure Policy vs IAM Policy</h3>
+<p>Totally different versus AWS IAM Policy. Azure Policy enforce rules on resources, not permissions.</p>
+<table>
+<thead>
+<tr>
+<th>AWS</th>
+<th>Azure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IAM Policy = who can do what</td>
+<td>RBAC = who can do what</td>
+</tr>
+<tr>
+<td>SCP = restrict accounts</td>
+<td>Azure Policy = enforce rules on resources</td>
+</tr>
+</tbody>
+</table>
+<p>Example about Azure Policy:</p>
+<ul>
+<li>VM only created in Southeast Asia.</li>
+<li>Storage Account must enable encryption.</li>
+<li>All resources must have tag <code>Environment</code></li>
+</ul>
+<h3>Management Groups</h3>
+<p>Like AWS Organization, group Subscription for apply policies/RBAC</p>
+<div class="highlight"><pre><span></span><code>Root Management Group
+  ├── Production
+  │     ├── Subscription: prod-app1
+  │     └── Subscription: prod-app2
+  └── Development
+        └── Subscription: dev-sandbox
+</code></pre></div>
+
+<p>Policy/RBAC assigned in Management Group, inherit to all subscription. Easy to understand, right?</p>
+<p>Resource reference: </p>
+<p><a href="https://learn.microsoft.com/en-us/azure/governance/management-groups/overview">https://learn.microsoft.com/en-us/azure/governance/management-groups/overview</a></p>
+<h3>Little concept comparison</h3>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>AWS</th>
+<th>Azure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Identity provider</td>
+<td>IAM</td>
+<td>Entra ID (Azure AD)</td>
+</tr>
+<tr>
+<td>Permissions</td>
+<td>IAM Policies</td>
+<td>RBAC Role Assignments</td>
+</tr>
+<tr>
+<td>Resource rules</td>
+<td>Service Control Policies</td>
+<td>Azure Policies</td>
+</tr>
+<tr>
+<td>Account grouping</td>
+<td>Organizations and Organization Units</td>
+<td>Management Groups</td>
+</tr>
+<tr>
+<td>Billing boundary</td>
+<td>Account</td>
+<td>Subscription</td>
+</tr>
+<tr>
+<td>Resource grouping</td>
+<td>Tags only</td>
+<td>Resource Groups + Tags</td>
+</tr>
+<tr>
+<td>Delete protection</td>
+<td>Termination protection (EC2)</td>
+<td>Resource Locks (any resource)</td>
+</tr>
+</tbody>
+</table>
+<h3>Entra ID (Azure AD) vs AWS IAM</h3>
+<p>B2B: <a href="https://learn.microsoft.com/en-us/entra/external-id/what-is-b2b">Business to Business</a></p>
+<p>B2C: <a href="https://learn.microsoft.com/en-us/azure/active-directory-b2c/overview">Business to Consumer</a></p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>AWS IAM</th>
+<th>Entra ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Built-in MFA</td>
+<td>IAM MFA</td>
+<td>Azure MFA (enforce via Conditional Access)</td>
+</tr>
+<tr>
+<td>SSO to apps</td>
+<td>IAM Identity Center</td>
+<td>Enterprise Apps</td>
+</tr>
+<tr>
+<td>B2B access</td>
+<td>Cross-account roles</td>
+<td>Guest Users</td>
+</tr>
+<tr>
+<td>B2C access</td>
+<td>Cognito</td>
+<td>Azure AD B2C</td>
+</tr>
+</tbody>
+</table>
+<h3>System-Assigned Managed Identity (SAMI) vs User-Assigned Managed Identity (UAMI)</h3>
+<p>Resource reference:</p>
+<p><a href="https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview">https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview</a></p>
+<p><a href="https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/managed-identity-best-practice-recommendations">https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/managed-identity-best-practice-recommendations</a></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>SAMI</th>
+<th>UAMI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lifecycle</td>
+<td>attach with resource, when delete resource, SAMI will be delete also</td>
+<td>Don't care, still stay after resource deletion xD</td>
+</tr>
+<tr>
+<td>Reuse</td>
+<td>1 resource → 1 identity</td>
+<td>1 identity → multiple resources</td>
+</tr>
+<tr>
+<td>When</td>
+<td>Throwaway, 1-1 with VM/App Service</td>
+<td>Reuse identity between multiple resources</td>
+</tr>
+</tbody>
+</table>
+<h3>Control Plane vs Data Plane</h3>
+<div class="highlight"><pre><span></span><code><span class="n">Subscription</span><span class="w"> </span><span class="n">Owner</span>
+<span class="err">├──</span><span class="w"> </span><span class="n">Control</span><span class="w"> </span><span class="nl">plane:</span><span class="w"> </span><span class="n">create</span><span class="o">/</span><span class="n">delete</span><span class="o">/</span><span class="n">manage</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="p">(</span><span class="n">Microsoft</span><span class="p">.</span><span class="n">Storage</span><span class="o">/*</span><span class="p">,</span><span class="w"> </span><span class="n">Microsoft</span><span class="p">.</span><span class="n">KeyVault</span><span class="o">/*</span><span class="p">)</span>
+<span class="err">└──</span><span class="w"> </span><span class="n">Data</span><span class="w"> </span><span class="nl">plane:</span><span class="w"> </span><span class="n">No</span><span class="w"> </span><span class="err">—</span><span class="w"> </span><span class="n">must</span><span class="w"> </span><span class="k">assign</span><span class="w"> </span><span class="n">role</span><span class="w"> </span><span class="n">explicitly</span>
+</code></pre></div>
+
+<p>For example:</p>
+<ul>
+<li>Owner can create Storage Account</li>
+<li>Owner access blob (Binary Large Object) -&gt; need role "Storage Blob Data Reader"</li>
+<li>Owner can create Key Vault</li>
+<li>Owner access secret -&gt; need role "Key Vault Secrets User" </li>
+</ul>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/control-plane-and-data-plane">Azure Control Plane and Data Plane</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/blobs/assign-azure-role-data-access?tabs=portal">RBAC for Storage</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide?tabs=azure-cli">RBAC for Key Vault</a></li>
+</ul>
+<h3>Managed Identity + Key Vault</h3>
+<p>Pattern:</p>
+<div class="highlight"><pre><span></span><code><span class="n">App</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="o">[</span><span class="n">SAMI</span><span class="o">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="k">Key</span><span class="w"> </span><span class="n">Vault</span><span class="w"> </span><span class="n">Reference</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">Secret</span>
+</code></pre></div>
+
+<p>Setup step:</p>
+<ul>
+<li>Enable SAMI in App Service</li>
+<li>Assign role Key Vault Secrets User for managed identity in Key Vault</li>
+<li>App setting uses <code>@Microsoft.KeyVault(SecretUri=...)</code></li>
+</ul>
+<p>No need to store credentials anywhere, managed identity auto get token from Azure AD</p>
+<p><strong>K8s analogy:</strong> This pattern is identical to <strong>Workload Identity</strong> (AKS/GKE) or <strong>IRSA</strong> (EKS — IAM Roles for Service Accounts):</p>
+<div class="highlight"><pre><span></span><code><span class="nl">K8s</span><span class="p">:</span><span class="w">    </span><span class="n">Pod</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="o">[</span><span class="n">ServiceAccount</span><span class="o">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">IAM</span><span class="w"> </span><span class="k">Role</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">Managed</span><span class="w"> </span><span class="k">Identity</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">AWS</span><span class="o">/</span><span class="n">Azure</span><span class="w"> </span><span class="n">resource</span>
+<span class="nl">Azure</span><span class="p">:</span><span class="w">  </span><span class="n">App</span><span class="w"> </span><span class="n">Service</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="o">[</span><span class="n">SAMI</span><span class="o">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">RBAC</span><span class="w"> </span><span class="k">role</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="k">Key</span><span class="w"> </span><span class="n">Vault</span><span class="w"> </span><span class="n">secret</span>
+</code></pre></div>
+
+<p>Same idea: workload is bound to an identity, the identity is granted permissions, and the runtime auto-exchanges tokens (via OIDC / IMDS endpoint). Code only calls the SDK — no secrets or keys needed anywhere. When Pod/App restarts, the identity persists — no manual credential rotation.</p>
+<p>It also applies to in-cluster K8s RBAC: a Pod runs as a ServiceAccount, that SA is bound via Role/RoleBinding (or ClusterRole/ClusterRoleBinding), and calls to the K8s API server (default endpoint <code>https://kubernetes.default.svc</code> inside the Pod) are authenticated using the projected token at <code>/var/run/secrets/kubernetes.io/serviceaccount/token</code>. Same identity-binds-to-workload pattern, just scoped to the cluster instead of cloud resources.</p>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/app-service/app-service-key-vault-references?tabs=azure-cli">Use Key Vault references for App Service and Azure Functions</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp">How to use managed identities for App Service and Azure Functions</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview">Azure AD Workload Identity for AKS</a></li>
+</ul>
+<h3>Conclusion and Gotchas</h3>
+<ul>
+<li>RBAC = IAM Roles. </li>
+<li>Azure Policy = Service Control Policies (but have more flexibility)</li>
+<li>SAMI is often prefer because it will not make <code>orphaned identities</code> xD</li>
+<li>Subscription owner can not read KV secret by default. Owner only have control plane permissions — need to self-grant data plane role (e.g. <code>Key Vault Secrets User</code>) if access is needed</li>
+<li>Key Vault Contributor = manage vault configuration (control plane), NOT read secret</li>
+<li>Key Vault Administrator = full data plane access (read/write/delete secrets, keys, certs)</li>
+<li>For vault access model best practice: pick RBAC!</li>
+</ul>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide?tabs=azure-cli#azure-built-in-roles-for-key-vault-data-plane-operations">Built-in roles for Key Vault data plane operations</a></li>
+</ul>
+<hr>
+<h1>Domain 2 - Compute</h1>
+<h3>Virtual Machine (VM) Availability</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Availability Set</th>
+<th>Availability Zones</th>
+<th>VM Scale Sets (VMSS)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Protection</td>
+<td>Hardware/rack failure</td>
+<td>Datacenter failure</td>
+<td>Scale + HA</td>
+</tr>
+<tr>
+<td>SLA</td>
+<td>99.95%</td>
+<td>99.99%</td>
+<td>depend config</td>
+</tr>
+<tr>
+<td>Use case</td>
+<td>Legacy app, lift-and-shift</td>
+<td>Production critical</td>
+<td>Web tier, stateless</td>
+</tr>
+<tr>
+<td>Region support</td>
+<td>All region</td>
+<td>Only region with zones</td>
+<td>All region</td>
+</tr>
+</tbody>
+</table>
+<p>Exam Gotchas</p>
+<ul>
+<li>SLA 99.99% → must pick Zones, not Set</li>
+<li>Can not combine Availability Set and Availability Zones</li>
+<li>Availability Set: <strong>Fault Domain (FD):</strong> different physical rack (power, switch) — max 3, default 2</li>
+<li>Availability Set: <strong>Update Domain (UD):</strong> group VM not going to restart together when Azure patch — max 20</li>
+</ul>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-machines/availability">Availability options for Azure Virtual Machines</a></li>
+<li><a href="https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services">SLA for Online Services</a></li>
+</ul>
+<h3>VM Encryption</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>What</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SSE</strong> (Server-Side Encryption)</td>
+<td>Azure auto encrypt in storage layer</td>
+<td>Default</td>
+</tr>
+<tr>
+<td><strong>ADE</strong> (Azure Disk Encryption)</td>
+<td>Encrypt OS + Data disks at OS level (BitLocker/DM-Crypt), key in Key Vault</td>
+<td>Compliance required OS-level encryption</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verdict:</strong> SSE almost ready for everything. ADE only when compliance is required.</p>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-machines/disk-encryption-overview">Overview of managed disk encryption options</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-machines/disk-encryption">Server-side encryption of Azure Disk Storage</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/security/fundamentals/azure-disk-encryption-vms-vmss">Azure Disk Encryption for VMs and VMSS</a></li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> ADE is scheduled for retirement on <strong>September 15, 2028</strong>. Microsoft recommends migrating to <strong>encryption at host</strong> for new VMs.</p>
+</blockquote>
+<h3>Deployment slot</h3>
+<p>Azure App Service deployment slots are live, distinct environments for your web apps. They allow you to test changes, warm up instances, and achieve zero-downtime deployments. By managing configurations independently, you can deploy updates to a staging slot, verify them, and instantly swap them into production. (from AI Overview when google search xD).</p>
+<p>Some note for exam:</p>
+<ul>
+<li>Deployment slot is not available in Free/Basic plan. If question related to staging environment, pick Standards.</li>
+<li>After slot swap, both slot still running, for rolling back, just simple by swap back.</li>
+<li>App Service Plan = compute resource.</li>
+</ul>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/app-service/deploy-staging-slots">Set up staging environments in Azure App Service</a></li>
+</ul>
+<h3>ARM (Azure Resource Manager) and Bicep</h3>
+<ul>
+<li>ARM Template = Cloudformation Template of AWS</li>
+<li>Bicep still is ARM but better syntax (Azure only)</li>
+<li>Still prefer to use Terraform instead of this fucking shit when it comes to production!</li>
+</ul>
+<h3>Containers</h3>
+<p>Comparison between 3 services</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>What</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ACI</strong> (Azure Container Instances)</td>
+<td>Run 1 container fast, no fucking cluster</td>
+<td>Dev/test, batch jobs, CI/CD runners</td>
+</tr>
+<tr>
+<td><strong>Container Apps</strong></td>
+<td>Serverless containers with scaling (KEDA inside), ingress</td>
+<td>Production apps, microservices</td>
+</tr>
+<tr>
+<td><strong>AKS</strong></td>
+<td>Managed Kubernetes</td>
+<td>You know when....</td>
+</tr>
+</tbody>
+</table>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/container-instances/container-instances-overview">What is Azure Container Instances?</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/container-apps/overview">What is Azure Container Apps?</a></li>
+</ul>
+<hr>
+<h1>Domain 3 - Storage</h1>
+<h3>Azure Storage Account vs AWS S3 — Mental Model</h3>
+<div class="highlight"><pre><span></span><code><span class="nx">AWS</span><span class="w">                              </span><span class="nx">Azure</span>
+<span class="err">───────────────────────────────────────────────────</span>
+<span class="p">(</span><span class="nx">No</span><span class="p">)</span><span class="w">                         </span><span class="err">→</span><span class="w">   </span><span class="nx">Storage</span><span class="w"> </span><span class="nx">Account</span><span class="w"> </span><span class="p">(</span><span class="nx">wrap</span><span class="w"> </span><span class="nx">layer</span><span class="p">)</span>
+<span class="nx">S3</span><span class="w"> </span><span class="nx">Bucket</span><span class="w">                    </span><span class="err">→</span><span class="w">   </span><span class="nx">Blob</span><span class="w"> </span><span class="nx">Container</span>
+<span class="nx">S3</span><span class="w"> </span><span class="nx">Object</span><span class="w">                    </span><span class="err">→</span><span class="w">   </span><span class="nx">Blob</span>
+<span class="nx">S3</span><span class="w"> </span><span class="nx">Bucket</span><span class="w"> </span><span class="nx">Policy</span><span class="w">             </span><span class="err">→</span><span class="w">   </span><span class="nx">Container</span><span class="w"> </span><span class="nx">Access</span><span class="w"> </span><span class="nx">Policy</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">RBAC</span>
+<span class="nx">S3</span><span class="w"> </span><span class="nx">Lifecycle</span><span class="w"> </span><span class="nx">Rules</span><span class="w">           </span><span class="err">→</span><span class="w">   </span><span class="nx">Lifecycle</span><span class="w"> </span><span class="nx">Management</span>
+<span class="nx">S3</span><span class="w"> </span><span class="nx">Versioning</span><span class="w">                </span><span class="err">→</span><span class="w">   </span><span class="nx">Blob</span><span class="w"> </span><span class="nx">Versioning</span>
+<span class="nx">S3</span><span class="w"> </span><span class="nx">Storage</span><span class="w"> </span><span class="nx">Classes</span><span class="w">           </span><span class="err">→</span><span class="w">   </span><span class="nx">Access</span><span class="w"> </span><span class="nx">Tiers</span><span class="w"> </span><span class="p">(</span><span class="nx">Hot</span><span class="o">/</span><span class="nx">Cool</span><span class="o">/</span><span class="nx">Archive</span><span class="p">)</span>
+<span class="nx">S3</span><span class="w"> </span><span class="nx">Presigned</span><span class="w"> </span><span class="nx">URL</span><span class="w">             </span><span class="err">→</span><span class="w">   </span><span class="nx">SAS</span><span class="w"> </span><span class="nx">Token</span>
+<span class="nx">S3</span><span class="w"> </span><span class="nx">Static</span><span class="w"> </span><span class="nx">Website</span><span class="w">            </span><span class="err">→</span><span class="w">   </span><span class="nx">Static</span><span class="w"> </span><span class="nx">Website</span><span class="w"> </span><span class="p">(</span><span class="k">in</span><span class="w"> </span><span class="nx">Blob</span><span class="p">)</span>
+<span class="err">───────────────────────────────────────────────────</span>
+<span class="nx">EFS</span><span class="w">                          </span><span class="err">→</span><span class="w">   </span><span class="nx">Azure</span><span class="w"> </span><span class="nx">Files</span>
+<span class="nx">SQS</span><span class="w">                          </span><span class="err">→</span><span class="w">   </span><span class="nx">Queue</span><span class="w"> </span><span class="nx">Storage</span>
+<span class="nx">DynamoDB</span><span class="w"> </span><span class="p">(</span><span class="nx">simple</span><span class="w"> </span><span class="nx">use</span><span class="p">)</span><span class="w">        </span><span class="err">→</span><span class="w">   </span><span class="nx">Table</span><span class="w"> </span><span class="nx">Storage</span>
+</code></pre></div>
+
+<p>Key Differences:</p>
+<table>
+<thead>
+<tr>
+<th>AWS</th>
+<th>Azure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Create S3 bucket directly</td>
+<td>Need to init Storage Account first, then create container</td>
+</tr>
+<tr>
+<td>Each bucket have it owns settings</td>
+<td>Storage Account contains setting for all services inside</td>
+</tr>
+<tr>
+<td>Bucket name globally unique</td>
+<td>Storage Account name globally unique, Blob container only need unique in internal Storage Account</td>
+</tr>
+<tr>
+<td>Bucket policy per bucket</td>
+<td>RBAC can be set at account or container level</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>AWS:
+  - s3://my-images-bucket        (Create)
+  - s3://my-backup-bucket        (Create)  
+  - EFS: my-team-share           (Other service)
+
+Azure:
+  - mystorageaccount
+      ├── container: images      (Like S3 bucket)
+      ├── container: backups     (Like S3 bucket)
+      └── fileshare: team-share  (Like EFS)
+</code></pre></div>
+
+<h3>Immutable vs Mutable Settings</h3>
+<p>Can not change after created:</p>
+<ul>
+<li>Storage Account name</li>
+<li>Location/Region</li>
+<li>Performance tier (Standard ↔ Premium)</li>
+<li>Hierarchical namespace (For exam, but in fact we have migration tool)</li>
+</ul>
+<p>Can be change after created:</p>
+<ul>
+<li>Redundancy (LRS/ZRS/GRS) - but limit</li>
+<li>Access tier (Hot/Cool)</li>
+<li>Network/Firewall rules</li>
+<li>Data protection (soft delete, versioning)</li>
+<li>Encryption settings</li>
+</ul>
+<p>We need to pick Name, Region, Performance tier right for the first damn time!</p>
+<h3>Replication Types</h3>
+<p>In single region:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>What</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LRS</strong> (Locally Redundant)</td>
+<td>3 copies, 1 datacenter</td>
+<td>Hardware failure</td>
+</tr>
+<tr>
+<td><strong>ZRS</strong> (Zone Redundant)</td>
+<td>3 copies, 3 zones</td>
+<td>Datacenter / zone failure</td>
+</tr>
+</tbody>
+</table>
+<p>Cross-region:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>What</th>
+<th>When</th>
+<th>Read from secondary?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GRS</strong> (Geo-Redundant)</td>
+<td>6 copies (3+3), 2 regions</td>
+<td>Region failure</td>
+<td>No, Never able to read from secondary, must failover first, after failover, secondary become new primary</td>
+</tr>
+<tr>
+<td><strong>RA-GRS</strong> (Read-Access GRS)</td>
+<td>6 copies, 2 regions</td>
+<td>Region failure</td>
+<td><strong>Yes</strong> (always)</td>
+</tr>
+<tr>
+<td><strong>GZRS</strong></td>
+<td>ZRS primary + LRS secondary</td>
+<td>Zone + region failure</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>RA-GZRS</strong></td>
+<td>ZRS primary + LRS secondary</td>
+<td>Zone + region failure</td>
+<td><strong>Yes</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Pick replication by keyword:</p>
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Disk/hardware failure, cheapest</td>
+<td><strong>LRS</strong></td>
+</tr>
+<tr>
+<td>Zone failure, within region</td>
+<td><strong>ZRS</strong></td>
+</tr>
+<tr>
+<td>Region down, data still available</td>
+<td><strong>GRS</strong> (If no continuously read)</td>
+</tr>
+<tr>
+<td>Region down + can read secondary continuously</td>
+<td><strong>RA-GRS</strong></td>
+</tr>
+<tr>
+<td>Zone + region, highest availability</td>
+<td><strong>RA-GZRS</strong></td>
+</tr>
+<tr>
+<td>Available even if a region goes down and cost-effective</td>
+<td><strong>GRS</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-redundancy">Azure Storage redundancy</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/common/redundancy-migration">Change how a storage account is replicated</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview">Hot, cool, cold, and archive access tiers for blob data</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-sas-overview">Grant limited access to data with shared access signatures (SAS)</a></li>
+</ul>
+<h3>Exam Tricks for Storage Features (non-replication)</h3>
+<blockquote>
+<p>For replication keywords (LRS/ZRS/GRS/RA-GRS/GZRS/RA-GZRS), see the <strong>Replication Types</strong> section above.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data cannot be deleted/modified for compliance</td>
+<td>Immutable storage (WORM - Write once read many)</td>
+</tr>
+<tr>
+<td>Automatically move old data to cheaper tier</td>
+<td>Lifecycle Management Policy</td>
+</tr>
+<tr>
+<td>Share files between VMs (SMB)</td>
+<td>Azure Files</td>
+</tr>
+<tr>
+<td>Store VM disk</td>
+<td>Managed Disk (Premium SSD/Standard SSD/HDD)</td>
+</tr>
+<tr>
+<td>Cheapest storage for rarely accessed archived data</td>
+<td>Archive tier</td>
+</tr>
+<tr>
+<td>Restore accidentally deleted blob</td>
+<td>Soft Delete</td>
+</tr>
+<tr>
+<td>Grant temp access to a specific blob without sharing key</td>
+<td>SAS token</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1>Domain 4 - Networking</h1>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/architecture/aws-professional/networking">AWS to Azure services comparison - Networking</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview">Azure Virtual Network (VNet) Overview</a></li>
+</ul>
+<h3>Quick Mapping from AWS VPC xD</h3>
+<div class="highlight"><pre><span></span><code>AWS                              Azure
+───────────────────────────────────────────────────
+VPC                          →   VNet
+Subnet                       →   Subnet
+Security Group               →   NSG (Network Security Group)
+Elastic IP                   →   Public IP (Static)
+ENI                          →   NIC (Network Interface Card)
+VPC Peering                  →   VNet Peering
+NAT Gateway                  →   NAT Gateway
+Route Table                  →   Route Table
+</code></pre></div>
+
+<p>But there is still some little different. And we will go one by one</p>
+<p>Subnet and Availability Zones (AZs)</p>
+<ul>
+<li>AWS: each Subnet locked into 1 AZ. To achieve HA, we need to create multiple subnet in different AZ.</li>
+<li>Azure: Subnet expanded to all AZ in single region. We can place VM in AZ 1, AZ 2, AZ 3 into same subnet.</li>
+</ul>
+<p>NSG (Network Security Group) vs SG (Security Group) / NACL</p>
+<ul>
+<li>AWS: Use SG (applied at ENI/Instance) and Network ACL (NACL) (applied at Subnet)</li>
+<li>Azure: Use only NSG. NSG Can be applied both to NIC or Subnet</li>
+<li>NSG is stateful, NACL is stateless</li>
+</ul>
+<p><strong>Stateful vs Stateless — what does it mean?</strong></p>
+<ul>
+<li><strong>Stateful (NSG, AWS SG):</strong> firewall <em>remembers</em> connections. When outbound traffic is allowed, the return traffic is <strong>automatically allowed</strong> — the firewall tracks the session in a connection table.</li>
+<li><strong>Stateless (AWS NACL):</strong> firewall has <em>no memory</em>. Every packet is evaluated independently → you must define rules for <strong>both directions</strong> (inbound AND outbound).</li>
+</ul>
+<p>Quick example — VM calling GitHub API (HTTPS port 443):</p>
+<div class="highlight"><pre><span></span><code><span class="n">VM</span><span class="w"> </span><span class="p">(</span><span class="n">random</span><span class="w"> </span><span class="n">port</span><span class="w"> </span><span class="mi">54321</span><span class="p">)</span><span class="w"> </span><span class="err">──</span><span class="o">[</span><span class="n">request</span><span class="o">]</span><span class="err">──→</span><span class="w"> </span><span class="n">GitHub</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="w"> </span><span class="mi">443</span><span class="p">)</span>
+<span class="n">VM</span><span class="w"> </span><span class="p">(</span><span class="n">random</span><span class="w"> </span><span class="n">port</span><span class="w"> </span><span class="mi">54321</span><span class="p">)</span><span class="w"> </span><span class="err">←──</span><span class="o">[</span><span class="n">response</span><span class="o">]</span><span class="err">──</span><span class="w"> </span><span class="n">GitHub</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="w"> </span><span class="mi">443</span><span class="p">)</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th>NSG (stateful)</th>
+<th>NACL (stateless)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rules needed</td>
+<td>1 outbound: Allow TCP 443</td>
+<td>Outbound: Allow TCP 443 <strong>+</strong> Inbound: Allow TCP from 443 → ephemeral ports 1024-65535</td>
+</tr>
+<tr>
+<td>Forget the return rule?</td>
+<td>Still works (auto-tracked)</td>
+<td>Response dropped → connection fails</td>
+</tr>
+</tbody>
+</table>
+<p>That's why Azure only needs <strong>one NSG</strong> instead of AWS's two-layer SG + NACL model — simpler, no need to open wide ephemeral port ranges, less misconfiguration risk.</p>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview">Azure network security groups overview</a></li>
+</ul>
+<h3>VNet Peering &amp; Gateway</h3>
+<div class="highlight"><pre><span></span><code><span class="n">AWS</span><span class="w">                              </span><span class="n">Azure</span>
+<span class="err">───────────────────────────────────────────────────</span>
+<span class="n">VPC</span><span class="w"> </span><span class="n">Peering</span><span class="w"> </span><span class="p">(</span><span class="n">same</span><span class="w"> </span><span class="n">region</span><span class="p">)</span><span class="w">    </span><span class="err">→</span><span class="w">   </span><span class="n">VNet</span><span class="w"> </span><span class="n">Peering</span>
+<span class="n">VPC</span><span class="w"> </span><span class="n">Peering</span><span class="w"> </span><span class="p">(</span><span class="n">cross</span><span class="o">-</span><span class="n">region</span><span class="p">)</span><span class="w">   </span><span class="err">→</span><span class="w">   </span><span class="n">Global</span><span class="w"> </span><span class="n">VNet</span><span class="w"> </span><span class="n">Peering</span>
+<span class="n">VPN</span><span class="w"> </span><span class="n">Gateway</span><span class="w">                  </span><span class="err">→</span><span class="w">   </span><span class="n">Virtual</span><span class="w"> </span><span class="n">Network</span><span class="w"> </span><span class="n">Gateway</span>
+<span class="n">Transit</span><span class="w"> </span><span class="n">Gateway</span><span class="w">              </span><span class="err">→</span><span class="w">   </span><span class="n">Virtual</span><span class="w"> </span><span class="n">WAN</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">VNet</span><span class="w"> </span><span class="n">Gateway</span>
+<span class="n">Site</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">Site</span><span class="w"> </span><span class="n">VPN</span><span class="w">             </span><span class="err">→</span><span class="w">   </span><span class="n">VPN</span><span class="w"> </span><span class="n">Gateway</span><span class="w"> </span><span class="n">Connection</span>
+<span class="n">Direct</span><span class="w"> </span><span class="n">Connect</span><span class="w">               </span><span class="err">→</span><span class="w">   </span><span class="n">ExpressRoute</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Connect 2 VNets same region</td>
+<td>VNet Peering</td>
+</tr>
+<tr>
+<td>Connect 2 VNets different region</td>
+<td>Global Peering</td>
+</tr>
+<tr>
+<td>On-prem ↔ Azure (internet)</td>
+<td>VPN Gateway</td>
+</tr>
+<tr>
+<td>On-prem ↔ Azure (dedicated)</td>
+<td>ExpressRoute</td>
+</tr>
+</tbody>
+</table>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-peering-overview">Azure Virtual Network peering</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-about-vpngateways">About Azure VPN Gateway</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/expressroute/expressroute-introduction">Azure ExpressRoute overview</a></li>
+</ul>
+<h3>Azure DNS</h3>
+<div class="highlight"><pre><span></span><code>AWS                              Azure
+───────────────────────────────────────────────────
+Route53                      →   Azure DNS
+Route53 Hosted Zone (public) →   Public DNS Zone
+Route53 Private Hosted Zone  →   Private DNS Zone
+Route53 Domain Registration  →   App Service Domain
+Route53 Health Checks        →   Traffic Manager
+Route53 Routing Policies     →   Traffic Manager
+</code></pre></div>
+
+<p>Azure separates health checks + traffic routings via Traffic Manager, not built-in like Route53.</p>
+<h3>Azure Load Balancing</h3>
+<div class="highlight"><pre><span></span><code>AWS                              Azure
+───────────────────────────────────────────────────
+NLB (Layer 4)                →   Azure Load Balancer
+ALB (Layer 7)                →   Application Gateway
+CloudFront + ALB (global)    →   Azure Front Door
+Route53 routing policies     →   Traffic Manager (DNS-based)
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Layer</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Load Balancer</strong></td>
+<td>L4</td>
+<td>VM load balancing, non-HTTP</td>
+</tr>
+<tr>
+<td><strong>Application Gateway</strong></td>
+<td>L7</td>
+<td>Web apps, SSL termination, WAF</td>
+</tr>
+<tr>
+<td><strong>Front Door</strong></td>
+<td>L7 Global</td>
+<td>Global apps, CDN + LB + WAF</td>
+</tr>
+<tr>
+<td><strong>Traffic Manager</strong></td>
+<td>DNS</td>
+<td>Failover, geo routing</td>
+</tr>
+</tbody>
+</table>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/architecture/guide/technology-choices/load-balancing-overview">Load-balancing options</a> — Official Microsoft comparison</li>
+</ul>
+<h3>Azure Network Watcher (Debug tools)</h3>
+<div class="highlight"><pre><span></span><code>AWS                              Azure
+───────────────────────────────────────────────────
+VPC Flow Logs                →   NSG Flow Logs
+VPC Reachability Analyzer    →   IP Flow Verify / Connection Troubleshoot
+VPC Traffic Mirroring        →   Packet Capture
+</code></pre></div>
+
+<p><strong>Verdict:</strong> Almost 1:1 with AWS VPC/Route53/ELB, just a fucking name different.</p>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-overview">Azure Network Watcher overview</a></li>
+</ul>
+<h3>Exam Gotchas</h3>
+<ul>
+<li>ExpressRoute <strong>does not go via internet</strong> → question "secure private connection" = ExpressRoute.</li>
+<li>VPN Policy-based <strong>not support</strong> Point-to-Site.</li>
+<li><strong>Active-Active</strong> VPN Gateway = 2 tunnel, high availability.</li>
+<li>ExpressRoute <strong>Global Reach:</strong> connect 2 on-prem sites via Azure backbone (no need internet).</li>
+<li>Question "consistent latency, high bandwidth" = ExpressRoute.</li>
+<li>Question "quick setup, cost-effective" = VPN Gateway.</li>
+</ul>
+<hr>
+<h1>Domain 5 - Monitor &amp; Backup</h1>
+<h3>Quick Mapping from AWS for Backup xD</h3>
+<div class="highlight"><pre><span></span><code>AWS                              Azure
+───────────────────────────────────────────────────
+AWS Backup                   →   Azure Backup
+Backup Vault                 →   Recovery Services Vault
+AWS DRS / CloudEndure        →   Azure Site Recovery (ASR)
+EBS Snapshots                →   VM Backup (disk snapshots)
+</code></pre></div>
+
+<h3>Backup Services</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Azure Backup</strong></td>
+<td>Backup VMs, databases, files (daily, point-in-time)</td>
+</tr>
+<tr>
+<td><strong>ASR</strong> (Azure Site Recovery)</td>
+<td>Replicate VMs to another region, failover when DR</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verdict:</strong> Azure Backup = AWS Backup, ASR = DRS (AWS Elastic Disaster Recovery).</p>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/backup/backup-overview">What is Azure Backup?</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/site-recovery/site-recovery-overview">About Azure Site Recovery</a></li>
+</ul>
+<h3>Quick Mapping from AWS CloudWatch</h3>
+<div class="highlight"><pre><span></span><code>AWS                              Azure
+───────────────────────────────────────────────────
+CloudWatch                   →   Azure Monitor
+CloudWatch Metrics           →   Metrics
+CloudWatch Logs              →   Log Analytics Workspace
+CloudWatch Logs Insights     →   Kusto Query Language (KQL)
+CloudWatch Alarms            →   Alerts
+CloudWatch Agent             →   Azure Monitor Agent
+X-Ray                        →   Application Insights
+</code></pre></div>
+
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-monitor/overview">Azure Monitor overview</a></li>
+<li><a href="https://learn.microsoft.com/en-us/kusto/query/">Kusto Query Language (KQL) overview</a></li>
+</ul>
+<hr>
+<h1>Exam Tip/Tricks</h1>
+<p>Summary of common pitfalls, this is not study guide. Only pattern to drop wrong answer xD</p>
+<h3>1. "X replaces NSG/Firewall"</h3>
+<p>This is always wrong. Bastion, Private Endpoint, VPN Gateway, Front Door, App Gateway... <strong>not</strong> replace NSG. NSG is layer filter , always apply together.</p>
+<h3>2. VNet Peering</h3>
+<table>
+<thead>
+<tr>
+<th>Trap</th>
+<th>Correct</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Peering is <strong>transitive</strong></td>
+<td>Wrong — A↔B, B↔C does <strong>not</strong> imply A↔C</td>
+</tr>
+<tr>
+<td>Enable <code>Use Remote Gateway</code> in 1 side is enough</td>
+<td>Wrong, must be paired with <strong>Allow Gateway Transit</strong> with gateway side</td>
+</tr>
+<tr>
+<td>1 spoke use multiple remote gateway</td>
+<td>Wrong — only one</td>
+</tr>
+</tbody>
+</table>
+<h3>3. Storage Replication</h3>
+<p>See <strong>Domain 3 — Replication Types</strong> for the full picker table.</p>
+<p><strong>Pitfalls:</strong> "highest availability within a region" → ZRS (not GRS). GRS is <strong>cross-region</strong>. G stands for GEO</p>
+<h3>4. Backup vs Site Recovery</h3>
+<ul>
+<li><strong>Azure Backup</strong> = data recovery (file, VM disk, DB) — RPO calculate by hour/day</li>
+<li><strong>Azure Site Recovery (ASR)</strong> = disaster recovery (replicate VM into another region) — RPO/RTO low</li>
+</ul>
+<p>Question "recover deleted file" → Azure Backup. "Region down, switch to another region" → ASR.</p>
+<h3>5. Recovery Services vault vs Backup vault (naming pitfall )</h3>
+<table>
+<thead>
+<tr>
+<th>Vault</th>
+<th>Workload</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Recovery Services vault</strong> (Old)</td>
+<td>Azure VM, <strong>MARS agent (files/folders/system state on-prem)</strong>, SQL/SAP HANA in VM, Azure File Shares</td>
+</tr>
+<tr>
+<td><strong>Azure Backup vault</strong> (New)</td>
+<td>PostgreSQL, <strong>Blob</strong>, Managed Disks, AKS, MySQL</td>
+</tr>
+</tbody>
+</table>
+<p>Keyword <strong>"files, folders, system state"</strong> → alway are <strong>Recovery Services vault</strong> (Because attach with MARS agent). Don't be wrong with "Azure Backup vault"</p>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/backup/backup-vault-overview">Overview of Backup vaults</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/backup/backup-azure-recovery-services-vault-overview">Recovery Services vaults overview</a></li>
+</ul>
+<h3>6. RBAC vs Azure Policy</h3>
+<ul>
+<li><strong>RBAC</strong> = who did what (access)</li>
+<li><strong>Policy</strong> = resource allows to exist or not (compliance, deny tag missing, deny SKU ...)</li>
+</ul>
+<p>If questions are "enforce tag", "block region" → Policy. Otherwise "grant read access" → RBAC.</p>
+<h3>7. Four built-in roles</h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th style="text-align: center;">Manage resources</th>
+<th style="text-align: center;">Assign roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Owner</strong></td>
+<td style="text-align: center;">Ok</td>
+<td style="text-align: center;">Ok</td>
+</tr>
+<tr>
+<td><strong>Contributor</strong></td>
+<td style="text-align: center;">Ok</td>
+<td style="text-align: center;">Hell no</td>
+</tr>
+<tr>
+<td><strong>Reader</strong></td>
+<td style="text-align: center;">No (read-only)</td>
+<td style="text-align: center;">No</td>
+</tr>
+<tr>
+<td><strong>User Access Administrator</strong></td>
+<td style="text-align: center;">No</td>
+<td style="text-align: center;">Ok</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Common pitfalls:</strong> exam question "full manage resources <strong>but no</strong> assign roles" → answer is <strong>Contributor</strong>, NOT User Access Administrator (UAA). UAA is reversed role — Only assign roles, not going to have permissions to touch resources.</p>
+<p><strong>Trick:</strong></p>
+<ul>
+<li>Owner = Contributor + UAA</li>
+<li>Contributor = Everything but not able to give permissions</li>
+<li>UAA = Only able to give permissions</li>
+</ul>
+<h3>8. RBAC scope — 4 levels</h3>
+<div class="highlight"><pre><span></span><code>Management Group  (top, contains multiple subscription)
+    ↓ inherit
+Subscription
+    ↓ inherit
+Resource Group
+    ↓ inherit
+Resource          ← VNet, VM, Storage, Key Vault... individual resource.
+</code></pre></div>
+
+<p><strong>Rules</strong>: Anything that contains Resource ID can be scope. Role assigned at higher scope, inherit to lower scope.</p>
+<p><strong>Pitfalls</strong>: List specific like "Virtual Network", "Storage Account" make distractor, it still is valid scope (Level Resource).</p>
+<p><strong>Least privilege pattern</strong>: Instead assign Contributor at Subscription, assign role lower scope, like Network Contributor at that damn Virtual Network.</p>
+<h3>9. Locks</h3>
+<table>
+<thead>
+<tr>
+<th>Lock</th>
+<th>what Lock</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ReadOnly</strong></td>
+<td>Both modify + delete</td>
+</tr>
+<tr>
+<td><strong>CanNotDelete</strong></td>
+<td>only delete, still able to modify</td>
+</tr>
+</tbody>
+</table>
+<p>Gotcha: ReadOnly lock can break some operations thought it was "read". </p>
+<p>Example: list keys of Storage Account actually is post request.</p>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/lock-resources?tabs=json#considerations-before-applying-your-locks">Considerations before applying your locks</a></li>
+</ul>
+<h3>10. Cost Management Pitfalls</h3>
+<ul>
+<li><strong>Reserved Instance</strong> = commit 1/3 year, reduced up to 72%</li>
+<li><strong>Spot VM</strong> = cheap but can be evicted</li>
+<li><strong>Hybrid Benefit</strong> = bring license Windows/SQL on-prem to Azure</li>
+</ul>
+<p>If question "predictable workload, lowest cost" → Reserved Instance. "Batch job, can be restart" → Spot.</p>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/cost-management-billing/reservations/save-compute-costs-reservations">What are Azure Reservations?</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/virtual-machines/spot-vms">Use Azure Spot Virtual Machines</a></li>
+</ul>
+<h3>11. An overly absolute answer → 90% chance of being a distractor</h3>
+<p>"red flag" in answers xD:</p>
+<table>
+<thead>
+<tr>
+<th>Red flag</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>automatically</code></td>
+<td>Azure rare do for user — license, scaling, backup... all need config</td>
+</tr>
+<tr>
+<td><code>all</code> / <code>every</code></td>
+<td>All PaaS services, every VM in subscription —&gt; Azure doesn't apply blanket</td>
+</tr>
+<tr>
+<td><code>only</code></td>
+<td>Each user can have only one license, only via portal — Azure normally can have multiple ways</td>
+</tr>
+<tr>
+<td><code>never</code> / <code>cannot</code></td>
+<td>Azure dynamic, Absolute prohibitions are rare</td>
+</tr>
+<tr>
+<td><code>replaces</code></td>
+<td>Service A "replaces" Service B → mostly they are individual layer</td>
+</tr>
+</tbody>
+</table>
+<h3>12. Network Watcher — choose the right tool</h3>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>latency / packet loss VM↔VM</td>
+<td><strong>Connection Monitor</strong></td>
+</tr>
+<tr>
+<td>Test 1 time: VM A can connect to VM B port X?</td>
+<td><strong>Connection Troubleshoot</strong></td>
+</tr>
+<tr>
+<td>This Packet would dropped by NSG or not?</td>
+<td><strong>IP Flow Verify</strong></td>
+</tr>
+<tr>
+<td>Effective NSG rules applied NIC</td>
+<td><strong>Effective Security Rules</strong></td>
+</tr>
+<tr>
+<td>Log all traffic via NSG</td>
+<td><strong>NSG Flow Logs</strong></td>
+</tr>
+<tr>
+<td>Draw network topology</td>
+<td><strong>Topology</strong></td>
+</tr>
+<tr>
+<td>Capture packet to analyze Wireshark</td>
+<td><strong>Packet Capture</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Need to remember: </p>
+<ul>
+<li>If question "between two VMs" + "network" → reflex Network Watcher. </li>
+<li>If question "continuous/monitor over time" → Connection <strong>Monitor</strong>. </li>
+<li>If question "one-time test" → Connection <strong>Troubleshoot</strong>.</li>
+</ul>
+<h3>13. Azure Monitor — Metrics vs Logs vs Insights</h3>
+<p>Pitfalls: exam ask "diagnostic between 2 specific VM" → <strong>Hell No</strong>, it is NOT Insights. Insights is overview, not deep-dive.</p>
+<p><strong>Differentiation Insights vs Log Analytics when exam have "analyze":</strong></p>
+<table>
+<thead>
+<tr>
+<th>Exam</th>
+<th>Pick</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>view dashboard / performance overview / dependency map</td>
+<td>Insights</td>
+</tr>
+<tr>
+<td>analyze / query / compliance report</td>
+<td>Log Analytics</td>
+</tr>
+<tr>
+<td>across multiple VMs + summary data</td>
+<td>Log Analytics</td>
+</tr>
+<tr>
+<td>Update Management / patch compliance</td>
+<td>Log Analytics (data put into workspace)</td>
+</tr>
+<tr>
+<td>Change tracking</td>
+<td>Log Analytics</td>
+</tr>
+</tbody>
+</table>
+<h3>14. Private DNS + Private Endpoint + Hybrid resolution</h3>
+<p>Questions around "Can VM/on-prem resolve name of private or not?". Need to remember scope of each components.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Scope</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Private DNS Zone</strong></td>
+<td><strong>Global</strong></td>
+<td>1 zone link, multiple VNet in every region/sub</td>
+</tr>
+<tr>
+<td><strong>VNet</strong></td>
+<td>Region</td>
+<td>No cross-region</td>
+</tr>
+<tr>
+<td><strong>VNet Peering</strong></td>
+<td>Cross-region/cross-sub OK</td>
+<td><strong>Not share DNS by default</strong></td>
+</tr>
+<tr>
+<td><strong>DNS Private Resolver</strong> (inbound/outbound endpoint)</td>
+<td><strong>Region</strong></td>
+<td>HA need resolver for each region</td>
+</tr>
+<tr>
+<td><strong>Private Endpoint NIC</strong></td>
+<td>Region (in subnet)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Pitfall 1: Peering not share DNS</p>
+<ul>
+<li>
+<p>VNet-A have Private Endpoint + zone already link → VM-A resolve OK. VM-B in VNet-B (peered) <strong>fail</strong> because zone haven't link to VNet-B.</p>
+</li>
+<li>
+<p><strong>Fix:</strong> link zone to <strong>both</strong> VNet. Zone is global, link is unlimit</p>
+</li>
+</ul>
+<p>Pitfall 2: Hybrid DNS need Private Resolver</p>
+<ul>
+<li>On-prem need to resolve <code>mystorage.privatelink.blob...</code> →</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">On</span><span class="o">-</span><span class="n">prem</span><span class="w"> </span><span class="n">DNS</span><span class="w">  </span><span class="err">──</span><span class="n">conditional</span><span class="w"> </span><span class="n">fwd</span><span class="err">──→</span><span class="w">  </span><span class="n">DNS</span><span class="w"> </span><span class="n">Private</span><span class="w"> </span><span class="n">Resolver</span>
+<span class="w">                                   </span><span class="p">(</span><span class="n">inbound</span><span class="w"> </span><span class="n">endpoint</span><span class="p">,</span><span class="w"> </span><span class="n">region</span><span class="w"> </span><span class="n">X</span><span class="p">)</span>
+<span class="w">                                          </span><span class="err">↓</span>
+<span class="w">                                   </span><span class="n">linked</span><span class="w"> </span><span class="n">Private</span><span class="w"> </span><span class="n">DNS</span><span class="w"> </span><span class="n">Zones</span>
+<span class="w">                                          </span><span class="err">↓</span>
+<span class="w">                                   </span><span class="k">return</span><span class="w"> </span><span class="n">IP</span><span class="w"> </span><span class="n">private</span><span class="w"> </span><span class="n">endpoint</span>
+</code></pre></div>
+
+<ul>
+<li><strong>Inbound endpoint</strong> = on-prem DNS forward query into Azure (resolve privatelink zones)</li>
+<li><strong>Outbound endpoint</strong> = Azure VM resolve DNS on-prem via conditional forwarding rules.</li>
+<li>HA cross-region → deploy resolver in 2 region</li>
+</ul>
+<p>Common Scenario:</p>
+<table>
+<thead>
+<tr>
+<th>Symptoms</th>
+<th>Reason</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VM resolve private endpoint → public IP</td>
+<td>Zone haven't link VNet</td>
+<td>Link zone into VNet</td>
+</tr>
+<tr>
+<td>Spoke not resolve even peered hub</td>
+<td>Zone link only hub</td>
+<td>Link zone into spoke also</td>
+</tr>
+<tr>
+<td>On-prem resolve → public IP</td>
+<td>Don't have hybrid DNS</td>
+<td>Deploy <strong>DNS Private Resolver</strong> + conditional fwd</td>
+</tr>
+<tr>
+<td>HA cross-region hybrid</td>
+<td>Resolver region-bound</td>
+<td>Resolver in 2 region</td>
+</tr>
+<tr>
+<td>Zone in different sub without link</td>
+<td>Cross-sub permission</td>
+<td>Provide <code>Network Contributor</code> for zone</td>
+</tr>
+</tbody>
+</table>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/dns/dns-private-resolver-overview">Azure DNS Private Resolver overview</a></li>
+<li><a href="https://learn.microsoft.com/en-us/azure/dns/private-dns-overview">What is an Azure Private DNS zone?</a></li>
+</ul>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2026-05-16T00:00:00+07:00">Sat 16 May 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://blackmetalz.github.io/tags.html#azure-ref">azure
+                    <span class="superscript">3</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#devops-ref">devops
+                    <span class="superscript">4</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#exam-ref">exam
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://blackmetalz.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
