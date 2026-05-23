@@ -27,7 +27,7 @@
 &lt;li&gt;Domain 5 — Monitor &amp;amp; Backup (10–15%)&lt;/li&gt;
 &lt;li&gt;Exam Tip/Tricks&lt;/li&gt;
 &lt;li&gt;Secure Weapons&lt;/li&gt;
-&lt;li&gt;Prepare for the Exam!&lt;/li&gt;
+&lt;li&gt;Taking the Exam!&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Ok, let's take them one by one!&lt;/p&gt;
 &lt;hr&gt;
@@ -1251,7 +1251,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 &lt;li&gt;&lt;a href="https://learn.microsoft.com/en-us/azure/dns/dns-private-resolver-overview"&gt;Azure DNS Private Resolver overview&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://learn.microsoft.com/en-us/azure/dns/private-dns-overview"&gt;What is an Azure Private DNS zone?&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h1&gt;Takingthe Exam&lt;/h1&gt;
+&lt;h1&gt;Taking the Exam&lt;/h1&gt;
 &lt;p&gt;From my experience preparing for cloud certs, AZ-104 feels harder than AWS SAA / GCP ACE at the associate level — broader scope and tons of edge cases xD&lt;/p&gt;
 &lt;p&gt;Even you can access &lt;a href="https://learn.microsoft.com/"&gt;https://learn.microsoft.com/&lt;/a&gt; But no CTRL+F, very slow and time consuming, like watch document during CKAD/CKS/CKA exam.&lt;/p&gt;
 &lt;p&gt;Fuck this exam, it was hard AF. No idea I can complete this or not!!!&lt;/p&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="devops"/><category term="exam"/></entry><entry><title>My experience on learning Azure Devops - Part 2: Azure Devops</title><link href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-2-azure-devops.html" rel="alternate"/><published>2026-05-05T00:00:00+07:00</published><updated>2026-05-05T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-05:/my-experience-on-learning-azure-devops-part-2-azure-devops.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
