@@ -30,6 +30,12 @@
 &lt;li&gt;Taking the Exam!&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Ok, let's take them one by one!&lt;/p&gt;
+&lt;h3&gt;Azure physical infrastructure&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="Infra structure" src="./images/2026/05/07.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Availability Zones&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="AZs" src="./images/2026/05/08.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Use availability zones for your workloads&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="AZ workloads" src="./images/2026/05/09.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Domain 1 - Identity &amp;amp; Governance&lt;/h1&gt;
 &lt;h3&gt;Hierarchy&lt;/h3&gt;
@@ -43,6 +49,8 @@
               └── Resource  →  only that resource
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;I like this fucking picture that explain everything!&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Azure accounts" src="./images/2026/05/06.png"&gt;&lt;/p&gt;
 &lt;p&gt;Here are common built-in roles of Azure RBAC:&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
@@ -1294,7 +1302,8 @@ Azure blob storage when: "object / blob / images / unstructured data" (Access vi
 &lt;h1&gt;Taking the Exam&lt;/h1&gt;
 &lt;p&gt;From my experience preparing for cloud certs, AZ-104 feels harder than AWS SAA / GCP ACE at the associate level — broader scope and tons of edge cases xD&lt;/p&gt;
 &lt;p&gt;Even you can access &lt;a href="https://learn.microsoft.com/"&gt;https://learn.microsoft.com/&lt;/a&gt; But no CTRL+F, very slow and time consuming, like watch document during CKAD/CKS/CKA exam.&lt;/p&gt;
-&lt;p&gt;Fuck this exam, it was hard AF. No idea I can complete this or not!!!&lt;/p&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="devops"/><category term="exam"/></entry><entry><title>My experience on learning Azure Devops - Part 2: Azure Devops</title><link href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-2-azure-devops.html" rel="alternate"/><published>2026-05-05T00:00:00+07:00</published><updated>2026-05-05T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-05:/my-experience-on-learning-azure-devops-part-2-azure-devops.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;Fuck this exam, it was hard AF. No idea I can complete this or not!!!&lt;/p&gt;
+&lt;p&gt;Schedule &lt;a href="https://learn.microsoft.com/en-us/credentials/certifications/azure-administrator/?practice-assessment-type=certification"&gt;exam here&lt;/a&gt;&lt;/p&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="devops"/><category term="exam"/></entry><entry><title>My experience on learning Azure Devops - Part 2: Azure Devops</title><link href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-2-azure-devops.html" rel="alternate"/><published>2026-05-05T00:00:00+07:00</published><updated>2026-05-05T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-05:/my-experience-on-learning-azure-devops-part-2-azure-devops.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This article is part 2, part 1 you can find it here: &lt;a href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-1-acr-aks.html"&gt;My experience on learning Azure Devops - Part 1: ACR + AKS&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;In this article, I will show you some little knowledge about Azure DevOps that I learned and try to implement in my lab.&lt;/p&gt;
 &lt;hr&gt;
