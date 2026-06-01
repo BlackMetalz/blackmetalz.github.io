@@ -1251,6 +1251,9 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 &lt;li&gt;&lt;a href="https://learn.microsoft.com/en-us/azure/dns/dns-private-resolver-overview"&gt;Azure DNS Private Resolver overview&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://learn.microsoft.com/en-us/azure/dns/private-dns-overview"&gt;What is an Azure Private DNS zone?&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
+&lt;h3&gt;15. Azure Files vs Azure Blob Storage&lt;/h3&gt;
+&lt;p&gt;Azure files when: "file share" / "shared files" / "mount" / "SMB" (Access via mount, smb...)
+Azure blob storage when: "object / blob / images / unstructured data" (Access via Rest API/URl)&lt;/p&gt;
 &lt;h1&gt;Taking the Exam&lt;/h1&gt;
 &lt;p&gt;From my experience preparing for cloud certs, AZ-104 feels harder than AWS SAA / GCP ACE at the associate level — broader scope and tons of edge cases xD&lt;/p&gt;
 &lt;p&gt;Even you can access &lt;a href="https://learn.microsoft.com/"&gt;https://learn.microsoft.com/&lt;/a&gt; But no CTRL+F, very slow and time consuming, like watch document during CKAD/CKS/CKA exam.&lt;/p&gt;
