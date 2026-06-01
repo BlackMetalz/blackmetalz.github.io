@@ -80,7 +80,7 @@
             
             <p>New challenge, acquire all DevOps certifications in 3 popular public cloud providers, Azure is the first target of mine. Let's fucking go!!!</p>
 <p>I will try to refer to AWS as much as I can because AWS is the first cloud I learned.</p>
-<p>This article could contains some wrong information since I'm new to this, correct me if I'm wrong, thanks xD</p>
+<p>This article could contain some wrong information since I'm new to this, correct me if I'm wrong, thanks xD</p>
 <hr>
 <h1>Prepare for the exam</h1>
 <h3>Useful resources:</h3>
@@ -149,9 +149,9 @@
 </tr>
 </tbody>
 </table>
-<p>Resource reference: 
-<a href="https://learn.microsoft.com/en-us/azure/role-based-access-control/overview">https://learn.microsoft.com/en-us/azure/role-based-access-control/overview</a></p>
-<p>Inheritance: very very very important, assigned 1 time in Management Group, all sub resource inherit.</p>
+<p>Resource reference: </p>
+<p><a href="https://learn.microsoft.com/en-us/azure/role-based-access-control/overview">https://learn.microsoft.com/en-us/azure/role-based-access-control/overview</a></p>
+<p>Inheritance: very very very important, <strong>assigned 1 time in Management Group, all sub resource inherit.</strong></p>
 <h3>Azure Policy vs IAM Policy</h3>
 <p>Totally different versus AWS IAM Policy. Azure Policy enforce rules on resources, not permissions.</p>
 <table>
@@ -167,7 +167,7 @@
 <td>RBAC = who can do what</td>
 </tr>
 <tr>
-<td>SCP = restrict accounts</td>
+<td>SCP = restrict permissions across accounts</td>
 <td>Azure Policy = enforce rules on resources</td>
 </tr>
 </tbody>
@@ -339,7 +339,7 @@
 </code></pre></div>
 
 <p>Same idea: workload is bound to an identity, the identity is granted permissions, and the runtime auto-exchanges tokens (via OIDC / IMDS endpoint). Code only calls the SDK — no secrets or keys needed anywhere. When Pod/App restarts, the identity persists — no manual credential rotation.</p>
-<p>It also applies to in-cluster K8s RBAC: a Pod runs as a ServiceAccount, that SA is bound via Role/RoleBinding (or ClusterRole/ClusterRoleBinding), and calls to the K8s API server (default endpoint <code>https://kubernetes.default.svc</code> inside the Pod) are authenticated using the projected token at <code>/var/run/secrets/kubernetes.io/serviceaccount/token</code>. Same identity-binds-to-workload pattern, just scoped to the cluster instead of cloud resources.</p>
+<p>It also applies to in-cluster K8s RBAC: a Pod runs as a ServiceAccount, that SA is bound via Role/RoleBinding (or ClusterRole/ClusterRoleBinding), and calls to the K8s API server (default endpoint <strong>https://kubernetes.default.svc</strong> inside the Pod) are authenticated using the projected token at <strong>/var/run/secrets/kubernetes.io/serviceaccount/token</strong>. Same identity-binds-to-workload pattern, just scoped to the cluster instead of cloud resources.</p>
 <p>Resource Reference:</p>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/azure/app-service/app-service-key-vault-references?tabs=azure-cli">Use Key Vault references for App Service and Azure Functions</a></li>
@@ -351,7 +351,7 @@
 <li>RBAC = IAM Roles. </li>
 <li>Azure Policy = Service Control Policies (but have more flexibility)</li>
 <li>SAMI is often prefer because it will not make <code>orphaned identities</code> xD</li>
-<li>Subscription owner can not read KV secret by default. Owner only have control plane permissions — need to self-grant data plane role (e.g. <code>Key Vault Secrets User</code>) if access is needed</li>
+<li>Subscription owner can not read KV secret by default. Owner only have control plane permissions — need to self-grant data plane role (e.g. <code>Key Vault Secrets User</code>) if access is needed, applies regardless of permission model, but RBAC is recommended!</li>
 <li>Key Vault Contributor = manage vault configuration (control plane), NOT read secret</li>
 <li>Key Vault Administrator = full data plane access (read/write/delete secrets, keys, certs)</li>
 <li>For vault access model best practice: pick RBAC!</li>
@@ -403,7 +403,7 @@
 <ul>
 <li>SLA 99.99% → must pick Zones, not Set</li>
 <li>Can not combine Availability Set and Availability Zones</li>
-<li>Availability Set: <strong>Fault Domain (FD):</strong> different physical rack (power, switch) — max 3, default 2</li>
+<li>Availability Set: <strong>Fault Domain (FD):</strong> different physical rack (power, switch) — default 2, max 3 (some regions support 3)</li>
 <li>Availability Set: <strong>Update Domain (UD):</strong> group VM not going to restart together when Azure patch — max 20</li>
 </ul>
 <p>Resource Reference:</p>
@@ -445,9 +445,15 @@
 </blockquote>
 <h3>Deployment slot</h3>
 <p>Azure App Service deployment slots are live, distinct environments for your web apps. They allow you to test changes, warm up instances, and achieve zero-downtime deployments. By managing configurations independently, you can deploy updates to a staging slot, verify them, and instantly swap them into production. (from AI Overview when google search xD).</p>
+<p>Reference: It is same like AWS Beanstalk</p>
+<ul>
+<li>Staging/Production Slot = AWS - Elastic Beanstalk Environments / AWS - Lambda Versions</li>
+<li>Swap Slots = AWS Swap Environment URLs</li>
+<li>Traffic % (Routing) = Weighted Aliases (Lambda) or Weighted Routing (Route 53 / ALB)</li>
+</ul>
 <p>Some note for exam:</p>
 <ul>
-<li>Deployment slot is not available in Free/Basic plan. If question related to staging environment, pick Standards.</li>
+<li>Deployment slot is not available in Free/Basic plan. If question related to staging environment, pick Standard.</li>
 <li>After slot swap, both slot still running, for rolling back, just simple by swap back.</li>
 <li>App Service Plan = compute resource.</li>
 </ul>
@@ -661,7 +667,7 @@ Azure:
 <td><strong>RA-GZRS</strong></td>
 </tr>
 <tr>
-<td>Available even if a region goes down and cost-effective</td>
+<td>Available even if a region goes down and cost-effective (GRS cheaper than RA-GRS / GZRS)</td>
 <td><strong>GRS</strong></td>
 </tr>
 </tbody>
@@ -1047,7 +1053,7 @@ X-Ray                        →   Application Insights
 </tr>
 <tr>
 <td><strong>Reader</strong></td>
-<td style="text-align: center;">No (read-only)</td>
+<td style="text-align: center;">No</td>
 <td style="text-align: center;">No</td>
 </tr>
 <tr>

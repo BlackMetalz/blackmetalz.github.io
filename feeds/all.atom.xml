@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-05-16T00:00:00+07:00</updated><entry><title>[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104)</title><link href="https://blackmetalz.github.io/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104.html" rel="alternate"/><published>2026-05-16T00:00:00+07:00</published><updated>2026-05-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-16:/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104.html</id><summary type="html"/><content type="html">&lt;p&gt;New challenge, acquire all DevOps certifications in 3 popular public cloud providers, Azure is the first target of mine. Let's fucking go!!!&lt;/p&gt;
 &lt;p&gt;I will try to refer to AWS as much as I can because AWS is the first cloud I learned.&lt;/p&gt;
-&lt;p&gt;This article could contains some wrong information since I'm new to this, correct me if I'm wrong, thanks xD&lt;/p&gt;
+&lt;p&gt;This article could contain some wrong information since I'm new to this, correct me if I'm wrong, thanks xD&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Prepare for the exam&lt;/h1&gt;
 &lt;h3&gt;Useful resources:&lt;/h3&gt;
@@ -70,9 +70,9 @@
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;Resource reference: 
-&lt;a href="https://learn.microsoft.com/en-us/azure/role-based-access-control/overview"&gt;https://learn.microsoft.com/en-us/azure/role-based-access-control/overview&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Inheritance: very very very important, assigned 1 time in Management Group, all sub resource inherit.&lt;/p&gt;
+&lt;p&gt;Resource reference: &lt;/p&gt;
+&lt;p&gt;&lt;a href="https://learn.microsoft.com/en-us/azure/role-based-access-control/overview"&gt;https://learn.microsoft.com/en-us/azure/role-based-access-control/overview&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Inheritance: very very very important, &lt;strong&gt;assigned 1 time in Management Group, all sub resource inherit.&lt;/strong&gt;&lt;/p&gt;
 &lt;h3&gt;Azure Policy vs IAM Policy&lt;/h3&gt;
 &lt;p&gt;Totally different versus AWS IAM Policy. Azure Policy enforce rules on resources, not permissions.&lt;/p&gt;
 &lt;table&gt;
@@ -88,7 +88,7 @@
 &lt;td&gt;RBAC = who can do what&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;SCP = restrict accounts&lt;/td&gt;
+&lt;td&gt;SCP = restrict permissions across accounts&lt;/td&gt;
 &lt;td&gt;Azure Policy = enforce rules on resources&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
@@ -260,7 +260,7 @@
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Same idea: workload is bound to an identity, the identity is granted permissions, and the runtime auto-exchanges tokens (via OIDC / IMDS endpoint). Code only calls the SDK — no secrets or keys needed anywhere. When Pod/App restarts, the identity persists — no manual credential rotation.&lt;/p&gt;
-&lt;p&gt;It also applies to in-cluster K8s RBAC: a Pod runs as a ServiceAccount, that SA is bound via Role/RoleBinding (or ClusterRole/ClusterRoleBinding), and calls to the K8s API server (default endpoint &lt;code&gt;https://kubernetes.default.svc&lt;/code&gt; inside the Pod) are authenticated using the projected token at &lt;code&gt;/var/run/secrets/kubernetes.io/serviceaccount/token&lt;/code&gt;. Same identity-binds-to-workload pattern, just scoped to the cluster instead of cloud resources.&lt;/p&gt;
+&lt;p&gt;It also applies to in-cluster K8s RBAC: a Pod runs as a ServiceAccount, that SA is bound via Role/RoleBinding (or ClusterRole/ClusterRoleBinding), and calls to the K8s API server (default endpoint &lt;strong&gt;https://kubernetes.default.svc&lt;/strong&gt; inside the Pod) are authenticated using the projected token at &lt;strong&gt;/var/run/secrets/kubernetes.io/serviceaccount/token&lt;/strong&gt;. Same identity-binds-to-workload pattern, just scoped to the cluster instead of cloud resources.&lt;/p&gt;
 &lt;p&gt;Resource Reference:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://learn.microsoft.com/en-us/azure/app-service/app-service-key-vault-references?tabs=azure-cli"&gt;Use Key Vault references for App Service and Azure Functions&lt;/a&gt;&lt;/li&gt;
@@ -272,7 +272,7 @@
 &lt;li&gt;RBAC = IAM Roles. &lt;/li&gt;
 &lt;li&gt;Azure Policy = Service Control Policies (but have more flexibility)&lt;/li&gt;
 &lt;li&gt;SAMI is often prefer because it will not make &lt;code&gt;orphaned identities&lt;/code&gt; xD&lt;/li&gt;
-&lt;li&gt;Subscription owner can not read KV secret by default. Owner only have control plane permissions — need to self-grant data plane role (e.g. &lt;code&gt;Key Vault Secrets User&lt;/code&gt;) if access is needed&lt;/li&gt;
+&lt;li&gt;Subscription owner can not read KV secret by default. Owner only have control plane permissions — need to self-grant data plane role (e.g. &lt;code&gt;Key Vault Secrets User&lt;/code&gt;) if access is needed, applies regardless of permission model, but RBAC is recommended!&lt;/li&gt;
 &lt;li&gt;Key Vault Contributor = manage vault configuration (control plane), NOT read secret&lt;/li&gt;
 &lt;li&gt;Key Vault Administrator = full data plane access (read/write/delete secrets, keys, certs)&lt;/li&gt;
 &lt;li&gt;For vault access model best practice: pick RBAC!&lt;/li&gt;
@@ -324,7 +324,7 @@
 &lt;ul&gt;
 &lt;li&gt;SLA 99.99% → must pick Zones, not Set&lt;/li&gt;
 &lt;li&gt;Can not combine Availability Set and Availability Zones&lt;/li&gt;
-&lt;li&gt;Availability Set: &lt;strong&gt;Fault Domain (FD):&lt;/strong&gt; different physical rack (power, switch) — max 3, default 2&lt;/li&gt;
+&lt;li&gt;Availability Set: &lt;strong&gt;Fault Domain (FD):&lt;/strong&gt; different physical rack (power, switch) — default 2, max 3 (some regions support 3)&lt;/li&gt;
 &lt;li&gt;Availability Set: &lt;strong&gt;Update Domain (UD):&lt;/strong&gt; group VM not going to restart together when Azure patch — max 20&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Resource Reference:&lt;/p&gt;
@@ -366,9 +366,15 @@
 &lt;/blockquote&gt;
 &lt;h3&gt;Deployment slot&lt;/h3&gt;
 &lt;p&gt;Azure App Service deployment slots are live, distinct environments for your web apps. They allow you to test changes, warm up instances, and achieve zero-downtime deployments. By managing configurations independently, you can deploy updates to a staging slot, verify them, and instantly swap them into production. (from AI Overview when google search xD).&lt;/p&gt;
+&lt;p&gt;Reference: It is same like AWS Beanstalk&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Staging/Production Slot = AWS - Elastic Beanstalk Environments / AWS - Lambda Versions&lt;/li&gt;
+&lt;li&gt;Swap Slots = AWS Swap Environment URLs&lt;/li&gt;
+&lt;li&gt;Traffic % (Routing) = Weighted Aliases (Lambda) or Weighted Routing (Route 53 / ALB)&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;Some note for exam:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Deployment slot is not available in Free/Basic plan. If question related to staging environment, pick Standards.&lt;/li&gt;
+&lt;li&gt;Deployment slot is not available in Free/Basic plan. If question related to staging environment, pick Standard.&lt;/li&gt;
 &lt;li&gt;After slot swap, both slot still running, for rolling back, just simple by swap back.&lt;/li&gt;
 &lt;li&gt;App Service Plan = compute resource.&lt;/li&gt;
 &lt;/ul&gt;
@@ -582,7 +588,7 @@ Azure:
 &lt;td&gt;&lt;strong&gt;RA-GZRS&lt;/strong&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;Available even if a region goes down and cost-effective&lt;/td&gt;
+&lt;td&gt;Available even if a region goes down and cost-effective (GRS cheaper than RA-GRS / GZRS)&lt;/td&gt;
 &lt;td&gt;&lt;strong&gt;GRS&lt;/strong&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
@@ -968,7 +974,7 @@ X-Ray                        →   Application Insights
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;&lt;strong&gt;Reader&lt;/strong&gt;&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;No (read-only)&lt;/td&gt;
+&lt;td style="text-align: center;"&gt;No&lt;/td&gt;
 &lt;td style="text-align: center;"&gt;No&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
