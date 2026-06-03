@@ -84,11 +84,10 @@
 <hr>
 <h1>Prepare for the exam</h1>
 <h3>Useful resources:</h3>
+<p>A lot of image I take from <a href="https://learn.microsoft.com/">https://learn.microsoft.com/</a>. I think next article better use link instead copy to this repo and include to article xD</p>
+<p>Resource must/should watch (Yeah, it is a lot, I didn't watched them all, just write here for reference. Haaaaaaaaaa):</p>
 <ul>
 <li><a href="https://udemy.com/course/70533-azure/">AZ-104 Microsoft Azure Administrator - Complete Exam Prep - Scott Duffy</a></li>
-</ul>
-<p>Resource must watch:</p>
-<ul>
 <li><a href="https://www.youtube.com/watch?v=KD1cEc1-vOE">AZ-104 Preparation Done Wrong | What Top Scorers Do Differently</a></li>
 <li><a href="https://www.youtube.com/watch?v=27WLcdQkqIg">Everything you need to know about the AZ-104 exam</a></li>
 <li><a href="https://www.youtube.com/watch?v=0Knf9nub4-k&amp;list=PLlVtbbG169nH_CJl4wwKBfS1V8nMYr7xL&amp;index=9">AZ-104 Administrator Associate Study Cram v2</a></li>
@@ -363,6 +362,7 @@
 <li>Key Vault Contributor = manage vault configuration (control plane), NOT read secret</li>
 <li>Key Vault Administrator = full data plane access (read/write/delete secrets, keys, certs)</li>
 <li>For vault access model best practice: pick RBAC!</li>
+<li>Microsoft Identity Manager (MIM) = bridging/sync identity store on-premises (like AD FS) with Microsft Entra ID</li>
 </ul>
 <p>Resource Reference:</p>
 <ul>
@@ -412,7 +412,7 @@
 <p><img alt="Fault domains" src="https://learn.microsoft.com/en-us/training/wwl-azure/configure-virtual-machine-availability/media/update-fault-domains-c1ceee00.png"></p>
 <p>Exam Gotchas</p>
 <ul>
-<li>SLA 99.99% → must pick Zones, not Set</li>
+<li>SLA 99.99% -&gt; must pick Zones, not Set</li>
 <li>Can not combine Availability Set and Availability Zones</li>
 <li>Availability Set: <strong>Fault Domain (FD):</strong> different physical rack (power, switch) — default 2, max 3 (some regions support 3)</li>
 <li>Availability Set: <strong>Update Domain (UD):</strong> group VM not going to restart together when Azure patch — max 20</li>
@@ -477,7 +477,22 @@
 <li>ARM Template = Cloudformation Template of AWS</li>
 <li>Bicep still is ARM but better syntax (Azure only)</li>
 <li>Still prefer to use Terraform instead of this fucking shit when it comes to production!</li>
+<li>From Bicep to ARM (build/compile): </li>
 </ul>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>bicep<span class="w"> </span>build<span class="w"> </span>--file<span class="w"> </span>main.bicep
+<span class="c1"># Output: main.json (ARM template)</span>
+<span class="c1"># Directly</span>
+bicep<span class="w"> </span>build<span class="w"> </span>main.bicep
+bicep<span class="w"> </span>decompile<span class="w"> </span>main.json
+</code></pre></div>
+
+<ul>
+<li>From ARM to Bicep (decompile):</li>
+</ul>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>bicep<span class="w"> </span>decompile<span class="w"> </span>--file<span class="w"> </span>main.json
+<span class="c1"># Output: main.bicep</span>
+</code></pre></div>
+
 <h3>Containers</h3>
 <p>Comparison between 3 services</p>
 <table>
@@ -521,7 +536,7 @@
 <h3>Azure Storage Account vs AWS S3 — Mental Model</h3>
 <div class="highlight"><pre><span></span><code><span class="nx">AWS</span><span class="w">                              </span><span class="nx">Azure</span>
 <span class="err">───────────────────────────────────────────────────</span>
-<span class="p">(</span><span class="nx">No</span><span class="p">)</span><span class="w">                         </span><span class="err">→</span><span class="w">   </span><span class="nx">Storage</span><span class="w"> </span><span class="nx">Account</span><span class="w"> </span><span class="p">(</span><span class="nx">wrap</span><span class="w"> </span><span class="nx">layer</span><span class="p">)</span>
+<span class="p">(</span><span class="nx">No</span><span class="w"> </span><span class="nx">Need</span><span class="p">!)</span><span class="w">                   </span><span class="err">→</span><span class="w">   </span><span class="nx">Storage</span><span class="w"> </span><span class="nx">Account</span><span class="w"> </span><span class="p">(</span><span class="nx">wrap</span><span class="w"> </span><span class="nx">layer</span><span class="p">)</span>
 <span class="nx">S3</span><span class="w"> </span><span class="nx">Bucket</span><span class="w">                    </span><span class="err">→</span><span class="w">   </span><span class="nx">Blob</span><span class="w"> </span><span class="nx">Container</span>
 <span class="nx">S3</span><span class="w"> </span><span class="nx">Object</span><span class="w">                    </span><span class="err">→</span><span class="w">   </span><span class="nx">Blob</span>
 <span class="nx">S3</span><span class="w"> </span><span class="nx">Bucket</span><span class="w"> </span><span class="nx">Policy</span><span class="w">             </span><span class="err">→</span><span class="w">   </span><span class="nx">Container</span><span class="w"> </span><span class="nx">Access</span><span class="w"> </span><span class="nx">Policy</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">RBAC</span>
@@ -581,7 +596,7 @@ Azure:
 <ul>
 <li>Storage Account name</li>
 <li>Location/Region</li>
-<li>Performance tier (Standard ↔ Premium)</li>
+<li>Performance tier (Standard &lt;---&gt; Premium)</li>
 <li>Hierarchical namespace (For exam, but in fact we have migration tool)</li>
 </ul>
 <p>Can be change after created:</p>
@@ -683,11 +698,12 @@ Azure:
 <td><strong>RA-GZRS</strong></td>
 </tr>
 <tr>
-<td>Available even if a region goes down and cost-effective (GRS cheaper than RA-GRS / GZRS)</td>
-<td><strong>GRS</strong></td>
+<td>Available even if a region goes down and cost-effective</td>
+<td><strong>GRS</strong> (GRS cheaper than RA-GRS / GZRS)</td>
 </tr>
 </tbody>
 </table>
+<p>GZRS = Geo-Zone-Redundant Storage</p>
 <p>Resource Reference:</p>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-redundancy">Azure Storage redundancy</a></li>
@@ -775,8 +791,8 @@ Route Table                  →   Route Table
 <li><strong>Stateless (AWS NACL):</strong> firewall has <em>no memory</em>. Every packet is evaluated independently → you must define rules for <strong>both directions</strong> (inbound AND outbound).</li>
 </ul>
 <p>Quick example — VM calling GitHub API (HTTPS port 443):</p>
-<div class="highlight"><pre><span></span><code><span class="n">VM</span><span class="w"> </span><span class="p">(</span><span class="n">random</span><span class="w"> </span><span class="n">port</span><span class="w"> </span><span class="mi">54321</span><span class="p">)</span><span class="w"> </span><span class="err">──</span><span class="o">[</span><span class="n">request</span><span class="o">]</span><span class="err">──→</span><span class="w"> </span><span class="n">GitHub</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="w"> </span><span class="mi">443</span><span class="p">)</span>
-<span class="n">VM</span><span class="w"> </span><span class="p">(</span><span class="n">random</span><span class="w"> </span><span class="n">port</span><span class="w"> </span><span class="mi">54321</span><span class="p">)</span><span class="w"> </span><span class="err">←──</span><span class="o">[</span><span class="n">response</span><span class="o">]</span><span class="err">──</span><span class="w"> </span><span class="n">GitHub</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="w"> </span><span class="mi">443</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">VM</span><span class="w"> </span><span class="p">(</span><span class="n">random</span><span class="w"> </span><span class="n">port</span><span class="w"> </span><span class="mi">54321</span><span class="p">)</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="o">[</span><span class="n">request</span><span class="o">]</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">GitHub</span><span class="w"> </span><span class="p">(</span><span class="n">port</span><span class="w"> </span><span class="mi">443</span><span class="p">)</span>
+<span class="n">VM</span><span class="w"> </span><span class="p">(</span><span class="n">random</span><span class="w"> </span><span class="n">port</span><span class="w"> </span><span class="mi">54321</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="c1">-- [response] &lt;-- GitHub (port 443)</span>
 </code></pre></div>
 
 <table>
@@ -791,7 +807,7 @@ Route Table                  →   Route Table
 <tr>
 <td>Rules needed</td>
 <td>1 outbound: Allow TCP 443</td>
-<td>Outbound: Allow TCP 443 <strong>+</strong> Inbound: Allow TCP from 443 → ephemeral ports 1024-65535</td>
+<td>Outbound: Allow TCP 443 <strong>+</strong> Inbound: Allow TCP from 443 -&gt; ephemeral ports 1024-65535</td>
 </tr>
 <tr>
 <td>Forget the return rule?</td>
@@ -833,11 +849,11 @@ Route Table                  →   Route Table
 <td>Global Peering</td>
 </tr>
 <tr>
-<td>On-prem ↔ Azure (internet)</td>
+<td>On-prem &lt;--&gt; Azure (internet)</td>
 <td>VPN Gateway</td>
 </tr>
 <tr>
-<td>On-prem ↔ Azure (dedicated)</td>
+<td>On-prem &lt;--&gt; Azure (dedicated)</td>
 <td>ExpressRoute</td>
 </tr>
 </tbody>
@@ -923,11 +939,11 @@ VPC Traffic Mirroring        →   Packet Capture
 <p>Flow request (write by Claude):</p>
 <p><img alt="user flow" src="./images/2026/06/01.png"></p>
 <p>Explain by Claude (I don't think I can explain it better LOL)</p>
-<p>What is hub-and-spoke used for?:</p>
+<p>What is hub-and-spoke used for?</p>
 <div class="highlight"><pre><span></span><code><span class="n">Hub</span><span class="o">-</span><span class="ow">and</span><span class="o">-</span><span class="n">spoke</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">network</span><span class="w"> </span><span class="n">architecture</span><span class="w"> </span><span class="n">model</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">helps</span><span class="w"> </span><span class="n">organize</span><span class="w"> </span><span class="n">multiple</span><span class="w"> </span><span class="n">VNets</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">clean</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">cost</span><span class="o">-</span><span class="n">effective</span><span class="w"> </span><span class="n">way</span><span class="o">.</span><span class="w"> </span><span class="n">Instead</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">having</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">VNet</span><span class="w"> </span><span class="n">provision</span><span class="w"> </span><span class="n">its</span><span class="w"> </span><span class="n">own</span><span class="w"> </span><span class="n">shared</span><span class="w"> </span><span class="n">services</span><span class="w"> </span><span class="n">such</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">firewall</span><span class="p">,</span><span class="w"> </span><span class="n">gateway</span><span class="p">,</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">DNS</span><span class="w"> </span><span class="p">(</span><span class="n">which</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">both</span><span class="w"> </span><span class="n">expensive</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">hard</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">manage</span><span class="p">),</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">consolidate</span><span class="w"> </span><span class="n">them</span><span class="w"> </span><span class="n">into</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">central</span><span class="w"> </span><span class="n">VNet</span><span class="w"> </span><span class="n">called</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">hub</span><span class="o">.</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">application</span><span class="w"> </span><span class="n">VNets</span><span class="w"> </span><span class="p">(</span><span class="n">called</span><span class="w"> </span><span class="n">spokes</span><span class="p">)</span><span class="w"> </span><span class="n">only</span><span class="w"> </span><span class="n">hold</span><span class="w"> </span><span class="n">their</span><span class="w"> </span><span class="n">own</span><span class="w"> </span><span class="n">workloads</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="s2">&quot;borrow&quot;</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">shared</span><span class="w"> </span><span class="n">services</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">hub</span><span class="o">.</span><span class="w"> </span><span class="n">In</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">architecture</span><span class="p">,</span><span class="w"> </span><span class="n">hub</span><span class="o">-</span><span class="n">vnet</span><span class="w"> </span><span class="p">(</span><span class="mf">10.0</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span><span class="w"> </span><span class="n">acts</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">hub</span><span class="w"> </span><span class="n">hosting</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">shared</span><span class="w"> </span><span class="n">Azure</span><span class="w"> </span><span class="n">Firewall</span><span class="p">,</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="n">app</span><span class="o">-</span><span class="n">vnet</span><span class="w"> </span><span class="p">(</span><span class="mf">10.1</span><span class="o">.</span><span class="mf">0.0</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">spoke</span><span class="w"> </span><span class="n">containing</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">application</span><span class="w"> </span><span class="p">(</span><span class="n">the</span><span class="w"> </span><span class="n">frontend</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">backend</span><span class="w"> </span><span class="n">VMs</span><span class="p">)</span><span class="o">.</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">main</span><span class="w"> </span><span class="n">benefits</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">centralized</span><span class="w"> </span><span class="n">security</span><span class="w"> </span><span class="n">control</span><span class="p">,</span><span class="w"> </span><span class="n">lower</span><span class="w"> </span><span class="n">cost</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">avoiding</span><span class="w"> </span><span class="n">duplication</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">expensive</span><span class="w"> </span><span class="n">services</span><span class="p">,</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">easy</span><span class="w"> </span><span class="n">scalability</span><span class="w"> </span><span class="err">—</span><span class="w"> </span><span class="n">adding</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">spoke</span><span class="w"> </span><span class="n">simply</span><span class="w"> </span><span class="n">requires</span><span class="w"> </span><span class="n">peering</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">hub</span><span class="o">.</span>
 </code></pre></div>
 
-<p>Why do we need Virtual Network Peering?:</p>
+<p>Why do we need Virtual Network Peering?</p>
 <div class="highlight"><pre><span></span><code><span class="n">By</span><span class="w"> </span><span class="k">default</span><span class="p">,</span><span class="w"> </span><span class="n">two</span><span class="w"> </span><span class="n">different</span><span class="w"> </span><span class="n">VNets</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">fully</span><span class="w"> </span><span class="n">isolated</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">cannot</span><span class="w"> </span><span class="n">communicate</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">other</span><span class="p">,</span><span class="w"> </span><span class="n">even</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">they</span><span class="p">&#39;</span><span class="n">re</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="n">region</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">subscription</span><span class="p">.</span><span class="w"> </span><span class="n">VNet</span><span class="w"> </span><span class="n">Peering</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">mechanism</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">connects</span><span class="w"> </span><span class="n">two</span><span class="w"> </span><span class="n">VNets</span><span class="w"> </span><span class="n">so</span><span class="w"> </span><span class="n">they</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">route</span><span class="w"> </span><span class="n">traffic</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">other</span><span class="w"> </span><span class="n">over</span><span class="w"> </span><span class="n">private</span><span class="w"> </span><span class="n">IPs</span><span class="p">,</span><span class="w"> </span><span class="n">traveling</span><span class="w"> </span><span class="n">across</span><span class="w"> </span><span class="n">Microsoft</span><span class="p">&#39;</span><span class="n">s</span><span class="w"> </span><span class="n">backbone</span><span class="w"> </span><span class="n">infrastructure</span><span class="w"> </span><span class="n">instead</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">going</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">internet</span><span class="p">.</span><span class="w"> </span><span class="n">In</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">hub</span><span class="o">-</span><span class="k">and</span><span class="o">-</span><span class="n">spoke</span><span class="w"> </span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">peering</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="nl">mandatory:</span><span class="w"> </span><span class="n">without</span><span class="w"> </span><span class="n">peering</span><span class="w"> </span><span class="n">between</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">hub</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">spoke</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">spoke</span><span class="w"> </span><span class="n">cannot</span><span class="w"> </span><span class="n">send</span><span class="w"> </span><span class="n">its</span><span class="w"> </span><span class="n">traffic</span><span class="w"> </span><span class="n">through</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Azure</span><span class="w"> </span><span class="n">Firewall</span><span class="w"> </span><span class="n">located</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">hub</span><span class="p">.</span><span class="w"> </span><span class="n">In</span><span class="w"> </span><span class="n">other</span><span class="w"> </span><span class="n">words</span><span class="p">,</span><span class="w"> </span><span class="n">peering</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">what</span><span class="w"> </span><span class="n">turns</span><span class="w"> </span><span class="n">separate</span><span class="p">,</span><span class="w"> </span><span class="n">isolated</span><span class="w"> </span><span class="n">VNets</span><span class="w"> </span><span class="n">into</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">unified</span><span class="w"> </span><span class="n">hub</span><span class="o">-</span><span class="k">and</span><span class="o">-</span><span class="n">spoke</span><span class="w"> </span><span class="n">architecture</span><span class="p">.</span>
 </code></pre></div>
 
@@ -1018,7 +1034,7 @@ X-Ray                        →   Application Insights
 <tbody>
 <tr>
 <td>Peering is <strong>transitive</strong></td>
-<td>Wrong — A↔B, B↔C does <strong>not</strong> imply A↔C</td>
+<td>Wrong. A&lt;-&gt;B, B&lt;-&gt;C does <strong>not</strong> imply A&lt;-&gt;C</td>
 </tr>
 <tr>
 <td>Enable <code>Use Remote Gateway</code> in 1 side is enough</td>
@@ -1026,19 +1042,19 @@ X-Ray                        →   Application Insights
 </tr>
 <tr>
 <td>1 spoke use multiple remote gateway</td>
-<td>Wrong — only one</td>
+<td>Wrong, only one</td>
 </tr>
 </tbody>
 </table>
 <h3>3. Storage Replication</h3>
 <p>See <strong>Domain 3 — Replication Types</strong> for the full picker table.</p>
-<p><strong>Pitfalls:</strong> "highest availability within a region" → ZRS (not GRS). GRS is <strong>cross-region</strong>. G stands for GEO</p>
+<p><strong>Pitfalls:</strong> "highest availability within a region" -&gt; ZRS (not GRS). GRS is <strong>cross-region</strong>. G stands for GEO</p>
 <h3>4. Backup vs Site Recovery</h3>
 <ul>
 <li><strong>Azure Backup</strong> = data recovery (file, VM disk, DB) — RPO calculate by hour/day</li>
 <li><strong>Azure Site Recovery (ASR)</strong> = disaster recovery (replicate VM into another region) — RPO/RTO low</li>
 </ul>
-<p>Question "recover deleted file" → Azure Backup. "Region down, switch to another region" → ASR.</p>
+<p>Question "recover deleted file" -&gt; Azure Backup. "Region down, switch to another region" -&gt; ASR.</p>
 <h3>5. Recovery Services vault vs Backup vault (naming pitfall )</h3>
 <table>
 <thead>
@@ -1058,7 +1074,7 @@ X-Ray                        →   Application Insights
 </tr>
 </tbody>
 </table>
-<p>Keyword <strong>"files, folders, system state"</strong> → alway are <strong>Recovery Services vault</strong> (Because attach with MARS agent). Don't be wrong with "Azure Backup vault"</p>
+<p>Keyword <strong>"files, folders, system state"</strong> -&gt; alway are <strong>Recovery Services vault</strong> (Because attach with MARS agent). Don't be wrong with Azure Backup vault</p>
 <p>Resource Reference:</p>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/azure/backup/backup-vault-overview">Overview of Backup vaults</a></li>
@@ -1069,7 +1085,7 @@ X-Ray                        →   Application Insights
 <li><strong>RBAC</strong> = who did what (access)</li>
 <li><strong>Policy</strong> = resource allows to exist or not (compliance, deny tag missing, deny SKU ...)</li>
 </ul>
-<p>If questions are "enforce tag", "block region" → Policy. Otherwise "grant read access" → RBAC.</p>
+<p>If questions are "enforce tag", "block region" -&gt; Policy. Otherwise "grant read access" -&gt; RBAC.</p>
 <h3>7. Four built-in roles</h3>
 <table>
 <thead>
@@ -1082,12 +1098,12 @@ X-Ray                        →   Application Insights
 <tbody>
 <tr>
 <td><strong>Owner</strong></td>
-<td style="text-align: center;">Ok</td>
-<td style="text-align: center;">Ok</td>
+<td style="text-align: center;">Yes</td>
+<td style="text-align: center;">Yes</td>
 </tr>
 <tr>
 <td><strong>Contributor</strong></td>
-<td style="text-align: center;">Ok</td>
+<td style="text-align: center;">Yes</td>
 <td style="text-align: center;">Hell no</td>
 </tr>
 <tr>
@@ -1098,11 +1114,11 @@ X-Ray                        →   Application Insights
 <tr>
 <td><strong>User Access Administrator</strong></td>
 <td style="text-align: center;">No</td>
-<td style="text-align: center;">Ok</td>
+<td style="text-align: center;">Yes</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Common pitfalls:</strong> exam question "full manage resources <strong>but no</strong> assign roles" → answer is <strong>Contributor</strong>, NOT User Access Administrator (UAA). UAA is reversed role — Only assign roles, not going to have permissions to touch resources.</p>
+<p><strong>Common pitfalls:</strong> exam question full manage resources <strong>but no</strong> assign roles -&gt; answer is <strong>Contributor</strong>, NOT User Access Administrator (UAA). UAA is reversed role. Only assign roles, not going to have permissions to touch resources.</p>
 <p><strong>Trick:</strong></p>
 <ul>
 <li>Owner = Contributor + UAA</li>
@@ -1120,7 +1136,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 </code></pre></div>
 
 <p><strong>Rules</strong>: Anything that contains Resource ID can be scope. Role assigned at higher scope, inherit to lower scope.</p>
-<p><strong>Pitfalls</strong>: List specific like "Virtual Network", "Storage Account" make distractor, it still is valid scope (Level Resource).</p>
+<p><strong>Pitfalls</strong>: List specific like Virtual Network, Storage Account make distractor, it still is valid scope (Level Resource).</p>
 <p><strong>Least privilege pattern</strong>: Instead assign Contributor at Subscription, assign role lower scope, like Network Contributor at that damn Virtual Network.</p>
 <h3>9. Locks</h3>
 <table>
@@ -1141,7 +1157,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 </tr>
 </tbody>
 </table>
-<p>Gotcha: ReadOnly lock can break some operations thought it was "read". </p>
+<p>Gotcha: ReadOnly lock can break some operations thought it was read. </p>
 <p>Example: list keys of Storage Account actually is post request.</p>
 <p>Resource Reference:</p>
 <ul>
@@ -1153,14 +1169,14 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <li><strong>Spot VM</strong> = cheap but can be evicted</li>
 <li><strong>Hybrid Benefit</strong> = bring license Windows/SQL on-prem to Azure</li>
 </ul>
-<p>If question "predictable workload, lowest cost" → Reserved Instance. "Batch job, can be restart" → Spot.</p>
+<p>If question predictable workload, lowest cost -&gt; Reserved Instance. Batch job, can be restart -&gt; Spot.</p>
 <p>Resource Reference:</p>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/azure/cost-management-billing/reservations/save-compute-costs-reservations">What are Azure Reservations?</a></li>
 <li><a href="https://learn.microsoft.com/en-us/azure/virtual-machines/spot-vms">Use Azure Spot Virtual Machines</a></li>
 </ul>
 <h3>11. An overly absolute answer → 90% chance of being a distractor</h3>
-<p>"red flag" in answers xD:</p>
+<p>Red flags in answer xD:</p>
 <table>
 <thead>
 <tr>
@@ -1171,7 +1187,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <tbody>
 <tr>
 <td><code>automatically</code></td>
-<td>Azure rare do for user — license, scaling, backup... all need config</td>
+<td>Azure rare do for user, license, scaling, backup... all need config</td>
 </tr>
 <tr>
 <td><code>all</code> / <code>every</code></td>
@@ -1179,7 +1195,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 </tr>
 <tr>
 <td><code>only</code></td>
-<td>Each user can have only one license, only via portal — Azure normally can have multiple ways</td>
+<td>Each user can have only one license, only via portal Azure normally can have multiple ways</td>
 </tr>
 <tr>
 <td><code>never</code> / <code>cannot</code></td>
@@ -1187,7 +1203,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 </tr>
 <tr>
 <td><code>replaces</code></td>
-<td>Service A "replaces" Service B → mostly they are individual layer</td>
+<td>Service A replaces Service B -&gt; mostly they are individual layer</td>
 </tr>
 </tbody>
 </table>
@@ -1201,7 +1217,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 </thead>
 <tbody>
 <tr>
-<td>latency / packet loss VM↔VM</td>
+<td>latency / packet loss VM&lt;--&gt;VM</td>
 <td><strong>Connection Monitor</strong></td>
 </tr>
 <tr>
@@ -1209,7 +1225,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <td><strong>Connection Troubleshoot</strong></td>
 </tr>
 <tr>
-<td>This Packet would dropped by NSG or not?</td>
+<td>This fucking packet would dropped by NSG or not?</td>
 <td><strong>IP Flow Verify</strong></td>
 </tr>
 <tr>
@@ -1232,13 +1248,13 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 </table>
 <p>Need to remember: </p>
 <ul>
-<li>If question "between two VMs" + "network" → reflex Network Watcher. </li>
-<li>If question "continuous/monitor over time" → Connection <strong>Monitor</strong>. </li>
-<li>If question "one-time test" → Connection <strong>Troubleshoot</strong>.</li>
+<li>If question between two VMs + network -&gt; reflex Network Watcher. </li>
+<li>If question continuous/monitor over time -&gt; Connection Monitor. </li>
+<li>If question one-time test -&gt; Connection Troubleshoot.</li>
 </ul>
 <h3>13. Azure Monitor — Metrics vs Logs vs Insights</h3>
-<p>Pitfalls: exam ask "diagnostic between 2 specific VM" → <strong>Hell No</strong>, it is NOT Insights. Insights is overview, not deep-dive.</p>
-<p><strong>Differentiation Insights vs Log Analytics when exam have "analyze":</strong></p>
+<p>Pitfalls: exam ask diagnostic between 2 specific VM -&gt; <strong>Hell No</strong>, is NOT Insights. Insights is overview, not deep-dive.</p>
+<p><strong>Differentiation Insights vs Log Analytics when exam have analyze:</strong></p>
 <table>
 <thead>
 <tr>
@@ -1270,7 +1286,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 </tbody>
 </table>
 <h3>14. Private DNS + Private Endpoint + Hybrid resolution</h3>
-<p>Questions around "Can VM/on-prem resolve name of private or not?". Need to remember scope of each components.</p>
+<p>Questions around Can VM/on-prem resolve name of private or not?. Need to remember scope of each components.</p>
 <table>
 <thead>
 <tr>
@@ -1310,7 +1326,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <p>Pitfall 1: Peering not share DNS</p>
 <ul>
 <li>
-<p>VNet-A have Private Endpoint + zone already link → VM-A resolve OK. VM-B in VNet-B (peered) <strong>fail</strong> because zone haven't link to VNet-B.</p>
+<p>VNet-A have Private Endpoint + zone already link -&gt; VM-A resolve OK. VM-B in VNet-B (peered) <strong>fail</strong> because zone haven't link to VNet-B.</p>
 </li>
 <li>
 <p><strong>Fix:</strong> link zone to <strong>both</strong> VNet. Zone is global, link is unlimit</p>
@@ -1320,7 +1336,8 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <ul>
 <li>On-prem need to resolve <code>mystorage.privatelink.blob...</code> →</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="n">On</span><span class="o">-</span><span class="n">prem</span><span class="w"> </span><span class="n">DNS</span><span class="w">  </span><span class="err">──</span><span class="n">conditional</span><span class="w"> </span><span class="n">fwd</span><span class="err">──→</span><span class="w">  </span><span class="n">DNS</span><span class="w"> </span><span class="n">Private</span><span class="w"> </span><span class="n">Resolver</span>
+<div class="highlight"><pre><span></span><code><span class="p">#</span><span class="w"> </span><span class="n">Generate</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">AI</span><span class="w"> </span><span class="n">xD</span>
+<span class="n">On</span><span class="o">-</span><span class="n">prem</span><span class="w"> </span><span class="n">DNS</span><span class="w">  </span><span class="err">──</span><span class="o">&gt;</span><span class="w"> </span><span class="n">conditional</span><span class="w"> </span><span class="n">fwd</span><span class="w"> </span><span class="o">--&gt;</span><span class="w">   </span><span class="n">DNS</span><span class="w"> </span><span class="n">Private</span><span class="w"> </span><span class="n">Resolver</span>
 <span class="w">                                   </span><span class="p">(</span><span class="n">inbound</span><span class="w"> </span><span class="n">endpoint</span><span class="p">,</span><span class="w"> </span><span class="n">region</span><span class="w"> </span><span class="n">X</span><span class="p">)</span>
 <span class="w">                                          </span><span class="err">↓</span>
 <span class="w">                                   </span><span class="n">linked</span><span class="w"> </span><span class="n">Private</span><span class="w"> </span><span class="n">DNS</span><span class="w"> </span><span class="n">Zones</span>
@@ -1331,7 +1348,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <ul>
 <li><strong>Inbound endpoint</strong> = on-prem DNS forward query into Azure (resolve privatelink zones)</li>
 <li><strong>Outbound endpoint</strong> = Azure VM resolve DNS on-prem via conditional forwarding rules.</li>
-<li>HA cross-region → deploy resolver in 2 region</li>
+<li>HA cross-region -&gt; deploy resolver in 2 region</li>
 </ul>
 <p>Common Scenario:</p>
 <table>
@@ -1344,7 +1361,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 </thead>
 <tbody>
 <tr>
-<td>VM resolve private endpoint → public IP</td>
+<td>VM resolve private endpoint to public IP</td>
 <td>Zone haven't link VNet</td>
 <td>Link zone into VNet</td>
 </tr>
@@ -1354,9 +1371,9 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <td>Link zone into spoke also</td>
 </tr>
 <tr>
-<td>On-prem resolve → public IP</td>
+<td>On-prem resolve -&gt; public IP</td>
 <td>Don't have hybrid DNS</td>
-<td>Deploy <strong>DNS Private Resolver</strong> + conditional fwd</td>
+<td>Deploy <strong>DNS Private Resolver</strong> and conditional fwd</td>
 </tr>
 <tr>
 <td>HA cross-region hybrid</td>
@@ -1376,15 +1393,17 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <li><a href="https://learn.microsoft.com/en-us/azure/dns/private-dns-overview">What is an Azure Private DNS zone?</a></li>
 </ul>
 <h3>15. Azure Files vs Azure Blob Storage</h3>
-<p>Azure files when: "file share" / "shared files" / "mount" / "SMB" (Access via mount, smb...)
-Azure blob storage when: "object / blob / images / unstructured data" (Access via Rest API/URl)</p>
+<p>Azure files when: file share / shared files / mount/ SMB (Access via mount, smb...).</p>
+<p>Azure blob storage when: object / blob / images / unstructured data (Access via Rest API/URl).</p>
+<hr>
 <h1>Taking the Exam</h1>
-<p>From my experience preparing for cloud certs, AZ-104 feels harder than AWS SAA / GCP ACE at the associate level — broader scope and tons of edge cases xD</p>
-<p>Even you can access <a href="https://learn.microsoft.com/">https://learn.microsoft.com/</a> But very slow and time consuming, like watch document during CKAD/CKS/CKA exam. Remember 120 fucking minutes only!</p>
-<p>Register here: <a href="https://learn.microsoft.com/en-us/credentials/certifications/azure-administrator/">Microsoft Certified: Azure Administrator Associate
-</a></p>
+<p>From my experience preparing for cloud certs, AZ-104 feels harder than AWS SAA / GCP ACE at the associate level, broader scope and tons of edge cases xD</p>
+<p>Even you can access <a href="https://learn.microsoft.com/">https://learn.microsoft.com/</a> but should use only for verifying information like plans, very slow and time consuming, like watch document during CKAD/CKS/CKA exam!</p>
 <p>Fuck this exam, it was hard AF. No idea I can complete this or not!!!</p>
 <p>Schedule <a href="https://learn.microsoft.com/en-us/credentials/certifications/azure-administrator/?practice-assessment-type=certification">exam here</a></p>
+<p>Random useful comment from <a href="https://www.youtube.com/watch?v=3mxjUtHHVKI">Youtube</a> I think, 9 months ago, so it maybe like September-2025 this comment appears.</p>
+<div class="highlight"><pre><span></span><code><span class="n">Just</span><span class="w"> </span><span class="n">Passed</span><span class="w"> </span><span class="n">Today</span><span class="o">.</span><span class="w"> </span><span class="n">Most</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">question</span><span class="w"> </span><span class="n">were</span><span class="w"> </span><span class="n">around</span><span class="w"> </span><span class="n">File</span><span class="o">/</span><span class="n">Blob</span><span class="w"> </span><span class="n">Storage</span><span class="w"> </span><span class="n">Access</span><span class="w"> </span><span class="n">Tier</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">LifeCycle</span><span class="o">.</span><span class="w"> </span><span class="n">RBAC</span><span class="w"> </span><span class="n">Role</span><span class="w"> </span><span class="n">assingment</span><span class="p">,</span><span class="w"> </span><span class="n">AzCopy</span><span class="p">,</span><span class="w"> </span><span class="n">Recovery</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="n">vault</span><span class="p">,</span><span class="w"> </span><span class="n">LoadBalancer</span><span class="p">,</span><span class="n">VNET</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="n">Thanks</span><span class="w"> </span><span class="n">TechBlackBoard</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">providing</span><span class="w"> </span><span class="n">compiled</span><span class="w"> </span><span class="n">question</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">pattern</span><span class="o">.</span><span class="w"> </span><span class="mi">15</span><span class="o">-</span><span class="mi">20</span><span class="o">%</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">actual</span><span class="w"> </span><span class="n">exams</span><span class="w"> </span><span class="n">questions</span><span class="w"> </span><span class="n">were</span><span class="w"> </span><span class="n">almost</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">video</span><span class="o">.</span><span class="w"> </span><span class="n">There</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="mi">50</span><span class="w"> </span><span class="n">questions</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">include</span><span class="w"> </span><span class="mi">40</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="n">question</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">skipped</span><span class="w"> </span><span class="n">question</span><span class="w"> </span><span class="n">set</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">cant</span><span class="w"> </span><span class="n">review</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">end</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">case</span><span class="w"> </span><span class="n">study</span><span class="w"> </span><span class="n">having</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="n">questions</span><span class="o">.</span><span class="w"> </span><span class="n">Total</span><span class="w"> </span><span class="n">Time</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="n">minutes</span><span class="o">.</span><span class="w"> </span><span class="n">Now</span><span class="w"> </span><span class="n">these</span><span class="w"> </span><span class="n">days</span><span class="w"> </span><span class="n">microsoft</span><span class="w"> </span><span class="n">allows</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="n">notebook</span><span class="w"> </span><span class="n">so</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">use</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">micosoft</span><span class="o">.</span><span class="n">learn</span><span class="w"> </span><span class="n">portal</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">exam</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">too</span><span class="w"> </span><span class="n">helpful</span><span class="o">.</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">review</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">price</span><span class="w"> </span><span class="n">tier</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">various</span><span class="w"> </span><span class="n">azure</span><span class="w"> </span><span class="n">services</span><span class="o">.</span>
+</code></pre></div>
 
 
              
