@@ -1,5 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-05-16T00:00:00+07:00</updated><entry><title>[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104)</title><link href="https://blackmetalz.github.io/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104.html" rel="alternate"/><published>2026-05-16T00:00:00+07:00</published><updated>2026-05-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-16:/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104.html</id><summary type="html"/><content type="html">&lt;p&gt;New challenge, acquire all DevOps certifications in 3 popular public cloud providers, Azure is the first target of mine. Let's fucking go!!!&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-05-30T00:00:00+07:00</updated><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro - I thought I understood, but it turns out I didn't.&lt;/h1&gt;
+&lt;p&gt;I thought I was understand ArgoCD enough, in the past I have running ArgoCD with multiple K8S Cluster inside it. (&amp;gt;10 clusters). And have around 500-600 ArgoCD Applications in single cluster. But I was contributor in there, not who build from scratch, it is 100% misconceptions that I often encounter. Even I had Certified Argo Project Associate (CAPA) but it was a joke for me, no value gained! So that is the reason this article born. To help me understand more "basic" knowledge of ArgoCD.&lt;/p&gt;
+&lt;p&gt;Ok, we will go through sections below in this article:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Architecture &amp;amp; Reconciliation loop&lt;/li&gt;
+&lt;li&gt;Application - atomic unit&lt;/li&gt;
+&lt;li&gt;Cluster registration&lt;/li&gt;
+&lt;li&gt;AppProject - governance layer&lt;/li&gt;
+&lt;li&gt;ApplicationSet - factory pattern&lt;/li&gt;
+&lt;li&gt;Sync mechanics deep dive&lt;/li&gt;
+&lt;li&gt;RBAC 3 layers&lt;/li&gt;
+&lt;li&gt;Operational gotchas&lt;/li&gt;
+&lt;li&gt;Recap - mental model&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="Architecture" src="./images/2026/06/02.png"&gt;&lt;/p&gt;
+&lt;h1&gt;Architecture &amp;amp; Reconciliation loop&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;Static View: What the fuck components are&lt;/li&gt;
+&lt;li&gt;Dynamic View: How the fuck they are looping&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ArgoCD is not fucking monolith, it is fucking workload run in namespace &lt;strong&gt;argocd&lt;/strong&gt; in common and contains 5 major components.&lt;/p&gt;
+&lt;h3&gt;Static view - argocd-server (API + UI gateway)&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Expose GRPC + Rest API for serving UI&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Reference resources:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://argo-cd.readthedocs.io/en/latest/operator-manual/architecture/"&gt;Architectural Overview&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://argo-cd.readthedocs.io/en/latest/operator-manual/server-commands/argocd-server/"&gt;argocd-server Command Reference&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://argo-cd.readthedocs.io/en/latest/developer-guide/architecture/components/#component-architecture"&gt;Component Architecture&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="argocd"/></entry><entry><title>[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104)</title><link href="https://blackmetalz.github.io/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104.html" rel="alternate"/><published>2026-05-16T00:00:00+07:00</published><updated>2026-05-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-16:/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104.html</id><summary type="html"/><content type="html">&lt;p&gt;New challenge, acquire all DevOps certifications in 3 popular public cloud providers, Azure is the first target of mine. Let's fucking go!!!&lt;/p&gt;
 &lt;p&gt;I will try to refer to AWS as much as I can because AWS is the first cloud I learned.&lt;/p&gt;
 &lt;p&gt;This article could contain some wrong information since I'm new to this, correct me if I'm wrong, thanks xD&lt;/p&gt;
 &lt;hr&gt;
@@ -1301,7 +1331,9 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 Azure blob storage when: "object / blob / images / unstructured data" (Access via Rest API/URl)&lt;/p&gt;
 &lt;h1&gt;Taking the Exam&lt;/h1&gt;
 &lt;p&gt;From my experience preparing for cloud certs, AZ-104 feels harder than AWS SAA / GCP ACE at the associate level — broader scope and tons of edge cases xD&lt;/p&gt;
-&lt;p&gt;Even you can access &lt;a href="https://learn.microsoft.com/"&gt;https://learn.microsoft.com/&lt;/a&gt; But no CTRL+F, very slow and time consuming, like watch document during CKAD/CKS/CKA exam.&lt;/p&gt;
+&lt;p&gt;Even you can access &lt;a href="https://learn.microsoft.com/"&gt;https://learn.microsoft.com/&lt;/a&gt; But very slow and time consuming, like watch document during CKAD/CKS/CKA exam. Remember 120 fucking minutes only!&lt;/p&gt;
+&lt;p&gt;Register here: &lt;a href="https://learn.microsoft.com/en-us/credentials/certifications/azure-administrator/"&gt;Microsoft Certified: Azure Administrator Associate
+&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;Fuck this exam, it was hard AF. No idea I can complete this or not!!!&lt;/p&gt;
 &lt;p&gt;Schedule &lt;a href="https://learn.microsoft.com/en-us/credentials/certifications/azure-administrator/?practice-assessment-type=certification"&gt;exam here&lt;/a&gt;&lt;/p&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="devops"/><category term="exam"/></entry><entry><title>My experience on learning Azure Devops - Part 2: Azure Devops</title><link href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-2-azure-devops.html" rel="alternate"/><published>2026-05-05T00:00:00+07:00</published><updated>2026-05-05T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-05:/my-experience-on-learning-azure-devops-part-2-azure-devops.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This article is part 2, part 1 you can find it here: &lt;a href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-1-acr-aks.html"&gt;My experience on learning Azure Devops - Part 1: ACR + AKS&lt;/a&gt;&lt;/p&gt;
