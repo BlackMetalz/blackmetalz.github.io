@@ -381,6 +381,18 @@
 <li>And yeah we can have a custom role, for example Sysadmin Group can be access to Storage,VM,Network. We create that role for example and only need assign Sysadmin user to that group for simple management. Custom role required Azure Entra ID license P1/P2 in order to get access to custom roles.</li>
 <li>Custom role defined with AssignableScopes, specify range(Management group, subscription or resource group) that role can be assigned.</li>
 <li>Interpret Access Assignments: additive union permissions of assigned role. Because RBAC have no fucking deny iin role, so Contributor role will eat custom role that have some permission like in Contributor role</li>
+<li>Azure Account/User: a person(username, password, multi-factor) or a program (managed identity), basis for authentication.</li>
+<li>Tenant: represent of an org, usually with public domain name. Will be assigned a domain if not specified (example.onmicrosoft.com). It is a fucking dedicated instance of Azure Actice Directory, every Azure Account is part of at least one tenant! More than one account can be the owner in a tenant!</li>
+<li>Subscription: An agreement with Microsoft to use Azure services and how you are fucking to pay for that. All Azure resource usage gets billedd to the payment method of subscription (Free, PAYG, Enterprise agreements...). Not every tenant needs to have a subscription. Tenants can have more than one subscription. </li>
+<li>Resources: Nothing much to say about this... Account can be given read,update, owner rights to resources.</li>
+<li>Resource Groups: a way to organizing resources in a subscription. A Folder struct, all resources must belong to only one resource group.</li>
+<li>Subscription have option for Resource locks, that prevent you from delete any resource in subscription scope or resource scope or even more, for example specific Function App. It means no one would able to delete if the lock still exists! (Or control people have permission that able to delete). Lock type Read only, you are not able to change setting. So 2 types, remember this.</li>
+<li>We can restrict location access for specific resource or deny unencrypted HTTPS storage accounts as example of Policy. Policy definition is single policy, but Initiative is set of policies.</li>
+<li>Custom policy, you want may want to copy syntax from template first before create custom policy, because they are all ARM templates. And after create custom policy, assign to specific scope like resource group.</li>
+<li>Tags: Is one of important thing to manage resource on any public cloud provider, not only Azure.</li>
+<li>Move Resources: It can be move to another resource group/subscription/region. </li>
+<li>Manage policy by Powershell, mostly you can do everything like manage resource/policy in Portal via Powershell or CLI.</li>
+<li>Subscription and Management Group: We can create new subsciption and put it under a management group</li>
 </ul>
 <hr>
 <h1>Domain 2 - Compute</h1>
@@ -724,6 +736,37 @@ Azure:
 <li><a href="https://learn.microsoft.com/en-us/azure/storage/common/redundancy-migration">Change how a storage account is replicated</a></li>
 <li><a href="https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview">Hot, cool, cold, and archive access tiers for blob data</a></li>
 <li><a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-sas-overview">Grant limited access to data with shared access signatures (SAS)</a></li>
+</ul>
+<h3>AzCopy</h3>
+<p>Standalone CLI tool to copy data to/from Azure Storage. <code>aws s3 cp</code> / <code>aws s3 sync</code> equivalent.</p>
+<p>Auth: <code>azcopy login</code> (Azure AD, RBAC) hoặc SAS Token embedded in URL.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>azcopy copy</code></td>
+<td>One-time copy/migration</td>
+</tr>
+<tr>
+<td><code>azcopy sync</code></td>
+<td>Incremental sync (like rsync), only new/changed</td>
+</tr>
+</tbody>
+</table>
+<p>Exam Gotchas:</p>
+<ul>
+<li><code>azcopy sync</code> does <strong>NOT</strong> delete by default — need <code>--delete-destination=true</code></li>
+<li>Cross-account copy is <strong>server-side</strong> — no local bandwidth used</li>
+<li>Standalone binary, <strong>no Azure CLI</strong> dependency</li>
+</ul>
+<p>Resource Reference:</p>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10">Get started with AzCopy</a></li>
 </ul>
 <h3>Exam Tricks for Storage Features (non-replication)</h3>
 <blockquote>
