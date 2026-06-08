@@ -810,7 +810,24 @@ Azure:
 </tr>
 </tbody>
 </table>
-<hr>
+<h3>Enhanced after fail first exam</h3>
+<ul>
+<li>Not related to exam but some region required to store data in their region, for example, when you are working with EU clients, you need to create storage account in EU region I guess.</li>
+<li>Redundancy type: Not all region have option for GZRS.</li>
+<li>Storage account advanced setting: Required secure transfer for REST API, it means you only can use HTTPS for interacting. For authentication we have 2 option storage account key access(enable by default) and microsoft entra authorization.</li>
+<li>Storage account access tier: So for more cheaper from store the data(Cool/Cold), the more expensive for operation(read/write) for example. And you can have a mix of access tier file, some files are hot, some files are cool/cold/archive.</li>
+<li>Storage account networking: Public access from all networks are not worth to mention. But public access from selected virtual network and IP address are (You h ave an option to add IP Address for public access in this case like test from your home?). And finally disable public access and use private access. Network routing, lets use Microsoft network routing by default. (Travel over a private network or Azure backbone network I guess).</li>
+<li>Storage account data protection: soft delete can be enable for blobs,containers,file shares as an option in this tab. And enable versioning for blobs, the more money you are going to pays xD</li>
+<li>Storage account encryption: This section is easy to understand xD</li>
+<li>We can generate SAS with assigned access policy. (Control how we access on file share).</li>
+<li>If enable (Entra ID/Azure AD), we can give specific user to have access read/write on specific containers.</li>
+<li>Object replication copied "asynchronously" from a source storage account to a destination account.</li>
+<li>For quick example with Azcopy, create a folder as destination, generate SAS token and get SAS URL, then:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>azcopy<span class="w"> </span>copy<span class="w"> </span><span class="s2">&quot;C:\my\file.txt&quot;</span><span class="w"> </span><span class="s2">&quot;https://blob-sas-url-here&quot;</span>
+</code></pre></div>
+
+<h2>- And we have talking a lot about containers, one revelant to this fucking exam called file shares, we can understand it as fucking NFS (we have a tool to keep file sync between on-premises and Azure called Azure File Sync). Also Azure File can be backup as Snapshot</h2>
 <h1>Domain 4 - Networking</h1>
 <p>Resource Reference:</p>
 <ul>
