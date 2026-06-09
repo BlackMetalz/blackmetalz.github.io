@@ -778,7 +778,15 @@ Azure:
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;azcopy&lt;span class="w"&gt; &lt;/span&gt;copy&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;C:\my\file.txt&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;https://blob-sas-url-here&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h2&gt;- And we have talking a lot about containers, one revelant to this fucking exam called file shares, we can understand it as fucking NFS (we have a tool to keep file sync between on-premises and Azure called Azure File Sync). Also Azure File can be backup as Snapshot&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;And we have talking a lot about containers, one revelant to this fucking exam called file shares, we can understand it as fucking NFS (we have a tool to keep file sync between on-premises and Azure called Azure File Sync). Also Azure File can be backup as Snapshot.&lt;/li&gt;
+&lt;li&gt;Which backup type does Azure Blob backup use? &lt;a href="https://learn.microsoft.com/en-us/azure/backup/blob-backup-overview?tabs=operational-backup"&gt;operational backup: Continuous backups&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Block Blob: Save common file (image, video, document..). Can be overwrite data.&lt;/li&gt;
+&lt;li&gt;Append Blob: Append without modify/delete old data, useful for log data, monitoring logs, audit trails.&lt;/li&gt;
+&lt;li&gt;Page Blob: Random read/write, common use case: Virtual Disk (VHD) for VM, database files.&lt;/li&gt;
+&lt;li&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
 &lt;h1&gt;Domain 4 - Networking&lt;/h1&gt;
 &lt;p&gt;Resource Reference:&lt;/p&gt;
 &lt;ul&gt;
@@ -1432,7 +1440,14 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 
 &lt;p&gt;Update 1st try in June-04-2026: failed with score 622/1000. It is just hard because I haven't prepare serious enough, still need more practice. The domain Compute and Storage I felt pretty confident, but domain Entra ID is really really bad for me =.=
 But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - Complete Exam Prep&lt;/strong&gt;, I skip a lot and spam only on practice test!&lt;/p&gt;
-&lt;p&gt;Start learning again in morning saturday June-06-2026! Plan for retake in June-12-2026!&lt;/p&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="devops"/><category term="exam"/></entry><entry><title>My experience on learning Azure Devops - Part 2: Azure Devops</title><link href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-2-azure-devops.html" rel="alternate"/><published>2026-05-05T00:00:00+07:00</published><updated>2026-05-05T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-05:/my-experience-on-learning-azure-devops-part-2-azure-devops.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;Start learning again in morning saturday June-06-2026! Plan for retake in June-12-2026!&lt;/p&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;Hard AF for people like me, who never working in single day with Azure Cloud!&lt;/li&gt;
+&lt;li&gt;Need to learn skill how to use &lt;a href="https://learn.microsoft.com/"&gt;https://learn.microsoft.com/&lt;/a&gt;, we can not remember memory all stuff, we need to read the fucking document. But reading document during exam is fucking hard, that is why you need to practice it hard!&lt;/li&gt;
+&lt;li&gt;Trust me, if you don't work in Azure but still want to try exam. Learn for it for non-stop 30 days before taking exam!&lt;/li&gt;
+&lt;li&gt;This exam is fucking ridiculous, even you are able to read document, but time is fucking limited!!! holy shiet!!!&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="devops"/><category term="exam"/></entry><entry><title>My experience on learning Azure Devops - Part 2: Azure Devops</title><link href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-2-azure-devops.html" rel="alternate"/><published>2026-05-05T00:00:00+07:00</published><updated>2026-05-05T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-05:/my-experience-on-learning-azure-devops-part-2-azure-devops.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This article is part 2, part 1 you can find it here: &lt;a href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-1-acr-aks.html"&gt;My experience on learning Azure Devops - Part 1: ACR + AKS&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;In this article, I will show you some little knowledge about Azure DevOps that I learned and try to implement in my lab.&lt;/p&gt;
 &lt;hr&gt;
