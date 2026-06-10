@@ -559,6 +559,24 @@ bicep<span class="w"> </span>decompile<span class="w"> </span>main.json
 </ul>
 <h3>Enhanced after fail first exam</h3>
 <hr>
+<h1>Domain 2.1 - ARM + Bicep</h1>
+<h3>ARM template basic</h3>
+<p>Whenever we create VM or VNET, there is alway a section called "View automation template" in review + create resource.</p>
+<p>ARM template section:</p>
+<ul>
+<li>$schema</li>
+<li>contentVersion</li>
+<li>variables</li>
+<li>resources</li>
+<li>parameters</li>
+<li>outputs</li>
+</ul>
+<p>Minimum required to create virtual network:</p>
+<p><img alt="arm" src="./images/2026/06/03.png"></p>
+<p>And yeah, we have <em>dependsOn</em> inside resources section which depend on other specific resource to create resource</p>
+<p>We can create template spec then use it to deploy resources via Portal or cmd (Powershell)</p>
+<h2>ARM Templates Capture a Point in Time: This is basic, same like snapshot but without data, just spec/blueprint.</h2>
+<h1>Domain 2.2 - Containers</h1>
 <h1>Domain 3 - Storage</h1>
 <h3>Azure Storage Account vs AWS S3 — Mental Model</h3>
 <div class="highlight"><pre><span></span><code><span class="nx">AWS</span><span class="w">                              </span><span class="nx">Azure</span>
