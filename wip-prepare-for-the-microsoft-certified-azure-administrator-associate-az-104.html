@@ -470,6 +470,8 @@
 </tr>
 </tbody>
 </table>
+<p>Picture I took from <a href="udemy.com/course/70533-azure/">Azure Course</a></p>
+<p><img alt="SSE vs ADE" src="./images/2026/06/04.png"></p>
 <p><strong>Verdict:</strong> SSE almost ready for everything. ADE only when compliance is required.</p>
 <p>Resource Reference:</p>
 <ul>
@@ -557,7 +559,6 @@ bicep<span class="w"> </span>decompile<span class="w"> </span>main.json
 <li>strong / complete / security isolation / security boundaries = Virtual Machine</li>
 <li>light weight / fast / microservices = Containers</li>
 </ul>
-<h3>Enhanced after fail first exam</h3>
 <hr>
 <h1>Domain 2.1 - ARM + Bicep</h1>
 <h3>ARM template basic</h3>
@@ -575,8 +576,33 @@ bicep<span class="w"> </span>decompile<span class="w"> </span>main.json
 <p><img alt="arm" src="./images/2026/06/03.png"></p>
 <p>And yeah, we have <em>dependsOn</em> inside resources section which depend on other specific resource to create resource</p>
 <p>We can create template spec then use it to deploy resources via Portal or cmd (Powershell)</p>
-<h2>ARM Templates Capture a Point in Time: This is basic, same like snapshot but without data, just spec/blueprint.</h2>
-<h1>Domain 2.2 - Containers</h1>
+<p>ARM Templates Capture a Point in Time: This is basic, same like snapshot but without data, just spec/blueprint.</p>
+<h3>Bicep overview</h3>
+<p>We could deploy bicep to Azure via some cmd:</p>
+<ul>
+<li>Deploy to RG:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>az<span class="w"> </span>deployment<span class="w"> </span>group<span class="w"> </span>create<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--resource-group<span class="w"> </span>&lt;name-of-rg&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--template-file<span class="w"> </span>main.bicep<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--parameters<span class="w"> </span><span class="nv">param1</span><span class="o">=</span>value1<span class="w"> </span><span class="nv">param2</span><span class="o">=</span>value2
+</code></pre></div>
+
+<hr>
+<h1>Domain 2.2 - Azure App Server</h1>
+<h3>Web App/App Service</h3>
+<p>Nothing much to write, you upload your code, Azure run your code and help you to manage server.</p>
+<p>It also have feature backup so you can restore from backup instead of upload code again for speed faster?</p>
+<p>App Service Networking:</p>
+<ul>
+<li>Control inbound traffic (into app): Access restrictions, private endpoints, service endpoints, app-assigned address</li>
+<li>Control outbound traffic (out from app): VNet integration, Gateway-required Vnet integration....</li>
+<li>Custom domain: point DNS into app, not networking feature.</li>
+</ul>
+<p>We also able to config cert and TLS for app service. They are auto renew at 45 days before expires. Limit: Not support wildcard, available with Basic plan and above.</p>
+<hr>
+<h1>Domain 2.3 - Containers</h1>
+<hr>
 <h1>Domain 3 - Storage</h1>
 <h3>Azure Storage Account vs AWS S3 — Mental Model</h3>
 <div class="highlight"><pre><span></span><code><span class="nx">AWS</span><span class="w">                              </span><span class="nx">Azure</span>

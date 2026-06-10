@@ -421,6 +421,8 @@
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
+&lt;p&gt;Picture I took from &lt;a href="udemy.com/course/70533-azure/"&gt;Azure Course&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="SSE vs ADE" src="./images/2026/06/04.png"&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Verdict:&lt;/strong&gt; SSE almost ready for everything. ADE only when compliance is required.&lt;/p&gt;
 &lt;p&gt;Resource Reference:&lt;/p&gt;
 &lt;ul&gt;
@@ -508,7 +510,6 @@ bicep&lt;span class="w"&gt; &lt;/span&gt;decompile&lt;span class="w"&gt; &lt;/sp
 &lt;li&gt;strong / complete / security isolation / security boundaries = Virtual Machine&lt;/li&gt;
 &lt;li&gt;light weight / fast / microservices = Containers&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3&gt;Enhanced after fail first exam&lt;/h3&gt;
 &lt;hr&gt;
 &lt;h1&gt;Domain 2.1 - ARM + Bicep&lt;/h1&gt;
 &lt;h3&gt;ARM template basic&lt;/h3&gt;
@@ -526,8 +527,33 @@ bicep&lt;span class="w"&gt; &lt;/span&gt;decompile&lt;span class="w"&gt; &lt;/sp
 &lt;p&gt;&lt;img alt="arm" src="./images/2026/06/03.png"&gt;&lt;/p&gt;
 &lt;p&gt;And yeah, we have &lt;em&gt;dependsOn&lt;/em&gt; inside resources section which depend on other specific resource to create resource&lt;/p&gt;
 &lt;p&gt;We can create template spec then use it to deploy resources via Portal or cmd (Powershell)&lt;/p&gt;
-&lt;h2&gt;ARM Templates Capture a Point in Time: This is basic, same like snapshot but without data, just spec/blueprint.&lt;/h2&gt;
-&lt;h1&gt;Domain 2.2 - Containers&lt;/h1&gt;
+&lt;p&gt;ARM Templates Capture a Point in Time: This is basic, same like snapshot but without data, just spec/blueprint.&lt;/p&gt;
+&lt;h3&gt;Bicep overview&lt;/h3&gt;
+&lt;p&gt;We could deploy bicep to Azure via some cmd:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Deploy to RG:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;az&lt;span class="w"&gt; &lt;/span&gt;deployment&lt;span class="w"&gt; &lt;/span&gt;group&lt;span class="w"&gt; &lt;/span&gt;create&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--resource-group&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;name-of-rg&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--template-file&lt;span class="w"&gt; &lt;/span&gt;main.bicep&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--parameters&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;param1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;value1&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;param2&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;value2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;hr&gt;
+&lt;h1&gt;Domain 2.2 - Azure App Server&lt;/h1&gt;
+&lt;h3&gt;Web App/App Service&lt;/h3&gt;
+&lt;p&gt;Nothing much to write, you upload your code, Azure run your code and help you to manage server.&lt;/p&gt;
+&lt;p&gt;It also have feature backup so you can restore from backup instead of upload code again for speed faster?&lt;/p&gt;
+&lt;p&gt;App Service Networking:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Control inbound traffic (into app): Access restrictions, private endpoints, service endpoints, app-assigned address&lt;/li&gt;
+&lt;li&gt;Control outbound traffic (out from app): VNet integration, Gateway-required Vnet integration....&lt;/li&gt;
+&lt;li&gt;Custom domain: point DNS into app, not networking feature.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We also able to config cert and TLS for app service. They are auto renew at 45 days before expires. Limit: Not support wildcard, available with Basic plan and above.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1&gt;Domain 2.3 - Containers&lt;/h1&gt;
+&lt;hr&gt;
 &lt;h1&gt;Domain 3 - Storage&lt;/h1&gt;
 &lt;h3&gt;Azure Storage Account vs AWS S3 — Mental Model&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nx"&gt;AWS&lt;/span&gt;&lt;span class="w"&gt;                              &lt;/span&gt;&lt;span class="nx"&gt;Azure&lt;/span&gt;
