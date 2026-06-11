@@ -553,6 +553,13 @@ bicep&lt;span class="w"&gt; &lt;/span&gt;decompile&lt;span class="w"&gt; &lt;/sp
 &lt;p&gt;We also able to config cert and TLS for app service. They are auto renew at 45 days before expires. Limit: Not support wildcard, available with Basic plan and above.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Domain 2.3 - Containers&lt;/h1&gt;
+&lt;h3&gt;Azure Container Instances&lt;/h3&gt;
+&lt;p&gt;Quick to deploy but have limitation, should be used for testing demonstration. Can not scale.&lt;/p&gt;
+&lt;h3&gt;ACI container groups&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="ACI" src="./images/2026/06/05.png"&gt;&lt;/p&gt;
+&lt;p&gt;We can not create ACI via portal, must be via command line. I think it is like pod in k8s? xD&lt;/p&gt;
+&lt;h3&gt;Azure container apps&lt;/h3&gt;
+&lt;p&gt;Almost same like container instance but have more options like ingress settings, revision and replicas (like deployment slot in Azure App), scale based HTTP Traffic, Keda, manual.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Domain 3 - Storage&lt;/h1&gt;
 &lt;h3&gt;Azure Storage Account vs AWS S3 — Mental Model&lt;/h3&gt;
