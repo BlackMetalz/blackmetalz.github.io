@@ -916,7 +916,7 @@ Route Table                  →   Route Table
 <p>NSG (Network Security Group) vs SG (Security Group) / NACL</p>
 <ul>
 <li>AWS: Use SG (applied at ENI/Instance) and Network ACL (NACL) (applied at Subnet)</li>
-<li>Azure: Use only NSG. NSG Can be applied both to NIC or Subnet</li>
+<li>Azure: Use only NSG. NSG Can be applied both to NIC or Subnet. This is core for our exam.</li>
 <li>NSG is stateful, NACL is stateless</li>
 </ul>
 <p><strong>Stateful vs Stateless — what does it mean?</strong></p>
@@ -1062,6 +1062,7 @@ VPC Reachability Analyzer    →   IP Flow Verify / Connection Troubleshoot
 VPC Traffic Mirroring        →   Packet Capture
 </code></pre></div>
 
+<p>Mostly we can checking connection between Azure resource together. And it does costs money btw.</p>
 <p><strong>Verdict:</strong> Almost 1:1 with AWS VPC/Route53/ELB, just a fucking name different.</p>
 <p>Resource Reference:</p>
 <ul>
@@ -1109,6 +1110,37 @@ VPC Traffic Mirroring        →   Packet Capture
 5. Create Connection between 2 vpn gateway, connection type: VNet-to-VNet, remember to choice correction for 2 of your VNet
 6. Review at connections panel.</p>
 <p><img alt="vnet-to-vnet" src="./images/2026/06/09.png"></p>
+<ul>
+<li>We are able to auto register domain for VM when we created VM via option "Enable Auto Registration" (In Private DNS Zone)</li>
+<li>We can group multiple rule to Application Security Group(ASG), and allow traffic to ASG is much better than hardcode IP in NSG. For ASG we have to create new ASG as a resource. And go to VM --&gt; Networking --&gt; Config the ASG --&gt; Link VM to specific ASG, 1 VM can be attach more than 1 ASG. After that we can create new Inbound Security Rule in NSG with destination is ASG. Picture for example:</li>
+</ul>
+<p><img alt="ASG" src="./images/2026/06/10.png"></p>
+<p>Again ASG really is just an abstraction of the destination instead of specifying a list of IP addresses.
+- Connection troubleshooter: Enter via VM --&gt; Help --&gt; Connection Troubleshoot, select source which is current VM and destination which is VM we can't connect from current VM, we are able to use TCP/ICMP for probe settings. When we click run diagnostic tests, it deployed an agent to the VM and take couples minute. Example: </p>
+<p><img alt="Connection troubleshoot" src="./images/2026/06/11.png"></p>
+<ul>
+<li>You can not create "Basic SKU" for Azure LB. Forget about "Gateway SKU". </li>
+<li>Standard LB supports: Zonal (in one zone) + Zone-redundant (across zones)</li>
+<li>Azure LB = Layer 4 (TCP/UDP)</li>
+<li>Azure Application Gateway = Layer 7 (HTTP/HTTPS, WAF)</li>
+<li>Azure Front Door = Global LB, SSL offloading, CDN. So for SSL offloading, we can call TLS Termination, it means Front Door/LB will handle encrypt/decrypt HTTPS for backend server, so backend server we only need to use HTTP, no need double encrypt while LB/FrontDoor already help you!</li>
+<li>Traffic Manager = DNS-based traffic redirection. Like you come from USA it will redirect you to USA region, you come from Vietnam, it will redirect you to Southeast Asia region</li>
+<li>Holy shiet. Azure provide some good shit. For example <a href="https://github.com/Azure/azure-quickstart-templates/tree/master/quickstarts/microsoft.network/load-balancer-standard-create">this link</a> have a button that "Deploy to Azure" and after we logged into portal of azure:</li>
+</ul>
+<p><img alt="quick start" src="./images/2026/06/12.png"></p>
+<ul>
+<li>Monitor -&gt; Logs: you can query for diagnostics issue and there are some template for those query right in portal UI</li>
+</ul>
+<p><img alt="query log" src="./images/2026/06/13.png"></p>
+<ul>
+<li>Capture actual packets, TCP handshake, payload details --&gt; <a href="https://learn.microsoft.com/en-us/azure/network-watcher/packet-capture-overview">Packet capture of Network Watcher</a></li>
+<li>Inbound internet --&gt; private IP/port, <a href="https://learn.microsoft.com/en-us/azure/firewall/tutorial-firewall-dnat-policy">always use DNAT</a> rule in Azure Firewall, bro!</li>
+<li>Private endpoint alway create record when Private DNS zone linked, no need tick option "auto-registration" like in VM.</li>
+<li>VNet peering not auto share DNS zone link. Hub link zone != spoke link zone, <a href="https://learn.microsoft.com/en-us/azure/dns/private-dns-virtual-network-links">need to link VNet seprated</a></li>
+<li>Subnet delegation = subnet used for only 1 service, <a href="https://learn.microsoft.com/en-us/azure/virtual-network/subnet-delegation-overview">not share with VM or other resource</a>.</li>
+<li>Allow gateway transit (VNet with Gateway) + Use remote gateways (VNet have no gateway) = VNet spoke useable VPN/ExpressRoute of Hub, no need any extra configuration or UDR. </li>
+<li>Route/Advertise 0.0.0.0/0 via ExpressRoute, all traffic (internet + Azure Paas public endpoints) go through on-premises. <a href="https://learn.microsoft.com/en-us/azure/expressroute/expressroute-faqs">VM totally lost direct internet access</a></li>
+</ul>
 <hr>
 <h1>Domain 5 - Monitor &amp; Backup</h1>
 <h3>Quick Mapping from AWS for Backup xD</h3>
@@ -1570,6 +1602,7 @@ But I didn't watch serious <strong>AZ-104 Microsoft Azure Administrator - Comple
 <li>Trust me, if you don't work in Azure but still want to try exam. Learn for it for non-stop 30 days before taking exam!</li>
 <li>This exam is fucking ridiculous, even you are able to read document, but time is fucking limited!!! holy shiet!!!</li>
 </ul>
+<p>I would spam this word in every article related to any certification: Passing an exam, getting certifications is not an achievement for me, no fucking salary increase, no fucking showoff because I'm fucking lowkey, introverted person. I just have no idea what to do at sometime in every year, so instead of wasting time, I think learning is better for fucking sure. The exam is just 1 fucking gate or guardrail I created to make sure I understand enough what is fucking I'm learning. Wasted time and money (buy an exam to get cert) or be fucking serious about learning?</p>
 
 
              

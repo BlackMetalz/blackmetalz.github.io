@@ -867,7 +867,7 @@ Route Table                  →   Route Table
 &lt;p&gt;NSG (Network Security Group) vs SG (Security Group) / NACL&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;AWS: Use SG (applied at ENI/Instance) and Network ACL (NACL) (applied at Subnet)&lt;/li&gt;
-&lt;li&gt;Azure: Use only NSG. NSG Can be applied both to NIC or Subnet&lt;/li&gt;
+&lt;li&gt;Azure: Use only NSG. NSG Can be applied both to NIC or Subnet. This is core for our exam.&lt;/li&gt;
 &lt;li&gt;NSG is stateful, NACL is stateless&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;strong&gt;Stateful vs Stateless — what does it mean?&lt;/strong&gt;&lt;/p&gt;
@@ -1013,6 +1013,7 @@ VPC Reachability Analyzer    →   IP Flow Verify / Connection Troubleshoot
 VPC Traffic Mirroring        →   Packet Capture
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;Mostly we can checking connection between Azure resource together. And it does costs money btw.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Verdict:&lt;/strong&gt; Almost 1:1 with AWS VPC/Route53/ELB, just a fucking name different.&lt;/p&gt;
 &lt;p&gt;Resource Reference:&lt;/p&gt;
 &lt;ul&gt;
@@ -1060,6 +1061,37 @@ VPC Traffic Mirroring        →   Packet Capture
 5. Create Connection between 2 vpn gateway, connection type: VNet-to-VNet, remember to choice correction for 2 of your VNet
 6. Review at connections panel.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="vnet-to-vnet" src="./images/2026/06/09.png"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;We are able to auto register domain for VM when we created VM via option "Enable Auto Registration" (In Private DNS Zone)&lt;/li&gt;
+&lt;li&gt;We can group multiple rule to Application Security Group(ASG), and allow traffic to ASG is much better than hardcode IP in NSG. For ASG we have to create new ASG as a resource. And go to VM --&amp;gt; Networking --&amp;gt; Config the ASG --&amp;gt; Link VM to specific ASG, 1 VM can be attach more than 1 ASG. After that we can create new Inbound Security Rule in NSG with destination is ASG. Picture for example:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="ASG" src="./images/2026/06/10.png"&gt;&lt;/p&gt;
+&lt;p&gt;Again ASG really is just an abstraction of the destination instead of specifying a list of IP addresses.
+- Connection troubleshooter: Enter via VM --&amp;gt; Help --&amp;gt; Connection Troubleshoot, select source which is current VM and destination which is VM we can't connect from current VM, we are able to use TCP/ICMP for probe settings. When we click run diagnostic tests, it deployed an agent to the VM and take couples minute. Example: &lt;/p&gt;
+&lt;p&gt;&lt;img alt="Connection troubleshoot" src="./images/2026/06/11.png"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;You can not create "Basic SKU" for Azure LB. Forget about "Gateway SKU". &lt;/li&gt;
+&lt;li&gt;Standard LB supports: Zonal (in one zone) + Zone-redundant (across zones)&lt;/li&gt;
+&lt;li&gt;Azure LB = Layer 4 (TCP/UDP)&lt;/li&gt;
+&lt;li&gt;Azure Application Gateway = Layer 7 (HTTP/HTTPS, WAF)&lt;/li&gt;
+&lt;li&gt;Azure Front Door = Global LB, SSL offloading, CDN. So for SSL offloading, we can call TLS Termination, it means Front Door/LB will handle encrypt/decrypt HTTPS for backend server, so backend server we only need to use HTTP, no need double encrypt while LB/FrontDoor already help you!&lt;/li&gt;
+&lt;li&gt;Traffic Manager = DNS-based traffic redirection. Like you come from USA it will redirect you to USA region, you come from Vietnam, it will redirect you to Southeast Asia region&lt;/li&gt;
+&lt;li&gt;Holy shiet. Azure provide some good shit. For example &lt;a href="https://github.com/Azure/azure-quickstart-templates/tree/master/quickstarts/microsoft.network/load-balancer-standard-create"&gt;this link&lt;/a&gt; have a button that "Deploy to Azure" and after we logged into portal of azure:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="quick start" src="./images/2026/06/12.png"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Monitor -&amp;gt; Logs: you can query for diagnostics issue and there are some template for those query right in portal UI&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="query log" src="./images/2026/06/13.png"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Capture actual packets, TCP handshake, payload details --&amp;gt; &lt;a href="https://learn.microsoft.com/en-us/azure/network-watcher/packet-capture-overview"&gt;Packet capture of Network Watcher&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Inbound internet --&amp;gt; private IP/port, &lt;a href="https://learn.microsoft.com/en-us/azure/firewall/tutorial-firewall-dnat-policy"&gt;always use DNAT&lt;/a&gt; rule in Azure Firewall, bro!&lt;/li&gt;
+&lt;li&gt;Private endpoint alway create record when Private DNS zone linked, no need tick option "auto-registration" like in VM.&lt;/li&gt;
+&lt;li&gt;VNet peering not auto share DNS zone link. Hub link zone != spoke link zone, &lt;a href="https://learn.microsoft.com/en-us/azure/dns/private-dns-virtual-network-links"&gt;need to link VNet seprated&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Subnet delegation = subnet used for only 1 service, &lt;a href="https://learn.microsoft.com/en-us/azure/virtual-network/subnet-delegation-overview"&gt;not share with VM or other resource&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Allow gateway transit (VNet with Gateway) + Use remote gateways (VNet have no gateway) = VNet spoke useable VPN/ExpressRoute of Hub, no need any extra configuration or UDR. &lt;/li&gt;
+&lt;li&gt;Route/Advertise 0.0.0.0/0 via ExpressRoute, all traffic (internet + Azure Paas public endpoints) go through on-premises. &lt;a href="https://learn.microsoft.com/en-us/azure/expressroute/expressroute-faqs"&gt;VM totally lost direct internet access&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;hr&gt;
 &lt;h1&gt;Domain 5 - Monitor &amp;amp; Backup&lt;/h1&gt;
 &lt;h3&gt;Quick Mapping from AWS for Backup xD&lt;/h3&gt;
@@ -1520,7 +1552,8 @@ But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - 
 &lt;li&gt;Need to learn skill how to use &lt;a href="https://learn.microsoft.com/"&gt;https://learn.microsoft.com/&lt;/a&gt;, we can not remember memory all stuff, we need to read the fucking document. But reading document during exam is fucking hard, that is why you need to practice it hard!&lt;/li&gt;
 &lt;li&gt;Trust me, if you don't work in Azure but still want to try exam. Learn for it for non-stop 30 days before taking exam!&lt;/li&gt;
 &lt;li&gt;This exam is fucking ridiculous, even you are able to read document, but time is fucking limited!!! holy shiet!!!&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="devops"/><category term="exam"/></entry><entry><title>My experience on learning Azure Devops - Part 2: Azure Devops</title><link href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-2-azure-devops.html" rel="alternate"/><published>2026-05-05T00:00:00+07:00</published><updated>2026-05-05T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-05:/my-experience-on-learning-azure-devops-part-2-azure-devops.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;/ul&gt;
+&lt;p&gt;I would spam this word in every article related to any certification: Passing an exam, getting certifications is not an achievement for me, no fucking salary increase, no fucking showoff because I'm fucking lowkey, introverted person. I just have no idea what to do at sometime in every year, so instead of wasting time, I think learning is better for fucking sure. The exam is just 1 fucking gate or guardrail I created to make sure I understand enough what is fucking I'm learning. Wasted time and money (buy an exam to get cert) or be fucking serious about learning?&lt;/p&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="devops"/><category term="exam"/></entry><entry><title>My experience on learning Azure Devops - Part 2: Azure Devops</title><link href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-2-azure-devops.html" rel="alternate"/><published>2026-05-05T00:00:00+07:00</published><updated>2026-05-05T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-05:/my-experience-on-learning-azure-devops-part-2-azure-devops.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This article is part 2, part 1 you can find it here: &lt;a href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-1-acr-aks.html"&gt;My experience on learning Azure Devops - Part 1: ACR + AKS&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;In this article, I will show you some little knowledge about Azure DevOps that I learned and try to implement in my lab.&lt;/p&gt;
 &lt;hr&gt;
