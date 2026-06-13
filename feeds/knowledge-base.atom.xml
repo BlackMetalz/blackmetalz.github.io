@@ -29,7 +29,7 @@
 &lt;li&gt;&lt;a href="https://argo-cd.readthedocs.io/en/latest/operator-manual/architecture/"&gt;Architectural Overview&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://argo-cd.readthedocs.io/en/latest/operator-manual/server-commands/argocd-server/"&gt;argocd-server Command Reference&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://argo-cd.readthedocs.io/en/latest/developer-guide/architecture/components/#component-architecture"&gt;Component Architecture&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="argocd"/></entry><entry><title>Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam</title><link href="https://blackmetalz.github.io/prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html" rel="alternate"/><published>2026-05-16T00:00:00+07:00</published><updated>2026-05-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-16:/prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;New challenge, acquire all DevOps certifications in 3 popular public cloud providers, Azure is the first target of mine. Let's fucking go!!!&lt;/p&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="argocd"/></entry><entry><title>[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam</title><link href="https://blackmetalz.github.io/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html" rel="alternate"/><published>2026-05-16T00:00:00+07:00</published><updated>2026-05-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-16:/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;New challenge, acquire all DevOps certifications in 3 popular public cloud providers, Azure is the first target of mine. Let's fucking go!!!&lt;/p&gt;
 &lt;p&gt;I will try to refer to AWS as much as I can because AWS is the first cloud I learned.&lt;/p&gt;
 &lt;p&gt;This article could contain some wrong information since I'm new to this, correct me if I'm wrong, thanks xD&lt;/p&gt;
 &lt;hr&gt;
@@ -1568,6 +1568,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 &lt;p&gt;Update 1st try in June-04-2026: failed with score 622/1000. It is just hard because I haven't prepare serious enough, still need more practice. The domain Compute and Storage I felt pretty confident, but domain Entra ID is really really bad for me =.=
 But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - Complete Exam Prep&lt;/strong&gt;, I skip a lot and spam only on practice test!&lt;/p&gt;
 &lt;p&gt;Start learning again in morning saturday June-06-2026! Plan for retake in June-14-2026!&lt;/p&gt;
+&lt;p&gt;Update: Fuckkkkkkk. 672/1000!&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Secret weapon&lt;/h1&gt;
 &lt;p&gt;Good shit for exam prep: &lt;a href="https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-az-104-manage-azure-identities-and-governance-1-of-5"&gt;very very quality&lt;/a&gt;&lt;/p&gt;
