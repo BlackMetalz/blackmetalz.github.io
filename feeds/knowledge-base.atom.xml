@@ -29,7 +29,7 @@
 &lt;li&gt;&lt;a href="https://argo-cd.readthedocs.io/en/latest/operator-manual/architecture/"&gt;Architectural Overview&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://argo-cd.readthedocs.io/en/latest/operator-manual/server-commands/argocd-server/"&gt;argocd-server Command Reference&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://argo-cd.readthedocs.io/en/latest/developer-guide/architecture/components/#component-architecture"&gt;Component Architecture&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="argocd"/></entry><entry><title>[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104)</title><link href="https://blackmetalz.github.io/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104.html" rel="alternate"/><published>2026-05-16T00:00:00+07:00</published><updated>2026-05-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-16:/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104.html</id><summary type="html"/><content type="html">&lt;p&gt;New challenge, acquire all DevOps certifications in 3 popular public cloud providers, Azure is the first target of mine. Let's fucking go!!!&lt;/p&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="argocd"/></entry><entry><title>Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam</title><link href="https://blackmetalz.github.io/prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html" rel="alternate"/><published>2026-05-16T00:00:00+07:00</published><updated>2026-05-16T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-16:/prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;New challenge, acquire all DevOps certifications in 3 popular public cloud providers, Azure is the first target of mine. Let's fucking go!!!&lt;/p&gt;
 &lt;p&gt;I will try to refer to AWS as much as I can because AWS is the first cloud I learned.&lt;/p&gt;
 &lt;p&gt;This article could contain some wrong information since I'm new to this, correct me if I'm wrong, thanks xD&lt;/p&gt;
 &lt;hr&gt;
@@ -321,6 +321,9 @@
 &lt;/ul&gt;
 &lt;h3&gt;Enhanced after fail first exam&lt;/h3&gt;
 &lt;ul&gt;
+&lt;li&gt;3 different type of group: cloud, hybrid and guest group?&lt;/li&gt;
+&lt;li&gt;Microsoft entra ID has different licenses: Free, P1, P2 and Governance. Like PIM for only P2 license, SSPR required P1.&lt;/li&gt;
+&lt;li&gt;No fucking break inheritance. Definations are group of policies, RG can't be nested&lt;/li&gt;
 &lt;li&gt;User type can be: Member or Guest. Dynamic membership is a rule if user have some specific attribute that matched with dynamic membership, they will automatically added to that group, that is why it called Dynamic Group I guess! Group with membership assigned is common group that Admin user select member manually.&lt;/li&gt;
 &lt;li&gt;Administratives users can work which some parts of your organization. Administrative units allow you to segregate your directory such that certain administrators only have permissions to work on certain areas. &lt;/li&gt;
 &lt;li&gt;Devices in Azure AD represent and manage physical devices used by users that access organization's resources. You can allow/block devices of specific users.&lt;/li&gt;
@@ -331,7 +334,7 @@
 &lt;li&gt;We can swap Storage Account from using Access Key to RBAC as well. And we can grant role/permission on various levels from the specific container, storage account, resource group.&lt;/li&gt;
 &lt;li&gt;And yeah we can have a custom role, for example Sysadmin Group can be access to Storage,VM,Network. We create that role for example and only need assign Sysadmin user to that group for simple management. Custom role required Azure Entra ID license P1/P2 in order to get access to custom roles.&lt;/li&gt;
 &lt;li&gt;Custom role defined with AssignableScopes, specify range(Management group, subscription or resource group) that role can be assigned.&lt;/li&gt;
-&lt;li&gt;Interpret Access Assignments: additive union permissions of assigned role. Because RBAC have no fucking deny iin role, so Contributor role will eat custom role that have some permission like in Contributor role&lt;/li&gt;
+&lt;li&gt;Interpret Access Assignments: additive union permissions of assigned role. Because RBAC have no fucking deny in role, so Contributor role will eat custom role that have some permission like in Contributor role&lt;/li&gt;
 &lt;li&gt;Azure Account/User: a person(username, password, multi-factor) or a program (managed identity), basis for authentication.&lt;/li&gt;
 &lt;li&gt;Tenant: represent of an org, usually with public domain name. Will be assigned a domain if not specified (example.onmicrosoft.com). It is a fucking dedicated instance of Azure Actice Directory, every Azure Account is part of at least one tenant! More than one account can be the owner in a tenant!&lt;/li&gt;
 &lt;li&gt;Subscription: An agreement with Microsoft to use Azure services and how you are fucking to pay for that. All Azure resource usage gets billedd to the payment method of subscription (Free, PAYG, Enterprise agreements...). Not every tenant needs to have a subscription. Tenants can have more than one subscription. &lt;/li&gt;
@@ -347,6 +350,8 @@
 &lt;/ul&gt;
 &lt;hr&gt;
 &lt;h1&gt;Domain 2 - Compute&lt;/h1&gt;
+&lt;p&gt;Manage VM Sizes:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Manage VM Sizes" src="./images/2026/06/18.png"&gt;&lt;/p&gt;
 &lt;h3&gt;Virtual Machine (VM) Availability&lt;/h3&gt;
 &lt;table&gt;
 &lt;thead&gt;
@@ -523,6 +528,9 @@ bicep&lt;span class="w"&gt; &lt;/span&gt;decompile&lt;span class="w"&gt; &lt;/sp
 &lt;li&gt;parameters&lt;/li&gt;
 &lt;li&gt;outputs&lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;Good shit:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="arm-1" src="./images/2026/06/16.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="bicep" src="./images/2026/06/17.png"&gt;&lt;/p&gt;
 &lt;p&gt;Minimum required to create virtual network:&lt;/p&gt;
 &lt;p&gt;&lt;img alt="arm" src="./images/2026/06/03.png"&gt;&lt;/p&gt;
 &lt;p&gt;And yeah, we have &lt;em&gt;dependsOn&lt;/em&gt; inside resources section which depend on other specific resource to create resource&lt;/p&gt;
@@ -836,8 +844,9 @@ Azure:
 &lt;li&gt;Block Blob: Save common file (image, video, document..). Can be overwrite data.&lt;/li&gt;
 &lt;li&gt;Append Blob: Append without modify/delete old data, useful for log data, monitoring logs, audit trails.&lt;/li&gt;
 &lt;li&gt;Page Blob: Random read/write, common use case: Virtual Disk (VHD) for VM, database files.&lt;/li&gt;
-&lt;li&gt;&lt;/li&gt;
+&lt;li&gt;This is interesting:&lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;&lt;img alt="prepare - storage" src="./images/2026/06/15.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Domain 4 - Networking&lt;/h1&gt;
 &lt;p&gt;Resource Reference:&lt;/p&gt;
@@ -1053,21 +1062,25 @@ VPC Traffic Mirroring        →   Packet Capture
 &lt;li&gt;You can assign public IP to LB/NIC&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3&gt;Enhanced after fail first exam&lt;/h3&gt;
-&lt;p&gt;Virtual Network Gateway or VPN gateway, to connect between 2 Vnet using VPN gateway:
-1. add new subnet for vpn gateway in each VNET
-2. create virtual network gateway with subnet you just created. Create/use exists First and Second Public IP for it (second IP for HA i guess?)
-3. create virtual network gateway again for second vnet
-4. adding network gateway connection between 2 vpn gateway we just created, remember to change Autonomous system number (ASN) if not we will fail!
-5. Create Connection between 2 vpn gateway, connection type: VNet-to-VNet, remember to choice correction for 2 of your VNet
-6. Review at connections panel.&lt;/p&gt;
+&lt;p&gt;Virtual Network Gateway or VPN gateway, to connect between 2 Vnet using VPN gateway:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;add&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;subnet&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;vpn&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;gateway&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;each&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;VNET&lt;/span&gt;
+&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;create&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;virtual&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;network&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;gateway&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;with&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;subnet&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;you&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;just&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;created&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Create&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;use&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;exists&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;First&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Second&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Public&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;IP&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;it&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;second&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;IP&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;HA&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;guess&lt;/span&gt;&lt;span class="p"&gt;?)&lt;/span&gt;
+&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;create&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;virtual&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;network&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;gateway&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;again&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;second&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;vnet&lt;/span&gt;
+&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;adding&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;network&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;gateway&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;connection&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;between&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;vpn&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;gateway&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;we&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;just&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;created&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;remember&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;to&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;change&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Autonomous&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;system&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;number&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;ASN&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;not&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;we&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;will&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;fail&lt;/span&gt;&lt;span class="p"&gt;!&lt;/span&gt;
+&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Create&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Connection&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;between&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;vpn&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;gateway&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;connection&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;type&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;VNet&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;to&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;VNet&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;remember&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;to&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;choice&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;correction&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;of&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;your&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;VNet&lt;/span&gt;
+&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Review&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;at&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;connections&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;panel&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;p&gt;&lt;img alt="vnet-to-vnet" src="./images/2026/06/09.png"&gt;&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;We are able to auto register domain for VM when we created VM via option "Enable Auto Registration" (In Private DNS Zone)&lt;/li&gt;
+&lt;li&gt;We are able to auto register domain for VM when we created VM via option "Enable Auto Registration" (In Private DNS Zone).&lt;/li&gt;
 &lt;li&gt;We can group multiple rule to Application Security Group(ASG), and allow traffic to ASG is much better than hardcode IP in NSG. For ASG we have to create new ASG as a resource. And go to VM --&amp;gt; Networking --&amp;gt; Config the ASG --&amp;gt; Link VM to specific ASG, 1 VM can be attach more than 1 ASG. After that we can create new Inbound Security Rule in NSG with destination is ASG. Picture for example:&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;img alt="ASG" src="./images/2026/06/10.png"&gt;&lt;/p&gt;
-&lt;p&gt;Again ASG really is just an abstraction of the destination instead of specifying a list of IP addresses.
-- Connection troubleshooter: Enter via VM --&amp;gt; Help --&amp;gt; Connection Troubleshoot, select source which is current VM and destination which is VM we can't connect from current VM, we are able to use TCP/ICMP for probe settings. When we click run diagnostic tests, it deployed an agent to the VM and take couples minute. Example: &lt;/p&gt;
+&lt;p&gt;Again ASG really is just an abstraction of the destination instead of specifying a list of IP addresses.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Connection troubleshooter: Enter via VM --&amp;gt; Help --&amp;gt; Connection Troubleshoot, select source which is current VM and destination which is VM we can't connect from current VM, we are able to use TCP/ICMP for probe settings. When we click run diagnostic tests, it deployed an agent to the VM and take couples minute. Example: &lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;&lt;img alt="Connection troubleshoot" src="./images/2026/06/11.png"&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;You can not create "Basic SKU" for Azure LB. Forget about "Gateway SKU". &lt;/li&gt;
@@ -1554,9 +1567,10 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 
 &lt;p&gt;Update 1st try in June-04-2026: failed with score 622/1000. It is just hard because I haven't prepare serious enough, still need more practice. The domain Compute and Storage I felt pretty confident, but domain Entra ID is really really bad for me =.=
 But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - Complete Exam Prep&lt;/strong&gt;, I skip a lot and spam only on practice test!&lt;/p&gt;
-&lt;p&gt;Start learning again in morning saturday June-06-2026! Plan for retake in June-12-2026!&lt;/p&gt;
+&lt;p&gt;Start learning again in morning saturday June-06-2026! Plan for retake in June-14-2026!&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Secret weapon&lt;/h1&gt;
+&lt;p&gt;Good shit for exam prep: &lt;a href="https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-az-104-manage-azure-identities-and-governance-1-of-5"&gt;very very quality&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;For example we have this fucking question (taken from secret weapon xD)&lt;/p&gt;
 &lt;p&gt;&lt;img alt="exam test" src="./images/2026/06/06.png"&gt;&lt;/p&gt;
 &lt;p&gt;We can't remember everything for fucking sure. Let's me told you what I reliazed after practice for exam. It is how fucking we use &lt;a href="https://learn.microsoft.com/"&gt;https://learn.microsoft.com/&lt;/a&gt; during exam.&lt;/p&gt;
@@ -1573,7 +1587,7 @@ But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - 
 &lt;li&gt;Trust me, if you don't work in Azure but still want to try exam. Learn for it for non-stop 30 days before taking exam!&lt;/li&gt;
 &lt;li&gt;This exam is fucking ridiculous, even you are able to read document, but time is fucking limited!!! holy shiet!!!&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;I would spam this word in every article related to any certification: Passing an exam, getting certifications is not an achievement for me, no fucking salary increase, no fucking showoff because I'm fucking lowkey, introverted person. I just have no idea what to do at sometime in every year, so instead of wasting time, I think learning is better for fucking sure. The exam is just 1 fucking gate or guardrail I created to make sure I understand enough what is fucking I'm learning. Wasted time and money (buy an exam to get cert) or be fucking serious about learning? If I need to compare, I simply compare my current year with myself from last year; that's all. LOL&lt;/p&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="devops"/><category term="exam"/></entry><entry><title>My experience on learning Azure Devops - Part 2: Azure Devops</title><link href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-2-azure-devops.html" rel="alternate"/><published>2026-05-05T00:00:00+07:00</published><updated>2026-05-05T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-05:/my-experience-on-learning-azure-devops-part-2-azure-devops.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;I would spam this word in every article related to any certification: Passing an exam, getting certifications is not an achievement for me, no fucking salary increase, I'm not proud if I have achieved certifications because I'm fucking lowkey, introverted person. I just have no idea what to do at sometime in every year, so instead of wasting time, I think learning is better for fucking sure. The exam is just 1 fucking gate or guardrail I created to make sure I understand enough what is fucking I'm learning. Wasted time and money (buy an exam to get cert) or be fucking serious about learning? If I need to compare, I simply compare my current year with myself from last year; that's all. LOL&lt;/p&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="devops"/><category term="exam"/></entry><entry><title>My experience on learning Azure Devops - Part 2: Azure Devops</title><link href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-2-azure-devops.html" rel="alternate"/><published>2026-05-05T00:00:00+07:00</published><updated>2026-05-05T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-05:/my-experience-on-learning-azure-devops-part-2-azure-devops.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This article is part 2, part 1 you can find it here: &lt;a href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-1-acr-aks.html"&gt;My experience on learning Azure Devops - Part 1: ACR + AKS&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;In this article, I will show you some little knowledge about Azure DevOps that I learned and try to implement in my lab.&lt;/p&gt;
 &lt;hr&gt;

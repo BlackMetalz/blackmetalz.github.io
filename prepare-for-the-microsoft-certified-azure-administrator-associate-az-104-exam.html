@@ -17,16 +17,16 @@
 
 <meta name="keywords" content="azure, devops, exam, Knowledge Base, " />
 
-<meta property="og:title" content="[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) "/>
-<meta property="og:url" content="https://blackmetalz.github.io/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104.html" />
+<meta property="og:title" content="Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam "/>
+<meta property="og:url" content="https://blackmetalz.github.io/prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html" />
 <meta property="og:description" content="" />
 <meta property="og:site_name" content="Kienlt&#39;s notebook" />
 <meta property="og:article:author" content="kienlt" />
 <meta property="og:article:published_time" content="2026-05-16T00:00:00+07:00" />
-<meta name="twitter:title" content="[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) ">
+<meta name="twitter:title" content="Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam ">
 <meta name="twitter:description" content="">
 
-        <title>[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104)  · Kienlt&#39;s notebook
+        <title>Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam  · Kienlt&#39;s notebook
 </title>
         <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
 
@@ -68,8 +68,8 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="https://blackmetalz.github.io/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104.html">
-                [WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104)
+            <a href="https://blackmetalz.github.io/prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html">
+                Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam
             </a>
         </h1>
     </header>
@@ -370,6 +370,9 @@
 </ul>
 <h3>Enhanced after fail first exam</h3>
 <ul>
+<li>3 different type of group: cloud, hybrid and guest group?</li>
+<li>Microsoft entra ID has different licenses: Free, P1, P2 and Governance. Like PIM for only P2 license, SSPR required P1.</li>
+<li>No fucking break inheritance. Definations are group of policies, RG can't be nested</li>
 <li>User type can be: Member or Guest. Dynamic membership is a rule if user have some specific attribute that matched with dynamic membership, they will automatically added to that group, that is why it called Dynamic Group I guess! Group with membership assigned is common group that Admin user select member manually.</li>
 <li>Administratives users can work which some parts of your organization. Administrative units allow you to segregate your directory such that certain administrators only have permissions to work on certain areas. </li>
 <li>Devices in Azure AD represent and manage physical devices used by users that access organization's resources. You can allow/block devices of specific users.</li>
@@ -380,7 +383,7 @@
 <li>We can swap Storage Account from using Access Key to RBAC as well. And we can grant role/permission on various levels from the specific container, storage account, resource group.</li>
 <li>And yeah we can have a custom role, for example Sysadmin Group can be access to Storage,VM,Network. We create that role for example and only need assign Sysadmin user to that group for simple management. Custom role required Azure Entra ID license P1/P2 in order to get access to custom roles.</li>
 <li>Custom role defined with AssignableScopes, specify range(Management group, subscription or resource group) that role can be assigned.</li>
-<li>Interpret Access Assignments: additive union permissions of assigned role. Because RBAC have no fucking deny iin role, so Contributor role will eat custom role that have some permission like in Contributor role</li>
+<li>Interpret Access Assignments: additive union permissions of assigned role. Because RBAC have no fucking deny in role, so Contributor role will eat custom role that have some permission like in Contributor role</li>
 <li>Azure Account/User: a person(username, password, multi-factor) or a program (managed identity), basis for authentication.</li>
 <li>Tenant: represent of an org, usually with public domain name. Will be assigned a domain if not specified (example.onmicrosoft.com). It is a fucking dedicated instance of Azure Actice Directory, every Azure Account is part of at least one tenant! More than one account can be the owner in a tenant!</li>
 <li>Subscription: An agreement with Microsoft to use Azure services and how you are fucking to pay for that. All Azure resource usage gets billedd to the payment method of subscription (Free, PAYG, Enterprise agreements...). Not every tenant needs to have a subscription. Tenants can have more than one subscription. </li>
@@ -396,6 +399,8 @@
 </ul>
 <hr>
 <h1>Domain 2 - Compute</h1>
+<p>Manage VM Sizes:</p>
+<p><img alt="Manage VM Sizes" src="./images/2026/06/18.png"></p>
 <h3>Virtual Machine (VM) Availability</h3>
 <table>
 <thead>
@@ -572,6 +577,9 @@ bicep<span class="w"> </span>decompile<span class="w"> </span>main.json
 <li>parameters</li>
 <li>outputs</li>
 </ul>
+<p>Good shit:</p>
+<p><img alt="arm-1" src="./images/2026/06/16.png"></p>
+<p><img alt="bicep" src="./images/2026/06/17.png"></p>
 <p>Minimum required to create virtual network:</p>
 <p><img alt="arm" src="./images/2026/06/03.png"></p>
 <p>And yeah, we have <em>dependsOn</em> inside resources section which depend on other specific resource to create resource</p>
@@ -885,8 +893,9 @@ Azure:
 <li>Block Blob: Save common file (image, video, document..). Can be overwrite data.</li>
 <li>Append Blob: Append without modify/delete old data, useful for log data, monitoring logs, audit trails.</li>
 <li>Page Blob: Random read/write, common use case: Virtual Disk (VHD) for VM, database files.</li>
-<li></li>
+<li>This is interesting:</li>
 </ul>
+<p><img alt="prepare - storage" src="./images/2026/06/15.png"></p>
 <hr>
 <h1>Domain 4 - Networking</h1>
 <p>Resource Reference:</p>
@@ -1102,21 +1111,25 @@ VPC Traffic Mirroring        →   Packet Capture
 <li>You can assign public IP to LB/NIC</li>
 </ul>
 <h3>Enhanced after fail first exam</h3>
-<p>Virtual Network Gateway or VPN gateway, to connect between 2 Vnet using VPN gateway:
-1. add new subnet for vpn gateway in each VNET
-2. create virtual network gateway with subnet you just created. Create/use exists First and Second Public IP for it (second IP for HA i guess?)
-3. create virtual network gateway again for second vnet
-4. adding network gateway connection between 2 vpn gateway we just created, remember to change Autonomous system number (ASN) if not we will fail!
-5. Create Connection between 2 vpn gateway, connection type: VNet-to-VNet, remember to choice correction for 2 of your VNet
-6. Review at connections panel.</p>
+<p>Virtual Network Gateway or VPN gateway, to connect between 2 Vnet using VPN gateway:</p>
+<div class="highlight"><pre><span></span><code><span class="mi">1</span><span class="p">.</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="nx">new</span><span class="w"> </span><span class="nx">subnet</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">vpn</span><span class="w"> </span><span class="nx">gateway</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">each</span><span class="w"> </span><span class="nx">VNET</span>
+<span class="mi">2</span><span class="p">.</span><span class="w"> </span><span class="nx">create</span><span class="w"> </span><span class="kd">virtual</span><span class="w"> </span><span class="nx">network</span><span class="w"> </span><span class="nx">gateway</span><span class="w"> </span><span class="nx">with</span><span class="w"> </span><span class="nx">subnet</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">just</span><span class="w"> </span><span class="nx">created</span><span class="p">.</span><span class="w"> </span><span class="nx">Create</span><span class="o">/</span><span class="nx">use</span><span class="w"> </span><span class="nx">exists</span><span class="w"> </span><span class="nx">First</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">Second</span><span class="w"> </span><span class="nx">Public</span><span class="w"> </span><span class="nx">IP</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">it</span><span class="w"> </span><span class="p">(</span><span class="nx">second</span><span class="w"> </span><span class="nx">IP</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">HA</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="nx">guess</span><span class="p">?)</span>
+<span class="mi">3</span><span class="p">.</span><span class="w"> </span><span class="nx">create</span><span class="w"> </span><span class="kd">virtual</span><span class="w"> </span><span class="nx">network</span><span class="w"> </span><span class="nx">gateway</span><span class="w"> </span><span class="nx">again</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">second</span><span class="w"> </span><span class="nx">vnet</span>
+<span class="mi">4</span><span class="p">.</span><span class="w"> </span><span class="nx">adding</span><span class="w"> </span><span class="nx">network</span><span class="w"> </span><span class="nx">gateway</span><span class="w"> </span><span class="nx">connection</span><span class="w"> </span><span class="nx">between</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="nx">vpn</span><span class="w"> </span><span class="nx">gateway</span><span class="w"> </span><span class="nx">we</span><span class="w"> </span><span class="nx">just</span><span class="w"> </span><span class="nx">created</span><span class="p">,</span><span class="w"> </span><span class="nx">remember</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">change</span><span class="w"> </span><span class="nx">Autonomous</span><span class="w"> </span><span class="nx">system</span><span class="w"> </span><span class="nx">number</span><span class="w"> </span><span class="p">(</span><span class="nx">ASN</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="nx">we</span><span class="w"> </span><span class="nx">will</span><span class="w"> </span><span class="nx">fail</span><span class="p">!</span>
+<span class="mi">5</span><span class="p">.</span><span class="w"> </span><span class="nx">Create</span><span class="w"> </span><span class="nx">Connection</span><span class="w"> </span><span class="nx">between</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="nx">vpn</span><span class="w"> </span><span class="nx">gateway</span><span class="p">,</span><span class="w"> </span><span class="nx">connection</span><span class="w"> </span><span class="k">type</span><span class="p">:</span><span class="w"> </span><span class="nx">VNet</span><span class="o">-</span><span class="nx">to</span><span class="o">-</span><span class="nx">VNet</span><span class="p">,</span><span class="w"> </span><span class="nx">remember</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="kd">choice</span><span class="w"> </span><span class="nx">correction</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">your</span><span class="w"> </span><span class="nx">VNet</span>
+<span class="mi">6</span><span class="p">.</span><span class="w"> </span><span class="nx">Review</span><span class="w"> </span><span class="nx">at</span><span class="w"> </span><span class="nx">connections</span><span class="w"> </span><span class="nx">panel</span><span class="p">.</span>
+</code></pre></div>
+
 <p><img alt="vnet-to-vnet" src="./images/2026/06/09.png"></p>
 <ul>
-<li>We are able to auto register domain for VM when we created VM via option "Enable Auto Registration" (In Private DNS Zone)</li>
+<li>We are able to auto register domain for VM when we created VM via option "Enable Auto Registration" (In Private DNS Zone).</li>
 <li>We can group multiple rule to Application Security Group(ASG), and allow traffic to ASG is much better than hardcode IP in NSG. For ASG we have to create new ASG as a resource. And go to VM --&gt; Networking --&gt; Config the ASG --&gt; Link VM to specific ASG, 1 VM can be attach more than 1 ASG. After that we can create new Inbound Security Rule in NSG with destination is ASG. Picture for example:</li>
 </ul>
 <p><img alt="ASG" src="./images/2026/06/10.png"></p>
-<p>Again ASG really is just an abstraction of the destination instead of specifying a list of IP addresses.
-- Connection troubleshooter: Enter via VM --&gt; Help --&gt; Connection Troubleshoot, select source which is current VM and destination which is VM we can't connect from current VM, we are able to use TCP/ICMP for probe settings. When we click run diagnostic tests, it deployed an agent to the VM and take couples minute. Example: </p>
+<p>Again ASG really is just an abstraction of the destination instead of specifying a list of IP addresses.</p>
+<ul>
+<li>Connection troubleshooter: Enter via VM --&gt; Help --&gt; Connection Troubleshoot, select source which is current VM and destination which is VM we can't connect from current VM, we are able to use TCP/ICMP for probe settings. When we click run diagnostic tests, it deployed an agent to the VM and take couples minute. Example: </li>
+</ul>
 <p><img alt="Connection troubleshoot" src="./images/2026/06/11.png"></p>
 <ul>
 <li>You can not create "Basic SKU" for Azure LB. Forget about "Gateway SKU". </li>
@@ -1603,9 +1616,10 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 
 <p>Update 1st try in June-04-2026: failed with score 622/1000. It is just hard because I haven't prepare serious enough, still need more practice. The domain Compute and Storage I felt pretty confident, but domain Entra ID is really really bad for me =.=
 But I didn't watch serious <strong>AZ-104 Microsoft Azure Administrator - Complete Exam Prep</strong>, I skip a lot and spam only on practice test!</p>
-<p>Start learning again in morning saturday June-06-2026! Plan for retake in June-12-2026!</p>
+<p>Start learning again in morning saturday June-06-2026! Plan for retake in June-14-2026!</p>
 <hr>
 <h1>Secret weapon</h1>
+<p>Good shit for exam prep: <a href="https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-az-104-manage-azure-identities-and-governance-1-of-5">very very quality</a></p>
 <p>For example we have this fucking question (taken from secret weapon xD)</p>
 <p><img alt="exam test" src="./images/2026/06/06.png"></p>
 <p>We can't remember everything for fucking sure. Let's me told you what I reliazed after practice for exam. It is how fucking we use <a href="https://learn.microsoft.com/">https://learn.microsoft.com/</a> during exam.</p>
@@ -1622,7 +1636,7 @@ But I didn't watch serious <strong>AZ-104 Microsoft Azure Administrator - Comple
 <li>Trust me, if you don't work in Azure but still want to try exam. Learn for it for non-stop 30 days before taking exam!</li>
 <li>This exam is fucking ridiculous, even you are able to read document, but time is fucking limited!!! holy shiet!!!</li>
 </ul>
-<p>I would spam this word in every article related to any certification: Passing an exam, getting certifications is not an achievement for me, no fucking salary increase, no fucking showoff because I'm fucking lowkey, introverted person. I just have no idea what to do at sometime in every year, so instead of wasting time, I think learning is better for fucking sure. The exam is just 1 fucking gate or guardrail I created to make sure I understand enough what is fucking I'm learning. Wasted time and money (buy an exam to get cert) or be fucking serious about learning? If I need to compare, I simply compare my current year with myself from last year; that's all. LOL</p>
+<p>I would spam this word in every article related to any certification: Passing an exam, getting certifications is not an achievement for me, no fucking salary increase, I'm not proud if I have achieved certifications because I'm fucking lowkey, introverted person. I just have no idea what to do at sometime in every year, so instead of wasting time, I think learning is better for fucking sure. The exam is just 1 fucking gate or guardrail I created to make sure I understand enough what is fucking I'm learning. Wasted time and money (buy an exam to get cert) or be fucking serious about learning? If I need to compare, I simply compare my current year with myself from last year; that's all. LOL</p>
 
 
              
