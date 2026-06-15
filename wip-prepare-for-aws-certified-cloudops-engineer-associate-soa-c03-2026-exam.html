@@ -86,6 +86,7 @@
 <li>CloudWatch (CW)</li>
 <li>Auto Scaling Group (ASG)</li>
 <li>Relational Database Service (RDS)</li>
+<li>Amazon Machine Imag (AMI)</li>
 </ul>
 <hr>
 <h1>Section 1: EC2 for CloudOps</h1>
@@ -179,6 +180,22 @@
 <p>We have to create instance scheduler via Cloudformation --&gt; Stack --&gt; create stack or use exists template to create this fucking stack. After created that we have a lot of resources created</p>
 <p><img alt="Instance Schduler" src="./images/2026/06/21.png"></p>
 <hr>
+<h1>Section 2: AMI - Amazon Machine Image</h1>
+<h3>Overview</h3>
+<p>We are gonna use public AMI, most well-known is Amazon Linux 2, very popular AMI for AWS.</p>
+<p>We can create AMI from running instance without shutdown AMI with AMI No-reboot option (It was disable by default). </p>
+<p>Hmm, so much services in AWS. We can create AMI via AWS Backup also (Doesn't reboot the instances while taking EBS snapshot)</p>
+<p>Migrate? yes we can migrate EC2 instance between AZ via AMI</p>
+<p>EC2 Image Builder: Hmm, auto build AMI manually or with schedule and run shit load of test cases to validate AMI (free service btw). Oh indetail of EC2 Iamge Builder, there is shit load of predefined components and OS select to create AMI:</p>
+<ul>
+<li>amazon-cloudwatch-agent-linux</li>
+<li>amazon-corretto-11-headless</li>
+<li>aws-cli-version-2-linux ... and more</li>
+</ul>
+<p>And in window of new Image Builder, we need to add a role for it also (Create a role with multiple required policies) and last one was Distributed settings where you can define where AMI will be distributed.</p>
+<p>Cross-Account AMI sharing: you can share AMI with another AWS account that AMI can have unencrypted or encrypted volumes via customer managed key (You need to share managed key as well, so they can decrypt the encrypted AMI).</p>
+<p>AMI in Production: add tag to AMI and use policy to approve only AMI have tags.</p>
+<p>Holy fuck, remember AMI is region locked can not be shared with other regions, only able to share in AZs</p>
 
 
              
