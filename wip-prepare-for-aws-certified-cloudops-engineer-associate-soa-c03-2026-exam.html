@@ -228,7 +228,75 @@
 </ul>
 <h3>SSM - Automation</h3>
 <p>Simplifies common maintenance and deployment task for EC2 instances and other AWS resources, for example: restart instances, create AMI, EBS snapshot.</p>
-<p>Hmm, it mostly choose which module (AWS provided) to run</p>
+<p>Hmm, it mostly choose which module (AWS provided) to run.</p>
+<p>Patch AMIs &amp; Update ASG.</p>
+<h3>SSM - Parameter Store</h3>
+<p>Secure storage for configuration and secrets, best for App config + lightweight secrets, no fucking auto-rotation (need auto-rotations/DB Credential/API Keys/Tokens safe location? --&gt; Secrets Manager)</p>
+<p>Used with Parameter Store (not just SSM):</p>
+<ul>
+<li>Lambda: reads DB URLs, API keys at runtime</li>
+<li>ECS/EKS: inject secrets as env vars into container</li>
+<li>Code Deploy/Code Build: pull credentials during CI/CD</li>
+<li>Any EC2 app - via SDK/CLI with proper IAM role (ssm:GetParameter)</li>
+</ul>
+<p>Hierarchy uses <em>/</em> delimited paths, like a file system:</p>
+<div class="highlight"><pre><span></span><code>/                                    ← root
+├── myapp/
+│   ├── prod/
+│   │   ├── db/
+│   │   │   ├── url                  → &quot;postgres://prod-db.rds.amazonaws.com:5432/mydb&quot;
+│   │   │   ├── username             → &quot;admin&quot;
+│   │   │   └── password             → (SecureString, KMS encrypted)
+│   │   ├── redis/
+│   │   │   └── endpoint             → &quot;redis://prod-cache.abc123.ng.0001.use1.cache.amazonaws.com&quot;
+│   │   └── feature_flags/
+│   │       └── new_dashboard        → &quot;true&quot;
+│   └── dev/
+│       ├── db/
+│       │   ├── url                  → &quot;postgres://dev-db.rds.amazonaws.com:5432/mydb&quot;
+│       │   └── password             → (SecureString)
+│       └── feature_flags/
+│           └── new_dashboard        → &quot;false&quot;
+└── shared/
+    ├── datadog_api_key              → (SecureString)
+    └── slack_webhook_url            → &quot;https://hooks.slack.com/...&quot;
+</code></pre></div>
+
+<p>Fetch by path in CLI:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># single param</span>
+aws<span class="w"> </span>ssm<span class="w"> </span>get-parameter<span class="w"> </span>--name<span class="w"> </span><span class="s2">&quot;/myapp/prod/db/password&quot;</span><span class="w"> </span>
+<span class="c1"># Multi param</span>
+aws<span class="w"> </span>ssm<span class="w"> </span>get-parameter<span class="w"> </span>--names<span class="w"> </span><span class="s2">&quot;/myapp/prod/db/password&quot;</span><span class="w"> </span><span class="s2">&quot;/myapp/prod/db/username&quot;</span>
+<span class="c1"># With decryption </span>
+aws<span class="w"> </span>ssm<span class="w"> </span>get-parameter<span class="w"> </span>--name<span class="w"> </span><span class="s2">&quot;/myapp/prod/db/password&quot;</span><span class="w"> </span>--with-decrytion
+<span class="c1"># entire subtree at once (recursive)</span>
+aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<span class="w"> </span>--path<span class="w"> </span><span class="s2">&quot;/myapp/prod&quot;</span><span class="w"> </span>--recursive
+</code></pre></div>
+
+<p>Free parameters tier used up to 10000 number of parameters while paid up to 100k with maximum size of parameter value is 4 KB (advanced 8Kb) and no fucking parameter policies available (advanced: yes)</p>
+<p>So what is the fucking parameters policies:</p>
+<ul>
+<li>Allow to assign a TTL to a parameter to force updating or deleting sensitive data such as passwords, tokens.</li>
+<li>Can assign multiple polices at a time.</li>
+</ul>
+<h3>SSM - Default Host Management Configuration (DHMC)</h3>
+<p>Short explain: turn on one setting per region → all EC2 instances in that region get SSM managed automatically, no per-instance IAM role needed.</p>
+<h3>SSM - Inventory &amp; State Manager</h3>
+<p>Short explain: what's installed/running inside my instances --&gt; It is fucking SSM Inventory</p>
+<p>How it works:</p>
+<ul>
+<li>EC2 (SSM Agent)</li>
+<li>Collects metadata then sends to SSM Inventory</li>
+<li>S3 bucket (optional sync)</li>
+<li>Athena / QuickSight (query/visualize)</li>
+</ul>
+<p>Key points for fucking exam:</p>
+<ul>
+<li>Data synced to S3 via Resource Data Sync — aggregate inventory across multiple accounts/regions into one S3 bucket.</li>
+<li>Query with Athena on top of that S3 data</li>
+<li>If instance doesn't show inventory → check SSM Agent running + IAM role has <em>ssm:PutInventory</em> permission</li>
+<li>Works for both EC2 and on-premises servers (any SSM managed node)</li>
+</ul>
 
 
              

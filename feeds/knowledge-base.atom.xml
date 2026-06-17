@@ -149,7 +149,75 @@
 &lt;/ul&gt;
 &lt;h3&gt;SSM - Automation&lt;/h3&gt;
 &lt;p&gt;Simplifies common maintenance and deployment task for EC2 instances and other AWS resources, for example: restart instances, create AMI, EBS snapshot.&lt;/p&gt;
-&lt;p&gt;Hmm, it mostly choose which module (AWS provided) to run&lt;/p&gt;</content><category term="Knowledge Base"/><category term="aws"/><category term="devops"/><category term="exam"/></entry><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro - I thought I understood, but it turns out I didn't.&lt;/h1&gt;
+&lt;p&gt;Hmm, it mostly choose which module (AWS provided) to run.&lt;/p&gt;
+&lt;p&gt;Patch AMIs &amp;amp; Update ASG.&lt;/p&gt;
+&lt;h3&gt;SSM - Parameter Store&lt;/h3&gt;
+&lt;p&gt;Secure storage for configuration and secrets, best for App config + lightweight secrets, no fucking auto-rotation (need auto-rotations/DB Credential/API Keys/Tokens safe location? --&amp;gt; Secrets Manager)&lt;/p&gt;
+&lt;p&gt;Used with Parameter Store (not just SSM):&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Lambda: reads DB URLs, API keys at runtime&lt;/li&gt;
+&lt;li&gt;ECS/EKS: inject secrets as env vars into container&lt;/li&gt;
+&lt;li&gt;Code Deploy/Code Build: pull credentials during CI/CD&lt;/li&gt;
+&lt;li&gt;Any EC2 app - via SDK/CLI with proper IAM role (ssm:GetParameter)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Hierarchy uses &lt;em&gt;/&lt;/em&gt; delimited paths, like a file system:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;/                                    ← root
+├── myapp/
+│   ├── prod/
+│   │   ├── db/
+│   │   │   ├── url                  → &amp;quot;postgres://prod-db.rds.amazonaws.com:5432/mydb&amp;quot;
+│   │   │   ├── username             → &amp;quot;admin&amp;quot;
+│   │   │   └── password             → (SecureString, KMS encrypted)
+│   │   ├── redis/
+│   │   │   └── endpoint             → &amp;quot;redis://prod-cache.abc123.ng.0001.use1.cache.amazonaws.com&amp;quot;
+│   │   └── feature_flags/
+│   │       └── new_dashboard        → &amp;quot;true&amp;quot;
+│   └── dev/
+│       ├── db/
+│       │   ├── url                  → &amp;quot;postgres://dev-db.rds.amazonaws.com:5432/mydb&amp;quot;
+│       │   └── password             → (SecureString)
+│       └── feature_flags/
+│           └── new_dashboard        → &amp;quot;false&amp;quot;
+└── shared/
+    ├── datadog_api_key              → (SecureString)
+    └── slack_webhook_url            → &amp;quot;https://hooks.slack.com/...&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Fetch by path in CLI:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# single param&lt;/span&gt;
+aws&lt;span class="w"&gt; &lt;/span&gt;ssm&lt;span class="w"&gt; &lt;/span&gt;get-parameter&lt;span class="w"&gt; &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/myapp/prod/db/password&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="c1"&gt;# Multi param&lt;/span&gt;
+aws&lt;span class="w"&gt; &lt;/span&gt;ssm&lt;span class="w"&gt; &lt;/span&gt;get-parameter&lt;span class="w"&gt; &lt;/span&gt;--names&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/myapp/prod/db/password&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/myapp/prod/db/username&amp;quot;&lt;/span&gt;
+&lt;span class="c1"&gt;# With decryption &lt;/span&gt;
+aws&lt;span class="w"&gt; &lt;/span&gt;ssm&lt;span class="w"&gt; &lt;/span&gt;get-parameter&lt;span class="w"&gt; &lt;/span&gt;--name&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/myapp/prod/db/password&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--with-decrytion
+&lt;span class="c1"&gt;# entire subtree at once (recursive)&lt;/span&gt;
+aws&lt;span class="w"&gt; &lt;/span&gt;ssm&lt;span class="w"&gt; &lt;/span&gt;get-parameters-by-path&lt;span class="w"&gt; &lt;/span&gt;--path&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/myapp/prod&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--recursive
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Free parameters tier used up to 10000 number of parameters while paid up to 100k with maximum size of parameter value is 4 KB (advanced 8Kb) and no fucking parameter policies available (advanced: yes)&lt;/p&gt;
+&lt;p&gt;So what is the fucking parameters policies:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Allow to assign a TTL to a parameter to force updating or deleting sensitive data such as passwords, tokens.&lt;/li&gt;
+&lt;li&gt;Can assign multiple polices at a time.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;SSM - Default Host Management Configuration (DHMC)&lt;/h3&gt;
+&lt;p&gt;Short explain: turn on one setting per region → all EC2 instances in that region get SSM managed automatically, no per-instance IAM role needed.&lt;/p&gt;
+&lt;h3&gt;SSM - Inventory &amp;amp; State Manager&lt;/h3&gt;
+&lt;p&gt;Short explain: what's installed/running inside my instances --&amp;gt; It is fucking SSM Inventory&lt;/p&gt;
+&lt;p&gt;How it works:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;EC2 (SSM Agent)&lt;/li&gt;
+&lt;li&gt;Collects metadata then sends to SSM Inventory&lt;/li&gt;
+&lt;li&gt;S3 bucket (optional sync)&lt;/li&gt;
+&lt;li&gt;Athena / QuickSight (query/visualize)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Key points for fucking exam:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Data synced to S3 via Resource Data Sync — aggregate inventory across multiple accounts/regions into one S3 bucket.&lt;/li&gt;
+&lt;li&gt;Query with Athena on top of that S3 data&lt;/li&gt;
+&lt;li&gt;If instance doesn't show inventory → check SSM Agent running + IAM role has &lt;em&gt;ssm:PutInventory&lt;/em&gt; permission&lt;/li&gt;
+&lt;li&gt;Works for both EC2 and on-premises servers (any SSM managed node)&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="aws"/><category term="devops"/><category term="exam"/></entry><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro - I thought I understood, but it turns out I didn't.&lt;/h1&gt;
 &lt;p&gt;I thought I was understand ArgoCD enough, in the past I have running ArgoCD with multiple K8S Cluster inside it. (&amp;gt;10 clusters). And have around 500-600 ArgoCD Applications in single cluster. But I was contributor in there, not who build from scratch, it is 100% misconceptions that I often encounter. Even I had Certified Argo Project Associate (CAPA) but it was a joke for me, no value gained! So that is the reason this article born. To help me understand more "basic" knowledge of ArgoCD.&lt;/p&gt;
 &lt;p&gt;Ok, we will go through sections below in this article:&lt;/p&gt;
 &lt;ul&gt;
