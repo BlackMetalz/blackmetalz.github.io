@@ -280,7 +280,8 @@ aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<spa
 <li>Can assign multiple polices at a time.</li>
 </ul>
 <h3>SSM - Default Host Management Configuration (DHMC)</h3>
-<p>Short explain: turn on one setting per region → all EC2 instances in that region get SSM managed automatically, no per-instance IAM role needed.</p>
+<p>Short explain: turn on one setting per region → all EC2 instances in that region get SSM managed automatically, no per-instance IAM role needed. </p>
+<p>Required IMDSv2 to be active for enhanced security and to successfully identify instances.</p>
 <h3>SSM - Inventory &amp; State Manager</h3>
 <p>Short explain: what's installed/running inside my instances --&gt; It is fucking SSM Inventory</p>
 <p>How it works:</p>
@@ -297,6 +298,43 @@ aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<spa
 <li>If instance doesn't show inventory → check SSM Agent running + IAM role has <em>ssm:PutInventory</em> permission</li>
 <li>Works for both EC2 and on-premises servers (any SSM managed node)</li>
 </ul>
+<h3>SSM - Patch Manager</h3>
+<p>Automate the process of patching managed instances, patch on demand or on a schedule using Maintenance Windows. Scan instances and generate patch compliance report (missing patches)</p>
+<p>Patch baseline:</p>
+<ul>
+<li>Defines which patches should and shouldn't be installed on your instances</li>
+<li>Ability to create custom patch baseline (specify approved/rejected patches)</li>
+</ul>
+<p>Patch Group:</p>
+<ul>
+<li>Associate a set of instances with specific patch baseline</li>
+<li>Example: create patch groups for different environments (dev,test,prod)</li>
+<li>An instance can only be in one patch group, patch group can be registered with only one patch baseline</li>
+</ul>
+<p>For exam perspective: patch manager is used to patch your instances</p>
+<h3>SSM - Session Manager</h3>
+<p>Allow you to start a secure shell on your EC2 and on-premises servers. Does not need SSH access, bastion osts or SSH keys. This is possible because we have fucking SSM Agent installed.</p>
+<p>Required for SSM Manager works:</p>
+<ul>
+<li>SSM Agent need to be installed and running in the instance.</li>
+<li>Instance must have IAM role with related policy to SSM Managed</li>
+<li>Instance must have internet access or VPC endpoint to SSM connect to AWS endpoint?</li>
+</ul>
+<p>And commands in this shell session can be logged and sent to S3, and control user in which group can access shell. Easier to audit I think.</p>
+<h3>SSM - Distributor</h3>
+<p>Packet and deploy software to your managed instances, you can create Distributorr package (SSM Document)</p>
+<p>Can be install via one-time (Run Command - yes, fucking like saltstack xD) or on a schedule (using state manager)</p>
+<h3>SSM - OpsCenter</h3>
+<p>Allow you to view, investigate and remediate issues in one place (no need to navigate across different AWS services)</p>
+<p>Issues could be security, performance issues, failures which help to reduce meantime to resolve issues.</p>
+<hr>
+<h1>Section 4: EC2 High Availability and Scalability</h1>
+<p>I skip section and jump direct to quiz. My wrong answer for this question in this quiz:</p>
+<p>Question: You would like to expose a fixed static IP to your end-users for compliance purposes, so they can write firewall rules that will be stable and approved by regulators. Which Load Balancer should you use?</p>
+<p>Answer: I picked ALB with EIP attached to it because it sounds right LOL. But in fact the ALB itself dynamically manages its IP addresses, so if you need fixed static IP, you need NLB</p>
+<p>Second question: Which of the following is NOT a valid target while you create a Target Group for your Application Load Balancer?</p>
+<p>Answer: I picked wrong answer again. <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-target-groups.html">It is fucking Public IP</a></p>
+<p>And I failed 6 in total of 16 questions, I think i need to watch this section again.</p>
 
 
              
