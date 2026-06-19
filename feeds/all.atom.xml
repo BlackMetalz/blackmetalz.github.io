@@ -3,6 +3,7 @@
 &lt;p&gt;I start the progress by using &lt;a href="udemy.com/course/aws-certified-cloudops-associate/"&gt;Stephane Maarek's course&lt;/a&gt;&lt;/p&gt;
 &lt;h3&gt;Some shortcut I will used in this article&lt;/h3&gt;
 &lt;ul&gt;
+&lt;li&gt;Load Balancer (LB)&lt;/li&gt;
 &lt;li&gt;Placement Groups (PG)&lt;/li&gt;
 &lt;li&gt;CloudWatch (CW)&lt;/li&gt;
 &lt;li&gt;Auto Scaling Group (ASG)&lt;/li&gt;
@@ -10,6 +11,12 @@
 &lt;li&gt;Amazon Machine Imag (AMI)&lt;/li&gt;
 &lt;li&gt;Systems Manager (SSM)&lt;/li&gt;
 &lt;li&gt;Resource Groups (RGs)&lt;/li&gt;
+&lt;li&gt;Elastic Load Balancer (ELB)&lt;/li&gt;
+&lt;li&gt;Application Load Balancer (ALB)&lt;/li&gt;
+&lt;li&gt;Security Group (SG)&lt;/li&gt;
+&lt;li&gt;Network Load Balancer (NLB)&lt;/li&gt;
+&lt;li&gt;Gateway Load Balancer (GWLB)&lt;/li&gt;
+&lt;li&gt;Server Name Indication (SNI)&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr&gt;
 &lt;h1&gt;Section 1: EC2 for CloudOps&lt;/h1&gt;
@@ -255,7 +262,77 @@ aws&lt;span class="w"&gt; &lt;/span&gt;ssm&lt;span class="w"&gt; &lt;/span&gt;ge
 &lt;p&gt;Answer: I picked ALB with EIP attached to it because it sounds right LOL. But in fact the ALB itself dynamically manages its IP addresses, so if you need fixed static IP, you need NLB&lt;/p&gt;
 &lt;p&gt;Second question: Which of the following is NOT a valid target while you create a Target Group for your Application Load Balancer?&lt;/p&gt;
 &lt;p&gt;Answer: I picked wrong answer again. &lt;a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-target-groups.html"&gt;It is fucking Public IP&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;And I failed 6 in total of 16 questions, I think i need to watch this section again.&lt;/p&gt;</content><category term="Knowledge Base"/><category term="aws"/><category term="devops"/><category term="exam"/></entry><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro - I thought I understood, but it turns out I didn't.&lt;/h1&gt;
+&lt;p&gt;And I failed 6 in total of 16 questions, I think i need to watch this section again.&lt;/p&gt;
+&lt;h3&gt;Application Load Balancer (ALB)&lt;/h3&gt;
+&lt;p&gt;Routing tables to different target groups:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Routing based path in URL&lt;/li&gt;
+&lt;li&gt;Routing based on hostname in URL (It means you can have multiple domain point to ALB)&lt;/li&gt;
+&lt;li&gt;Routing based on Query String, Headers (domain.com/users?id=123&amp;amp;order=true)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Target Groups:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;EC2 instances - HTTP&lt;/li&gt;
+&lt;li&gt;ECS tasks - HTTP&lt;/li&gt;
+&lt;li&gt;Lambda functions - HTTP request is translated into a JSON event&lt;/li&gt;
+&lt;li&gt;IP Address (private IPs)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;ALB can route to mulitple target groups and health check are at the target group level.&lt;/p&gt;
+&lt;p&gt;There is something great to know from this section (Which I never know/understand before). Header X-Forwarded-For can be spoof but can prevent by using last client in in ALB (ALB auto inject header)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;  Client sends:    X-Forwarded-For: fake-ip
+  ALB appends:     X-Forwarded-For: fake-ip, real-client-ip  ← ALB controls this
+                                              ^^^^^^^^^^^^
+                                              always trustworthy
+
+
+&lt;span class="gh"&gt;#&lt;/span&gt; Unsafe
+client_ip = request.headers[&amp;quot;X-Forwarded-For&amp;quot;].split(&amp;quot;,&amp;quot;)[0].strip()
+&lt;span class="gh"&gt;#&lt;/span&gt; Safe
+client_ip = request.headers[&amp;quot;X-Forwarded-For&amp;quot;].split(&amp;quot;,&amp;quot;)[-1].strip()                       
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Allow only request comming from ALB: in SG of EC2 instance, add inbound rule with source is custom (then select right SG of ALB)&lt;/p&gt;
+&lt;p&gt;We can have listener rule to do routing according conditions/rules. (like add custom path with custom fixed response code, body, content type.)&lt;/p&gt;
+&lt;h3&gt;Network Load Balancer (NLB)&lt;/h3&gt;
+&lt;p&gt;NLB (Layer 4), has one static ip per AZ and supports assining Elastic IP (helpful for whitelisting specific IP). And the rest is almost the same with ALB.&lt;/p&gt;
+&lt;p&gt;NLB does not support cookie-based session affinity, but uses source IP hash for connection stickiness.&lt;/p&gt;
+&lt;h3&gt;Gateway Load Balancer (GWLB)&lt;/h3&gt;
+&lt;p&gt;Gateway for network virtual appliances (NVA) in AWS (Ex: Firewalls, Instrusion Detection, Deep packet inspection and so on..). User --&amp;gt; GWLB --&amp;gt; 3rd NVA (If pass traffic will be sent to GWLB otherwise drop) --&amp;gt; GWLB --&amp;gt; Backend&lt;/p&gt;
+&lt;p&gt;Operates at Layer 3 - Ip Packets&lt;/p&gt;
+&lt;p&gt;Exam perspective: Use GENEVE protocol on port 6801 (right if you use GWLB)&lt;/p&gt;
+&lt;h3&gt;ELB - Server Name Indication (SNI)&lt;/h3&gt;
+&lt;p&gt;Used in scenario where you have multiple domain that point to same ALB/NLB, each domain serving specific target group.&lt;/p&gt;
+&lt;h3&gt;Connection Draining&lt;/h3&gt;
+&lt;p&gt;Feature naming: Deregistration Delay - For ALB &amp;amp; NLB&lt;/p&gt;
+&lt;p&gt;It is time to complete "in-flight requests" while the instance is de-registering or unhealthy. &lt;/p&gt;
+&lt;p&gt;Think like graceful shutdown:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Instance marked as Draining(like k8s drain node xDD)/Deregistration&lt;/li&gt;
+&lt;li&gt;ALB stops sending NEW requests to it&lt;/li&gt;
+&lt;li&gt;But existing in-flight requests get time to finish  ──► users see no errors&lt;/li&gt;
+&lt;li&gt;After timeout (default 300s), instance is fully removed&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;ELB - monitoring, troubleshooting, logging and tracing&lt;/h3&gt;
+&lt;p&gt;All LB metrics are directly pushed to CW metrics&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;SurgeQueueLength: The total of request (in HTTP listener) or connection (TCP listener) that are pending routing to a healthy instance.&lt;/li&gt;
+&lt;li&gt;SpilloverCount: the total number of requests that were rejected because the surge queue is full.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For request tracing, each HTTP request has an added custom header "X-Amzn-Trace-Id". This is useful in logs / distributed tracing platform to track a single request.&lt;/p&gt;
+&lt;h3&gt;Auto Scaling - Instance Refresh&lt;/h3&gt;
+&lt;p&gt;When we update launch template and then re-creating all EC2 instances, instance refresh is like rolling update in k8s deployment xD, same idea, pattern. Just little different start a VM is slower than start a pod, make sure you have right setting for warm-up time.&lt;/p&gt;
+&lt;h3&gt;ASG - Warm Pools&lt;/h3&gt;
+&lt;p&gt;To resolve latency issue, we have warm pool, pre-initialized VM but cost more money since they are up and ready to join auto scaling group?&lt;/p&gt;
+&lt;h3&gt;CloudOps - ASG&lt;/h3&gt;
+&lt;p&gt;There is some lifecycle hooks: instance launching, instance terminating.&lt;/p&gt;
+&lt;p&gt;This is kind great feature for me when use public cloud, lifecycle event can be trigger to EventBridge,SNS,SQS and with EventBridge it can invoke Lambda function to do your custom logic.&lt;/p&gt;
+&lt;p&gt;Example, SQS with ASG&lt;/p&gt;
+&lt;p&gt;&lt;img alt="sqs-asg" src="./images/2026/06/23.png"&gt;&lt;/p&gt;
+&lt;h3&gt;CW for ASG&lt;/h3&gt;
+&lt;p&gt;Metrics are collected every 1 minutes&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1&gt;Section 5: CloudFormation for CloudOps&lt;/h1&gt;
+&lt;p&gt;ah shit, here we go again, i forfeited 2 times when I'm learning this section for AWS DOP-C02 in 2024 and 2025...&lt;/p&gt;</content><category term="Knowledge Base"/><category term="aws"/><category term="devops"/><category term="exam"/></entry><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro - I thought I understood, but it turns out I didn't.&lt;/h1&gt;
 &lt;p&gt;I thought I was understand ArgoCD enough, in the past I have running ArgoCD with multiple K8S Cluster inside it. (&amp;gt;10 clusters). And have around 500-600 ArgoCD Applications in single cluster. But I was contributor in there, not who build from scratch, it is 100% misconceptions that I often encounter. Even I had Certified Argo Project Associate (CAPA) but it was a joke for me, no value gained! So that is the reason this article born. To help me understand more "basic" knowledge of ArgoCD.&lt;/p&gt;
 &lt;p&gt;Ok, we will go through sections below in this article:&lt;/p&gt;
 &lt;ul&gt;

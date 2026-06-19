@@ -82,6 +82,7 @@
 <p>I start the progress by using <a href="udemy.com/course/aws-certified-cloudops-associate/">Stephane Maarek's course</a></p>
 <h3>Some shortcut I will used in this article</h3>
 <ul>
+<li>Load Balancer (LB)</li>
 <li>Placement Groups (PG)</li>
 <li>CloudWatch (CW)</li>
 <li>Auto Scaling Group (ASG)</li>
@@ -89,6 +90,12 @@
 <li>Amazon Machine Imag (AMI)</li>
 <li>Systems Manager (SSM)</li>
 <li>Resource Groups (RGs)</li>
+<li>Elastic Load Balancer (ELB)</li>
+<li>Application Load Balancer (ALB)</li>
+<li>Security Group (SG)</li>
+<li>Network Load Balancer (NLB)</li>
+<li>Gateway Load Balancer (GWLB)</li>
+<li>Server Name Indication (SNI)</li>
 </ul>
 <hr>
 <h1>Section 1: EC2 for CloudOps</h1>
@@ -335,6 +342,76 @@ aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<spa
 <p>Second question: Which of the following is NOT a valid target while you create a Target Group for your Application Load Balancer?</p>
 <p>Answer: I picked wrong answer again. <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-target-groups.html">It is fucking Public IP</a></p>
 <p>And I failed 6 in total of 16 questions, I think i need to watch this section again.</p>
+<h3>Application Load Balancer (ALB)</h3>
+<p>Routing tables to different target groups:</p>
+<ul>
+<li>Routing based path in URL</li>
+<li>Routing based on hostname in URL (It means you can have multiple domain point to ALB)</li>
+<li>Routing based on Query String, Headers (domain.com/users?id=123&amp;order=true)</li>
+</ul>
+<p>Target Groups:</p>
+<ul>
+<li>EC2 instances - HTTP</li>
+<li>ECS tasks - HTTP</li>
+<li>Lambda functions - HTTP request is translated into a JSON event</li>
+<li>IP Address (private IPs)</li>
+</ul>
+<p>ALB can route to mulitple target groups and health check are at the target group level.</p>
+<p>There is something great to know from this section (Which I never know/understand before). Header X-Forwarded-For can be spoof but can prevent by using last client in in ALB (ALB auto inject header)</p>
+<div class="highlight"><pre><span></span><code>  Client sends:    X-Forwarded-For: fake-ip
+  ALB appends:     X-Forwarded-For: fake-ip, real-client-ip  ← ALB controls this
+                                              ^^^^^^^^^^^^
+                                              always trustworthy
+
+
+<span class="gh">#</span> Unsafe
+client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[0].strip()
+<span class="gh">#</span> Safe
+client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1].strip()                       
+</code></pre></div>
+
+<p>Allow only request comming from ALB: in SG of EC2 instance, add inbound rule with source is custom (then select right SG of ALB)</p>
+<p>We can have listener rule to do routing according conditions/rules. (like add custom path with custom fixed response code, body, content type.)</p>
+<h3>Network Load Balancer (NLB)</h3>
+<p>NLB (Layer 4), has one static ip per AZ and supports assining Elastic IP (helpful for whitelisting specific IP). And the rest is almost the same with ALB.</p>
+<p>NLB does not support cookie-based session affinity, but uses source IP hash for connection stickiness.</p>
+<h3>Gateway Load Balancer (GWLB)</h3>
+<p>Gateway for network virtual appliances (NVA) in AWS (Ex: Firewalls, Instrusion Detection, Deep packet inspection and so on..). User --&gt; GWLB --&gt; 3rd NVA (If pass traffic will be sent to GWLB otherwise drop) --&gt; GWLB --&gt; Backend</p>
+<p>Operates at Layer 3 - Ip Packets</p>
+<p>Exam perspective: Use GENEVE protocol on port 6801 (right if you use GWLB)</p>
+<h3>ELB - Server Name Indication (SNI)</h3>
+<p>Used in scenario where you have multiple domain that point to same ALB/NLB, each domain serving specific target group.</p>
+<h3>Connection Draining</h3>
+<p>Feature naming: Deregistration Delay - For ALB &amp; NLB</p>
+<p>It is time to complete "in-flight requests" while the instance is de-registering or unhealthy. </p>
+<p>Think like graceful shutdown:</p>
+<ul>
+<li>Instance marked as Draining(like k8s drain node xDD)/Deregistration</li>
+<li>ALB stops sending NEW requests to it</li>
+<li>But existing in-flight requests get time to finish  ──► users see no errors</li>
+<li>After timeout (default 300s), instance is fully removed</li>
+</ul>
+<h3>ELB - monitoring, troubleshooting, logging and tracing</h3>
+<p>All LB metrics are directly pushed to CW metrics</p>
+<ul>
+<li>SurgeQueueLength: The total of request (in HTTP listener) or connection (TCP listener) that are pending routing to a healthy instance.</li>
+<li>SpilloverCount: the total number of requests that were rejected because the surge queue is full.</li>
+</ul>
+<p>For request tracing, each HTTP request has an added custom header "X-Amzn-Trace-Id". This is useful in logs / distributed tracing platform to track a single request.</p>
+<h3>Auto Scaling - Instance Refresh</h3>
+<p>When we update launch template and then re-creating all EC2 instances, instance refresh is like rolling update in k8s deployment xD, same idea, pattern. Just little different start a VM is slower than start a pod, make sure you have right setting for warm-up time.</p>
+<h3>ASG - Warm Pools</h3>
+<p>To resolve latency issue, we have warm pool, pre-initialized VM but cost more money since they are up and ready to join auto scaling group?</p>
+<h3>CloudOps - ASG</h3>
+<p>There is some lifecycle hooks: instance launching, instance terminating.</p>
+<p>This is kind great feature for me when use public cloud, lifecycle event can be trigger to EventBridge,SNS,SQS and with EventBridge it can invoke Lambda function to do your custom logic.</p>
+<p>Example, SQS with ASG</p>
+<p><img alt="sqs-asg" src="./images/2026/06/23.png"></p>
+<h3>CW for ASG</h3>
+<p>Metrics are collected every 1 minutes</p>
+<hr>
+<h1>Section 5: CloudFormation for CloudOps</h1>
+<p>ah shit, here we go again, i forfeited 2 times when I'm learning this section for AWS DOP-C02 in 2024 and 2025...</p>
 
 
              
