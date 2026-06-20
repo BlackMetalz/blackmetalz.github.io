@@ -411,7 +411,212 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <p>Metrics are collected every 1 minutes</p>
 <hr>
 <h1>Section 5: CloudFormation for CloudOps</h1>
-<p>ah shit, here we go again, i forfeited 2 times when I'm learning this section for AWS DOP-C02 in 2024 and 2025...</p>
+<p>ah shit, here we go again, i forfeited this fucking section 2 times when I'm learning this section for AWS DOP-C02 in 2024 and 2025.... Yaml developer, a lot of fucking hooks =.=</p>
+<p>Short: IAC but for AWS only. You are able to visualization with Infrastructure Composer to see how components are related to each other in Cloudformation. </p>
+<p>How it works?:</p>
+<ul>
+<li>You should separate for create many stacks, each stack for specific resource (VPC/Network/App stacks).</li>
+<li>You need to upload template to S3 then reference it in Cloudformation. </li>
+<li>To update template, you will have to upload new version of template, can not edit previous.</li>
+<li>Stacks are defined by name. Delete stack will delete any resource/artifact created via that.</li>
+<li>You can deploy using manual way or via CLI / CD tools of AWS.</li>
+<li>Templates could be in YAML or JSON format, YAML is prefered</li>
+</ul>
+<p>Building Blocks: we will deep dive in each section below soon:</p>
+<ul>
+<li>AWSTemplateFormatVersion: Identifies the capabilities of template</li>
+<li>Description: description, comment LOL</li>
+<li>Resource: Your resources declared in the fucking template.</li>
+<li>Parameters: it is fucking parameters (dynamic inputs) for your template.</li>
+<li>Mappings: the static variables for your template</li>
+<li>Outputs: yeah, like terraform</li>
+<li>Conditionals: list of conditions to perform resource creation</li>
+<li>Template helpers, we have references and functions.</li>
+</ul>
+<h3>Resources</h3>
+<p>Resources are the core of Cloudformation template (this is the only one mandatory in whole template of Cloudformation.)</p>
+<h3>Parameters</h3>
+<p>This section I tell the AI create the content I want from what I understand xD.</p>
+<p>Dynamic inputs for your template. The main benefit: define a value once in Parameters, reference it in multiple places — when you need to change it, update only the parameter instead of hunting down every hardcoded value across the template.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">Parameters</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">EnvName</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Environment name (e.g. dev, prod)</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">String</span>
+<span class="w">    </span><span class="nt">Default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev</span>
+
+<span class="nt">Resources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">WebServerSG</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::EC2::SecurityGroup</span>
+<span class="w">    </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">GroupDescription</span><span class="p">:</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="s">&quot;SG</span><span class="nv"> </span><span class="s">for</span><span class="nv"> </span><span class="s">web</span><span class="nv"> </span><span class="s">server</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">${EnvName}&quot;</span>
+<span class="w">      </span><span class="nt">Tags</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Name</span>
+<span class="w">          </span><span class="nt">Value</span><span class="p">:</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="s">&quot;${EnvName}-web-sg&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Environment</span>
+<span class="w">          </span><span class="nt">Value</span><span class="p">:</span><span class="w"> </span><span class="kt">!Ref</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EnvName</span>
+
+<span class="w">  </span><span class="nt">WebInstance</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::EC2::Instance</span>
+<span class="w">    </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">InstanceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">t2.micro</span>
+<span class="w">      </span><span class="nt">ImageId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ami-0a3c3a20c09d6f377</span>
+<span class="w">      </span><span class="nt">Tags</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Name</span>
+<span class="w">          </span><span class="nt">Value</span><span class="p">:</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="s">&quot;${EnvName}-web-server&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Environment</span>
+<span class="w">          </span><span class="nt">Value</span><span class="p">:</span><span class="w"> </span><span class="kt">!Ref</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EnvName</span>
+<span class="w">      </span><span class="nt">SecurityGroups</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Ref</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">WebServerSG</span>
+
+<span class="w">  </span><span class="nt">MyBucket</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::S3::Bucket</span>
+<span class="w">    </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">BucketName</span><span class="p">:</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="s">&quot;my-app-${EnvName}-bucket&quot;</span>
+<span class="w">      </span><span class="nt">Tags</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Environment</span>
+<span class="w">          </span><span class="nt">Value</span><span class="p">:</span><span class="w"> </span><span class="kt">!Ref</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EnvName</span>
+</code></pre></div>
+
+<p><code>EnvName</code> is used in 7 places — deploy with <code>EnvName=prod</code> and everything updates automatically.</p>
+<p>Two ways to reference a parameter:
+- <code>!Ref EnvName</code> — returns the raw value, use when assigning directly to a field
+- <code>!Sub "${EnvName}-web-server"</code> — use when you need string interpolation (prefix/suffix)</p>
+<p>Exam information: </p>
+<ul>
+<li>AllowedValues: allow user select only allowed values.</li>
+<li>NoEcho: to not display, echo the sensitive data like password.</li>
+</ul>
+<p>Pre-defined / Pseudo parameters xD</p>
+<p><img alt="pseudo" src="./images/2026/06/24.png"></p>
+<h3>Mappings</h3>
+<p>This section I tell the AI create the content I want from what I understand xD.</p>
+<p>Static variables hardcoded in the template — no user input, no dynamic lookup. Use when you know the values in advance and they vary by some fixed dimension (region, environment, arch).</p>
+<p>Classic use case: AMI IDs. AMIs are region-specific — <code>ami-0ff8a91507f77f867</code> in <code>us-east-1</code> is a completely different image than <code>ami-0bdb828fd58c52235</code> in <code>us-west-1</code>. Mappings let you encode that lookup table once and resolve it automatically based on the current region.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">Mappings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">RegionMap</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">us-east-1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">HVM64</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ami-0ff8a91507f77f867</span>
+<span class="w">      </span><span class="nt">HVMG2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ami-0a584ac55a7631c0c</span>
+<span class="w">    </span><span class="nt">us-west-1</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">HVM64</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ami-0bdb828fd58c52235</span>
+<span class="w">      </span><span class="nt">HVMG2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ami-066ee5fd4a9ef77f1</span>
+
+<span class="nt">Resources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">MyEC2Instance</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::EC2::Instance</span>
+<span class="w">    </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ImageId</span><span class="p">:</span><span class="w"> </span><span class="kt">!FindInMap</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">RegionMap</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="kt">!Ref</span><span class="w"> </span><span class="s">&quot;AWS::Region&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">HVM64</span><span class="p p-Indicator">]</span>
+<span class="w">      </span><span class="nt">InstanceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">t2.micro</span>
+</code></pre></div>
+
+<p><code>!FindInMap [MapName, TopLevelKey, SecondLevelKey]</code> — three-level lookup, always this structure.</p>
+<p><code>!Ref "AWS::Region"</code> is a pseudo parameter — AWS injects the current region automatically, no user input needed. That's what makes this pattern useful: deploy the same template to any region and it picks the right AMI ID.</p>
+<p>Mappings vs Parameters: if the value is truly static and predictable (like AMI IDs per region), use Mappings. If it needs to vary per deployment based on user input, use Parameters.</p>
+<h3>Outputs and Exports</h3>
+<p>Holy shiet, If I use AI too much, this fucking article will be more than 2k lines =.=. </p>
+<p>So for outputs, think like output in terraform ok?</p>
+<p>For exports, export in 1 stack, import in another stack</p>
+<p>Stack 1: export</p>
+<div class="highlight"><pre><span></span><code><span class="nt">Outputs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">StackSSHSecurityGroup</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Value</span><span class="p">:</span><span class="w"> </span><span class="kt">!Ref</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyCompanyWideSSHSecurityGroup</span>
+<span class="w">    </span><span class="nt">Export</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">Name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SSHSecurityGroup</span><span class="w">   </span><span class="c1"># this is the export name</span>
+</code></pre></div>
+
+<p>Stack 2: import</p>
+<div class="highlight"><pre><span></span><code><span class="nt">Resources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">MyInstance</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::EC2::Instance</span>
+<span class="w">    </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">SecurityGroups</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!ImportValue</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SSHSecurityGroup</span><span class="w">   </span><span class="c1"># must match the fucking export name</span>
+</code></pre></div>
+
+<h3>Conditions</h3>
+<p>Holy shit, I just don't want to throw fucking code here but without it, everything else is useless</p>
+<div class="highlight"><pre><span></span><code><span class="nt">Parameters</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">EnvType</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">String</span>
+<span class="w">    </span><span class="nt">AllowedValues</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">dev</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">prod</span><span class="p p-Indicator">]</span>
+
+<span class="nt">Conditions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">IsProd</span><span class="p">:</span><span class="w"> </span><span class="kt">!Equals</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="kt">!Ref</span><span class="w"> </span><span class="nv">EnvType</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">prod</span><span class="p p-Indicator">]</span>
+
+<span class="nt">Resources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">MyInstance</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::EC2::Instance</span>
+<span class="w">    </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ImageId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ami-0ff8a91507f77f867</span>
+<span class="w">      </span><span class="nt">InstanceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">t2.micro</span>
+<span class="w">      </span><span class="nt">Volumes</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!If</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IsProd</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Device</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/dev/xvdb</span>
+<span class="w">            </span><span class="nt">VolumeId</span><span class="p">:</span><span class="w"> </span><span class="kt">!Ref</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ProdDataVolume</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Ref</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::NoValue</span><span class="w">   </span><span class="c1"># remove this property entirely if not prod</span>
+
+<span class="w">  </span><span class="nt">ProdDataVolume</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::EC2::Volume</span>
+<span class="w">    </span><span class="nt">Condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IsProd</span><span class="w">           </span><span class="c1"># resource itself only created if IsProd=true</span>
+<span class="w">    </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">AvailabilityZone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">us-east-1a</span>
+<span class="w">      </span><span class="nt">Size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">      </span><span class="nt">VolumeType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gp3</span>
+</code></pre></div>
+
+<p>With this you will understand how conditions works (resource create by conditions)</p>
+<h3>Rollbacks</h3>
+<p>We have some common scenario for rolls back:</p>
+<ul>
+<li>If stack creation failed: Default, everything rolls back (deleted).</li>
+<li>If stack update failed: the stack auto rolls back to previous working state.</li>
+<li>If rolls back failure: fix it manually then ContinueUpdateRollback API from console.</li>
+</ul>
+<h1>Other useful sections</h1>
+<ul>
+<li>Delete policy: default will delete resource on delete cloudformation stack, but we don't want to delete S3 bucket, we set <strong>DeletionPolicy=Retain</strong>, and last one is snapshot (create one final snapshot before delete the resource, works for some supported resource). </li>
+<li>Update replace policy: same idea with deletion policy but apply only during stack updates. </li>
+<li>Stack Policy: protect your resource from unintended update, default all resources are protected, specify an explicit ALLOW for the resources you want to be allowed to be updated.</li>
+<li>Termination Protection: to prevent accidental deletes on Cloudformation, enable this.</li>
+<li>Custom resources: Running lambda function to empty s3 bucket before delete bucket. Define by "Type: Custom::MyCustomResource" and required ServiceToken which can be SNS/Lambda ARN.</li>
+<li>Dynamic references: refer to external values stored in SSM parameter store or Secrets Manager. Format: {{resolve:service-name:reference-key}}. Service name value supports: ssm, ssm-secure, secretsmanager.</li>
+<li>Propertie ManageMasterUsersPassword = true, Cloudformation will create a secret in Secrets Manager and it's rotation</li>
+<li>For UserData in cloudformation, but it will always show success in cloudformation even script in user data failed.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">Resources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">MyInstance</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::EC2::Instance</span>
+<span class="w">    </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">ImageId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ami-123456</span>
+<span class="w">      </span><span class="nt">InstanceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">t2.micro</span>
+<span class="w">      </span><span class="nt">UserData</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">Fn::Base64</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">#!/bin/bash</span>
+<span class="w">          </span><span class="no">yum update -y</span>
+<span class="w">          </span><span class="no">yum install -y httpd</span>
+</code></pre></div>
+
+<ul>
+<li>And yeah issue in user data scripts could be fail and will give us hardtime to debug, that is why cloudformation provide a better way, it is cfn-init, let's take a look this picture. Better view/read-able, easy to debug than write bash scrip that contains more than 100 lines xD</li>
+</ul>
+<p><img alt="cfn-init" src="./images/2026/06/25.png"></p>
+<ul>
+<li>cfn-signal, yeah, this is a great way to debug in UI, send signal in some command you want to make sure exit code is zero. For example if 1 command fail, you send fail signal to cloudformation, then everything will get rolls back(deleted), we were talk about this in some line above xD.</li>
+<li>Nested stack: DRY LOL, mindset is same with gitlab template repo.</li>
+<li>Depends On: depend on other resource before create xD. For example we have 2 fucking resources are EC2instances and S3 Bucket, we set S3bucket depend on EC2instance, that mean s3bucket will not create until ec2instance is created.</li>
+<li>StackSets: holy fucking shit, this is just deploy 1 cloudformation template to multiple AWS account and multiple fucking region at the same time.</li>
+<li>Drift: It is same like state drift in terraform, little different drift detection in cloudformation need to trigger manually or schedule, not like terraform plan.</li>
+<li>Troubleshooting: </li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="n">DELETE_FAILED</span><span class="o">:</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="n">must</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">emptied</span><span class="w"> </span><span class="kr">before</span><span class="w"> </span><span class="n">deleting</span><span class="w"> </span><span class="n">such</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="n">S3</span><span class="w"> </span><span class="kr">or</span><span class="w"> </span><span class="n">SecGroup</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="kr">not</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">deleted</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="kr">all</span><span class="w"> </span><span class="n">EC2</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">fucking</span><span class="w"> </span><span class="kr">group</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">gone</span><span class="p">.</span><span class="w"> </span><span class="n">With</span><span class="w"> </span><span class="n">DeletionPolicy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Retain</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="kr">skip</span><span class="w"> </span><span class="n">fucking</span><span class="w"> </span><span class="n">deletion</span><span class="p">.</span>
+<span class="o">-</span><span class="w"> </span><span class="n">UPDATE_ROLLBACK_FAILED</span><span class="o">:</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="n">changed</span><span class="w"> </span><span class="n">outside</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">Cloudformation</span><span class="p">.</span>
+<span class="o">-</span><span class="w"> </span><span class="kr">And</span><span class="w"> </span><span class="n">more</span><span class="p">,</span><span class="w"> </span><span class="n">I</span><span class="s">&#39;m fucking lazy right now!</span>
+</code></pre></div>
+
+<ul>
+<li>StackFailures: Onfailure = rollback (default) or Do nothing (resource in state CREATE_FAILED) for debug purpose I think or event DELETE for fucking clean.</li>
+</ul>
 
 
              
