@@ -96,6 +96,7 @@
 <li>Network Load Balancer (NLB)</li>
 <li>Gateway Load Balancer (GWLB)</li>
 <li>Server Name Indication (SNI)</li>
+<li>Function as a Service (FAAS)</li>
 </ul>
 <hr>
 <h1>Section 1: EC2 for CloudOps</h1>
@@ -573,7 +574,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <li>If stack update failed: the stack auto rolls back to previous working state.</li>
 <li>If rolls back failure: fix it manually then ContinueUpdateRollback API from console.</li>
 </ul>
-<h1>Other useful sections</h1>
+<h3>Other useful sections</h3>
 <ul>
 <li>Delete policy: default will delete resource on delete cloudformation stack, but we don't want to delete S3 bucket, we set <strong>DeletionPolicy=Retain</strong>, and last one is snapshot (create one final snapshot before delete the resource, works for some supported resource). </li>
 <li>Update replace policy: same idea with deletion policy but apply only during stack updates. </li>
@@ -617,6 +618,45 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <ul>
 <li>StackFailures: Onfailure = rollback (default) or Do nothing (resource in state CREATE_FAILED) for debug purpose I think or event DELETE for fucking clean.</li>
 </ul>
+<hr>
+<h1>Section 6: Lambda for CloudOps</h1>
+<p>Lambda is FAAS, run on-demand, limited by time (short executions).</p>
+<p>Lambda support container image but they are not prefer, ECS/Fargate is preferred for running containers. And for the most important, it is integrations but a lot of AWS services by built-in.</p>
+<p><img alt="lambda" src="./images/2026/06/26.png"></p>
+<h3>Some note for Lambda</h3>
+<ul>
+<li>Most example for Lambda is serverless cronjob I guess. </li>
+<li>We can view lambda logs from CW logs. </li>
+<li>Max memory supports for Lambda is 10Gb</li>
+<li>/tmp storage: max is also 10GB</li>
+<li>Integration with CW Events / EventBridge: Create trigger every 1 hour that trigger Lambda function to perform a specific task.</li>
+</ul>
+<hr>
+<h1>Section 7: EC2 Storage and Data Management - EBS and EFS</h1>
+<h3>EBS Volume</h3>
+<p>It is like common volume in OpenStack, can be mount to only 1 VM. Locked to AZ for sure, LOL.</p>
+<p>There are some type for this volume type:</p>
+<ul>
+<li>gp2/gp3 (SSD): general purpose</li>
+<li>io1/io2: highest performance ssd (this is exception for multi-attach in EBS)</li>
+<li>st1: low cost hdd for requently access</li>
+<li>sc1: low cost hdd but less frequently access</li>
+</ul>
+<p>Some notes:</p>
+<ul>
+<li>Remember only ssd (gp/io series) can be used as boot volume for high performance.</li>
+<li>We can make EBS snapshots in AWS like snapshot in volume of OpenStack, same logic. - AWS create a service called Amazon Data Lifecycle Manager to manage creation,retention and deletion of EBS snapshots and EBS-backed AMIs. </li>
+<li>Locked at the AZ level.</li>
+<li>If you need more iops and is frequently running out of iops, increase volume size of EBS</li>
+</ul>
+<h3>EFS - Elastic File System</h3>
+<p>It is fucking managed NFS. Available at region level, it means you can mount NFS from any EC2 in any AZs in that fucking region.</p>
+<p>We again, as a related storage service in AWS, it will have storage classes:</p>
+<ul>
+<li>Storage tiers (lifecycle management feature - move file after N days): Standard, Infrequent Access, Archive.</li>
+</ul>
+<hr>
+<h1>Section 8: Amazon S3</h1>
 
 
              
