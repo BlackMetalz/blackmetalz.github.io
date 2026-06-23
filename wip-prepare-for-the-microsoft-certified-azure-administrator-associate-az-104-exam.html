@@ -245,40 +245,13 @@
 </tr>
 </tbody>
 </table>
-<h3>Entra ID (Azure AD) vs AWS IAM</h3>
+<h3>Entra ID (Azure AD) B2B/ B2C</h3>
 <p>B2B: <a href="https://learn.microsoft.com/en-us/entra/external-id/what-is-b2b">Business to Business</a></p>
 <p>B2C: <a href="https://learn.microsoft.com/en-us/azure/active-directory-b2c/overview">Business to Consumer</a></p>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>AWS IAM</th>
-<th>Entra ID</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Built-in MFA</td>
-<td>IAM MFA</td>
-<td>Azure MFA (enforce via Conditional Access)</td>
-</tr>
-<tr>
-<td>SSO to apps</td>
-<td>IAM Identity Center</td>
-<td>Enterprise Apps</td>
-</tr>
-<tr>
-<td>B2B access</td>
-<td>Cross-account roles</td>
-<td>Guest Users</td>
-</tr>
-<tr>
-<td>B2C access</td>
-<td>Cognito</td>
-<td>Azure AD B2C</td>
-</tr>
-</tbody>
-</table>
+<ul>
+<li>B2B: invite user from external tenant (Different Entra IA or Microsoft Account), that user still using their owned credential of their ORG to login, our Entra ID only create Guest Account in our tenant. Use Case for partner company, contractor, vendor that need access our resource</li>
+<li>B2C: User can login via third party provider like facebook, google, github via Azure AD B2C tenant (not normal Entra ID), used for application that have customer-facing. Use case for our application allow end-user sign-up/sign-in</li>
+</ul>
 <h3>System-Assigned Managed Identity (SAMI) vs User-Assigned Managed Identity (UAMI)</h3>
 <p>Resource reference:</p>
 <p><a href="https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview">https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview</a></p>
@@ -363,7 +336,10 @@
 <li>Key Vault Administrator = full data plane access (read/write/delete secrets, keys, certs)</li>
 <li>For vault access model best practice: pick RBAC!</li>
 <li>Microsoft Identity Manager (MIM) = bridging/sync identity store on-premises (like AD FS) with Microsft Entra ID</li>
+<li>When need to assign permission to access Azure resource, use security group.</li>
+<li>When need to create team collaboration (email, teams, sharepoint), use M365 group (M365 group could be used for assign RBAC but primary use still collaboration!)</li>
 </ul>
+<p><img alt="account group" src="./images/2026/06/29.png"></p>
 <p>Resource Reference:</p>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-guide?tabs=azure-cli#azure-built-in-roles-for-key-vault-data-plane-operations">Built-in roles for Key Vault data plane operations</a></li>
@@ -395,8 +371,18 @@
 <li>Tags: Is one of important thing to manage resource on any public cloud provider, not only Azure.</li>
 <li>Move Resources: It can be move to another resource group/subscription/region. </li>
 <li>Manage policy by Powershell, mostly you can do everything like manage resource/policy in Portal via Powershell or CLI.</li>
-<li>Subscription and Management Group: We can create new subsciption and put it under a management group</li>
+<li>
+<p>Subscription and Management Group: We can create new subsciption and put it under a management group</p>
+</li>
+<li>
+<p>Remember about SSPR:</p>
+</li>
 </ul>
+<p><img alt="sspr" src="./images/2026/06/27.png"></p>
+<ul>
+<li>Remember about this, even the tutor told you not to memory but I recommend to remember for time saving during exam!</li>
+</ul>
+<p><img alt="entra ID plan" src="./images/2026/06/28.png"></p>
 <hr>
 <h1>Domain 2 - Compute</h1>
 <p>Manage VM Sizes:</p>
@@ -1636,6 +1622,7 @@ But I didn't watch serious <strong>AZ-104 Microsoft Azure Administrator - Comple
 <li>Need to learn skill how to use <a href="https://learn.microsoft.com/">https://learn.microsoft.com/</a>, we can not remember memory all stuff, we need to read the fucking document. But reading document during exam is fucking hard, that is why you need to practice it hard!</li>
 <li>Trust me, if you don't work in Azure but still want to try exam. Learn for it for non-stop 30 days before taking exam!</li>
 <li>This exam is fucking ridiculous, even you are able to read document, but time is fucking limited!!! holy shiet!!!</li>
+<li>Don't use microsoft during exam, it is fucking waste time that will lead to pressure! I was thought if I have 20 minutes to think, I would not fail :((</li>
 </ul>
 <p>I would spam this word in every article related to any certification: Passing an exam, getting certifications is not an achievement for me, no fucking salary increase, I'm not proud if I have achieved certifications because I'm fucking lowkey, introverted person. I just have no idea what to do at sometime in every year, so instead of wasting time, I think learning is better for fucking sure. The exam is just 1 fucking gate or guardrail I created to make sure I understand enough what is fucking I'm learning. Wasted time and money (buy an exam to get cert) or be fucking serious about learning? If I need to compare, I simply compare my current year with myself from last year; that's all. LOL</p>
 
