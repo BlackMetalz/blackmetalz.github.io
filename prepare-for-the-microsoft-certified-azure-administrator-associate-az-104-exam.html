@@ -15,18 +15,18 @@
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary">
 
-<meta name="keywords" content="azure, devops, exam, Knowledge Base, " />
+<meta name="keywords" content="azure, exam, Knowledge Base, " />
 
-<meta property="og:title" content="[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam "/>
-<meta property="og:url" content="https://blackmetalz.github.io/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html" />
+<meta property="og:title" content="Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam "/>
+<meta property="og:url" content="https://blackmetalz.github.io/prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html" />
 <meta property="og:description" content="" />
 <meta property="og:site_name" content="Kienlt&#39;s notebook" />
 <meta property="og:article:author" content="kienlt" />
-<meta property="og:article:published_time" content="2026-05-16T00:00:00+07:00" />
-<meta name="twitter:title" content="[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam ">
+<meta property="og:article:published_time" content="2026-06-28T00:00:00+07:00" />
+<meta name="twitter:title" content="Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam ">
 <meta name="twitter:description" content="">
 
-        <title>[WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam  · Kienlt&#39;s notebook
+        <title>Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam  · Kienlt&#39;s notebook
 </title>
         <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
 
@@ -68,8 +68,8 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="https://blackmetalz.github.io/wip-prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html">
-                [WIP] Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam
+            <a href="https://blackmetalz.github.io/prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html">
+                Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam
             </a>
         </h1>
     </header>
@@ -81,6 +81,7 @@
             <p>New challenge, acquire all DevOps certifications in 3 popular public cloud providers, Azure is the first target of mine. Let's fucking go!!!</p>
 <p>I will try to refer to AWS as much as I can because AWS is the first cloud I learned.</p>
 <p>This article could contain some wrong information since I'm new to this, correct me if I'm wrong, thanks xD</p>
+<p><img alt="Cert" src="./images/2026/06/33.png"></p>
 <hr>
 <h1>Prepare for the exam</h1>
 <h3>Useful resources:</h3>
@@ -89,12 +90,12 @@
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/training/paths/az-104-administrator-prerequisites/">AZ-104: Prerequisites for Azure administrators</a> - Provided by Microsoft</li>
 <li><a href="https://www.youtube.com/watch?v=uBqp3ivFC_o&amp;list=PLahhVEj9XNTcj4dwEwRHozO3xcxI_UHYG">AZ-104: Azure Administrator</a> - Provided by Microsoft</li>
-<li><a href="https://udemy.com/course/70533-azure/">AZ-104 Microsoft Azure Administrator - Complete Exam Prep - Scott Duffy</a> - Not recommend unless you are working daily with Azure.</li>
+<li><a href="https://www.udemy.com/course/70533-azure/">AZ-104 Microsoft Azure Administrator - Complete Exam Prep - Scott Duffy</a> - Not recommend unless you are working daily with Azure.</li>
 <li><a href="https://www.youtube.com/watch?v=KD1cEc1-vOE">AZ-104 Preparation Done Wrong | What Top Scorers Do Differently</a></li>
 <li><a href="https://viblo.asia/p/kinh-nghiem-thi-chung-chi-az-104-microsoft-azure-administrator-5pPLkxgyVRZ">Vietnamese - Kinh nghiệm thi chứng chỉ AZ-104: Microsoft Azure Administrator</a></li>
 <li><a href="https://www.youtube.com/watch?v=w_G1Rufop-s">Prepare for Microsoft Certification Exam AZ-104: Microsoft Azure Administrator</a> - Provided by Microsoft</li>
 </ul>
-<h3>Some section need to be understand before taking the exam.</h3>
+<h3>Some sections need to be understood before taking the exam.</h3>
 <ul>
 <li>Domain 1 — Identity &amp; Governance (20–25%)</li>
 <li>Domain 2 — Compute (20–25%)</li>
@@ -102,7 +103,7 @@
 <li>Domain 4 — Networking (15–20%)</li>
 <li>Domain 5 — Monitor &amp; Backup (10–15%)</li>
 <li>Exam Tip/Tricks</li>
-<li>Secure Weapons</li>
+<li>Secret Weapons</li>
 <li>Taking the Exam!</li>
 </ul>
 <p>Ok, let's take them one by one!</p>
@@ -326,7 +327,7 @@
 <li>RBAC = IAM Roles. </li>
 <li>Azure Policy = Service Control Policies (but have more flexibility)</li>
 <li>SAMI is often preferred because it will not create <code>orphaned identities</code> xD</li>
-<li>Subscription owner can not read KV secret by default. Owner only have control plane permissions — need to self-grant data plane role (e.g. <code>Key Vault Secrets User</code>) if access is needed, applies regardless of permission model, but RBAC is recommended!</li>
+<li>Subscription owner can not read KV secret by default. Owner only has control plane permissions — need to self-grant access. For Azure RBAC model, assign data plane role (e.g. <code>Key Vault Secrets User</code>). For Vault Access Policy model, configure Key Vault access policies to grant permissions.</li>
 <li>Key Vault Contributor = manage vault configuration (control plane), NOT read secret</li>
 <li>Key Vault Administrator = full data plane access (read/write/delete secrets, keys, certs)</li>
 <li>For vault access model best practice: pick RBAC!</li>
@@ -343,28 +344,27 @@
 <ul>
 <li>3 different type of group: cloud, hybrid and guest group?</li>
 <li>Microsoft entra ID has different licenses: Free, P1, P2 and Governance. Like PIM for only P2 license, SSPR required P1.</li>
-<li>No fucking break inheritance. Definitions are groups of policies, RG can't be nested</li>
+<li>No fucking break inheritance. Initiatives are groups of policy definitions, RG can't be nested</li>
 <li>User type can be: Member or Guest. Dynamic membership is a rule if user have some specific attribute that matched with dynamic membership, they will automatically added to that group, that is why it called Dynamic Group I guess! Group with membership assigned is common group that Admin user select member manually.</li>
 <li>Administratives users can work which some parts of your organization. Administrative units allow you to segregate your directory such that certain administrators only have permissions to work on certain areas. </li>
 <li>Devices in Azure AD represent and manage physical devices used by users that access organization's resources. You can allow/block devices of specific users.</li>
 <li>Bulk Operations: Allow you create a lot of users from csv file.</li>
 <li>External Users: Can be understood as Guest Users (Need to invite from user creation page) who are granted access to your organization's resources (Partners, vendors, contractors... who you need to collaborate with) and you don't want them to have an account in your Azure AD.</li>
 <li>Self service password reset: Allow member/group able to reset their password, default only Administrators have that feature.</li>
-<li>RBAC: not thing much new, default comes with over 90++ built-in roles. </li>
+<li>RBAC: not thing much new, default comes with over 270++ built-in roles. </li>
 <li>We can swap Storage Account from using Access Key to RBAC as well. And we can grant role/permission on various levels from the specific container, storage account, resource group.</li>
-<li>And yeah we can have a custom role, for example Sysadmin Group can be access to Storage,VM,Network. We create that role for example and only need assign Sysadmin user to that group for simple management. Custom role required Azure Entra ID license P1/P2 in order to get access to custom roles.</li>
 <li>Custom role defined with AssignableScopes, specify range(Management group, subscription or resource group) that role can be assigned.</li>
 <li>Interpret Access Assignments: additive union permissions of assigned role. Because RBAC have no fucking deny in role, so Contributor role will eat custom role that have some permission like in Contributor role</li>
 <li>Azure Account/User: a person(username, password, multi-factor) or a program (managed identity), basis for authentication.</li>
 <li>Tenant: represent of an org, usually with public domain name. Will be assigned a domain if not specified (example.onmicrosoft.com). It is a fucking dedicated instance of Azure Active Directory, every Azure Account is part of at least one tenant! More than one account can be the owner in a tenant!</li>
-<li>Subscription: An agreement with Microsoft to use Azure services and how you are fucking to pay for that. All Azure resource usage gets billedd to the payment method of subscription (Free, PAYG, Enterprise agreements...). Not every tenant needs to have a subscription. Tenants can have more than one subscription. </li>
+<li>Subscription: An agreement with Microsoft to use Azure services and how you are fucking to pay for that. All Azure resource usage gets billed to the payment method of subscription (Free, PAYG, Enterprise agreements...). Not every tenant needs to have a subscription. Tenants can have more than one subscription. </li>
 <li>Resources: Nothing much to say about this... Account can be given read,update, owner rights to resources.</li>
 <li>Resource Groups: a way to organizing resources in a subscription. A Folder struct, all resources must belong to only one resource group.</li>
 <li>Subscription have option for Resource locks, that prevent you from delete any resource in subscription scope or resource scope or even more, for example specific Function App. It means no one would able to delete if the lock still exists! (Or control people have permission that able to delete). Lock type Read only, you are not able to change setting. So 2 types, remember this.</li>
 <li>We can restrict location access for specific resource or deny unencrypted HTTPS storage accounts as example of Policy. Policy definition is single policy, but Initiative is set of policies.</li>
 <li>Custom policy, you want may want to copy syntax from template first before create custom policy, because they are all ARM templates. And after create custom policy, assign to specific scope like resource group.</li>
 <li>Tags: Is one of important thing to manage resource on any public cloud provider, not only Azure.</li>
-<li>Move Resources: It can be move to another resource group/subscription/region. </li>
+<li>Move Resources: It can be move to another resource group/subscription in same region. In facts it moves only metadata if RG/Sub in same region, that is why we have no fucking downtime during moving xD.</li>
 <li>Manage policy by Powershell, mostly you can do everything like manage resource/policy in Portal via Powershell or CLI.</li>
 <li>
 <p>Subscription and Management Group: We can create new subscription and put it under a management group</p>
@@ -378,9 +378,6 @@
 <li>Remember about this, even the tutor told you not to memory but I recommend to remember for time saving during exam!</li>
 </ul>
 <p><img alt="entra ID plan" src="./images/2026/06/28.png"></p>
-<ul>
-<li></li>
-</ul>
 <hr>
 <h1>Domain 2 - Compute</h1>
 <p>Manage VM Sizes:</p>
@@ -459,7 +456,7 @@
 </tr>
 </tbody>
 </table>
-<p>Picture I took from <a href="udemy.com/course/70533-azure/">Azure Course</a></p>
+<p>Picture I took from <a href="https://www.udemy.com/course/70533-azure/">Azure Course</a></p>
 <p><img alt="SSE vs ADE" src="./images/2026/06/04.png"></p>
 <p><strong>Verdict:</strong> SSE almost ready for everything. ADE only when compliance is required.</p>
 <p>Resource Reference:</p>
@@ -574,7 +571,8 @@ bicep<span class="w"> </span>decompile<span class="w"> </span>main.json
 <p>We can create template spec then use it to deploy resources via Portal or cmd (Powershell)</p>
 <p>ARM Templates Capture a Point in Time: This is basic, same like snapshot but without data, just spec/blueprint.</p>
 <h3>Azure Blueprint</h3>
-<p>It is a package governance: ARM templates + Policy + RBAC assignments</p>
+<p>It is a package governance: ARM templates + Policy + RBAC assignments.</p>
+<p>Update: Azure Blueprints will be retired on January 31, 2027, with a phased retirement beginning July 31, 2026</p>
 <h3>Azure Custom Script Extension</h3>
 <ul>
 <li>Run script on VM <strong>after deploy</strong>, can trigger <strong>anytime</strong> (not just first boot)</li>
@@ -616,7 +614,6 @@ bicep<span class="w"> </span>decompile<span class="w"> </span>main.json
 <p>Quick to deploy but has limitations, should be used for testing/demonstration. Cannot scale.</p>
 <h3>ACI container groups</h3>
 <p><img alt="ACI" src="./images/2026/06/05.png"></p>
-<p>We can not create ACI via portal, must be via command line. I think it is like pod in k8s? xD</p>
 <h3>Azure container apps</h3>
 <p>Almost same like container instance but have more options like ingress settings, revision and replicas (like deployment slot in Azure App), scale based HTTP Traffic, Keda, manual.</p>
 <hr>
@@ -685,7 +682,7 @@ Azure:
 <li>Storage Account name</li>
 <li>Location/Region</li>
 <li>Performance tier (Standard &lt;---&gt; Premium)</li>
-<li>Hierarchical namespace (For exam, but in fact we have migration tool)</li>
+<li>Hierarchical namespace (One-way upgradeable: Cannot be disabled once enabled, but can be migrated from Flat namespace via Azure tools)</li>
 </ul>
 <p>Can be change after created:</p>
 <ul>
@@ -743,7 +740,7 @@ Azure:
 <td><strong>Yes</strong> (always)</td>
 </tr>
 <tr>
-<td><strong>GZRS</strong></td>
+<td><strong>GZRS</strong> (Geo-Zone-Redundant Storage)</td>
 <td>ZRS primary + LRS secondary</td>
 <td>Zone + region failure</td>
 <td>No</td>
@@ -791,7 +788,6 @@ Azure:
 </tr>
 </tbody>
 </table>
-<p>GZRS = Geo-Zone-Redundant Storage</p>
 <p>Resource Reference:</p>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/azure/storage/common/storage-redundancy">Azure Storage redundancy</a></li>
@@ -818,10 +814,15 @@ Azure:
 <td><code>azcopy sync</code></td>
 <td>Incremental sync (like rsync), only new/changed</td>
 </tr>
+<tr>
+<td><code>azcopy make</code></td>
+<td>Create a new container (Blob) or file share</td>
+</tr>
 </tbody>
 </table>
 <p>Exam Gotchas:</p>
 <ul>
+<li><code>azcopy make</code> only creates containers/file shares, NOT the Storage Account itself</li>
 <li><code>azcopy sync</code> does <strong>NOT</strong> delete by default — need <code>--delete-destination=true</code></li>
 <li>Cross-account copy is <strong>server-side</strong> — no local bandwidth used</li>
 <li>Standalone binary, <strong>no Azure CLI</strong> dependency</li>
@@ -873,17 +874,20 @@ Azure:
 </tbody>
 </table>
 <h3>Hierarchical Namespace</h3>
-<p><strong>Hierarchical Namespace</strong> converts Azure Blob Storage into <strong>Azure Data Lake Storage Gen2 (ADLS Gen2)</strong>:
-- Directories are <strong>real</strong> (rename/delete folder without touching individual files)
-- Supports <strong>POSIX ACL</strong> permissions at file/folder level
-- Designed for <strong>Big Data / Analytics</strong> workloads (Databricks, Synapse, HDInsight)
-- <strong>Cannot be disabled</strong> once enabled
-- Object Replication requires Hierarchical Namespace to be <strong>Disabled</strong></p>
+<p><strong>Hierarchical Namespace</strong> converts Azure Blob Storage into <strong>Azure Data Lake Storage Gen2 (ADLS Gen2)</strong>:</p>
+<ul>
+<li>Directories are <strong>real</strong> (rename/delete folder without touching individual files)</li>
+<li>Supports <strong>POSIX ACL</strong> permissions at file/folder level</li>
+<li>Designed for <strong>Big Data / Analytics</strong> workloads (Databricks, Synapse, HDInsight)</li>
+<li><strong>Cannot be disabled</strong> once enabled</li>
+<li>Object Replication requires Hierarchical Namespace to be <strong>Disabled</strong></li>
+</ul>
 <h3>Enhanced after fail first exam</h3>
 <ul>
 <li>Not related to exam but some region required to store data in their region, for example, when you are working with EU clients, you need to create storage account in EU region I guess.</li>
 <li>Redundancy type: Not all region have option for GZRS.</li>
 <li>Storage account advanced setting: Required secure transfer for REST API, it means you can only use HTTPS for interacting. For authentication we have 2 option storage account key access(enable by default) and microsoft entra authorization.</li>
+<li>Disabling "Allow storage account key access" will block both Shared Key Auth and Service/Account SAS, but User Delegation SAS (via Entra ID) will still work</li>
 <li>Storage account access tier: So for more cheaper from store the data(Cool/Cold), the more expensive for operation(read/write) for example. And you can have a mix of access tier file, some files are hot, some files are cool/cold/archive.</li>
 <li>Storage account networking: Public access from all networks are not worth to mention. But public access from selected virtual network and IP address are (You have an option to add IP Address for public access in this case like test from your home?). And finally disable public access and use private access. Network routing, lets use Microsoft network routing by default. (Travel over a private network or Azure backbone network I guess).</li>
 <li>Storage account data protection: soft delete can be enabled for blobs, containers, file shares as an option in this tab. And enable versioning for blobs, the more money you are going to pays xD</li>
@@ -1151,9 +1155,7 @@ VPC Traffic Mirroring        →   Packet Capture
 <li>Again, <strong>NSG</strong> = firewall rules (allow/deny by IP, port, protocol). <strong>ASG</strong> (Application Security Group) = a logical group tag for NICs/VMs, so rules can reference a group by name instead of listing every IP.</li>
 <li><strong>DMZ</strong> = buffer / barrier between external and internal.</li>
 <li>A virtual network can have only one VPN gateway.</li>
-<li>2 VNet talking to each other = Peering.</li>
-<li>Spoken uses the hub's shared VPN/ExpressRoute gateway to return to on-premises = Gateway Transit.</li>
-<li>Azure Load Balancer = Layer 4 (TCP/UDP). Application Gateway = Layer 7  (HTTP/HTTPS, URL/path routing, WAF, SSL termination, web application)</li>
+<li>Spoke uses the hub's shared VPN/ExpressRoute gateway to return to on-premises = Gateway Transit.</li>
 <li>You can assign public IP to LB/NIC</li>
 </ul>
 <h3>Enhanced after fail first exam</h3>
@@ -1168,7 +1170,7 @@ VPC Traffic Mirroring        →   Packet Capture
 
 <p><img alt="vnet-to-vnet" src="./images/2026/06/09.png"></p>
 <ul>
-<li>We are able to auto register domain for VM when we created VM via option "Enable Auto Registration" (In Private DNS Zone).</li>
+<li>We are able to auto register domain for VM when linking the VNet to the Private DNS Zone with the "Enable Auto Registration" option checked (not an option during VM creation).</li>
 <li>We can group multiple rule to Application Security Group(ASG), and allow traffic to ASG is much better than hardcode IP in NSG. For ASG we have to create new ASG as a resource. And go to VM --&gt; Networking --&gt; Config the ASG --&gt; Link VM to specific ASG, 1 VM can be attach more than 1 ASG. After that we can create new Inbound Security Rule in NSG with destination is ASG. Picture for example:</li>
 </ul>
 <p><img alt="ASG" src="./images/2026/06/10.png"></p>
@@ -1178,10 +1180,7 @@ VPC Traffic Mirroring        →   Packet Capture
 </ul>
 <p><img alt="Connection troubleshoot" src="./images/2026/06/11.png"></p>
 <ul>
-<li>You can not create "Basic SKU" for Azure LB. Forget about "Gateway SKU". </li>
 <li>Standard LB supports: Zonal (in one zone) + Zone-redundant (across zones)</li>
-<li>Azure LB = Layer 4 (TCP/UDP)</li>
-<li>Azure Application Gateway = Layer 7 (HTTP/HTTPS, WAF)</li>
 <li>Azure Front Door = Global LB, SSL offloading, CDN. So for SSL offloading, we can call TLS Termination, it means Front Door/LB will handle encrypt/decrypt HTTPS for backend server, so backend server we only need to use HTTP, no need double encrypt while LB/FrontDoor already help you!</li>
 <li>Traffic Manager = DNS-based traffic redirection. Like you come from USA it will redirect you to USA region, you come from Vietnam, it will redirect you to Southeast Asia region</li>
 <li>Holy shiet. Azure provide some good shit. For example <a href="https://github.com/Azure/azure-quickstart-templates/tree/master/quickstarts/microsoft.network/load-balancer-standard-create">this link</a> have a button that "Deploy to Azure" and after we logged into portal of azure:</li>
@@ -1283,15 +1282,14 @@ X-Ray                        →   Application Insights
 <li>For query, we need to select scope resource that we gonna do query log in there (Monitor -&gt; Logs)</li>
 <li>For Azure Backup, we need to create a policy and inside that fucking policy we have backup schedule, instant restore (retain instant recovery for snapshots for x days), retention range (default 30 days).</li>
 <li>For manually, we need to create recovery services vault (is a storage account that has certain rules on it because it is specially for backup).</li>
-<li>File recovery from backup, choose restore point + download script to browse and recover files (it basically mount a restored disk for you in window for exxample) then in step 3 you have to click on button unmount disk to remove backup disk, hmm this is pretty good feature without remember syntax.</li>
+<li>File recovery from backup, choose restore point + download script to browse and recover files (it basically mount a restored disk for you in window for example) then in step 3 you have to click on button unmount disk to remove backup disk, hmm this is pretty good feature without remember syntax.</li>
 <li>For full restore of VM, we use option restore VM which is next to "File Recovery" with restore type like create new virtual machine with some information need for restore VM</li>
 </ul>
 <p><img alt="restore vm" src="./images/2026/06/14.png"></p>
 <ul>
-<li>For restore on-premises, install Microsoft Azure Backup Server (MABS) to make it happen, remember MABS is only for on-premises?</li>
 <li>In Backup Jobs, we can find information related about that backup.... Also you can query logs for backup jobs...</li>
 <li>Azure backup have soft delete enable by default, free for 14 days</li>
-<li>Azure Disater Recovery, we can start VM replication for another Azure region in VM --&gt; Disaster Recovery and yeah data transfer will be charge ( will required brand new RG,VNet..)</li>
+<li>Azure Disaster Recovery, we can start VM replication for another Azure region in VM --&gt; Disaster Recovery and yeah data transfer will be charge ( will required brand new RG,VNet..)</li>
 <li>We also have test failover for site recovery job which will help us to validate it, what a great feature if we do this on-premises, will take shit load of time for automation.</li>
 <li>Identity-based access = authenticate with Kerberos/AD, like traditional file server. A fucking table to remember:</li>
 </ul>
@@ -1384,7 +1382,7 @@ X-Ray                        →   Application Insights
 </tr>
 <tr>
 <td><strong>Azure Backup vault</strong> (New)</td>
-<td>PostgreSQL, <strong>Blob</strong>, Managed Disks, AKS, MySQL</td>
+<td>PostgreSQL, <strong>Blob</strong>, Managed Disks, AKS (Note: MySQL backup preview is paused, use MySQL native backup)</td>
 </tr>
 </tbody>
 </table>
@@ -1396,7 +1394,7 @@ X-Ray                        →   Application Insights
 </ul>
 <h3>6. RBAC vs Azure Policy</h3>
 <ul>
-<li><strong>RBAC</strong> = who did what (access)</li>
+<li><strong>RBAC</strong> = who <strong>can</strong> do what (access control)</li>
 <li><strong>Policy</strong> = resource allows to exist or not (compliance, deny tag missing, deny SKU ...)</li>
 </ul>
 <p>If questions are "enforce tag", "block region" -&gt; Policy. Otherwise "grant read access" -&gt; RBAC.</p>
@@ -1501,11 +1499,11 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <tbody>
 <tr>
 <td><code>automatically</code></td>
-<td>Azure rarely does this for users; license, scaling, backup... all need config</td>
+<td>Azure rarely does this for users; license, scaling, backup... all require config</td>
 </tr>
 <tr>
 <td><code>all</code> / <code>every</code></td>
-<td>All PaaS services, every VM in subscription —&gt; Azure doesn't apply blanket</td>
+<td>All PaaS services, every VM in subscription —&gt; Azure rarely applies blanket policies without exceptions</td>
 </tr>
 <tr>
 <td><code>only</code></td>
@@ -1513,11 +1511,15 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 </tr>
 <tr>
 <td><code>never</code> / <code>cannot</code></td>
-<td>Azure dynamic, Absolute prohibitions are rare</td>
+<td>Azure dynamic, Absolute prohibitions are rare, e.g., 'You can never change SKU' is usually false</td>
 </tr>
 <tr>
 <td><code>replaces</code></td>
 <td>Service A replaces Service B -&gt; mostly they are individual layer</td>
+</tr>
+<tr>
+<td><code>must use / the only way</code></td>
+<td>Azure almost always offers alternative solutions (e.g., Portal, CLI, PowerShell, ARM, REST API).</td>
 </tr>
 </tbody>
 </table>
@@ -1600,7 +1602,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 </tbody>
 </table>
 <h3>14. Private DNS + Private Endpoint + Hybrid resolution</h3>
-<p>Questions around Can VM/on-prem resolve name of private or not?. Need to remember scope of each components.</p>
+<p>Questions around can VM/on-prem resolve name of private or not?. Need to remember scope of each components.</p>
 <table>
 <thead>
 <tr>
@@ -1613,7 +1615,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <tr>
 <td><strong>Private DNS Zone</strong></td>
 <td><strong>Global</strong></td>
-<td>1 zone link, multiple VNet in every region/sub</td>
+<td>Can link to multiple VNets across regions/subscriptions</td>
 </tr>
 <tr>
 <td><strong>VNet</strong></td>
@@ -1643,7 +1645,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <p>VNet-A have Private Endpoint + zone already link -&gt; VM-A resolve OK. VM-B in VNet-B (peered) <strong>fail</strong> because zone haven't link to VNet-B.</p>
 </li>
 <li>
-<p><strong>Fix:</strong> link zone to <strong>both</strong> VNet. Zone is global, link is unlimit</p>
+<p>Fix: Link the Private DNS zone to both VNets. (Note: A Private DNS zone is global and can be linked to up to 1,000 VNets across different regions/subscriptions).</p>
 </li>
 </ul>
 <p>Pitfall 2: Hybrid DNS need Private Resolver</p>
@@ -1697,7 +1699,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <tr>
 <td>Zone in different sub without link</td>
 <td>Cross-sub permission</td>
-<td>Provide <code>Network Contributor</code> for zone</td>
+<td>Private DNS Zone Contributor</td>
 </tr>
 </tbody>
 </table>
@@ -1713,7 +1715,6 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <h1>Taking the Exam</h1>
 <p>From my experience preparing for cloud certs, AZ-104 feels harder than AWS SAA / GCP ACE at the associate level, broader scope and tons of edge cases xD</p>
 <p>Even though you can access <a href="https://learn.microsoft.com/">https://learn.microsoft.com/</a> but should use only for verifying information like plans, very slow and time consuming, like watch document during CKAD/CKS/CKA exam!</p>
-<p>Fuck this exam, it was hard AF. No idea I can complete this or not!!!</p>
 <p>Schedule <a href="https://learn.microsoft.com/en-us/credentials/certifications/azure-administrator/?practice-assessment-type=certification">exam here</a></p>
 <p>Random useful comment from <a href="https://www.youtube.com/watch?v=3mxjUtHHVKI">Youtube</a> I think, 9 months ago, so it maybe like September-2025 this comment appears.</p>
 <div class="highlight"><pre><span></span><code><span class="n">Just</span><span class="w"> </span><span class="n">Passed</span><span class="w"> </span><span class="n">Today</span><span class="o">.</span><span class="w"> </span><span class="n">Most</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">question</span><span class="w"> </span><span class="n">were</span><span class="w"> </span><span class="n">around</span><span class="w"> </span><span class="n">File</span><span class="o">/</span><span class="n">Blob</span><span class="w"> </span><span class="n">Storage</span><span class="w"> </span><span class="n">Access</span><span class="w"> </span><span class="n">Tier</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">LifeCycle</span><span class="o">.</span><span class="w"> </span><span class="n">RBAC</span><span class="w"> </span><span class="n">Role</span><span class="w"> </span><span class="n">assingment</span><span class="p">,</span><span class="w"> </span><span class="n">AzCopy</span><span class="p">,</span><span class="w"> </span><span class="n">Recovery</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="n">vault</span><span class="p">,</span><span class="w"> </span><span class="n">LoadBalancer</span><span class="p">,</span><span class="n">VNET</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="n">Thanks</span><span class="w"> </span><span class="n">TechBlackBoard</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">providing</span><span class="w"> </span><span class="n">compiled</span><span class="w"> </span><span class="n">question</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">pattern</span><span class="o">.</span><span class="w"> </span><span class="mi">15</span><span class="o">-</span><span class="mi">20</span><span class="o">%</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">actual</span><span class="w"> </span><span class="n">exams</span><span class="w"> </span><span class="n">questions</span><span class="w"> </span><span class="n">were</span><span class="w"> </span><span class="n">almost</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">video</span><span class="o">.</span><span class="w"> </span><span class="n">There</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="mi">50</span><span class="w"> </span><span class="n">questions</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">include</span><span class="w"> </span><span class="mi">40</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="n">question</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">skipped</span><span class="w"> </span><span class="n">question</span><span class="w"> </span><span class="n">set</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">cant</span><span class="w"> </span><span class="n">review</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">end</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">case</span><span class="w"> </span><span class="n">study</span><span class="w"> </span><span class="n">having</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="n">questions</span><span class="o">.</span><span class="w"> </span><span class="n">Total</span><span class="w"> </span><span class="n">Time</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="n">minutes</span><span class="o">.</span><span class="w"> </span><span class="n">Now</span><span class="w"> </span><span class="n">these</span><span class="w"> </span><span class="n">days</span><span class="w"> </span><span class="n">microsoft</span><span class="w"> </span><span class="n">allows</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">open</span><span class="w"> </span><span class="n">notebook</span><span class="w"> </span><span class="n">so</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">use</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">micosoft</span><span class="o">.</span><span class="n">learn</span><span class="w"> </span><span class="n">portal</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">exam</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">too</span><span class="w"> </span><span class="n">helpful</span><span class="o">.</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">review</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">price</span><span class="w"> </span><span class="n">tier</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="n">content</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">various</span><span class="w"> </span><span class="n">azure</span><span class="w"> </span><span class="n">services</span><span class="o">.</span>
@@ -1722,9 +1723,10 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 <p>Update 1st try in June-04-2026: failed with score 622/1000. It is just hard because I haven't prepared seriously enough, still need more practice. The domain Compute and Storage I felt pretty confident, but domain Entra ID is really really bad for me =.=
 But I didn't watch serious <strong>AZ-104 Microsoft Azure Administrator - Complete Exam Prep</strong>, I skip a lot and spam only on practice test!</p>
 <p>Start learning again in morning saturday June-06-2026! Plan for retake in June-14-2026!</p>
-<p>Update: Fuckkkkkkk. 672/1000!</p>
+<p>Update 2nd (June-14-2026): Fuckkkkkkk. 672/1000!</p>
+<p>Update 3rd (June-28-2026): 800/1000 LOL.</p>
 <hr>
-<h1>Secret weapon</h1>
+<h1>Secret Weapons</h1>
 <p>Good shit for exam prep: <a href="https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-az-104-manage-azure-identities-and-governance-1-of-5">very very quality</a></p>
 <p>For example we have this fucking question (taken from secret weapon xD)</p>
 <p><img alt="exam test" src="./images/2026/06/06.png"></p>
@@ -1734,6 +1736,12 @@ But I didn't watch serious <strong>AZ-104 Microsoft Azure Administrator - Comple
 <p><img alt="keyword" src="./images/2026/06/08.png"></p>
 <p>It is possible but remember use it fast, like under 120 seconds if you need to use document, because we have only fucking 100 minutes to resolve more than 50 questions!!!</p>
 <p>If I recall correctly, there is no question related to AKS service during exam, so you could save a little time to prepare.</p>
+<h3>Tutorial Dojo</h3>
+<p>Pretty good to familiar with exam: I definitely <a href="https://portal.tutorialsdojo.com/product/az-104-microsoft-azure-administrator-practice-exams/">recommend it</a></p>
+<p>Why? You will be overwhelmed with how hard AZ-104 is, you need to familiar with practice test in TD first before taking real exam.</p>
+<h3>Udemy practice tests</h3>
+<p><a href="https://www.udemy.com/course/prepare-for-microsoft-azure-administrator-az-104-exam">Prepare for Microsoft Azure Administrator AZ-104 exam</a> realistically, this practice set will help you cover about 30% of the exam readiness journey. </p>
+<p>Understand why you choose the solution is better a lot than memorization, this exam is not like OTCA,Backstage, Cilium, Kyverno....</p>
 <hr>
 <h1>Conclusion</h1>
 <ul>
@@ -1763,16 +1771,13 @@ But I didn't watch serious <strong>AZ-104 Microsoft Azure Administrator - Comple
         </div>
         <section id="article-sidebar" class="span2">
             <h4>Published</h4>
-            <time itemprop="dateCreated" datetime="2026-05-16T00:00:00+07:00">Sat 16 May 2026</time>
+            <time itemprop="dateCreated" datetime="2026-06-28T00:00:00+07:00">Sun 28 June 2026</time>
             <h4>Category</h4>
             <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article">
                 <li><a href="https://blackmetalz.github.io/tags.html#azure-ref">azure
                     <span class="superscript">3</span>
-</a></li>
-                <li><a href="https://blackmetalz.github.io/tags.html#devops-ref">devops
-                    <span class="superscript">5</span>
 </a></li>
                 <li><a href="https://blackmetalz.github.io/tags.html#exam-ref">exam
                     <span class="superscript">2</span>
