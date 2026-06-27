@@ -613,7 +613,7 @@ client_ip = request.headers[&amp;quot;X-Forwarded-For&amp;quot;].split(&amp;quot
 &lt;hr&gt;
 &lt;h1&gt;Prepare for the exam&lt;/h1&gt;
 &lt;h3&gt;Useful resources:&lt;/h3&gt;
-&lt;p&gt;A lot of image I take from &lt;a href="https://learn.microsoft.com/"&gt;https://learn.microsoft.com/&lt;/a&gt;. I think next article better use link instead copy to this repo and include to article xD&lt;/p&gt;
+&lt;p&gt;Many images are taken from &lt;a href="https://learn.microsoft.com/"&gt;https://learn.microsoft.com/&lt;/a&gt;. I think next article better use link instead copy to this repo and include to article xD&lt;/p&gt;
 &lt;p&gt;Resources must watch (Yeah, it is a lot if you never been Azure portal before like me!):&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://learn.microsoft.com/en-us/training/paths/az-104-administrator-prerequisites/"&gt;AZ-104: Prerequisites for Azure administrators&lt;/a&gt; - Provided by Microsoft&lt;/li&gt;
@@ -773,7 +773,7 @@ client_ip = request.headers[&amp;quot;X-Forwarded-For&amp;quot;].split(&amp;quot
 &lt;p&gt;B2B: &lt;a href="https://learn.microsoft.com/en-us/entra/external-id/what-is-b2b"&gt;Business to Business&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;B2C: &lt;a href="https://learn.microsoft.com/en-us/azure/active-directory-b2c/overview"&gt;Business to Consumer&lt;/a&gt;&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;B2B: invite user from external tenant (Different Entra IA or Microsoft Account), that user still using their owned credential of their ORG to login, our Entra ID only create Guest Account in our tenant. Use Case for partner company, contractor, vendor that need access our resource&lt;/li&gt;
+&lt;li&gt;B2B: invite user from external tenant (Different Entra ID or Microsoft Account), that user still uses their own credentials from their ORG to login, our Entra ID only creates a Guest Account in our tenant. Use case for partner companies, contractors, vendors that need access to our resources&lt;/li&gt;
 &lt;li&gt;B2C: User can login via third party provider like facebook, google, github via Azure AD B2C tenant (not normal Entra ID), used for application that have customer-facing. Use case for our application allow end-user sign-up/sign-in&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3&gt;System-Assigned Managed Identity (SAMI) vs User-Assigned Managed Identity (UAMI)&lt;/h3&gt;
@@ -854,12 +854,12 @@ client_ip = request.headers[&amp;quot;X-Forwarded-For&amp;quot;].split(&amp;quot
 &lt;ul&gt;
 &lt;li&gt;RBAC = IAM Roles. &lt;/li&gt;
 &lt;li&gt;Azure Policy = Service Control Policies (but have more flexibility)&lt;/li&gt;
-&lt;li&gt;SAMI is often prefer because it will not make &lt;code&gt;orphaned identities&lt;/code&gt; xD&lt;/li&gt;
+&lt;li&gt;SAMI is often preferred because it will not create &lt;code&gt;orphaned identities&lt;/code&gt; xD&lt;/li&gt;
 &lt;li&gt;Subscription owner can not read KV secret by default. Owner only have control plane permissions — need to self-grant data plane role (e.g. &lt;code&gt;Key Vault Secrets User&lt;/code&gt;) if access is needed, applies regardless of permission model, but RBAC is recommended!&lt;/li&gt;
 &lt;li&gt;Key Vault Contributor = manage vault configuration (control plane), NOT read secret&lt;/li&gt;
 &lt;li&gt;Key Vault Administrator = full data plane access (read/write/delete secrets, keys, certs)&lt;/li&gt;
 &lt;li&gt;For vault access model best practice: pick RBAC!&lt;/li&gt;
-&lt;li&gt;Microsoft Identity Manager (MIM) = bridging/sync identity store on-premises (like AD FS) with Microsft Entra ID&lt;/li&gt;
+&lt;li&gt;Microsoft Identity Manager (MIM) = bridging/sync identity store on-premises (like AD FS) with Microsoft Entra ID&lt;/li&gt;
 &lt;li&gt;When need to assign permission to access Azure resource, use security group.&lt;/li&gt;
 &lt;li&gt;When need to create team collaboration (email, teams, sharepoint), use M365 group (M365 group could be used for assign RBAC but primary use still collaboration!)&lt;/li&gt;
 &lt;/ul&gt;
@@ -872,20 +872,20 @@ client_ip = request.headers[&amp;quot;X-Forwarded-For&amp;quot;].split(&amp;quot
 &lt;ul&gt;
 &lt;li&gt;3 different type of group: cloud, hybrid and guest group?&lt;/li&gt;
 &lt;li&gt;Microsoft entra ID has different licenses: Free, P1, P2 and Governance. Like PIM for only P2 license, SSPR required P1.&lt;/li&gt;
-&lt;li&gt;No fucking break inheritance. Definations are group of policies, RG can't be nested&lt;/li&gt;
+&lt;li&gt;No fucking break inheritance. Definitions are groups of policies, RG can't be nested&lt;/li&gt;
 &lt;li&gt;User type can be: Member or Guest. Dynamic membership is a rule if user have some specific attribute that matched with dynamic membership, they will automatically added to that group, that is why it called Dynamic Group I guess! Group with membership assigned is common group that Admin user select member manually.&lt;/li&gt;
 &lt;li&gt;Administratives users can work which some parts of your organization. Administrative units allow you to segregate your directory such that certain administrators only have permissions to work on certain areas. &lt;/li&gt;
 &lt;li&gt;Devices in Azure AD represent and manage physical devices used by users that access organization's resources. You can allow/block devices of specific users.&lt;/li&gt;
 &lt;li&gt;Bulk Operations: Allow you create a lot of users from csv file.&lt;/li&gt;
-&lt;li&gt;External Users: Can be understand as Guest User (Need to invite from user creation page) who's granted access to your organization's resources (Partners, vendors, contractors... who you need to collabrate with) and you don't want them to have an account in your Azure AD.&lt;/li&gt;
-&lt;li&gt;Self service password reset: Allow member/group able to reset their pasword, default only Administrator have that feature.&lt;/li&gt;
+&lt;li&gt;External Users: Can be understood as Guest Users (Need to invite from user creation page) who are granted access to your organization's resources (Partners, vendors, contractors... who you need to collaborate with) and you don't want them to have an account in your Azure AD.&lt;/li&gt;
+&lt;li&gt;Self service password reset: Allow member/group able to reset their password, default only Administrators have that feature.&lt;/li&gt;
 &lt;li&gt;RBAC: not thing much new, default comes with over 90++ built-in roles. &lt;/li&gt;
 &lt;li&gt;We can swap Storage Account from using Access Key to RBAC as well. And we can grant role/permission on various levels from the specific container, storage account, resource group.&lt;/li&gt;
 &lt;li&gt;And yeah we can have a custom role, for example Sysadmin Group can be access to Storage,VM,Network. We create that role for example and only need assign Sysadmin user to that group for simple management. Custom role required Azure Entra ID license P1/P2 in order to get access to custom roles.&lt;/li&gt;
 &lt;li&gt;Custom role defined with AssignableScopes, specify range(Management group, subscription or resource group) that role can be assigned.&lt;/li&gt;
 &lt;li&gt;Interpret Access Assignments: additive union permissions of assigned role. Because RBAC have no fucking deny in role, so Contributor role will eat custom role that have some permission like in Contributor role&lt;/li&gt;
 &lt;li&gt;Azure Account/User: a person(username, password, multi-factor) or a program (managed identity), basis for authentication.&lt;/li&gt;
-&lt;li&gt;Tenant: represent of an org, usually with public domain name. Will be assigned a domain if not specified (example.onmicrosoft.com). It is a fucking dedicated instance of Azure Actice Directory, every Azure Account is part of at least one tenant! More than one account can be the owner in a tenant!&lt;/li&gt;
+&lt;li&gt;Tenant: represent of an org, usually with public domain name. Will be assigned a domain if not specified (example.onmicrosoft.com). It is a fucking dedicated instance of Azure Active Directory, every Azure Account is part of at least one tenant! More than one account can be the owner in a tenant!&lt;/li&gt;
 &lt;li&gt;Subscription: An agreement with Microsoft to use Azure services and how you are fucking to pay for that. All Azure resource usage gets billedd to the payment method of subscription (Free, PAYG, Enterprise agreements...). Not every tenant needs to have a subscription. Tenants can have more than one subscription. &lt;/li&gt;
 &lt;li&gt;Resources: Nothing much to say about this... Account can be given read,update, owner rights to resources.&lt;/li&gt;
 &lt;li&gt;Resource Groups: a way to organizing resources in a subscription. A Folder struct, all resources must belong to only one resource group.&lt;/li&gt;
@@ -896,7 +896,7 @@ client_ip = request.headers[&amp;quot;X-Forwarded-For&amp;quot;].split(&amp;quot
 &lt;li&gt;Move Resources: It can be move to another resource group/subscription/region. &lt;/li&gt;
 &lt;li&gt;Manage policy by Powershell, mostly you can do everything like manage resource/policy in Portal via Powershell or CLI.&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Subscription and Management Group: We can create new subsciption and put it under a management group&lt;/p&gt;
+&lt;p&gt;Subscription and Management Group: We can create new subscription and put it under a management group&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Remember about SSPR:&lt;/p&gt;
@@ -1126,7 +1126,7 @@ bicep&lt;span class="w"&gt; &lt;/span&gt;decompile&lt;span class="w"&gt; &lt;/sp
 &lt;hr&gt;
 &lt;h1&gt;Domain 2.2 - Azure App Server&lt;/h1&gt;
 &lt;h3&gt;Web App/App Service&lt;/h3&gt;
-&lt;p&gt;Nothing much to write, you upload your code, Azure run your code and help you to manage server.&lt;/p&gt;
+&lt;p&gt;Nothing much to write, you upload your code, Azure runs your code and helps you to manage the server.&lt;/p&gt;
 &lt;p&gt;It also have feature backup so you can restore from backup instead of upload code again for speed faster?&lt;/p&gt;
 &lt;p&gt;App Service Networking:&lt;/p&gt;
 &lt;ul&gt;
@@ -1142,7 +1142,7 @@ bicep&lt;span class="w"&gt; &lt;/span&gt;decompile&lt;span class="w"&gt; &lt;/sp
 &lt;hr&gt;
 &lt;h1&gt;Domain 2.3 - Containers&lt;/h1&gt;
 &lt;h3&gt;Azure Container Instances&lt;/h3&gt;
-&lt;p&gt;Quick to deploy but have limitation, should be used for testing demonstration. Can not scale.&lt;/p&gt;
+&lt;p&gt;Quick to deploy but has limitations, should be used for testing/demonstration. Cannot scale.&lt;/p&gt;
 &lt;h3&gt;ACI container groups&lt;/h3&gt;
 &lt;p&gt;&lt;img alt="ACI" src="./images/2026/06/05.png"&gt;&lt;/p&gt;
 &lt;p&gt;We can not create ACI via portal, must be via command line. I think it is like pod in k8s? xD&lt;/p&gt;
@@ -1263,7 +1263,7 @@ Azure:
 &lt;td&gt;&lt;strong&gt;GRS&lt;/strong&gt; (Geo-Redundant)&lt;/td&gt;
 &lt;td&gt;6 copies (3+3), 2 regions&lt;/td&gt;
 &lt;td&gt;Region failure&lt;/td&gt;
-&lt;td&gt;No, Never able to read from secondary, must failover first, after failover, secondary become new primary&lt;/td&gt;
+&lt;td&gt;No, Never able to read from secondary, must failover first, after failover, secondary becomes new primary&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;&lt;strong&gt;RA-GRS&lt;/strong&gt; (Read-Access GRS)&lt;/td&gt;
@@ -1330,7 +1330,7 @@ Azure:
 &lt;/ul&gt;
 &lt;h3&gt;AzCopy&lt;/h3&gt;
 &lt;p&gt;Standalone CLI tool to copy data to/from Azure Storage. &lt;code&gt;aws s3 cp&lt;/code&gt; / &lt;code&gt;aws s3 sync&lt;/code&gt; equivalent.&lt;/p&gt;
-&lt;p&gt;Auth: &lt;code&gt;azcopy login&lt;/code&gt; (Azure AD, RBAC) hoặc SAS Token embedded in URL.&lt;/p&gt;
+&lt;p&gt;Auth: &lt;code&gt;azcopy login&lt;/code&gt; (Azure AD, RBAC) or SAS Token embedded in URL.&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -1412,21 +1412,21 @@ Azure:
 &lt;ul&gt;
 &lt;li&gt;Not related to exam but some region required to store data in their region, for example, when you are working with EU clients, you need to create storage account in EU region I guess.&lt;/li&gt;
 &lt;li&gt;Redundancy type: Not all region have option for GZRS.&lt;/li&gt;
-&lt;li&gt;Storage account advanced setting: Required secure transfer for REST API, it means you only can use HTTPS for interacting. For authentication we have 2 option storage account key access(enable by default) and microsoft entra authorization.&lt;/li&gt;
+&lt;li&gt;Storage account advanced setting: Required secure transfer for REST API, it means you can only use HTTPS for interacting. For authentication we have 2 option storage account key access(enable by default) and microsoft entra authorization.&lt;/li&gt;
 &lt;li&gt;Storage account access tier: So for more cheaper from store the data(Cool/Cold), the more expensive for operation(read/write) for example. And you can have a mix of access tier file, some files are hot, some files are cool/cold/archive.&lt;/li&gt;
-&lt;li&gt;Storage account networking: Public access from all networks are not worth to mention. But public access from selected virtual network and IP address are (You h ave an option to add IP Address for public access in this case like test from your home?). And finally disable public access and use private access. Network routing, lets use Microsoft network routing by default. (Travel over a private network or Azure backbone network I guess).&lt;/li&gt;
-&lt;li&gt;Storage account data protection: soft delete can be enable for blobs,containers,file shares as an option in this tab. And enable versioning for blobs, the more money you are going to pays xD&lt;/li&gt;
+&lt;li&gt;Storage account networking: Public access from all networks are not worth to mention. But public access from selected virtual network and IP address are (You have an option to add IP Address for public access in this case like test from your home?). And finally disable public access and use private access. Network routing, lets use Microsoft network routing by default. (Travel over a private network or Azure backbone network I guess).&lt;/li&gt;
+&lt;li&gt;Storage account data protection: soft delete can be enabled for blobs, containers, file shares as an option in this tab. And enable versioning for blobs, the more money you are going to pays xD&lt;/li&gt;
 &lt;li&gt;Storage account encryption: This section is easy to understand xD&lt;/li&gt;
 &lt;li&gt;We can generate SAS with assigned access policy. (Control how we access on file share).&lt;/li&gt;
 &lt;li&gt;If enable (Entra ID/Azure AD), we can give specific user to have access read/write on specific containers.&lt;/li&gt;
-&lt;li&gt;Object replication copied "asynchronously" from a source storage account to a destination account.&lt;/li&gt;
+&lt;li&gt;Object replication is copied "asynchronously" from a source storage account to a destination account.&lt;/li&gt;
 &lt;li&gt;For quick example with Azcopy, create a folder as destination, generate SAS token and get SAS URL, then:&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;azcopy&lt;span class="w"&gt; &lt;/span&gt;copy&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;C:\my\file.txt&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;https://blob-sas-url-here&amp;quot;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;ul&gt;
-&lt;li&gt;And we have talking a lot about containers, one revelant to this fucking exam called file shares, we can understand it as fucking NFS (we have a tool to keep file sync between on-premises and Azure called Azure File Sync). Also Azure File can be backup as Snapshot.&lt;/li&gt;
+&lt;li&gt;And we have talking a lot about containers, one relevant to this fucking exam called file shares, we can understand it as fucking NFS (we have a tool to keep file sync between on-premises and Azure called Azure File Sync). Also Azure Files can be backed up as Snapshot.&lt;/li&gt;
 &lt;li&gt;Which backup type does Azure Blob backup use? &lt;a href="https://learn.microsoft.com/en-us/azure/backup/blob-backup-overview?tabs=operational-backup"&gt;operational backup: Continuous backups&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Block Blob: Save common file (image, video, document..). Can be overwrite data.&lt;/li&gt;
 &lt;li&gt;Append Blob: Append without modify/delete old data, useful for log data, monitoring logs, audit trails.&lt;/li&gt;
@@ -1500,7 +1500,7 @@ Route Table                  →   Route Table
 &lt;p&gt;NSG (Network Security Group) vs SG (Security Group) / NACL&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;AWS: Use SG (applied at ENI/Instance) and Network ACL (NACL) (applied at Subnet)&lt;/li&gt;
-&lt;li&gt;Azure: Use only NSG. NSG Can be applied both to NIC or Subnet. This is core for our exam.&lt;/li&gt;
+&lt;li&gt;Azure: Use only NSG. NSG can be applied both to NIC or Subnet. This is core for our exam.&lt;/li&gt;
 &lt;li&gt;NSG is stateful, NACL is stateless&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;strong&gt;Stateful vs Stateless — what does it mean?&lt;/strong&gt;&lt;/p&gt;
@@ -1805,7 +1805,7 @@ X-Ray                        →   Application Insights
 &lt;/ul&gt;
 &lt;h3&gt;Enhanced after fail first exam&lt;/h3&gt;
 &lt;ul&gt;
-&lt;li&gt;Monitor need agent installed on VM Window or Linux to gather data and send to Azure to display.&lt;/li&gt;
+&lt;li&gt;Monitor needs an agent installed on Windows or Linux VMs to gather data and send to Azure to display.&lt;/li&gt;
 &lt;li&gt;We can enable diagnostic for specific resource or resource group.&lt;/li&gt;
 &lt;li&gt;For VM, we can turn on diagnostics in order to get the various operating system level metrics outside of the virtual machine. And the logs we get from "Insight" (need to enable it) which will collect the data and send to Azure for view, which is basically the agent will read/extract data from "Event Viewer" (VM itself) and send to monitor for centralized monitoring that we can run queries on.&lt;/li&gt;
 &lt;li&gt;We can create dashboard in Monitor -&amp;gt; Metrics with specific metrics we want to visualization.&lt;/li&gt;
@@ -1817,7 +1817,7 @@ X-Ray                        →   Application Insights
 &lt;/ul&gt;
 &lt;p&gt;&lt;img alt="restore vm" src="./images/2026/06/14.png"&gt;&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;For restore on-premises, install Microsoft Azure Backup Server (MABS) to make it happens, remember MBAS only for on-premises?&lt;/li&gt;
+&lt;li&gt;For restore on-premises, install Microsoft Azure Backup Server (MABS) to make it happen, remember MABS is only for on-premises?&lt;/li&gt;
 &lt;li&gt;In Backup Jobs, we can find information related about that backup.... Also you can query logs for backup jobs...&lt;/li&gt;
 &lt;li&gt;Azure backup have soft delete enable by default, free for 14 days&lt;/li&gt;
 &lt;li&gt;Azure Disater Recovery, we can start VM replication for another Azure region in VM --&amp;gt; Disaster Recovery and yeah data transfer will be charge ( will required brand new RG,VNet..)&lt;/li&gt;
@@ -1865,7 +1865,7 @@ X-Ray                        →   Application Insights
 &lt;p&gt;Summary of common pitfalls, this is not study guide. Only pattern to drop wrong answer xD.&lt;/p&gt;
 &lt;p&gt;Never, never, never ever skip free practice assessment available, if somethings are important, repeat 3 times!&lt;/p&gt;
 &lt;h3&gt;1. "X replaces NSG/Firewall"&lt;/h3&gt;
-&lt;p&gt;This is always wrong. Bastion, Private Endpoint, VPN Gateway, Front Door, App Gateway... &lt;strong&gt;not&lt;/strong&gt; replace NSG. NSG is layer filter , always apply together.&lt;/p&gt;
+&lt;p&gt;This is always wrong. Bastion, Private Endpoint, VPN Gateway, Front Door, App Gateway... do &lt;strong&gt;not&lt;/strong&gt; replace NSG. NSG is a layer filter, always applied together.&lt;/p&gt;
 &lt;h3&gt;2. VNet Peering&lt;/h3&gt;
 &lt;table&gt;
 &lt;thead&gt;
@@ -1917,7 +1917,7 @@ X-Ray                        →   Application Insights
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;Keyword &lt;strong&gt;"files, folders, system state"&lt;/strong&gt; -&amp;gt; alway are &lt;strong&gt;Recovery Services vault&lt;/strong&gt; (Because attach with MARS agent). Don't be wrong with Azure Backup vault&lt;/p&gt;
+&lt;p&gt;Keyword &lt;strong&gt;"files, folders, system state"&lt;/strong&gt; -&amp;gt; always are &lt;strong&gt;Recovery Services vault&lt;/strong&gt; (Because attach with MARS agent). Don't be wrong with Azure Backup vault&lt;/p&gt;
 &lt;p&gt;Resource Reference:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://learn.microsoft.com/en-us/azure/backup/backup-vault-overview"&gt;Overview of Backup vaults&lt;/a&gt;&lt;/li&gt;
@@ -2000,7 +2000,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;Gotcha: ReadOnly lock can break some operations thought it was read. &lt;/p&gt;
+&lt;p&gt;Gotcha: ReadOnly lock can break some operations though it was read. &lt;/p&gt;
 &lt;p&gt;Example: list keys of Storage Account actually is post request.&lt;/p&gt;
 &lt;p&gt;Resource Reference:&lt;/p&gt;
 &lt;ul&gt;
@@ -2030,7 +2030,7 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;&lt;code&gt;automatically&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Azure rare do for user, license, scaling, backup... all need config&lt;/td&gt;
+&lt;td&gt;Azure rarely does this for users; license, scaling, backup... all need config&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;&lt;code&gt;all&lt;/code&gt; / &lt;code&gt;every&lt;/code&gt;&lt;/td&gt;
@@ -2241,14 +2241,14 @@ Resource          ← VNet, VM, Storage, Key Vault... individual resource.
 &lt;hr&gt;
 &lt;h1&gt;Taking the Exam&lt;/h1&gt;
 &lt;p&gt;From my experience preparing for cloud certs, AZ-104 feels harder than AWS SAA / GCP ACE at the associate level, broader scope and tons of edge cases xD&lt;/p&gt;
-&lt;p&gt;Even you can access &lt;a href="https://learn.microsoft.com/"&gt;https://learn.microsoft.com/&lt;/a&gt; but should use only for verifying information like plans, very slow and time consuming, like watch document during CKAD/CKS/CKA exam!&lt;/p&gt;
+&lt;p&gt;Even though you can access &lt;a href="https://learn.microsoft.com/"&gt;https://learn.microsoft.com/&lt;/a&gt; but should use only for verifying information like plans, very slow and time consuming, like watch document during CKAD/CKS/CKA exam!&lt;/p&gt;
 &lt;p&gt;Fuck this exam, it was hard AF. No idea I can complete this or not!!!&lt;/p&gt;
 &lt;p&gt;Schedule &lt;a href="https://learn.microsoft.com/en-us/credentials/certifications/azure-administrator/?practice-assessment-type=certification"&gt;exam here&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;Random useful comment from &lt;a href="https://www.youtube.com/watch?v=3mxjUtHHVKI"&gt;Youtube&lt;/a&gt; I think, 9 months ago, so it maybe like September-2025 this comment appears.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Just&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Passed&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Today&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Most&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;of&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;question&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;were&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;around&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;File&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;Blob&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Storage&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Access&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Tier&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LifeCycle&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;RBAC&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Role&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;assingment&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;AzCopy&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Recovery&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;service&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;vault&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LoadBalancer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;VNET&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Thanks&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;TechBlackBoard&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;providing&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;compiled&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;question&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;pattern&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;15&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;actual&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;exams&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;questions&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;were&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;almost&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;same&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;from&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;video&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;There&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;will&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;be&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;50&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;questions&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;which&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;40&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;normal&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;question&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;not&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;skipped&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;question&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;set&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;of&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;which&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;we&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cant&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;review&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;at&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;end&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;case&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;study&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;having&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;questions&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Total&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Time&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;is&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;minutes&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Now&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;these&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;days&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;microsoft&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;allows&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;open&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;notebook&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;so&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;that&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;we&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;can&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;use&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;micosoft&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;learn&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;portal&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;exam&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;that&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;is&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;too&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;helpful&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;you&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;can&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;review&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;price&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;tier&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;static&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;content&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;various&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;azure&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;services&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Update 1st try in June-04-2026: failed with score 622/1000. It is just hard because I haven't prepare serious enough, still need more practice. The domain Compute and Storage I felt pretty confident, but domain Entra ID is really really bad for me =.=
+&lt;p&gt;Update 1st try in June-04-2026: failed with score 622/1000. It is just hard because I haven't prepared seriously enough, still need more practice. The domain Compute and Storage I felt pretty confident, but domain Entra ID is really really bad for me =.=
 But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - Complete Exam Prep&lt;/strong&gt;, I skip a lot and spam only on practice test!&lt;/p&gt;
 &lt;p&gt;Start learning again in morning saturday June-06-2026! Plan for retake in June-14-2026!&lt;/p&gt;
 &lt;p&gt;Update: Fuckkkkkkk. 672/1000!&lt;/p&gt;
@@ -2262,7 +2262,7 @@ But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - 
 &lt;p&gt;Enter first result found. Read as fast as you can, you will see Consumption plan here with key word "Pay for compute resources only when your functions are running (pay-as-you-go) with automatic scale on Windows."&lt;/p&gt;
 &lt;p&gt;&lt;img alt="keyword" src="./images/2026/06/08.png"&gt;&lt;/p&gt;
 &lt;p&gt;It is possible but remember use it fast, like under 120 seconds if you need to use document, because we have only fucking 100 minutes to resolve more than 50 questions!!!&lt;/p&gt;
-&lt;p&gt;If I don't remember wong, there is no question related to AKS service during exam, so you could save little time to prepare.&lt;/p&gt;
+&lt;p&gt;If I recall correctly, there is no question related to AKS service during exam, so you could save a little time to prepare.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Conclusion&lt;/h1&gt;
 &lt;ul&gt;
@@ -2271,7 +2271,7 @@ But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - 
 &lt;li&gt;Trust me, if you don't work in Azure but still want to try exam. Learn for it for non-stop 30 days before taking exam!&lt;/li&gt;
 &lt;li&gt;This exam is fucking ridiculous, even you are able to read document, but time is fucking limited!!! holy shiet!!!&lt;/li&gt;
 &lt;li&gt;Don't use microsoft during exam, it is fucking waste time that will lead to pressure! I was thought if I have 20 minutes to think, I would not fail :((&lt;/li&gt;
-&lt;li&gt;Questions are tricky, please understand correctly.... I was fail a lot during reading phase which leading to choosing wrong answer. Fucking tricky!!!!&lt;/li&gt;
+&lt;li&gt;Questions are tricky, please understand correctly.... I failed a lot during the reading phase which led to choosing wrong answers. Fucking tricky!!!!&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;I would spam this word in every article related to certifications: Passing an exam, getting certifications is not an achievement for me, no fucking salary increase, I'm not proud if I have achieved certifications because I'm fucking lowkey, introverted person. I just have no idea what to do at sometime in every year, so instead of wasting time, I think learning is better for fucking sure. The exam is just 1 fucking gate or guardrail I created to make sure I understand enough what is fucking I'm learning. Wasted time and money (buy an exam to get cert) or be fucking serious about learning? If I need to compare, I simply compare my current year with myself from last year; that's all. LOL&lt;/p&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="devops"/><category term="exam"/></entry><entry><title>My experience on learning Azure Devops - Part 2: Azure Devops</title><link href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-2-azure-devops.html" rel="alternate"/><published>2026-05-05T00:00:00+07:00</published><updated>2026-05-05T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-05:/my-experience-on-learning-azure-devops-part-2-azure-devops.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This article is part 2, part 1 you can find it here: &lt;a href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-1-acr-aks.html"&gt;My experience on learning Azure Devops - Part 1: ACR + AKS&lt;/a&gt;&lt;/p&gt;
