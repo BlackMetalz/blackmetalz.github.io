@@ -548,6 +548,10 @@ bicep<span class="w"> </span>decompile<span class="w"> </span>main.json
 <li>strong / complete / security isolation / security boundaries = Virtual Machine</li>
 <li>light weight / fast / microservices = Containers</li>
 </ul>
+<h3>Notes for exam:</h3>
+<ul>
+<li>Quota is calculated based on the total number of cores in use both allocated AND deallocated.</li>
+</ul>
 <hr>
 <h1>Domain 2.1 - ARM + Bicep</h1>
 <h3>ARM template basic</h3>
@@ -569,6 +573,16 @@ bicep<span class="w"> </span>decompile<span class="w"> </span>main.json
 <p>And yeah, we have <em>dependsOn</em> inside resources section which depend on other specific resource to create resource</p>
 <p>We can create template spec then use it to deploy resources via Portal or cmd (Powershell)</p>
 <p>ARM Templates Capture a Point in Time: This is basic, same like snapshot but without data, just spec/blueprint.</p>
+<h3>Azure Blueprint</h3>
+<p>It is a package governance: ARM templates + Policy + RBAC assignments</p>
+<h3>Azure Custom Script Extension</h3>
+<ul>
+<li>Run script on VM <strong>after deploy</strong>, can trigger <strong>anytime</strong> (not just first boot)</li>
+<li>Use case: install software (NGINX, etc.), configure OS</li>
+<li>Works with VMSS → applies to ALL instances</li>
+<li>Can be embedded in ARM template</li>
+</ul>
+<p>vs User Data (cloud-init): only runs at <strong>first boot</strong>, can't re-trigger</p>
 <h3>Bicep overview</h3>
 <p>We could deploy bicep to Azure via some cmd:</p>
 <ul>
@@ -1728,6 +1742,7 @@ But I didn't watch serious <strong>AZ-104 Microsoft Azure Administrator - Comple
 <li>Trust me, if you don't work in Azure but still want to try exam. Learn for it for non-stop 30 days before taking exam!</li>
 <li>This exam is fucking ridiculous, even you are able to read document, but time is fucking limited!!! holy shiet!!!</li>
 <li>Don't use microsoft during exam, it is fucking waste time that will lead to pressure! I was thought if I have 20 minutes to think, I would not fail :((</li>
+<li>Questions are tricky, please understand correctly.... I was fail a lot during reading phase which leading to choosing wrong answer. Fucking tricky!!!!</li>
 </ul>
 <p>I would spam this word in every article related to certifications: Passing an exam, getting certifications is not an achievement for me, no fucking salary increase, I'm not proud if I have achieved certifications because I'm fucking lowkey, introverted person. I just have no idea what to do at sometime in every year, so instead of wasting time, I think learning is better for fucking sure. The exam is just 1 fucking gate or guardrail I created to make sure I understand enough what is fucking I'm learning. Wasted time and money (buy an exam to get cert) or be fucking serious about learning? If I need to compare, I simply compare my current year with myself from last year; that's all. LOL</p>
 

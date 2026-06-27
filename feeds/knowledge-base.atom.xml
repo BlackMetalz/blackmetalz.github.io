@@ -1077,6 +1077,10 @@ bicep&lt;span class="w"&gt; &lt;/span&gt;decompile&lt;span class="w"&gt; &lt;/sp
 &lt;li&gt;strong / complete / security isolation / security boundaries = Virtual Machine&lt;/li&gt;
 &lt;li&gt;light weight / fast / microservices = Containers&lt;/li&gt;
 &lt;/ul&gt;
+&lt;h3&gt;Notes for exam:&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Quota is calculated based on the total number of cores in use both allocated AND deallocated.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;hr&gt;
 &lt;h1&gt;Domain 2.1 - ARM + Bicep&lt;/h1&gt;
 &lt;h3&gt;ARM template basic&lt;/h3&gt;
@@ -1098,6 +1102,16 @@ bicep&lt;span class="w"&gt; &lt;/span&gt;decompile&lt;span class="w"&gt; &lt;/sp
 &lt;p&gt;And yeah, we have &lt;em&gt;dependsOn&lt;/em&gt; inside resources section which depend on other specific resource to create resource&lt;/p&gt;
 &lt;p&gt;We can create template spec then use it to deploy resources via Portal or cmd (Powershell)&lt;/p&gt;
 &lt;p&gt;ARM Templates Capture a Point in Time: This is basic, same like snapshot but without data, just spec/blueprint.&lt;/p&gt;
+&lt;h3&gt;Azure Blueprint&lt;/h3&gt;
+&lt;p&gt;It is a package governance: ARM templates + Policy + RBAC assignments&lt;/p&gt;
+&lt;h3&gt;Azure Custom Script Extension&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Run script on VM &lt;strong&gt;after deploy&lt;/strong&gt;, can trigger &lt;strong&gt;anytime&lt;/strong&gt; (not just first boot)&lt;/li&gt;
+&lt;li&gt;Use case: install software (NGINX, etc.), configure OS&lt;/li&gt;
+&lt;li&gt;Works with VMSS → applies to ALL instances&lt;/li&gt;
+&lt;li&gt;Can be embedded in ARM template&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;vs User Data (cloud-init): only runs at &lt;strong&gt;first boot&lt;/strong&gt;, can't re-trigger&lt;/p&gt;
 &lt;h3&gt;Bicep overview&lt;/h3&gt;
 &lt;p&gt;We could deploy bicep to Azure via some cmd:&lt;/p&gt;
 &lt;ul&gt;
@@ -2257,6 +2271,7 @@ But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - 
 &lt;li&gt;Trust me, if you don't work in Azure but still want to try exam. Learn for it for non-stop 30 days before taking exam!&lt;/li&gt;
 &lt;li&gt;This exam is fucking ridiculous, even you are able to read document, but time is fucking limited!!! holy shiet!!!&lt;/li&gt;
 &lt;li&gt;Don't use microsoft during exam, it is fucking waste time that will lead to pressure! I was thought if I have 20 minutes to think, I would not fail :((&lt;/li&gt;
+&lt;li&gt;Questions are tricky, please understand correctly.... I was fail a lot during reading phase which leading to choosing wrong answer. Fucking tricky!!!!&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;I would spam this word in every article related to certifications: Passing an exam, getting certifications is not an achievement for me, no fucking salary increase, I'm not proud if I have achieved certifications because I'm fucking lowkey, introverted person. I just have no idea what to do at sometime in every year, so instead of wasting time, I think learning is better for fucking sure. The exam is just 1 fucking gate or guardrail I created to make sure I understand enough what is fucking I'm learning. Wasted time and money (buy an exam to get cert) or be fucking serious about learning? If I need to compare, I simply compare my current year with myself from last year; that's all. LOL&lt;/p&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="devops"/><category term="exam"/></entry><entry><title>My experience on learning Azure Devops - Part 2: Azure Devops</title><link href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-2-azure-devops.html" rel="alternate"/><published>2026-05-05T00:00:00+07:00</published><updated>2026-05-05T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-05:/my-experience-on-learning-azure-devops-part-2-azure-devops.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This article is part 2, part 1 you can find it here: &lt;a href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-1-acr-aks.html"&gt;My experience on learning Azure Devops - Part 1: ACR + AKS&lt;/a&gt;&lt;/p&gt;
