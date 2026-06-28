@@ -122,6 +122,8 @@
 <li>Gateway Load Balancer (GWLB)</li>
 <li>Server Name Indication (SNI)</li>
 <li>Function as a Service (FAAS)</li>
+<li>Cross-region replication (CRR)</li>
+<li>Same-region replication (SRR)</li>
 </ul>
 <hr>
 <h1>Section 1: EC2 for CloudOps</h1>
@@ -746,6 +748,106 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <li>Use Method 2 (IAM User) only for resources outside AWS (like local development machines or external servers).</li>
 </ul>
 <p>Not related but for IAM User, without checking the 'Provide user access to the AWS Management Console' option, we are essentially creating a Machine-to-Machine (M2M) / Robot account meant solely for programmatic access via APIs, CLI, or SDKs</p>
+<h3>Troubleshooting</h3>
+<p>After enable Versioning, you have to wait atleast 15 minutes to be fully progated. During that time you may expected error: HTTP 404 NoSuchKey when trying to get Objects created or updated.</p>
+<h3>S3 Replication (CRR &amp; SRR)</h3>
+<p>Replication using asynchronous mostly all the time. Same for Azure storage blob container, we need to enable versioning for replication!</p>
+<p>Use cases:</p>
+<ul>
+<li>CRR: Compliance (store data in required region), low latency access from user region, replication across account</li>
+<li>SRR: log aggreration (Like Mysql master-slave, we did analytic from slave node, not master node). Live replication between prod and test account</li>
+</ul>
+<p>Only new objects are gonna replicate after enable replication, if you want replicate exists object, use S3 Batch Replication. Version ID also going to get replicated in destination bucket xD</p>
+<p>We can replicate delete markers from source to target, Deletions with version ID are not replicated, prevent malicious deletes.</p>
+<p>AWS S3 Replication Time Control (RTC) guarantees that 99.99% of new objects are replicated within 15 minutes. This feature behaves similarly to MySQL Slave Replication Lag. We can set up a CloudWatch Alarm to alert us if the replication delay exceeds xxx seconds, akin to monitoring Seconds_Behind_Master in a MySQL replica. Ofcourse, there is no fucking free lunch, extra cost per GB for the replication!</p>
+<p>Another use case we can do with Batch Replication is add tag to object using job with manifest that contains bucket and path for objects we want to.</p>
+<hr>
+<h1>Section 9: Advanced Amazon S3 &amp; Athena</h1>
+<h3>Comparison vs Azure storage classes</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Azure Tier</th>
+<th style="text-align: left;">Equivalent AWS Storage Class</th>
+<th style="text-align: left;">Access Frequency</th>
+<th style="text-align: left;">Min Storage Duration</th>
+<th style="text-align: left;">Retrieval Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Hot</strong></td>
+<td style="text-align: left;"><strong>S3 Standard</strong></td>
+<td style="text-align: left;">High (Frequently accessed data)</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;">Milliseconds</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cool</strong></td>
+<td style="text-align: left;"><strong>S3 Standard-IA</strong> (Infrequent Access)</td>
+<td style="text-align: left;">Low (Accessed 1-2 times/month)</td>
+<td style="text-align: left;">30 days</td>
+<td style="text-align: left;">Milliseconds</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cold</strong></td>
+<td style="text-align: left;"><strong>S3 Glacier Instant Retrieval</strong></td>
+<td style="text-align: left;">Very low (Accessed once a quarter)</td>
+<td style="text-align: left;">90 days</td>
+<td style="text-align: left;">Milliseconds</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Archive</strong></td>
+<td style="text-align: left;"><strong>S3 Glacier Flexible Retrieval</strong></td>
+<td style="text-align: left;">Archive (Rarely accessed data)</td>
+<td style="text-align: left;">180 days</td>
+<td style="text-align: left;">1 minute to 12 hours</td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>(N/A)</em></td>
+<td style="text-align: left;"><strong>S3 Glacier Deep Archive</strong></td>
+<td style="text-align: left;">Deep Archive (Lowest cost backup)</td>
+<td style="text-align: left;">180 days</td>
+<td style="text-align: left;">12 to 48 hours</td>
+</tr>
+</tbody>
+</table>
+<h3>S3 Analytics - Storage Class Analysis</h3>
+<p>Great feature, that help you decide when to transition objects to right storage class for cost saving. Recommendations for Standard and Standard IA (Infrequently Access). Output file is CSV report</p>
+<p>Report is updated daily, 24-48 hours to start seeing data analysis.</p>
+<h3>Lifecycle policies</h3>
+<p>Moving between storage classes, alright? We could have 2 separated transition, one for current version and one for Noncurrent version.</p>
+<h3>S3 Event Notification</h3>
+<p>Handle event happens in S3 bucket, then trigger to SNS/SQS/Lambda for handle event. And yeah, everything required permission, SNS/SQS/Lambda are not exception.</p>
+<p>So let's take an example for SNS topic, we create IAM Policy that attach to SNS Topic to allow S3 bucket send message directly to SNS Topic, same for SQS queue and Lambda function.</p>
+<p>And one more thing that all events from S3 will be send to AWS EventBridge, so from EventBridge can we have rules sent to more than 18++ AWS services as destination. EventBridge provide more options like Advanced Filter(metadata, object size...), Multiple Destination, EventBridge Capabilities....</p>
+<p>Worthing to mention, AWS EventBridge = event-driven</p>
+<h3>S3 Inventory</h3>
+<p>List objects and their corresponding metadata. Usage:</p>
+<ul>
+<li>Audit and report on the replication and encryption status of objects</li>
+<li>Get the number of objects in S3 Bucket.</li>
+<li>Identify the total storage of previous object versions.</li>
+</ul>
+<h3>Athena</h3>
+<p>Serverless query service to analyze data stored in S3. Hmm, this shit is powerful!</p>
+<p><img alt="Athena" src="./images/2026/06/35.png"></p>
+<p>Result can be stored in S3 Bucket for later analysis.</p>
+<p>And again, there is no fucking free lunch. <a href="https://aws.amazon.com/athena/pricing/">Core Pricing Metric</a>: $5 per 1 TB of data scanned</p>
+<ul>
+<li>Athena does not charge based on query execution time.</li>
+<li>Athena does not charge based on the amount of data returned (result set).</li>
+<li>It charges you strictly based on the total volume of data it has to read (scan) from S3 to fulfill your query.</li>
+</ul>
+<p>Crucial Real-World Example:</p>
+<ul>
+<li>You have a 2 TB uncompressed text log file (CSV/JSON) stored on S3. You run a simple query: SELECT * FROM table LIMIT 10;.</li>
+<li>Because raw text files lack an intelligent columnar layout or metadata index, Athena is forced to scan the entire 2 TB file from top to bottom just to find those 10 rows.</li>
+<li>The result: That single query will cost you $10 in just a few seconds. If a BI Dashboard or an automated script triggers this query 50 times a day, you will burn $500/day instantly.</li>
+</ul>
+<p>That is enough I guess, there are other information related to convert Columnar (Parquet / ORC) to reduce data scan, partition data, gzip data and more....</p>
+<hr>
+<h1>Section 10: Amazon S3 Security</h1>
 
 
              
