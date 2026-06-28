@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-06-28T00:00:00+07:00</updated><entry><title>Prepare for the Microsoft Certified: Azure Administrator Associate (AZ-104) exam</title><link href="https://blackmetalz.github.io/prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html" rel="alternate"/><published>2026-06-28T00:00:00+07:00</published><updated>2026-06-28T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-06-28:/prepare-for-the-microsoft-certified-azure-administrator-associate-az-104-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;New challenge, acquire all DevOps certifications in 3 popular public cloud providers, Azure is the first target of mine. Let's fucking go!!!&lt;/p&gt;
 &lt;p&gt;I will try to refer to AWS as much as I can because AWS is the first cloud I learned.&lt;/p&gt;
 &lt;p&gt;This article could contain some wrong information since I'm new to this, correct me if I'm wrong, thanks xD&lt;/p&gt;
-&lt;p&gt;&lt;img alt="Cert" src="./images/2026/06/33.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Cert" src="./images/2026/06/34.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Prepare for the exam&lt;/h1&gt;
 &lt;h3&gt;Useful resources:&lt;/h3&gt;
@@ -1663,6 +1663,8 @@ But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - 
 &lt;h3&gt;Udemy practice tests&lt;/h3&gt;
 &lt;p&gt;&lt;a href="https://www.udemy.com/course/prepare-for-microsoft-azure-administrator-az-104-exam"&gt;Prepare for Microsoft Azure Administrator AZ-104 exam&lt;/a&gt; realistically, this practice set will help you cover about 30% of the exam readiness journey. &lt;/p&gt;
 &lt;p&gt;Understand why you choose the solution is better a lot than memorization, this exam is not like OTCA,Backstage, Cilium, Kyverno....&lt;/p&gt;
+&lt;p&gt;Seriously?
+&lt;img alt="seriously?" src="./images/2026/06/33.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Conclusion&lt;/h1&gt;
 &lt;ul&gt;
