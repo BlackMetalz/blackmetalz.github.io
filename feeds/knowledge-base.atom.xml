@@ -1648,6 +1648,7 @@ But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - 
 &lt;p&gt;Update 3rd (June-28-2026): 800/1000 LOL.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Secret Weapons&lt;/h1&gt;
+&lt;p&gt;Honestly, if I keep studying the same way I always have, I'm going to fail this exam for the third fucking time. The real problem is I don't have hands-on Azure experience — I work with Kubernetes and on-premises stuff day to day, so a lot of this is purely theoretical for me. Watching videos and taking notes clearly isn't enough when the exam throws scenario-based questions at you that only make sense if you've actually touched the console. So this time I need some secret weapons: very high quality practice questions that actually reflect the real exam, and a way to build intuition for Azure-specific behavior without spending months running real workloads. Let's see if this approach finally works xD&lt;/p&gt;
 &lt;p&gt;Good shit for exam prep: &lt;a href="https://learn.microsoft.com/en-us/shows/exam-readiness-zone/preparing-for-az-104-manage-azure-identities-and-governance-1-of-5"&gt;very very quality&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;For example we have this fucking question (taken from secret weapon xD)&lt;/p&gt;
 &lt;p&gt;&lt;img alt="exam test" src="./images/2026/06/06.png"&gt;&lt;/p&gt;
@@ -1663,8 +1664,6 @@ But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - 
 &lt;h3&gt;Udemy practice tests&lt;/h3&gt;
 &lt;p&gt;&lt;a href="https://www.udemy.com/course/prepare-for-microsoft-azure-administrator-az-104-exam"&gt;Prepare for Microsoft Azure Administrator AZ-104 exam&lt;/a&gt; realistically, this practice set will help you cover about 30% of the exam readiness journey. &lt;/p&gt;
 &lt;p&gt;Understand why you choose the solution is better a lot than memorization, this exam is not like OTCA,Backstage, Cilium, Kyverno....&lt;/p&gt;
-&lt;p&gt;Seriously?
-&lt;img alt="seriously?" src="./images/2026/06/33.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Conclusion&lt;/h1&gt;
 &lt;ul&gt;
@@ -1677,6 +1676,7 @@ But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - 
 &lt;/ul&gt;
 &lt;p&gt;I would spam this word in every article related to certifications: Passing an exam, getting certifications is not an achievement for me, no fucking salary increase, I'm not proud if I have achieved certifications because I'm fucking lowkey, introverted person. I just have no idea what to do at sometime in every year, so instead of wasting time, I think learning is better for fucking sure. The exam is just 1 fucking gate or guardrail I created to make sure I understand enough what is fucking I'm learning. Wasted time and money (buy an exam to get cert) or be fucking serious about learning? If I need to compare, I simply compare my current year with myself from last year; that's all. LOL&lt;/p&gt;</content><category term="Knowledge Base"/><category term="azure"/><category term="exam"/></entry><entry><title>[WIP] Prepare for AWS Certified CloudOps Engineer Associate SOA-C03 2026 exam</title><link href="https://blackmetalz.github.io/wip-prepare-for-aws-certified-cloudops-engineer-associate-soa-c03-2026-exam.html" rel="alternate"/><published>2026-06-14T00:00:00+07:00</published><updated>2026-06-14T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-06-14:/wip-prepare-for-aws-certified-cloudops-engineer-associate-soa-c03-2026-exam.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;I start the progress by using &lt;a href="udemy.com/course/aws-certified-cloudops-associate/"&gt;Stephane Maarek's course&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Honestly, if I keep studying the same way I always have, I'm going to fail this exam for the third fucking time. The real problem is I don't have hands-on AWS experience — I work with Kubernetes and on-premises stuff day to day, so a lot of this is purely theoretical for me. Watching videos and taking notes clearly isn't enough when the exam throws scenario-based questions at you that only make sense if you've actually touched the console. So this time I need some secret weapons: very high quality practice questions that actually reflect the real exam, and a way to build intuition for AWS-specific behavior without spending months running real workloads. Let's see if this approach finally works xD&lt;/p&gt;
 &lt;h3&gt;Learning Sections&lt;/h3&gt;
 &lt;p&gt;I will follow Udemy course, no idea if this article will be more than 1k5 lines long....&lt;/p&gt;
 &lt;ul&gt;
