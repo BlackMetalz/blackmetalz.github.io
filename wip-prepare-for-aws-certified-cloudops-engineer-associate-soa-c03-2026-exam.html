@@ -80,6 +80,31 @@
             
             <h1>Introduction</h1>
 <p>I start the progress by using <a href="udemy.com/course/aws-certified-cloudops-associate/">Stephane Maarek's course</a></p>
+<h3>Learning Sections</h3>
+<p>I will follow Udemy course, no idea if this article will be more than 1k5 lines long....</p>
+<ul>
+<li>Section 1: EC2 for CloudOps</li>
+<li>Section 2: AMI - Amazon Machine Image</li>
+<li>Section 3: Managing EC2 at Scale - Systems Manager (SSM)</li>
+<li>Section 4: EC2 High Availability and Scalability</li>
+<li>Section 5: CloudFormation for CloudOps</li>
+<li>Section 6: Lambda for CloudOps</li>
+<li>Section 7: EC2 Storage and Data Management - EBS and EFS</li>
+<li>Section 8: Amazon S3</li>
+<li>Section 9: Advanced Amazon S3 &amp; Athena</li>
+<li>Section 10: Amazon S3 Security</li>
+<li>Section 11: Advanced Storage Section</li>
+<li>Section 12: CloudFront</li>
+<li>Section 13: Databases for CloudOps</li>
+<li>Section 14: Monitoring, Auditing and Performance</li>
+<li>Section 15: AWS Account Management</li>
+<li>Section 16: Disaster Recovery</li>
+<li>Section 17: Security and Compliance for CloudOps</li>
+<li>Section 18: Identity</li>
+<li>Section 19: Networking - Route 53</li>
+<li>Section 20: Networking - VPC</li>
+<li>Section 21: Other Services</li>
+</ul>
 <h3>Some shortcut I will used in this article</h3>
 <ul>
 <li>Load Balancer (LB)</li>
@@ -87,7 +112,7 @@
 <li>CloudWatch (CW)</li>
 <li>Auto Scaling Group (ASG)</li>
 <li>Relational Database Service (RDS)</li>
-<li>Amazon Machine Imag (AMI)</li>
+<li>Amazon Machine Image (AMI)</li>
 <li>Systems Manager (SSM)</li>
 <li>Resource Groups (RGs)</li>
 <li>Elastic Load Balancer (ELB)</li>
@@ -101,7 +126,7 @@
 <hr>
 <h1>Section 1: EC2 for CloudOps</h1>
 <h3>Placement Groups</h3>
-<p>When I'm see this, i asociation with HDFS default replication (factor=3).</p>
+<p>When I see this, I associate it with HDFS default replication (factor=3).</p>
 <ul>
 <li>Replica 1: Place in node is writing.</li>
 <li>Replica 2: Place in node that have different rack than replica 1.</li>
@@ -140,14 +165,14 @@
 <p>Custom metric: Hmm, RAM is a custom metric? (I thought it should be default...), make sure IAM permissions on the EC2 instance role are correct. </p>
 <p>Yeah, RAM is not fucking included into the AWS EC2 metrics.</p>
 <p>If you have 3 or fewer dashboards using only standard EC2 metrics, it's completely free. If you have a 4th dashboard, it's $3/month.</p>
-<p>How CW collect metrics and logs from EC2 instance? --&gt; U nified CW Agent (with right permissions).</p>
+<p>How CW collect metrics and logs from EC2 instance? --&gt; Unified CW Agent (with right permissions).</p>
 <p>Unified CW Agent - procstat Plugin will come to exam:</p>
 <ul>
 <li>Collect metrics and monitor system utilization of individual process (support both Linux/Window)</li>
 <li>Select which process to monitor by pid_file/process name/pattern... This shit is free in CheckMK</li>
 <li>Metrics collected by procstat plugin begins with "procstat" prefix.</li>
 </ul>
-<p>Conclusion: CW agent not only push metrics, it also able to push logs to CW. Detailed Monitoring won't help you get RAM, it just gives you faster intervals on the same limited set of metrics.</p>
+<p>Conclusion: CW agent not only push metrics, it is also able to push logs to CW. Detailed Monitoring won't help you get RAM, it just gives you faster intervals on the same limited set of metrics.</p>
 <h3>EC2 Instance Connect Endpoint</h3>
 <p>Useful when no fucking bastion, public IP on the instance or EC2 instances running in a private subnet in a VPC without Internet Gateway or NAT Gateway.</p>
 <h3>Status Check</h3>
@@ -196,7 +221,7 @@
 <p>We can create AMI from running instance without shutdown AMI with AMI No-reboot option (It was disable by default). </p>
 <p>Hmm, so much services in AWS. We can create AMI via AWS Backup also (Doesn't reboot the instances while taking EBS snapshot)</p>
 <p>Migrate? yes we can migrate EC2 instance between AZ via AMI</p>
-<p>EC2 Image Builder: Hmm, auto build AMI manually or with schedule and run shit load of test cases to validate AMI (free service btw). Oh indetail of EC2 Iamge Builder, there is shit load of predefined components and OS select to create AMI:</p>
+<p>EC2 Image Builder: Hmm, auto build AMI manually or with schedule and run shit load of test cases to validate AMI (free service btw). Oh indetail of EC2 Image Builder, there is shit load of predefined components and OS select to create AMI:</p>
 <ul>
 <li>amazon-cloudwatch-agent-linux</li>
 <li>amazon-corretto-11-headless</li>
@@ -219,17 +244,17 @@
 <ul>
 <li>How it works: need to install SSM agent into EC2/On-premise Server/VM we control, install by default on Amazon Linux 2 and some Ubuntu AMI. And make sure EC2 instances have a proper IAM role to allow SSM actions. We manage EC2 instances that installed SSM agent in "Node tools - Fleet manager"</li>
 </ul>
-<h3>Resouce Groups</h3>
-<p>Holy shiet, this make me remember about Azure since Resource Group is one of important knowledge in Azure. So RGs create,view or manage logical group of resouces by using <strong>tags</strong>. For example EC2 instances have tags <strong>Team = Platform</strong>, we can create a RG based that tag.</p>
+<h3>Resource Groups</h3>
+<p>Holy shiet, this make me remember about Azure since Resource Group is one of important knowledge in Azure. So RGs create,view or manage logical group of resources by using <strong>tags</strong>. For example EC2 instances have tags <strong>Team = Platform</strong>, we can create a RG based that tag.</p>
 <p>This is regional service, works with EC2, S3,DynamoDB, Lambda, etc...</p>
 <p>And we can create RG via UI with filter like resource type (EC2 instances...), tags, then group name, details...</p>
 <p>Conclusion: It is all about manage resources, Azure when you create a resource you need to put it on a RG, in AWS only when works with SSM xD</p>
 <h3>SSM - Documents</h3>
-<p>Hmm, this is more like Saltstack run command or Ansible shell module? In AWS it called documents, LOL. It also sync with State Manager, Patch Manager, Automation. We can write our own document also.</p>
+<p>Hmm, this is more like Saltstack run command or Ansible shell module? In AWS it's called documents, LOL. It also sync with State Manager, Patch Manager, Automation. We can write our own document also.</p>
 <p>We can create Command or Session and Automation.</p>
 <p>Let's take a look with <strong>Run Command</strong>:</p>
 <ul>
-<li>Execute a document (= script) or just run a simple command across multiple instances (using RG, hmm this make sense now for RG usage.) with rate control/error conttrol with targets are RG/Instance tags/Instance selected manually and able to config rate control like concurrency and error threshold to stop the task fail.</li>
+<li>Execute a document (= script) or just run a simple command across multiple instances (using RG, hmm this make sense now for RG usage.) with rate control/error control with targets are RG/Instance tags/Instance selected manually and able to config rate control like concurrency and error threshold to stop the task fail.</li>
 <li>Integrated with IAM &amp; CloudTrail (You are able to see who run that commands) and yeah no need for SSH because it is Server-Agent architecture (Saltstack like).</li>
 <li>Command output will be show via console but can be send to S3 bucket or CW logs. Send notification to SNS about command status (In progress, success, failed...) and can be invoked using EventBridge for automation. (AWS really know how to make services... )</li>
 <li>If you know about Saltstack/Ansible, this is pretty easy to understand! But no idea if you need to remember structure of run command for exam!</li>
@@ -276,7 +301,7 @@ aws<span class="w"> </span>ssm<span class="w"> </span>get-parameter<span class="
 <span class="c1"># Multi param</span>
 aws<span class="w"> </span>ssm<span class="w"> </span>get-parameter<span class="w"> </span>--names<span class="w"> </span><span class="s2">&quot;/myapp/prod/db/password&quot;</span><span class="w"> </span><span class="s2">&quot;/myapp/prod/db/username&quot;</span>
 <span class="c1"># With decryption </span>
-aws<span class="w"> </span>ssm<span class="w"> </span>get-parameter<span class="w"> </span>--name<span class="w"> </span><span class="s2">&quot;/myapp/prod/db/password&quot;</span><span class="w"> </span>--with-decrytion
+aws<span class="w"> </span>ssm<span class="w"> </span>get-parameter<span class="w"> </span>--name<span class="w"> </span><span class="s2">&quot;/myapp/prod/db/password&quot;</span><span class="w"> </span>--with-decryption
 <span class="c1"># entire subtree at once (recursive)</span>
 aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<span class="w"> </span>--path<span class="w"> </span><span class="s2">&quot;/myapp/prod&quot;</span><span class="w"> </span>--recursive
 </code></pre></div>
@@ -321,7 +346,7 @@ aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<spa
 </ul>
 <p>For exam perspective: patch manager is used to patch your instances</p>
 <h3>SSM - Session Manager</h3>
-<p>Allow you to start a secure shell on your EC2 and on-premises servers. Does not need SSH access, bastion osts or SSH keys. This is possible because we have fucking SSM Agent installed.</p>
+<p>Allow you to start a secure shell on your EC2 and on-premises servers. Does not need SSH access, bastion hosts or SSH keys. This is possible because we have fucking SSM Agent installed.</p>
 <p>Required for SSM Manager works:</p>
 <ul>
 <li>SSM Agent need to be installed and running in the instance.</li>
@@ -330,7 +355,7 @@ aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<spa
 </ul>
 <p>And commands in this shell session can be logged and sent to S3, and control user in which group can access shell. Easier to audit I think.</p>
 <h3>SSM - Distributor</h3>
-<p>Packet and deploy software to your managed instances, you can create Distributorr package (SSM Document)</p>
+<p>Packet and deploy software to your managed instances, you can create Distributor package (SSM Document)</p>
 <p>Can be install via one-time (Run Command - yes, fucking like saltstack xD) or on a schedule (using state manager)</p>
 <h3>SSM - OpsCenter</h3>
 <p>Allow you to view, investigate and remediate issues in one place (no need to navigate across different AWS services)</p>
@@ -358,7 +383,7 @@ aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<spa
 <li>IP Address (private IPs)</li>
 </ul>
 <p>ALB can route to mulitple target groups and health check are at the target group level.</p>
-<p>There is something great to know from this section (Which I never know/understand before). Header X-Forwarded-For can be spoof but can prevent by using last client in in ALB (ALB auto inject header)</p>
+<p>There is something great to know from this section (Which I never know/understand before). Header X-Forwarded-For can be spoofed but can be prevented by using last client in ALB (ALB auto inject header)</p>
 <div class="highlight"><pre><span></span><code>  Client sends:    X-Forwarded-For: fake-ip
   ALB appends:     X-Forwarded-For: fake-ip, real-client-ip  ← ALB controls this
                                               ^^^^^^^^^^^^
@@ -371,13 +396,13 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[0]
 client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1].strip()                       
 </code></pre></div>
 
-<p>Allow only request comming from ALB: in SG of EC2 instance, add inbound rule with source is custom (then select right SG of ALB)</p>
+<p>Allow only requests coming from ALB: in SG of EC2 instance, add inbound rule with source is custom (then select right SG of ALB)</p>
 <p>We can have listener rule to do routing according conditions/rules. (like add custom path with custom fixed response code, body, content type.)</p>
 <h3>Network Load Balancer (NLB)</h3>
-<p>NLB (Layer 4), has one static ip per AZ and supports assining Elastic IP (helpful for whitelisting specific IP). And the rest is almost the same with ALB.</p>
+<p>NLB (Layer 4), has one static ip per AZ and supports assigning Elastic IP (helpful for whitelisting specific IP). And the rest is almost the same with ALB.</p>
 <p>NLB does not support cookie-based session affinity, but uses source IP hash for connection stickiness.</p>
 <h3>Gateway Load Balancer (GWLB)</h3>
-<p>Gateway for network virtual appliances (NVA) in AWS (Ex: Firewalls, Instrusion Detection, Deep packet inspection and so on..). User --&gt; GWLB --&gt; 3rd NVA (If pass traffic will be sent to GWLB otherwise drop) --&gt; GWLB --&gt; Backend</p>
+<p>Gateway for network virtual appliances (NVA) in AWS (Ex: Firewalls, Intrusion Detection, Deep packet inspection and so on..). User --&gt; GWLB --&gt; 3rd NVA (If passed, traffic will be sent to GWLB otherwise drop) --&gt; GWLB --&gt; Backend</p>
 <p>Operates at Layer 3 - Ip Packets</p>
 <p>Exam perspective: Use GENEVE protocol on port 6801 (right if you use GWLB)</p>
 <h3>ELB - Server Name Indication (SNI)</h3>
@@ -402,7 +427,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <h3>Auto Scaling - Instance Refresh</h3>
 <p>When we update launch template and then re-creating all EC2 instances, instance refresh is like rolling update in k8s deployment xD, same idea, pattern. Just little different start a VM is slower than start a pod, make sure you have right setting for warm-up time.</p>
 <h3>ASG - Warm Pools</h3>
-<p>To resolve latency issue, we have warm pool, pre-initialized VM but cost more money since they are up and ready to join auto scaling group?</p>
+<p>To resolve latency issue, we have warm pool, pre-initialized VM but costs more money since they are up and ready to join auto scaling group?</p>
 <h3>CloudOps - ASG</h3>
 <p>There is some lifecycle hooks: instance launching, instance terminating.</p>
 <p>This is kind great feature for me when use public cloud, lifecycle event can be trigger to EventBridge,SNS,SQS and with EventBridge it can invoke Lambda function to do your custom logic.</p>
@@ -599,7 +624,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 </code></pre></div>
 
 <ul>
-<li>And yeah issue in user data scripts could be fail and will give us hardtime to debug, that is why cloudformation provide a better way, it is cfn-init, let's take a look this picture. Better view/read-able, easy to debug than write bash scrip that contains more than 100 lines xD</li>
+<li>And yeah issue in user data scripts could be fail and will give us hardtime to debug, that is why cloudformation provide a better way, it is cfn-init, let's take a look at this picture. Better view/read-able, easy to debug than write bash scrip that contains more than 100 lines xD</li>
 </ul>
 <p><img alt="cfn-init" src="./images/2026/06/25.png"></p>
 <ul>
@@ -634,7 +659,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <hr>
 <h1>Section 7: EC2 Storage and Data Management - EBS and EFS</h1>
 <h3>EBS Volume</h3>
-<p>It is like common volume in OpenStack, can be mount to only 1 VM. Locked to AZ for sure, LOL.</p>
+<p>It is like common volume in OpenStack, can be mounted to only 1 VM. Locked to AZ for sure, LOL.</p>
 <p>There are some type for this volume type:</p>
 <ul>
 <li>gp2/gp3 (SSD): general purpose</li>
@@ -657,6 +682,70 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 </ul>
 <hr>
 <h1>Section 8: Amazon S3</h1>
+<h3>S3 - Bucket</h3>
+<p>Same meaning with Azure Blob Storage Container. There are 2 bucket type:</p>
+<ul>
+<li>General purpose</li>
+<li>Directory: low-latency use cases, use only S3 Express One Zone storage class.</li>
+</ul>
+<p>Hmm, let's figure why it is so fast in directory type: <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/directory-bucket-high-performance.html#s3-express-one-zone">High performance workloads</a></p>
+<ul>
+<li>Single AZ + colocate storage with compute to reduce latency, network hops...</li>
+<li>Session-based authentication: It uses <code>CreateSession</code> to get temporary credentials 1 time, next requests will use session token, reduce overhead in auth a lot.</li>
+<li>Zonal endpoint: object operations (GET,PUT) use Zonal endpoint instead of Regional endpoint, traffic go directly into AZ, by passing regional layer xD</li>
+<li>No replicate cross-AZ: data only stored in 1 AZ (multiple devices for sure), not overhead for sync cross-AZ</li>
+<li>Custom or Purpose-built hardware: only storage data in high-performance hardware, doesn't use same infrastructure with standard S3.</li>
+</ul>
+<h3>Pre-signed URL</h3>
+<p>Use case: let user download file from private S3 bucket without create IAM user or make public bucket.</p>
+<p>How it works?:</p>
+<ul>
+<li>Credential + signature embeded directly into URL</li>
+<li>Object still private, but anyone have URL can access</li>
+</ul>
+<h3>S3 security: Bucket Policy</h3>
+<p>User-based: IAM policies</p>
+<p>Resource-based: </p>
+<ul>
+<li>Bucket polices - bucket wide rules from the s3 console, allow across account.</li>
+<li>Object ACL - fine grain</li>
+<li>Bucket ACL - less common </li>
+</ul>
+<p>S3 Bucket Policies is Json based policies that define :</p>
+<ul>
+<li>Effect (Allow/Deny)</li>
+<li>Action (Action to Allow/Deny)</li>
+<li>Principal (scope, account or user to apply policy to, * mean public)</li>
+<li>Resource (s3 path arn). Example: "arn:aws:s3:::example-bucket/*"</li>
+</ul>
+<p>Use cases:</p>
+<ul>
+<li>Grant public access to the bucket</li>
+<li>Force objects to be encrypted at upload</li>
+<li>Grant access to another account (Cross Account)</li>
+</ul>
+<h3>AWS S3 Access Methods from an EC2 Instance</h3>
+<p>Not related but I want to put here to improve my understand. There are two primary ways to grant an Amazon EC2 instance access to an AWS S3 bucket. </p>
+<p>Method 1: Using IAM Roles (Recommended / Best Practice)</p>
+<ul>
+<li>Mechanism: Attach an IAM Role (via an IAM Instance Profile) directly to the EC2 instance.</li>
+<li>Authentication: The AWS CLI/SDK inside the VM automatically retrieves temporary, rotating credentials from the Instance Metadata Service (IMDS) at <a href="http://169.254.169.254">http://169.254.169.254</a>.</li>
+<li>Configuration: No credentials configuration required inside the VM. You only need to install the AWS CLI and run commands immediately.</li>
+<li>Security: High security. It eliminates the risk of hardcoded keys and avoids credential leakage since AWS manages key rotation automatically.</li>
+</ul>
+<p>Method 2: Using IAM User Credentials (Not Recommended for EC2)</p>
+<ul>
+<li>Mechanism: Create a dedicated IAM User and generate a pair of long-term Access Key ID and Secret Access Key.</li>
+<li>Authentication: The VM authenticates using these static, long-term credentials.</li>
+<li>Configuration: Requires manual setup inside the VM by either running aws configure (saved in ~/.aws/credentials) or injecting them as environment variables (AWS_ACCESS_KEY_ID &amp; AWS_SECRET_ACCESS_KEY).</li>
+<li>Security: Low security for EC2. If the VM is compromised or the image is shared, the static credentials could be exposed, leading to unauthorized access from anywhere.</li>
+</ul>
+<p>Key Takeaway:</p>
+<ul>
+<li>Use Method 1 (IAM Role) for resources inside AWS (like EC2 instances).</li>
+<li>Use Method 2 (IAM User) only for resources outside AWS (like local development machines or external servers).</li>
+</ul>
+<p>Not related but for IAM User, without checking the 'Provide user access to the AWS Management Console' option, we are essentially creating a Machine-to-Machine (M2M) / Robot account meant solely for programmatic access via APIs, CLI, or SDKs</p>
 
 
              
