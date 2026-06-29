@@ -853,6 +853,43 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <li>VPC Gateway Endpoint for Amazon S3: No idea, only remember use VPC Gateway Endpoint to access S3 privately from EC2 for exam...</li>
 <li>IAM Access Analyzer for S3: Ensure that only intended people have access to ur S3 buckets, we can review it is normal, expected or un-expected so you have right action to do.</li>
 </ul>
+<h1>Section 11: Advanced Storage Section</h1>
+<h3>Amazon FSx</h3>
+<p>Use cases:</p>
+<ul>
+<li>FSx for Windows: sharing disk that support Windows (SMB/NTFS), auto scale up/down. Managed service</li>
+<li>FSx for OpenZFS: High performance, high speed for Linux.</li>
+<li>FSx for Lustre: super performance for HPC/AI for Linux</li>
+<li>FSx for NetApp OnTap: Support both of Window/Linux, for lift and shift to cloud.</li>
+</ul>
+<p>Summary: Higher performance than EBS/EFS but cost more money, right?</p>
+<h3>AWS Storage Gateway</h3>
+<p>Bridge between on-premises data and cloud data. Use cases:</p>
+<ul>
+<li>DR</li>
+<li>Backup &amp; Restore... and more</li>
+</ul>
+<p>Types of Storage Gateway:</p>
+<ul>
+<li>S3 File Gateway: POSIX compliant (Linux filesystem)</li>
+</ul>
+<p><img alt="S3 file GW" src="./images/2026/06/36.png"></p>
+<ul>
+<li>Volume Gateway</li>
+<li>Tape Gateway</li>
+</ul>
+<p>Better to take a picture for summary....</p>
+<p><img alt="AWS Storage Gateway" src="./images/2026/06/37.png"></p>
+<p>Storage Gateway VM is an on-premises virtual machine that bridges local servers to AWS cloud storage using standard file protocols.</p>
+<h3>Little shit for exam:</h3>
+<ul>
+<li>Hybrid, Extend on-premises storage (Extend local disk), pick Storage Gateway</li>
+<li>Migrate Windows File Server to Cloud, pick Amazon FSx for windows</li>
+<li>Shared storage for thousands of EC2/GPUs for HPC/AI training -&gt; Pick FSx for Lustre (EFS/EBS can't handle the bandwidth).</li>
+<li>Enterprise needs NetApp ONTAP features (SnapMirror / Deduplication / Multi-protocol) -&gt; Auto-pick FSx for NetApp ONTAP.</li>
+<li>Replace physical tape drives / Backup tape to cloud -&gt; Auto-pick Tape Gateway (AWS's classic legacy backup trap).</li>
+</ul>
+<h1>Section 12: CloudFront</h1>
 
 
              
