@@ -890,6 +890,41 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <li>Replace physical tape drives / Backup tape to cloud -&gt; Auto-pick Tape Gateway (AWS's classic legacy backup trap).</li>
 </ul>
 <h1>Section 12: CloudFront</h1>
+<p>CloudFront = CDN xD</p>
+<h3>CloudFront - Origins</h3>
+<ul>
+<li>S3 bucket / Custom Origin (HTTP/S3 website)</li>
+<li>VPC Origin: Private ALB/NLB/EC2 instances</li>
+</ul>
+<p>So basically we can make website from S3 bucket without making public bucket by assign right policy for CloudFront (via OAC - Origin Access Control), CloudFront will serve request from user then use it's permission to access S3 data and return to user.</p>
+<p>Origin Shield: a cache for your cache.</p>
+<p>Every request made to CloudFront into a logging S3 bucket, that is where access logs stored.</p>
+<h3>CloudFront reports</h3>
+<p>We are able to generate reports on the data from Access Logs</p>
+<ul>
+<li>Cache Statistics Report</li>
+<li>Popular Objects Report</li>
+<li>Top Referrers Report</li>
+<li>Usage Reports</li>
+<li>Viewers Reports</li>
+</ul>
+<h3>CloudFront with ALB sticky sessions</h3>
+<ul>
+<li>Client must send Cookie within request to CloudFront</li>
+<li>Then CloudFront must forward/whitelist the cookie that controls the session affinity to the origin to allow the session affinity to work.</li>
+<li>You must set TTL to a value lesser than when the authentication cookie expires</li>
+</ul>
+<h3>AWS Global Accelerator</h3>
+<ul>
+<li>Unicast IP: one server holds one IP address</li>
+<li>Anycast IP: all servers hold the same IP address and the client is routed to the nearest one. Holy shiet, for real?</li>
+</ul>
+<p>Yes, AWS Global Accelerator use Anycast IP concept to works.</p>
+<p>Compare vs CloudFront</p>
+<ul>
+<li>CloudFront: Improve performance for both cacheable content, dynamic content and content is served at the edge location.</li>
+<li>Global Accelerator: Improves performance for a wide range of application over TCP or UDP, proxying packets at the edge to applications running in one or more AWS region.</li>
+</ul>
 
 
              
