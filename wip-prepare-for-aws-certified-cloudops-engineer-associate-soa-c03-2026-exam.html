@@ -164,6 +164,7 @@
 <li>Cons: If the AZ fails, all instances fails at the same time. PG spread have limited to 7 instances per AZ per PG. For PG paritions, we can have up to 7 partitions per AZ and can be span across multiple AZs in the same region.</li>
 </ul>
 <h3>CloudWatch for EC2</h3>
+<p>Remind: LGTM (Loki-Grafana-Tempo-Mimir) Stack = CloudWatch.</p>
 <p>AWS provided metrics (AWS push them for us) includes CPU,Network,Disk and Status check metric every 5 minutes with no agent needed. (paid version or Detailed Monitoring will be 1 minute interval). Good thing to know that defaults metrics are collected by AWS hypervisor from outside of instance?</p>
 <p>Custom metric: Hmm, RAM is a custom metric? (I thought it should be default...), make sure IAM permissions on the EC2 instance role are correct. </p>
 <p>Yeah, RAM is not fucking included into the AWS EC2 metrics.</p>
@@ -925,6 +926,63 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <li>CloudFront: Improve performance for both cacheable content, dynamic content and content is served at the edge location.</li>
 <li>Global Accelerator: Improves performance for a wide range of application over TCP or UDP, proxying packets at the edge to applications running in one or more AWS region.</li>
 </ul>
+<hr>
+<h1>Section 13: Databases for CloudOps</h1>
+<h3>RDS Read Replicas and Multi AZ</h3>
+<p>I write some notes because this will appear in exam xD.</p>
+<p>RDS read replicas for read scalability:</p>
+<ul>
+<li>Up to 15 read replicas (holy fucking shit, 15 replicas node. LOL. In entire my career, maximum slave node was only 3 which split into 3 zones not include master node).</li>
+<li>Available within AZ, Cross AZ or Cross Region.</li>
+<li>Replication is ASYNC.</li>
+<li>For RDS Read Replicas within the same region, you don't need pay the network fee when data goes from current AZ to another AZ.</li>
+</ul>
+<p>RDS Multi AZ (DR):</p>
+<ul>
+<li>Auto failover/promote standby to active.</li>
+<li>The read replicas can be setup as Multi AZ for DR</li>
+</ul>
+<p>From Single-AZ to Multi-AZ: new DB is restored from snapshot in new AZ then synchronization is established between the two databases.</p>
+<h3>Extra section not related to AWS</h3>
+<p>Ok, there are 3 replication formats in MySQL:</p>
+<ul>
+<li>
+<ol>
+<li>Statement-based replication: master write exactly query we did, then slave replay it. Cons: will be issue if related to function like <code>NOW()</code>. Because <code>NOW()</code> from master at 12:00 will be something like 12:03 in slave, diff issue bro!</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>Row-based replication: instead of write query SQL, master will record every change of "rows" (data changed). So Slave will replay exactly what is binlog, no diff issue. Cons: if we run update that target 1M rows, Binlog will increase way too big instead write simple 1 sql query.</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>Mixed-base replication: This is default method of modern MySQL and is exactly what AWS RDS use in common I guess xD. It will make priority for Statement-based, but if any query contain something dangerous like NOW() , UUID(), RAND(), it will convert to Row-based to make data consistency!</li>
+</ol>
+</li>
+</ul>
+<p>How sync work in Threads? So to understand why it called Async, we need to imagin that in replica side, there are 2 Threads work separately:</p>
+<ul>
+<li>
+<ol>
+<li>IO Thread (Ship): This shipper have a mission that connect to Master, if see any new Binlog, it will copy back into Slave node to a temp file called "Relay Log".</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>SQL Thread (Worker): This worker just collect row/qery from Relay Log to replay data into Slave node.</li>
+</ol>
+</li>
+</ul>
+<h3>Performance Insights</h3>
+<p>This feature expensive AF, I think most company will use self-hosted stack instead using AWS if there are giant log/metric (high throughput/high cardinality)!</p>
+<h3>Other shit</h3>
+<p>I don't mention them here because personally I think I understand them enough, I can reflection self-hosted in on-premises versus managed service in AWS...</p>
+<p>I spent 15-20 minutes to watch whole section xD</p>
+<p><img alt="RDS" src="./images/2026/07/01.png"></p>
+<p>I fail with RDS backup, it only able to take backup from standby, even Read replicas still is a standby with read traffic, so it can not make sure you have the fucking latest data to promote standby to active. And 2 fail question because I did skip them xDD</p>
+<hr>
 
 
              
