@@ -2520,7 +2520,7 @@ client_ip = request.headers[&amp;quot;X-Forwarded-For&amp;quot;].split(&amp;quot
 &lt;ul&gt;
 &lt;li&gt;CloudFront: Improve performance for both cacheable content, dynamic content and content is served at the edge location.&lt;/li&gt;
 &lt;li&gt;Global Accelerator: Improves performance for a wide range of application over TCP or UDP, proxying packets at the edge to applications running in one or more AWS region.&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="aws"/><category term="devops"/><category term="exam"/></entry><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro - I thought I understood, but it turns out I didn't.&lt;/h1&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="aws"/><category term="devops"/><category term="exam"/></entry><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
 &lt;p&gt;I thought I was understand ArgoCD enough, in the past I have running ArgoCD with multiple K8S Cluster inside it. (&amp;gt;10 clusters). And have around 500-600 ArgoCD Applications in single cluster. But I was contributor in there, not who build from scratch, it is 100% misconceptions that I often encounter. Even I had Certified Argo Project Associate (CAPA) but it was a joke for me, no value gained! So that is the reason this article born. To help me understand more "basic" knowledge of ArgoCD.&lt;/p&gt;
 &lt;p&gt;Ok, we will go through sections below in this article:&lt;/p&gt;
 &lt;ul&gt;
@@ -2535,6 +2535,7 @@ client_ip = request.headers[&amp;quot;X-Forwarded-For&amp;quot;].split(&amp;quot
 &lt;li&gt;Recap - mental model&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;img alt="Architecture" src="./images/2026/06/02.png"&gt;&lt;/p&gt;
+&lt;hr&gt;
 &lt;h1&gt;Architecture &amp;amp; Reconciliation loop&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;Static View: What the fuck components are&lt;/li&gt;
