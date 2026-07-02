@@ -1021,6 +1021,33 @@ abs(
 <h3>AWS Config Overview</h3>
 <p>AWS Config = Azure Policy + Azure Resource Graph</p>
 <p>Record configuration Changes and evaluate resources against compliance rules, remediation action...</p>
+<hr>
+<h1>Section 15: AWS Account Management</h1>
+<h3>SCP - Service Control Policy</h3>
+<p>So for example, we can restrict specific AWS account in our Org that not able list s3 buckets by use Deny action on s3:ListAllMyBuckets, even that account has Admin. Example SCP code:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Sid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DenyAllFuckingListBuckets&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Deny&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;s3:ListAllMyBuckets&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;Resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;*&quot;</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>SCP doesn't work with Management Account, it is able to deny root user aswell.</p>
+<p>In fact, SCP is just filter, if SCP allow but in IAM Policy of user don't have permissions, that user still able to make it works!</p>
+<h3>Other shit</h3>
+<ul>
+<li>AWS Control Tower = Azure Landing Zone. AWS Control Tower is service that handle multiple aws account or orchestrator.</li>
+</ul>
 
 
              
