@@ -2578,7 +2578,45 @@ client_ip = request.headers[&amp;quot;X-Forwarded-For&amp;quot;].split(&amp;quot
 &lt;p&gt;I spent 15-20 minutes to watch whole section xD&lt;/p&gt;
 &lt;p&gt;&lt;img alt="RDS" src="./images/2026/07/01.png"&gt;&lt;/p&gt;
 &lt;p&gt;I fail with RDS backup, it only able to take backup from standby, even Read replicas still is a standby with read traffic, so it can not make sure you have the fucking latest data to promote standby to active. And 2 fail question because I did skip them xDD&lt;/p&gt;
-&lt;hr&gt;</content><category term="Knowledge Base"/><category term="aws"/><category term="devops"/><category term="exam"/></entry><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
+&lt;hr&gt;
+&lt;h1&gt;Section 14: Monitoring, Auditing and Performance&lt;/h1&gt;
+&lt;p&gt;Holy fucking shit, pay more to gain more metric or faster interval when we have fucking Prometheus/victoriaMetrics?&lt;/p&gt;
+&lt;p&gt;And custom metric for what when we have fucking node exporter that include 99% what we need. &lt;/p&gt;
+&lt;p&gt;For anomaly detection instead of using CloudWatch we can use following in Prometheus for example:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://prometheus.io/docs/prometheus/latest/querying/functions/#predict_linear"&gt;predict_linear&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Compare current week with last week:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="gh"&gt;#&lt;/span&gt; Alert if current traffic is higher 50% than last week at this time!
+abs(
+  (rate(http_requests_total[5m]) - rate(http_requests_total[5m] offset 1w))
+  / 
+  rate(http_requests_total[5m] offset 1w)
+) &amp;gt; 0.5
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Custom dashboard in CloudWatch (3$/month after free dashboard)? Hmm, we have metrics, we can draw any dashboard we want in Grafana. &lt;/p&gt;
+&lt;p&gt;CW Synthetics Canary = Blackbox Monitoring. LOLLLL But Synthetics Canary can do more with headless google chrome browser, not only monitoring....&lt;/p&gt;
+&lt;h3&gt;EventBridge Content Filtering&lt;/h3&gt;
+&lt;p&gt;Worth money feature I guess.&lt;/p&gt;
+&lt;p&gt;Cost optimization:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Without filtering: lambda trigger 1M times --&amp;gt; holy fucking AWS billing&lt;/li&gt;
+&lt;li&gt;With filtering: EventBridge stop right front door, only event have right condition go through to trigger Lambda.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Decoupling: No need to handle if/else for event in Lambda&lt;/p&gt;
+&lt;p&gt;Powerful Matching Operators: Check exists, filtering numberic range, filtering with suffix,prefix, ip address....&lt;/p&gt;
+&lt;p&gt;With Input Transformation: zero cost and cost saving because we don't need to parse data and it is fucking free!&lt;/p&gt;
+&lt;h3&gt;AWS CloudTrail&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Get history of events / API calls made within your AWS account.&lt;/li&gt;
+&lt;li&gt;Audit for your account, enable by default.&lt;/li&gt;
+&lt;li&gt;If a resource is deleted in AWS, investigate CloudTrail first!&lt;/li&gt;
+&lt;li&gt;Stored for 90 days.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;AWS Config Overview&lt;/h3&gt;
+&lt;p&gt;AWS Config = Azure Policy + Azure Resource Graph&lt;/p&gt;
+&lt;p&gt;Record configuration Changes and evaluate resources against compliance rules, remediation action...&lt;/p&gt;</content><category term="Knowledge Base"/><category term="aws"/><category term="devops"/><category term="exam"/></entry><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
 &lt;p&gt;I thought I was understand ArgoCD enough, in the past I have running ArgoCD with multiple K8S Cluster inside it. (&amp;gt;10 clusters). And have around 500-600 ArgoCD Applications in single cluster. But I was contributor in there, not who build from scratch, it is 100% misconceptions that I often encounter. Even I had Certified Argo Project Associate (CAPA) but it was a joke for me, no value gained! So that is the reason this article born. To help me understand more "basic" knowledge of ArgoCD.&lt;/p&gt;
 &lt;p&gt;Ok, we will go through sections below in this article:&lt;/p&gt;
 &lt;ul&gt;

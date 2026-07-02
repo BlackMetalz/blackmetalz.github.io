@@ -983,6 +983,44 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <p><img alt="RDS" src="./images/2026/07/01.png"></p>
 <p>I fail with RDS backup, it only able to take backup from standby, even Read replicas still is a standby with read traffic, so it can not make sure you have the fucking latest data to promote standby to active. And 2 fail question because I did skip them xDD</p>
 <hr>
+<h1>Section 14: Monitoring, Auditing and Performance</h1>
+<p>Holy fucking shit, pay more to gain more metric or faster interval when we have fucking Prometheus/victoriaMetrics?</p>
+<p>And custom metric for what when we have fucking node exporter that include 99% what we need. </p>
+<p>For anomaly detection instead of using CloudWatch we can use following in Prometheus for example:</p>
+<ul>
+<li><a href="https://prometheus.io/docs/prometheus/latest/querying/functions/#predict_linear">predict_linear</a></li>
+<li>Compare current week with last week:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="gh">#</span> Alert if current traffic is higher 50% than last week at this time!
+abs(
+  (rate(http_requests_total[5m]) - rate(http_requests_total[5m] offset 1w))
+  / 
+  rate(http_requests_total[5m] offset 1w)
+) &gt; 0.5
+</code></pre></div>
+
+<p>Custom dashboard in CloudWatch (3$/month after free dashboard)? Hmm, we have metrics, we can draw any dashboard we want in Grafana. </p>
+<p>CW Synthetics Canary = Blackbox Monitoring. LOLLLL But Synthetics Canary can do more with headless google chrome browser, not only monitoring....</p>
+<h3>EventBridge Content Filtering</h3>
+<p>Worth money feature I guess.</p>
+<p>Cost optimization:</p>
+<ul>
+<li>Without filtering: lambda trigger 1M times --&gt; holy fucking AWS billing</li>
+<li>With filtering: EventBridge stop right front door, only event have right condition go through to trigger Lambda.</li>
+</ul>
+<p>Decoupling: No need to handle if/else for event in Lambda</p>
+<p>Powerful Matching Operators: Check exists, filtering numberic range, filtering with suffix,prefix, ip address....</p>
+<p>With Input Transformation: zero cost and cost saving because we don't need to parse data and it is fucking free!</p>
+<h3>AWS CloudTrail</h3>
+<ul>
+<li>Get history of events / API calls made within your AWS account.</li>
+<li>Audit for your account, enable by default.</li>
+<li>If a resource is deleted in AWS, investigate CloudTrail first!</li>
+<li>Stored for 90 days.</li>
+</ul>
+<h3>AWS Config Overview</h3>
+<p>AWS Config = Azure Policy + Azure Resource Graph</p>
+<p>Record configuration Changes and evaluate resources against compliance rules, remediation action...</p>
 
 
              
