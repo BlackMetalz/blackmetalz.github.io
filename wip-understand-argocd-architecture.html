@@ -15,7 +15,7 @@
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary">
 
-<meta name="keywords" content="argocd, Knowledge Base, " />
+<meta name="keywords" content="k8s, Knowledge Base, " />
 
 <meta property="og:title" content="[WIP] Understand ArgoCD architecture "/>
 <meta property="og:url" content="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" />
@@ -100,15 +100,96 @@
 <li>Dynamic View: How the fuck they are looping</li>
 </ul>
 <p>ArgoCD is not fucking monolith, it is fucking workload run in namespace <strong>argocd</strong> in common and contains 5 major components.</p>
-<h3>Static view - argocd-server (API + UI gateway)</h3>
+<p>First I thought ArgoCD watch mechanism is same like K8S watch mechanism, but look like it does has little different, let's figure out!</p>
+<h3>Kubernetes Controller Manager: Real-time Watch (Event-Driven)</h3>
+<p>In K8S, Controllers (like ReplicaSet Controller, Deployment Controller), they setup a <a href="https://learnkube.com/kubernetes-controller-manager-explained">HTTP Long-Polling</a> via watch mechanism to Kube-ApiServer. For example:</p>
 <ul>
-<li>Expose GRPC + Rest API for serving UI</li>
+<li>Desired State: state stored in ETCD (example: replicas: 1)</li>
+<li>Actual State: actual state of pod in the cluster</li>
+<li>When thing changes: Kube-ApiServer will send an event to let's Controller Manager know, Controller Manager see actual pod replicas = 0, but desired = 1. It makes a requests to Kube-ApiServer to create pod replicas that matched desired state. That is why we delete pod in deployment that have 1 replicas, it will auto bring new pod!</li>
 </ul>
-<p>Reference resources:</p>
+<p>Conclusion: K8S works with Event-Driven, if events appear, modify/changes....</p>
+<h3>Different between ArgoCD and Kubernetes</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>K8s Controller Manager</th>
+<th>ArgoCD (Application Controller)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Source keep desired state</td>
+<td>etcd</td>
+<td>Git repository (outside of cluster)</td>
+</tr>
+<tr>
+<td>How to recognize changes</td>
+<td>Watch API (Real-time events) from Kube-ApiServer</td>
+<td>Polling periodically to check Git or webhook</td>
+</tr>
+<tr>
+<td>Main quest</td>
+<td>Make sure resources run in desired state which stored at etcd</td>
+<td>make sure actual/live cluster state match desired state (Git)</td>
+</tr>
+</tbody>
+</table>
+<h3>Overview when combine ArgoCD + K8S</h3>
+<p>Actually when we are using GitOps (ArgoCD + K8S), we are using double Reconciliation loop:</p>
 <ul>
-<li><a href="https://argo-cd.readthedocs.io/en/latest/operator-manual/architecture/">Architectural Overview</a></li>
-<li><a href="https://argo-cd.readthedocs.io/en/latest/operator-manual/server-commands/argocd-server/">argocd-server Command Reference</a></li>
-<li><a href="https://argo-cd.readthedocs.io/en/latest/developer-guide/architecture/components/#component-architecture">Component Architecture</a></li>
+<li>First loop (ArgoCD): compare Git (desired) &lt;--&gt; K8s object spec read via kube-apiserver (this is "actual" from ArgoCD's view — but it's also exactly what feeds into loop 2 below as "desired"). If Git changes, or someone drifts the live spec away from Git (and selfHeal: true is set), ArgoCD re-applies via kube-apiserver to overwrite the drift back to match Git.</li>
+<li>
+<p>Second loop (Kubernetes, independent of ArgoCD): compare K8s object spec in etcd (desired at this layer) &lt;--&gt; actual runtime state (is the pod really running as spec says). If a pod dies, K8s controllers recreate it to match spec.</p>
+</li>
+<li>
+<p>When someone used <code>kubectl delete pod</code>, K8S controllers will recreate that pod (ofc, I'm talking about Deployment/ReplicaSet not fucking standalone pod)</p>
+</li>
+<li>
+<p>If someone used <code>kubectl edit deployment</code> to change resource/spec, ArgoCD will notice and change to match with data in Git (if selfHeal: true)</p>
+</li>
+</ul>
+<hr>
+<h1>Application - <a href="https://octopus.com/blog/argo-cd-application-dependencies">atomic unit</a></h1>
+<h3>Application vs ApplicationSets</h3>
+<ul>
+<li>Application: a CRD (Custom Resource Definition) that explain 1 source (repo + path/chart + revision) to a destination (cluster + namespace). It handled by application-controller reconcile and sync.</li>
+<li>ApplicationSet: a controller that run separately (know with pod <code>argocd-applicationset-controller</code> in argocd namespace). It's job is generate multiple Application from 1 template + generator(s), it doesn't do sync job, just create/update/delete application resource then application-controller will do that part.</li>
+</ul>
+<h3>Flow between Application Set and Application in ArgoCD</h3>
+<p>So basically flow with order from ApplicationSet to Application:</p>
+<ul>
+<li>Update value file in of ApplicationSet or add new folder in Gitops repo (generator source changes), applicationset-controller know the changes via periodic requeue (polling interval) or webhook.</li>
+<li>ApplicationSet run generator (for example git-dir), it ask for help of argocd-repo-server checkout repo list folder that match pattern.</li>
+<li>Argocd-repo-server will checkout git,list folder, file that match pattern then return raw parameter list to applicationset-controller, after that applicationset-controller render templates with parameters that feed into <code>template:</code>, we called this is wanted or expected Application.</li>
+<li>Then applicationset-controller will compare expected Application vs current Application, if it diff, modify/update the current Application.</li>
+<li>After that, current Application will compare with live-state, return will be Sync/OutOfSync you see often.</li>
+</ul>
+<hr>
+<h1>Cluster Registration</h1>
+<p>So basically for cluster register in ArgoCD, application-controller will call to endpoint of kube-apiserver of destination cluster (same idea like kubectl --context X).</p>
+<p>Destination cluster credential will saved as a secret in namespace argocd of cluster which host ArgoCD. Must require label <code>argocd.argoproj.io/secret-type: cluster</code></p>
+<p>Fields:</p>
+<ul>
+<li><code>name</code>: display name, used as destination.name</li>
+<li><code>server</code>: endpoint</li>
+<li><code>config</code>: JSON of bearerToken</li>
+</ul>
+<p>application-controller read secret via informer/watch separate, doesn't go via pipeline render-manifest(repo-server) like common Application</p>
+<p>Mostly we will use argocd-vault-plugin to secret, only use path that define where secret saved in Vault.</p>
+<p>Application deliver Secret must target <code>destination.name: in-cluster</code> which is built-in cluster, meaning cluster which is hosting ArgoCD. This secret need to stored in namespace argocd local, not destination cluster!</p>
+<hr>
+<h1>AppProject</h1>
+<p>AppProject is guardrail of ArgoCD, that will limit:</p>
+<ul>
+<li>sourceRepo (which git repo)</li>
+<li>destinations (which cluster + namespace): clusterResourceWhitelist/namespaceResourceWhitelist</li>
+</ul>
+<p>AppProject is secondary defense separately, running together:</p>
+<ul>
+<li>First(Real, k8s enforce): RBAC of SA/token in destination cluster. Absolute limit!</li>
+<li>Second(Software, by ArgoCD define and enforce): only block request that allowed in clusterResourceWhitelist/namespaceResourceWhitelist!</li>
 </ul>
 
 
@@ -133,8 +214,8 @@
             <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article">
-                <li><a href="https://blackmetalz.github.io/tags.html#argocd-ref">argocd
-                    <span class="superscript">2</span>
+                <li><a href="https://blackmetalz.github.io/tags.html#k8s-ref">k8s
+                    <span class="superscript">13</span>
 </a></li>
             </ul>
 <h4>Contact</h4>

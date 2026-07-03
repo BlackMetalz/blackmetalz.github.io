@@ -96,7 +96,7 @@ REDIRECT_URI=http://localhost:8501
 &lt;p&gt;Success! Welcome to my dashboard xD&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Conclusion&lt;/h1&gt;
-&lt;p&gt;This is just a solution that fits a specific scenario, that is I don't want to manage any external database, the purpose is just for internal users, not for public. Simple and easy to implement since it needed to ship this dashboard fast with requirements changing daily....&lt;/p&gt;</content><category term="Coding"/><category term="Streamlit"/><category term="Keycloak"/></entry><entry><title>Difference between pre-allocate and allocate in Go</title><link href="https://blackmetalz.github.io/difference-between-pre-allocate-and-allocate-in-go.html" rel="alternate"/><published>2026-02-21T00:00:00+07:00</published><updated>2026-02-21T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-02-21:/difference-between-pre-allocate-and-allocate-in-go.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;This is just a solution that fits a specific scenario, that is I don't want to manage any external database, the purpose is just for internal users, not for public. Simple and easy to implement since it needed to ship this dashboard fast with requirements changing daily....&lt;/p&gt;</content><category term="Coding"/><category term="code"/></entry><entry><title>Difference between pre-allocate and allocate in Go</title><link href="https://blackmetalz.github.io/difference-between-pre-allocate-and-allocate-in-go.html" rel="alternate"/><published>2026-02-21T00:00:00+07:00</published><updated>2026-02-21T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-02-21:/difference-between-pre-allocate-and-allocate-in-go.html</id><summary type="html"/><content type="html">&lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;While learning Goroutine and Channel, I found there is something interesting about pre-allocate and allocate in Go. That is the reason I wrote this article xD&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;TLDR&lt;/strong&gt;: Use pre-allocate when you have fixed size of data. Example for fixed size of data:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;// Create slice with fixed size&lt;/span&gt;
@@ -344,7 +344,7 @@ ok&lt;span class="w"&gt;      &lt;/span&gt;demo&lt;span class="w"&gt;    &lt;/sp
 &lt;hr&gt;
 &lt;h1&gt;Conclusion&lt;/h1&gt;
 &lt;p&gt;Resource: &lt;a href="https://alexanderobregon.substack.com/p/go-testing-benchmarks-and-how-they"&gt;https://alexanderobregon.substack.com/p/go-testing-benchmarks-and-how-they&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Just remember to use pre-allocate when you have fixed size of data. &lt;/p&gt;</content><category term="Coding"/><category term="Go"/></entry><entry><title>Learn Go by doing project: Change K8S Contexts CLI</title><link href="https://blackmetalz.github.io/learn-go-by-doing-project-change-k8s-contexts-cli.html" rel="alternate"/><published>2026-02-20T00:00:00+07:00</published><updated>2026-02-20T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-02-20:/learn-go-by-doing-project-change-k8s-contexts-cli.html</id><summary type="html"/><content type="html">&lt;hr&gt;
+&lt;p&gt;Just remember to use pre-allocate when you have fixed size of data. &lt;/p&gt;</content><category term="Coding"/><category term="code"/></entry><entry><title>Learn Go by doing project: Change K8S Contexts CLI</title><link href="https://blackmetalz.github.io/learn-go-by-doing-project-change-k8s-contexts-cli.html" rel="alternate"/><published>2026-02-20T00:00:00+07:00</published><updated>2026-02-20T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-02-20:/learn-go-by-doing-project-change-k8s-contexts-cli.html</id><summary type="html"/><content type="html">&lt;hr&gt;
 &lt;h1&gt;Learn Go from trash/pet project xD&lt;/h1&gt;
 &lt;h3&gt;Purpose&lt;/h3&gt;
 &lt;p&gt;Learn by building some project, use AI as less as I can with purpose to learn, not to cheat. This is not Python where I already have little experience and Go is zero!&lt;/p&gt;
@@ -712,4 +712,4 @@ Flags:
 &lt;ul&gt;
 &lt;li&gt;Approach by &lt;code&gt;KISS&lt;/code&gt;: Keep it simple, stupid!&lt;/li&gt;
 &lt;li&gt;Finished feature matter, finish first, make it work first before starting to do any over-engineering like refactor/rewrite/make code cleaner/beautiful.&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Coding"/><category term="Go"/></entry></feed>
+&lt;/ul&gt;</content><category term="Coding"/><category term="code"/></entry></feed>
