@@ -2675,7 +2675,13 @@ abs(
 &lt;li&gt;AWS Secret Manager = Hashicorp Vault for an easy reflection!&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr&gt;
-&lt;h1&gt;Section 18:&lt;/h1&gt;</content><category term="Knowledge Base"/><category term="aws"/><category term="certification"/></entry><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
+&lt;h1&gt;Section 18: Identity&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;AWS Identity Federation: no idea... Example: provide access to write to s3 bucket using facebook login... (Like Entra ID B2B/B2C)&lt;/li&gt;
+&lt;li&gt;AWS STS - Security Token Service.&lt;/li&gt;
+&lt;li&gt;IAM Policy Simulator: testing policies....&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;</content><category term="Knowledge Base"/><category term="aws"/><category term="certification"/></entry><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
 &lt;p&gt;I thought I understood ArgoCD well enough — in the past I ran ArgoCD with multiple K8s clusters inside it (&amp;gt;10 clusters), and had around 500-600 ArgoCD Applications in a single cluster. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the Certified Argo Project Associate (CAPA), it was a joke for me — no value gained! So that is the reason this article was born — to help me understand the "basic" knowledge of ArgoCD better.&lt;/p&gt;
 &lt;p&gt;Ok, we will go through the sections below in this article:&lt;/p&gt;
 &lt;ul&gt;
