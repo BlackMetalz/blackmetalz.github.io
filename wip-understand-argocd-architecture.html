@@ -79,8 +79,8 @@
         <div class="span8 offset2 article-content">
             
             <h1>Intro</h1>
-<p>I thought I was understand ArgoCD enough, in the past I have running ArgoCD with multiple K8S Cluster inside it. (&gt;10 clusters). And have around 500-600 ArgoCD Applications in single cluster. But I was contributor in there, not who build from scratch, it is 100% misconceptions that I often encounter. Even I had Certified Argo Project Associate (CAPA) but it was a joke for me, no value gained! So that is the reason this article born. To help me understand more "basic" knowledge of ArgoCD.</p>
-<p>Ok, we will go through sections below in this article:</p>
+<p>I thought I understood ArgoCD well enough — in the past I ran ArgoCD with multiple K8s clusters inside it (&gt;10 clusters), and had around 500-600 ArgoCD Applications in a single cluster. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the Certified Argo Project Associate (CAPA), it was a joke for me — no value gained! So that is the reason this article was born — to help me understand the "basic" knowledge of ArgoCD better.</p>
+<p>Ok, we will go through the sections below in this article:</p>
 <ul>
 <li>Architecture &amp; Reconciliation loop</li>
 <li>Application - atomic unit</li>
@@ -96,20 +96,20 @@
 <hr>
 <h1>Architecture &amp; Reconciliation loop</h1>
 <ul>
-<li>Static View: What the fuck components are</li>
-<li>Dynamic View: How the fuck they are looping</li>
+<li>Static View: what the fuck the components are</li>
+<li>Dynamic View: how the fuck they are looping</li>
 </ul>
-<p>ArgoCD is not fucking monolith, it is fucking workload run in namespace <strong>argocd</strong> in common and contains 5 major components.</p>
-<p>First I thought ArgoCD watch mechanism is same like K8S watch mechanism, but look like it does has little different, let's figure out!</p>
+<p>ArgoCD is not a fucking monolith, it's a fucking workload that commonly runs in the <strong>argocd</strong> namespace.</p>
+<p>First I thought ArgoCD's watch mechanism was the same as K8s's watch mechanism, but it turns out there's a little difference — let's figure it out!</p>
 <h3>Kubernetes Controller Manager: Real-time Watch (Event-Driven)</h3>
-<p>In K8S, Controllers (like ReplicaSet Controller, Deployment Controller), they setup a <a href="https://learnkube.com/kubernetes-controller-manager-explained">HTTP Long-Polling</a> via watch mechanism to Kube-ApiServer. For example:</p>
+<p>In K8s, Controllers (like the ReplicaSet Controller, Deployment Controller) set up an <a href="https://learnkube.com/kubernetes-controller-manager-explained">HTTP Long-Polling</a> watch mechanism to the Kube-ApiServer. For example:</p>
 <ul>
 <li>Desired State: state stored in ETCD (example: replicas: 1)</li>
-<li>Actual State: actual state of pod in the cluster</li>
-<li>When thing changes: Kube-ApiServer will send an event to let's Controller Manager know, Controller Manager see actual pod replicas = 0, but desired = 1. It makes a requests to Kube-ApiServer to create pod replicas that matched desired state. That is why we delete pod in deployment that have 1 replicas, it will auto bring new pod!</li>
+<li>Actual State: actual state of the pod in the cluster</li>
+<li>When something changes: the Kube-ApiServer sends an event to let the Controller Manager know. The Controller Manager sees actual pod replicas = 0, but desired = 1, so it makes a request to the Kube-ApiServer to create pod replicas that match the desired state. That is why when we delete a pod in a deployment with 1 replica, it automatically brings up a new pod!</li>
 </ul>
-<p>Conclusion: K8S works with Event-Driven, if events appear, modify/changes....</p>
-<h3>Different between ArgoCD and Kubernetes</h3>
+<p>Conclusion: K8s works in an event-driven way — if an event appears, it reacts and makes the change.</p>
+<h3>Difference between ArgoCD and Kubernetes</h3>
 <table>
 <thead>
 <tr>
@@ -131,66 +131,84 @@
 </tr>
 <tr>
 <td>Main quest</td>
-<td>Make sure resources run in desired state which stored at etcd</td>
-<td>make sure actual/live cluster state match desired state (Git)</td>
+<td>Make sure resources run in the desired state which is stored in etcd</td>
+<td>Make sure actual/live cluster state matches the desired state (Git)</td>
 </tr>
 </tbody>
 </table>
-<h3>Overview when combine ArgoCD + K8S</h3>
-<p>Actually when we are using GitOps (ArgoCD + K8S), we are using double Reconciliation loop:</p>
+<h3>Overview when combining ArgoCD + K8s</h3>
+<p>Actually when we use GitOps (ArgoCD + K8s), we're using a double reconciliation loop:</p>
 <ul>
 <li>First loop (ArgoCD): compare Git (desired) &lt;--&gt; K8s object spec read via kube-apiserver (this is "actual" from ArgoCD's view — but it's also exactly what feeds into loop 2 below as "desired"). If Git changes, or someone drifts the live spec away from Git (and selfHeal: true is set), ArgoCD re-applies via kube-apiserver to overwrite the drift back to match Git.</li>
 <li>
 <p>Second loop (Kubernetes, independent of ArgoCD): compare K8s object spec in etcd (desired at this layer) &lt;--&gt; actual runtime state (is the pod really running as spec says). If a pod dies, K8s controllers recreate it to match spec.</p>
 </li>
 <li>
-<p>When someone used <code>kubectl delete pod</code>, K8S controllers will recreate that pod (ofc, I'm talking about Deployment/ReplicaSet not fucking standalone pod)</p>
+<p>When someone uses <code>kubectl delete pod</code>, K8s controllers will recreate that pod (ofc, I'm talking about Deployment/ReplicaSet, not a fucking standalone pod)</p>
 </li>
 <li>
-<p>If someone used <code>kubectl edit deployment</code> to change resource/spec, ArgoCD will notice and change to match with data in Git (if selfHeal: true)</p>
+<p>If someone uses <code>kubectl edit deployment</code> to change a resource/spec, ArgoCD will notice and change it back to match the data in Git (if selfHeal: true)</p>
 </li>
 </ul>
 <hr>
 <h1>Application - <a href="https://octopus.com/blog/argo-cd-application-dependencies">atomic unit</a></h1>
-<h3>Application vs ApplicationSets</h3>
+<h3>Application vs ApplicationSet</h3>
 <ul>
-<li>Application: a CRD (Custom Resource Definition) that explain 1 source (repo + path/chart + revision) to a destination (cluster + namespace). It handled by application-controller reconcile and sync.</li>
-<li>ApplicationSet: a controller that run separately (know with pod <code>argocd-applicationset-controller</code> in argocd namespace). It's job is generate multiple Application from 1 template + generator(s), it doesn't do sync job, just create/update/delete application resource then application-controller will do that part.</li>
+<li>Application: a CRD (Custom Resource Definition) that describes 1 source (repo + path/chart + revision) mapped to a destination (cluster + namespace). It's handled by application-controller's reconcile and sync loop.</li>
+<li>ApplicationSet: a controller that runs separately (known as the <code>argocd-applicationset-controller</code> pod in the argocd namespace). Its job is to generate multiple Applications from 1 template + generator(s) — it doesn't do the sync job itself, it just creates/updates/deletes the Application resource, then application-controller does that part.</li>
 </ul>
-<h3>Flow between Application Set and Application in ArgoCD</h3>
-<p>So basically flow with order from ApplicationSet to Application:</p>
+<h3>Flow between ApplicationSet and Application in ArgoCD</h3>
+<p>So basically, the flow in order from ApplicationSet to Application:</p>
 <ul>
-<li>Update value file in of ApplicationSet or add new folder in Gitops repo (generator source changes), applicationset-controller know the changes via periodic requeue (polling interval) or webhook.</li>
-<li>ApplicationSet run generator (for example git-dir), it ask for help of argocd-repo-server checkout repo list folder that match pattern.</li>
-<li>Argocd-repo-server will checkout git,list folder, file that match pattern then return raw parameter list to applicationset-controller, after that applicationset-controller render templates with parameters that feed into <code>template:</code>, we called this is wanted or expected Application.</li>
-<li>Then applicationset-controller will compare expected Application vs current Application, if it diff, modify/update the current Application.</li>
-<li>After that, current Application will compare with live-state, return will be Sync/OutOfSync you see often.</li>
+<li>Update the value file of ApplicationSet, or add a new folder in the Gitops repo (generator source changes) — applicationset-controller learns about the changes via periodic requeue (polling interval) or webhook.</li>
+<li>ApplicationSet runs a generator (for example git-dir), asking argocd-repo-server for help to checkout the repo and list folders that match the pattern.</li>
+<li>argocd-repo-server will checkout git, list the folders/files that match the pattern, then return a raw parameter list to applicationset-controller. After that, applicationset-controller renders the templates with those parameters, feeding into <code>template:</code> — we call this the wanted, or expected, Application.</li>
+<li>Then applicationset-controller compares the expected Application vs the current Application; if there's a diff, it modifies/updates the current Application.</li>
+<li>After that, the current Application gets compared against live-state — the result is the Sync/OutOfSync status you often see.</li>
 </ul>
 <hr>
 <h1>Cluster Registration</h1>
-<p>So basically for cluster register in ArgoCD, application-controller will call to endpoint of kube-apiserver of destination cluster (same idea like kubectl --context X).</p>
-<p>Destination cluster credential will saved as a secret in namespace argocd of cluster which host ArgoCD. Must require label <code>argocd.argoproj.io/secret-type: cluster</code></p>
+<p>So basically, for cluster registration in ArgoCD, application-controller calls the endpoint of the kube-apiserver of the destination cluster (the same idea as <code>kubectl --context X</code>).</p>
+<p>The destination cluster credential is saved as a Secret in the argocd namespace of the cluster hosting ArgoCD. It must have the label <code>argocd.argoproj.io/secret-type: cluster</code>.</p>
 <p>Fields:</p>
 <ul>
 <li><code>name</code>: display name, used as destination.name</li>
 <li><code>server</code>: endpoint</li>
-<li><code>config</code>: JSON of bearerToken</li>
+<li><code>config</code>: JSON of bearerToken, tlsClientConfig/exec-based</li>
 </ul>
-<p>application-controller read secret via informer/watch separate, doesn't go via pipeline render-manifest(repo-server) like common Application</p>
-<p>Mostly we will use argocd-vault-plugin to secret, only use path that define where secret saved in Vault.</p>
-<p>Application deliver Secret must target <code>destination.name: in-cluster</code> which is built-in cluster, meaning cluster which is hosting ArgoCD. This secret need to stored in namespace argocd local, not destination cluster!</p>
+<p>application-controller reads the secret via a separate informer/watch — it doesn't go through the manifest-render pipeline (repo-server) like a normal Application does.</p>
+<p>Mostly we use argocd-vault-plugin for the secret — we only store the path that defines where the secret is saved in Vault.</p>
+<p>The Application delivering the Secret must target <code>destination.name: in-cluster</code>, which is the built-in cluster, meaning the cluster hosting ArgoCD. This Secret needs to be stored in the local argocd namespace, not the destination cluster!</p>
+<p>Provisioning the actual credential (ServiceAccount + ClusterRole + Binding + mint token) on the destination cluster is a separate concern — ArgoCD itself doesn't do this:</p>
+<ul>
+<li>CLI flow (<code>argocd cluster add</code>): the CLI (using your own local kubeconfig with admin access) bootstraps SA + ClusterRole + ClusterRoleBinding on the destination cluster, as a one-time setup. The default ClusterRole (<code>argocd-manager-role</code>) is near cluster-admin (<code>*/*/*</code>) unless scoped down manually.</li>
+<li>Declarative/GitOps flow (what we do): this provisioning has to happen outside ArgoCD (Terraform/other pipeline) against the destination cluster; only the resulting token gets pushed to Vault for AVP to inject.</li>
+</ul>
+<p>The cluster only actually shows up in ArgoCD (Settings &gt; Clusters, usable as a destination) AFTER the Secret is applied via a real sync — not the moment the Application object gets created. If the sync policy is manual and hasn't run yet, the Application just sits <code>OutOfSync</code> and the cluster stays invisible.</p>
 <hr>
 <h1>AppProject</h1>
-<p>AppProject is guardrail of ArgoCD, that will limit:</p>
+<p>AppProject is a guardrail of ArgoCD that limits 3 independent axes:</p>
 <ul>
-<li>sourceRepo (which git repo)</li>
-<li>destinations (which cluster + namespace): clusterResourceWhitelist/namespaceResourceWhitelist</li>
+<li>sourceRepos (which git repo)</li>
+<li>destinations (which cluster + namespace)</li>
+<li>clusterResourceWhitelist/namespaceResourceWhitelist (which K8s resource kind, cluster-scoped vs namespace-scoped)</li>
 </ul>
-<p>AppProject is secondary defense separately, running together:</p>
+<p><code>clusterResourceWhitelist</code> defaults to empty (deny all cluster-scoped resources like ClusterRole/ClusterRoleBinding/CRD/Namespace) unless explicitly whitelisted — this default-deny is what actually gives AppProject teeth.</p>
+<p>AppProject is a secondary defense, running concurrently with (not nested inside) the destination cluster's own RBAC:</p>
 <ul>
-<li>First(Real, k8s enforce): RBAC of SA/token in destination cluster. Absolute limit!</li>
-<li>Second(Software, by ArgoCD define and enforce): only block request that allowed in clusterResourceWhitelist/namespaceResourceWhitelist!</li>
+<li>First (Real, K8s-enforced): RBAC of the SA/token on the destination cluster. An absolute limit!</li>
+<li>Second (Software, defined and enforced by ArgoCD): only allows requests permitted by clusterResourceWhitelist/namespaceResourceWhitelist, sourceRepos, and destinations — anything outside that gets blocked.</li>
 </ul>
+<p>An Application's <code>spec.project</code> must reference an AppProject that already exists — validated right at Application creation time, before it even gets to sync. No AppProject means the Application object fails to even get created, full stop.</p>
+<h1>argocd-repo-server</h1>
+<p>It's one of the most important components — it's the only one that talks to git/Helm/OCI registries. It clones/fetches the repo, checks out the right revision, then renders the final manifest end-to-end no matter if the source is a Helm chart, Kustomize, or plain YAML. argocd-repo-server is called by:</p>
+<ul>
+<li>application-controller: each time it needs to diff git vs live-state, it needs to ask repo-server to show the rendered manifest for this source.</li>
+<li>applicationset-controller: each time it runs a git generator, it needs to ask repo-server to list folders/files that match this pattern, plz.</li>
+</ul>
+<hr>
+<h1>argocd-server (API/UI gateway)</h1>
+<p>It's the API/UI gateway — it handles every request and enforces RBAC to determine which user/group is allowed to sync/create/delete/overwrite what.</p>
 
 
              
