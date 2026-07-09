@@ -79,7 +79,7 @@
         <div class="span8 offset2 article-content">
             
             <h1>Intro</h1>
-<p>I thought I understood ArgoCD well enough — in the past I ran ArgoCD with multiple K8s clusters inside it (&gt;10 clusters), and had around 500-600 ArgoCD Applications in a single cluster. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the Certified Argo Project Associate (CAPA), it was a joke for me — no value gained! So that is the reason this article was born — to help me understand the "basic" knowledge of ArgoCD better.</p>
+<p>I thought I understood ArgoCD well enough in the past I ran ArgoCD with multiple K8s clusters inside it (&gt;10 clusters), and had around 500-600 ArgoCD applications in a single cluster. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the Certified Argo Project Associate (CAPA), it was a joke for me, no fucking value gained! So that is the reason this article was born to help me understand the "basic" knowledge of ArgoCD. LOL</p>
 <p>Ok, we will go through the sections below in this article:</p>
 <ul>
 <li>Architecture &amp; Reconciliation loop</li>
@@ -99,12 +99,12 @@
 <li>Static View: what the fuck the components are</li>
 <li>Dynamic View: how the fuck they are looping</li>
 </ul>
-<p>ArgoCD is not a fucking monolith, it's a fucking workload that commonly runs in the <strong>argocd</strong> namespace.</p>
-<p>First I thought ArgoCD's watch mechanism was the same as K8s's watch mechanism, but it turns out there's a little difference — let's figure it out!</p>
+<p>ArgoCD is not a fuckin' monolith, it's a fuckin' workload that commonly runs in the <strong>argocd</strong> namespace.</p>
+<p>First I thought ArgoCD's watch mechanism was the same as K8s's watch mechanism, but it turns out there's a little difference, let's figure it out!</p>
 <h3>Kubernetes Controller Manager: Real-time Watch (Event-Driven)</h3>
 <p>In K8s, Controllers (like the ReplicaSet Controller, Deployment Controller) set up an <a href="https://learnkube.com/kubernetes-controller-manager-explained">HTTP Long-Polling</a> watch mechanism to the Kube-ApiServer. For example:</p>
 <ul>
-<li>Desired State: state stored in ETCD (example: replicas: 1)</li>
+<li>Desired State: state stored in ETCD ( for example "replicas: 1")</li>
 <li>Actual State: actual state of the pod in the cluster</li>
 <li>When something changes: the Kube-ApiServer sends an event to let the Controller Manager know. The Controller Manager sees actual pod replicas = 0, but desired = 1, so it makes a request to the Kube-ApiServer to create pod replicas that match the desired state. That is why when we delete a pod in a deployment with 1 replica, it automatically brings up a new pod!</li>
 </ul>
@@ -139,24 +139,86 @@
 <h3>Overview when combining ArgoCD + K8s</h3>
 <p>Actually when we use GitOps (ArgoCD + K8s), we're using a double reconciliation loop:</p>
 <ul>
-<li>First loop (ArgoCD): compare Git (desired) &lt;--&gt; K8s object spec read via kube-apiserver (this is "actual" from ArgoCD's view — but it's also exactly what feeds into loop 2 below as "desired"). If Git changes, or someone drifts the live spec away from Git (and selfHeal: true is set), ArgoCD re-applies via kube-apiserver to overwrite the drift back to match Git.</li>
-<li>
-<p>Second loop (Kubernetes, independent of ArgoCD): compare K8s object spec in etcd (desired at this layer) &lt;--&gt; actual runtime state (is the pod really running as spec says). If a pod dies, K8s controllers recreate it to match spec.</p>
-</li>
-<li>
-<p>When someone uses <code>kubectl delete pod</code>, K8s controllers will recreate that pod (ofc, I'm talking about Deployment/ReplicaSet, not a fucking standalone pod)</p>
-</li>
-<li>
-<p>If someone uses <code>kubectl edit deployment</code> to change a resource/spec, ArgoCD will notice and change it back to match the data in Git (if selfHeal: true)</p>
-</li>
+<li>First loop (ArgoCD): compare Git (desired) &lt;--&gt; K8s object spec read via kube-apiserver (this is <code>actual</code> from ArgoCD's view — but it's also exactly what feeds into loop 2 below as <code>desired</code>). If Gitops repo changes, or someone drifts the live spec away from Git (and selfHeal: true is set), ArgoCD re-applies via kube-apiserver to overwrite the drift back to match Git.</li>
+<li>Second loop (Kubernetes, independent of ArgoCD): compare K8s object spec in etcd (desired at this layer) &lt;--&gt; actual runtime state (is the pod really running as spec says?). If the pod dies, K8s controllers recreate it to match spec.</li>
+<li>When someone uses <code>kubectl delete pod</code>, K8s controllers will recreate that pod (ofc, I'm talking about Deployment/ReplicaSet, not a fucking standalone pod)</li>
+<li>If someone uses <code>kubectl edit deployment</code> to change a resource/spec, ArgoCD will notice and change it back to match the data in Git (if selfHeal: true)</li>
 </ul>
 <hr>
 <h1>Application - <a href="https://octopus.com/blog/argo-cd-application-dependencies">atomic unit</a></h1>
 <h3>Application vs ApplicationSet</h3>
 <ul>
 <li>Application: a CRD (Custom Resource Definition) that describes 1 source (repo + path/chart + revision) mapped to a destination (cluster + namespace). It's handled by application-controller's reconcile and sync loop.</li>
-<li>ApplicationSet: a controller that runs separately (known as the <code>argocd-applicationset-controller</code> pod in the argocd namespace). Its job is to generate multiple Applications from 1 template + generator(s) — it doesn't do the sync job itself, it just creates/updates/deletes the Application resource, then application-controller does that part.</li>
 </ul>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Application</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">guestbook-app</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span><span class="w">     </span><span class="c1"># Must match the namespace where Argo CD is installed</span>
+<span class="w">  </span><span class="nt">finalizers</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">resources-finalizer.argocd.argoproj.io</span><span class="w"> </span><span class="c1"># Enables cascading delete (deletes K8s resources when the app is deleted)</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span><span class="w">       </span><span class="c1"># The Argo CD project this app belongs to</span>
+<span class="w">  </span><span class="c1"># 1. Source: Where your Kubernetes manifests live</span>
+<span class="w">  </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;https://github.com/argoproj/argocd-example-apps.git&#39;</span><span class="w"> </span><span class="c1"># Git or Helm repo URL</span>
+<span class="w">    </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HEAD</span><span class="w"> </span><span class="c1"># Git branch, tag, or commit hash</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">guestbook</span><span class="w">      </span><span class="c1"># Directory inside the repository containing the YAMLs</span>
+
+<span class="w">  </span><span class="c1"># 2. Destination: Where to deploy the resources</span>
+<span class="w">  </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;https://kubernetes.default.svc&#39;</span><span class="w"> </span><span class="c1"># Cluster API URL (this refers to the local cluster). We could define to other cluster if we have.</span>
+<span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">guestbook</span><span class="w">                     </span><span class="c1"># Target namespace in your cluster</span>
+
+<span class="w">  </span><span class="c1"># 3. Sync Policy: How Argo CD handles configuration drift</span>
+<span class="w">  </span><span class="nt">syncPolicy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">automated</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">prune</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">     </span><span class="c1"># Automatically delete resources no longer present in Git</span>
+<span class="w">      </span><span class="nt">selfHeal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># Automatically fix deviations if someone manually edits live cluster resources</span>
+<span class="w">    </span><span class="nt">syncOptions</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CreateNamespace=true</span><span class="w"> </span><span class="c1"># Create the target namespace automatically if it doesn&#39;t exist</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ApplyOutOfSyncOnly=true</span><span class="w"> </span><span class="c1"># Only sync components that have drifted to optimize performance</span>
+</code></pre></div>
+
+<ul>
+<li>ApplicationSet: a controller that runs separately (known as the <code>argocd-applicationset-controller</code> pod in the argocd namespace). Its job is to generate multiple Applications from 1 template + generator(s), it doesn't do the sync job itself, it just creates/updates/deletes the Application resource, then application-controller does that part.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ApplicationSet</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">guestbook</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span><span class="w">        </span><span class="c1"># Must match the namespace where Argo CD is installed</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">goTemplate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">          </span><span class="c1"># Enables Go template syntax ({{.path.basename}}) used in `template:` below</span>
+<span class="w">  </span><span class="nt">goTemplateOptions</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;missingkey=error&quot;</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># Fail render instead of silently rendering empty if a field is missing</span>
+<span class="w">  </span><span class="c1"># 1. Generators: how ApplicationSet discovers &quot;what Applications should exist&quot;</span>
+<span class="w">  </span><span class="nt">generators</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">git</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/argoproj/argocd-example-apps.git</span><span class="w"> </span><span class="c1"># Same repo concept as a normal Application source</span>
+<span class="w">        </span><span class="nt">revision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HEAD</span>
+<span class="w">        </span><span class="nt">directories</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/*</span><span class="w">    </span><span class="c1"># Glob pattern — each matching folder becomes 1 generated Application</span>
+
+<span class="w">  </span><span class="c1"># 2. Template: how each matched folder gets turned into an actual Application</span>
+<span class="w">  </span><span class="nt">template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{.path.basename}}&#39;</span><span class="w">   </span><span class="c1"># e.g. folder &quot;apps/guestbook&quot; -&gt; Application name &quot;guestbook&quot;</span>
+<span class="w">    </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="w">      </span><span class="nt">source</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/argoproj/argocd-example-apps.git</span>
+<span class="w">        </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HEAD</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{.path.path}}&#39;</span><span class="w">     </span><span class="c1"># Full matched path, e.g. &quot;apps/guestbook&quot;</span>
+<span class="w">      </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://kubernetes.default.svc</span>
+<span class="w">        </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{.path.basename}}&#39;</span><span class="w">  </span><span class="c1"># Deploy each generated app into its own namespace or in same namespace, your choice.</span>
+<span class="w">      </span><span class="nt">syncPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">automated</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">prune</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">          </span><span class="nt">selfHeal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+
+<p>I think at this point, it sill hard for you, no worry I will make hands on below!</p>
 <h3>Flow between ApplicationSet and Application in ArgoCD</h3>
 <p>So basically, the flow in order from ApplicationSet to Application:</p>
 <ul>
@@ -182,9 +244,9 @@
 <p>Provisioning the actual credential (ServiceAccount + ClusterRole + Binding + mint token) on the destination cluster is a separate concern — ArgoCD itself doesn't do this:</p>
 <ul>
 <li>CLI flow (<code>argocd cluster add</code>): the CLI (using your own local kubeconfig with admin access) bootstraps SA + ClusterRole + ClusterRoleBinding on the destination cluster, as a one-time setup. The default ClusterRole (<code>argocd-manager-role</code>) is near cluster-admin (<code>*/*/*</code>) unless scoped down manually.</li>
-<li>Declarative/GitOps flow (what we do): this provisioning has to happen outside ArgoCD (Terraform/other pipeline) against the destination cluster; only the resulting token gets pushed to Vault for AVP to inject.</li>
+<li>Declarative/GitOps flow (what we do): this provisioning has to happen outside ArgoCD (Terraform/other pipeline) against the destination cluster; only the resulting token gets pushed to Vault for AVP to inject.
+The cluster only actually shows up in ArgoCD (Settings &gt; Clusters, usable as a destination) AFTER the Secret is applied via a real sync — not the moment the Application object gets created. If the sync policy is manual and hasn't run yet, the Application just sits <code>OutOfSync</code> and the cluster stays invisible.</li>
 </ul>
-<p>The cluster only actually shows up in ArgoCD (Settings &gt; Clusters, usable as a destination) AFTER the Secret is applied via a real sync — not the moment the Application object gets created. If the sync policy is manual and hasn't run yet, the Application just sits <code>OutOfSync</code> and the cluster stays invisible.</p>
 <hr>
 <h1>AppProject</h1>
 <p>AppProject is a guardrail of ArgoCD that limits 3 independent axes:</p>
@@ -200,6 +262,7 @@
 <li>Second (Software, defined and enforced by ArgoCD): only allows requests permitted by clusterResourceWhitelist/namespaceResourceWhitelist, sourceRepos, and destinations — anything outside that gets blocked.</li>
 </ul>
 <p>An Application's <code>spec.project</code> must reference an AppProject that already exists — validated right at Application creation time, before it even gets to sync. No AppProject means the Application object fails to even get created, full stop.</p>
+<hr>
 <h1>argocd-repo-server</h1>
 <p>It's one of the most important components — it's the only one that talks to git/Helm/OCI registries. It clones/fetches the repo, checks out the right revision, then renders the final manifest end-to-end no matter if the source is a Helm chart, Kustomize, or plain YAML. argocd-repo-server is called by:</p>
 <ul>
@@ -209,6 +272,7 @@
 <hr>
 <h1>argocd-server (API/UI gateway)</h1>
 <p>It's the API/UI gateway — it handles every request and enforces RBAC to determine which user/group is allowed to sync/create/delete/overwrite what.</p>
+<hr>
 
 
              
