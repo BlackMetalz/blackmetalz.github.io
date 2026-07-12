@@ -1723,6 +1723,7 @@ But I didn't watch serious &lt;strong&gt;AZ-104 Microsoft Azure Administrator - 
 &lt;li&gt;Same-region replication (SRR)&lt;/li&gt;
 &lt;li&gt;Internet Gateway (IGW)&lt;/li&gt;
 &lt;li&gt;Network Access Control List (NACL)&lt;/li&gt;
+&lt;li&gt;Dead Letter Queue&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr&gt;
 &lt;h1&gt;Section 1: EC2 for CloudOps&lt;/h1&gt;
@@ -2765,15 +2766,85 @@ abs(
 &lt;h3&gt;VPC Endpoints&lt;/h3&gt;
 &lt;p&gt;Private endpoints connection, we have 2 type of endpoints:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Interface Endpoint: it creates 1 ENI (Elastic Network Interface) with private IP that attach into your subnet, instance in your VPC route to that subnet can use ENI, support most AWS services. Cost money by hour and GB data processed!&lt;/li&gt;
+&lt;li&gt;Interface Endpoint: it creates 1 ENI (Elastic Network Interface) with private IP that attach into your &lt;code&gt;subnet&lt;/code&gt;, instance in your VPC route to that subnet can use ENI, support most AWS services. Then your application can use that private domain name (if enable Private DNS) to connect to AWS Services. Cost money by hour and GB data processed!&lt;/li&gt;
 &lt;li&gt;Gateway Endpoints: Free!. Muse be used as target in route table, it means you need to add route for specific ip range via Gateway Endpoints. Only support S3 and DynamoDB&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3&gt;Other shits:&lt;/h3&gt;
 &lt;ul&gt;
+&lt;li&gt;You need to know how to calculate CIDR in your head without CIDR tool during exam xD. For example 10.0.4.0/28. So 32-28=4, 2^4=16 (16 IPs). Then you can see what is right answer here. Note: I wish I understand this earlier during AZ-104 exam....&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="cidr question" src="./images/2026/07/04.png"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;For example with octet like /24, /16/, /8&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;First-Second-Third-Fourth
+/24: only 4th can change
+/16: from 3rd to 4th can change
+/8: from 2nd to 4th can change
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Ok, why this is wrong answer? &lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="cidr wrong" src="./images/2026/07/05.png"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;32-27 = 5. 2^5 = 32, seem fit right?. But it required at least capacity for 28 EC2 instances and I forgot there are always 5 IP reversed by AWS!. So 32-5 = 27 useable IPs!. So the damn correct fuckin' answer should be /26!&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html"&gt;max CIDR size in AWS&lt;/a&gt; is /16. Smallest is /28 ( 16 IPs)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://aws.amazon.com/network-firewall/"&gt;AWS Network Firewall&lt;/a&gt; is a managed, stateful Layer 3 to Layer 7 service for Amazon VPCs. It offers deep packet inspection, intrusion detection and prevention (IPS), and web filtering...&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/vpc/latest/userguide/working-with-managed-prefix-lists.html"&gt;Customer-managed prefix lists&lt;/a&gt; allow you to define and maintain your own sets of IP address ranges, known as prefixes, within AWS.&lt;/li&gt;
 &lt;li&gt;VPC Reachability Analyzer tool: analyze connection between 2 VPC, show which component not allow/block connection. Cost money for each analyze!&lt;/li&gt;
 &lt;li&gt;VPC peering, this is easy to understand, right? But even you setup already in dashboard, you still need to modify both route table on both side the VPC you are connecting, so each subnet knows how to route traffic through the peering connection. It is pretty easy to understand if you are familiar with setup routing in Linux.&lt;/li&gt;
 &lt;li&gt;Like other VPC Peering, for example Azure, VPC Peering is not transitive!&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="aws"/><category term="certification"/></entry><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
+&lt;li&gt;So you know limit with VPC Peering, we have Transit Gateway that able to resolve pain of VPC Peering in scenario you have thousands of VPC....&lt;/li&gt;
+&lt;li&gt;VPC Block Public Access&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="Transit Gateway" src="./images/2026/07/02.png"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The picture above is for 1 region, how about multiple region? we have inter-region communication&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="Transit Gateway inter-region" src="./images/2026/07/03.png"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;AWS PrivateLink: connect to your service in other VPC without exposing to public.&lt;/li&gt;
+&lt;li&gt;Traffic Mirroring: yes, mirroring, you know what it means. Use case route the traffic to security appliances that you manage to analyze traffic without affect production workload!&lt;/li&gt;
+&lt;li&gt;Egress-only internet gateway: Used for IPv6 only. You must update the route tables like IGW or NAT GW. Oh IPv6 have no fuckin' private address, they are all public/route able in internet! So your EC2 instance may have IPv6 but it may get un-wanted access. That is why we have fuckin' Egress-only internet gateway! Nice thing to know about IPv6! This is what I really love when learning!&lt;/li&gt;
+&lt;li&gt;Egress-only IGW is fuckin' free! It doesn't need to translate private ip to public ip like NAT Gateway (IPv4)!&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://aws.amazon.com/blogs/networking-and-content-delivery/vpc-block-public-access/"&gt;VPC Block Public Access&lt;/a&gt; is a simple, declarative control that authoritatively blocks incoming (ingress) and outgoing (egress) VPC traffic through AWS provided internet paths!&lt;/li&gt;
+&lt;li&gt;Again, SecGroup is stateful and NACL is stateless. Remember it! On-prem reflection: Openstack vs Vmware VDC!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h1&gt;Section 21: Other Services&lt;/h1&gt;
+&lt;p&gt;I will review this section after I took exam, nothing much to write here right now!&lt;/p&gt;
+&lt;h3&gt;SQS&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Send msg to DLQ after x times process fail!&lt;/li&gt;
+&lt;li&gt;Visibility Timeout: when a consumer receive msg from SQS, that msg will be hidden from queue during processing time. If consumer process more than Visibility Timeout without haven't call deleteMsg action, SQS think that consumer dead, return msg to queue, other consumer or "fake dead" consumer process it again --&amp;gt; duplicate process. &lt;/li&gt;
+&lt;li&gt;SNS Filter Policy: Imagine we have multiple subscribers, for example: Billing, Shipping, and Fraud Detection systems. When we publish a message, by default all subscribers receive every message, even if it's not relevant to their logic. That's why we use an SNS Filter Policy: we attach a filter policy to each subscription, based on message attributes (e.g., messageType: billing), so each subscriber only receives the messages that match its filter — instead of processing every message and discarding irrelevant ones.&lt;/li&gt;
+&lt;li&gt;X-Ray = distributed tracing service, sidecar container is 1 way to deploy daemon for EKS/ECS. Other shits are EC2/Lambda.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h1&gt;Tip trick&lt;/h1&gt;
+&lt;h3&gt;Read the damn question carefully!!!&lt;/h3&gt;
+&lt;p&gt;LOL, I don't read questions careful enough. For example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;You have attached an Internet Gateway to your VPC, but your EC2 instances still don&amp;#39;t have access to the Internet. What is NOT a possible issue?
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;I pick route table are missing, wrong!&lt;/li&gt;
+&lt;li&gt;I pick NACL doesn't allow network traffic out, wrong again!&lt;/li&gt;
+&lt;li&gt;I pick the EC2 instance doesn't have a fuckin' public IP, still wrong! WTF!!!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Wait a minute....  What is "NOT" a possible issue. Then I realized....&lt;/p&gt;
+&lt;p&gt;NOTE: As of March 28, 2023, the AWS Certified SysOps Administrator - Associate exam will not include exam labs until further notice..... They should make exam hard like Azure (AZ-104) hard AF!!!!&lt;/p&gt;
+&lt;hr&gt;
+&lt;h1&gt;Secret Weapons&lt;/h1&gt;
+&lt;hr&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;</content><category term="Knowledge Base"/><category term="aws"/><category term="certification"/></entry><entry><title>[WIP] Understand ArgoCD architecture</title><link href="https://blackmetalz.github.io/wip-understand-argocd-architecture.html" rel="alternate"/><published>2026-05-30T00:00:00+07:00</published><updated>2026-05-30T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-05-30:/wip-understand-argocd-architecture.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
 &lt;p&gt;I thought I understood ArgoCD well enough in the past I ran ArgoCD with multiple K8s clusters inside it (&amp;gt;10 clusters), and had around 500-600 ArgoCD applications in a single cluster. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the Certified Argo Project Associate (CAPA), it was a joke for me, no fucking value gained! So that is the reason this article was born to help me understand the "basic" knowledge of ArgoCD. LOL&lt;/p&gt;
 &lt;p&gt;Ok, we will go through the sections below in this article:&lt;/p&gt;
 &lt;ul&gt;
