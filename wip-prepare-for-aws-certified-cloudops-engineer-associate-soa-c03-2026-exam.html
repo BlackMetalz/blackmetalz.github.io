@@ -80,7 +80,7 @@
             
             <h1>Introduction</h1>
 <p>I start the progress by using <a href="udemy.com/course/aws-certified-cloudops-associate/">Stephane Maarek's course</a></p>
-<p>Honestly, if I keep studying the same way I always have, I'm going to fail this exam for the third fucking time. The real problem is I don't have hands-on AWS experience — I work with Kubernetes and on-premises stuff day to day, so a lot of this is purely theoretical for me. Watching videos and taking notes clearly isn't enough when the exam throws scenario-based questions at you that only make sense if you've actually touched the console. So this time I need some secret weapons: very high quality practice questions that actually reflect the real exam, and a way to build intuition for AWS-specific behavior without spending months running real workloads. Let's see if this approach finally works xD</p>
+<p>Honestly, if I keep studying the same way I always have in the past which is memorization keyword, I'm going to fail this exam for fuckin' sure. The real problem is I don't have hands-on AWS experience — I work with Kubernetes and on-premises stuff day to day, so a lot of this is purely theoretical for me. Watching videos and taking notes clearly isn't enough when the exam throws scenario-based questions at you that only make sense if you've actually touched the console.</p>
 <h3>Learning Sections</h3>
 <p>I will follow Udemy course, no idea if this article will be more than 1k5 lines long....</p>
 <ul>
@@ -127,7 +127,7 @@
 <li>Same-region replication (SRR)</li>
 <li>Internet Gateway (IGW)</li>
 <li>Network Access Control List (NACL)</li>
-<li>Dead Letter Queue</li>
+<li>Dead Letter Queue (DLQ)</li>
 </ul>
 <hr>
 <h1>Section 1: EC2 for CloudOps</h1>
@@ -186,11 +186,11 @@
 <p>So for common we have 3 status check: failed system (host hardware), failed instance (our instance) and attached EBS.</p>
 <p>With CW Metrics and Recovery</p>
 <ul>
-<li>Option 1: CW Alarm, recover/restart EC2 instance on metric trigger (if StatusCheckFailed_System == 1 for example). Then send notification using SNS.</li>
+<li>Option 1: CW Alarm, recover/restart EC2 instance on metric trigger (if StatusCheckFailed_System == 1 for example). Then send notification using SNS (Remember, SNS is <strong>push-based</strong> service, not a pull/polling service. You do not need to build a consumer that constantly checks the topic at intervals)</li>
 </ul>
 <p><img alt="CW alarm" src="./images/2026/06/19.png"></p>
 <ul>
-<li>Option 2: ASG, yeah launch new instance replaced failed instance...</li>
+<li>Option 2: By default, an ASG uses EC2 status checks (StatusCheckFailed_System and StatusCheckFailed_Instance) to monitor the health of its instances and yeah, ASG launch new instance replaced failed instance.</li>
 </ul>
 <p>So after we config CW Alarm, we can test it by using CLI:</p>
 <div class="highlight"><pre><span></span><code>aws<span class="w"> </span>cloudwatch<span class="w"> </span>set-alarm-state<span class="w"> </span>--alarm-name<span class="w"> </span>name-here-bro<span class="w"> </span>--state-value<span class="w"> </span>ALARM<span class="w"> </span>--state-reason<span class="w"> </span><span class="s2">&quot;testing how recover in action after alarm triggered&quot;</span>
@@ -209,8 +209,8 @@
 <li>Instance RAM must be less than 150 GB</li>
 <li>Cannot hibernate for more than 60 days</li>
 <li>Not all instance types support hibernate (exam may test this)</li>
-<li>These 3 limits are commonly tested in SOA-C03</li>
 </ul>
+<p>These 3 limits above are commonly tested in SOA-C03!</p>
 <h3>Instance Scheduler on AWS</h3>
 <p>Yeah, that is how we save every bucks when running in Cloud. Features:</p>
 <ul>
@@ -219,7 +219,7 @@
 <li>Stop/Start instance by using resource's tag and Lambda.</li>
 <li>Works in cross-account and cross-region resources.</li>
 </ul>
-<p>We have to create instance scheduler via Cloudformation --&gt; Stack --&gt; create stack or use exists template to create this fucking stack. After created that we have a lot of resources created</p>
+<p>We have to create instance scheduler via Cloudformation --&gt; Stack --&gt; create stack or use exists template to create this fuckin' stack, after that we have a lot of created resources!</p>
 <p><img alt="Instance Schduler" src="./images/2026/06/21.png"></p>
 <hr>
 <h1>Section 2: AMI - Amazon Machine Image</h1>
@@ -249,7 +249,7 @@
 </ul>
 <p><img alt="important-ssm" src="./images/2026/06/22.png"></p>
 <ul>
-<li>How it works: need to install SSM agent into EC2/On-premise Server/VM we control, install by default on Amazon Linux 2 and some Ubuntu AMI. And make sure EC2 instances have a proper IAM role to allow SSM actions. We manage EC2 instances that installed SSM agent in "Node tools - Fleet manager"</li>
+<li>How it works: basically, it is server-agent model, it needs to install SSM agent into EC2/On-premise Server/VM we control, installed by default on Amazon Linux 2 and some Ubuntu AMI. And make sure EC2 instances have a proper IAM role to allow SSM actions. We manage EC2 instances that installed SSM agent in "Node tools - Fleet manager"</li>
 </ul>
 <h3>Resource Groups</h3>
 <p>Holy shiet, this make me remember about Azure since Resource Group is one of important knowledge in Azure. So RGs create,view or manage logical group of resources by using <strong>tags</strong>. For example EC2 instances have tags <strong>Team = Platform</strong>, we can create a RG based that tag.</p>
@@ -313,14 +313,15 @@ aws<span class="w"> </span>ssm<span class="w"> </span>get-parameter<span class="
 aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<span class="w"> </span>--path<span class="w"> </span><span class="s2">&quot;/myapp/prod&quot;</span><span class="w"> </span>--recursive
 </code></pre></div>
 
-<p>Free parameters tier used up to 10000 number of parameters while paid up to 100k with maximum size of parameter value is 4 KB (advanced 8Kb) and no fucking parameter policies available (advanced: yes)</p>
+<p>Free parameters tier used up to 10000 number of parameters while paid up to 100k with maximum size of parameter value is 4 KB (advanced 8Kb) and no fucking parameter policies available, parameters policies only available if you upgrade free tier to advanced tier (you can upgrade to advanced but not able to downgrade to free tier, remember it.)</p>
 <p>So what is the fucking parameters policies:</p>
 <ul>
-<li>Allow to assign a TTL to a parameter to force updating or deleting sensitive data such as passwords, tokens.</li>
-<li>Can assign multiple polices at a time.</li>
+<li>Allow to assign a TTL to a parameter to force updating or deleting sensitive data such as passwords, tokens. Can assign multiple polices at a time.</li>
+<li>ExpirationNotification Policy: fires an event to EventBridge when a parameter is nearing expiration or has just expired.</li>
+<li>NoChangeNotification Policy: Fires an event to EventBridge if a parameter has not been modified/updated within a certain number of days.</li>
 </ul>
 <h3>SSM - Default Host Management Configuration (DHMC)</h3>
-<p>Short explain: turn on one setting per region → all EC2 instances in that region get SSM managed automatically, no per-instance IAM role needed. </p>
+<p>Short explain: turn on one setting per region -&gt; all EC2 instances in that region get SSM managed automatically, no per-instance IAM role needed. </p>
 <p>Required IMDSv2 to be active for enhanced security and to successfully identify instances.</p>
 <h3>SSM - Inventory &amp; State Manager</h3>
 <p>Short explain: what's installed/running inside my instances --&gt; It is fucking SSM Inventory</p>
@@ -367,6 +368,8 @@ aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<spa
 <h3>SSM - OpsCenter</h3>
 <p>Allow you to view, investigate and remediate issues in one place (no need to navigate across different AWS services)</p>
 <p>Issues could be security, performance issues, failures which help to reduce meantime to resolve issues.</p>
+<h3>Conclusion</h3>
+<p>For this section, I think it has a lot of logic,bussiness and behavior like Ansible(agent-less)/Saltstack(server-agent) model. If you understand Ansible/Saltstack's essence, you should able to understand this section without any issues!</p>
 <hr>
 <h1>Section 4: EC2 High Availability and Scalability</h1>
 <p>I skip section and jump direct to quiz. My wrong answer for this question in this quiz:</p>
@@ -376,6 +379,10 @@ aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<spa
 <p>Answer: I picked wrong answer again. <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-target-groups.html">It is fucking Public IP</a></p>
 <p>And I failed 6 in total of 16 questions, I think i need to watch this section again.</p>
 <h3>Application Load Balancer (ALB)</h3>
+<ul>
+<li><strong>ALBs have Security Groups!</strong> (A common misconception is that SGs are EC2-only). Because ALBs are public-facing, they need an attached Security Group to control inbound traffic from the internet (e.g., allowing ports 80/443 from <code>0.0.0.0/0</code>).</li>
+<li><strong>Which AWS resources use Security Groups?</strong> Basically any resource with an Elastic Network Interface (ENI). This includes: EC2 instances, RDS databases, Lambda (inside VPC), ECS Tasks, VPC Endpoints, and ALBs/NLBs.</li>
+</ul>
 <p>Routing tables to different target groups:</p>
 <ul>
 <li>Routing based path in URL</li>
@@ -389,46 +396,50 @@ aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<spa
 <li>Lambda functions - HTTP request is translated into a JSON event</li>
 <li>IP Address (private IPs)</li>
 </ul>
-<p>ALB can route to mulitple target groups and health check are at the target group level.</p>
-<p>There is something great to know from this section (Which I never know/understand before). Header X-Forwarded-For can be spoofed but can be prevented by using last client in ALB (ALB auto inject header)</p>
+<p>ALB can route to mulitple target groups and health check are at the target group level. There is something great to know from this section (Which I never know/understand before). Header X-Forwarded-For can be spoofed but can be prevented by using last client in ALB (ALB auto inject header)</p>
 <div class="highlight"><pre><span></span><code>  Client sends:    X-Forwarded-For: fake-ip
   ALB appends:     X-Forwarded-For: fake-ip, real-client-ip  ← ALB controls this
                                               ^^^^^^^^^^^^
                                               always trustworthy
 
 
-<span class="gh">#</span> Unsafe
+<span class="gh">#</span> Unsafe, getting fake-ip
 client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[0].strip()
-<span class="gh">#</span> Safe
+<span class="gh">#</span> Safe, getting real-client-ip which control by ALB, it can not goes wrong!
 client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1].strip()                       
 </code></pre></div>
 
-<p>Allow only requests coming from ALB: in SG of EC2 instance, add inbound rule with source is custom (then select right SG of ALB)</p>
+<p>Allow only requests coming from ALB (Security Group Referencing / Chaining): In the Security Group of the EC2 instance, add an inbound rule:</p>
+<ul>
+<li><strong>Type</strong>: HTTP (Port 80), HTTPS (Port 443), or Custom TCP (your app port, e.g., 8080)</li>
+<li><strong>Source</strong>: Select <strong>Custom</strong> -&gt; then select/type the <strong>Security Group ID of the ALB</strong> (e.g., <code>sg-xxxxxxxx</code>).</li>
+</ul>
+<p><img alt="ALB source" src="./images/2026/07/06.png"></p>
+<p><strong>Why?</strong> Because the ALB's IP addresses are dynamic and change as AWS scales it. By referencing the ALB's Security Group as the source, you ensure only traffic routed through the ALB is allowed, without needing to maintain IP address lists.</p>
 <p>We can have listener rule to do routing according conditions/rules. (like add custom path with custom fixed response code, body, content type.)</p>
 <h3>Network Load Balancer (NLB)</h3>
 <p>NLB (Layer 4), has one static ip per AZ and supports assigning Elastic IP (helpful for whitelisting specific IP). And the rest is almost the same with ALB.</p>
 <p>NLB does not support cookie-based session affinity, but uses source IP hash for connection stickiness.</p>
 <h3>Gateway Load Balancer (GWLB)</h3>
-<p>Gateway for network virtual appliances (NVA) in AWS (Ex: Firewalls, Intrusion Detection, Deep packet inspection and so on..). User --&gt; GWLB --&gt; 3rd NVA (If passed, traffic will be sent to GWLB otherwise drop) --&gt; GWLB --&gt; Backend</p>
-<p>Operates at Layer 3 - Ip Packets</p>
-<p>Exam perspective: Use GENEVE protocol on port 6801 (right if you use GWLB)</p>
+<p>Gateway for network virtual appliances (NVA) in AWS (Ex: Firewalls, Intrusion Detection, Deep packet inspection and so on..). </p>
+<p>Flow: <strong>User/Internet Gateway</strong> --&gt; <strong>GWLB</strong> --&gt; <strong>3rd-party NVA</strong> (If passed, traffic will be sent to GWLB otherwise drop) --&gt; <strong>GWLB</strong> --&gt; <strong>Backend</strong></p>
+<p>Operates at Layer 3 - Ip Packets. Exam perspective: Use GENEVE protocol on port 6801 (right if you use GWLB)</p>
 <h3>ELB - Server Name Indication (SNI)</h3>
 <p>Used in scenario where you have multiple domain that point to same ALB/NLB, each domain serving specific target group.</p>
 <h3>Connection Draining</h3>
-<p>Feature naming: Deregistration Delay - For ALB &amp; NLB</p>
-<p>It is time to complete "in-flight requests" while the instance is de-registering or unhealthy. </p>
+<p>Feature naming: <strong>Deregistration Delay</strong> - For ALB &amp; NLB. It is time to complete "in-flight requests" while the instance is de-registering or unhealthy.</p>
 <p>Think like graceful shutdown:</p>
 <ul>
-<li>Instance marked as Draining(like k8s drain node xDD)/Deregistration</li>
-<li>ALB stops sending NEW requests to it</li>
-<li>But existing in-flight requests get time to finish  ──► users see no errors</li>
-<li>After timeout (default 300s), instance is fully removed</li>
+<li>Instance marked as Draining(like k8s drain node xDD)/Deregistration.</li>
+<li>ALB stops sending NEW requests to it.</li>
+<li>But existing in-flight requests get time to finish so users will see no errors.</li>
+<li>After timeout (default 300s), instance is fully removed.</li>
 </ul>
 <h3>ELB - monitoring, troubleshooting, logging and tracing</h3>
 <p>All LB metrics are directly pushed to CW metrics</p>
 <ul>
-<li>SurgeQueueLength: The total of request (in HTTP listener) or connection (TCP listener) that are pending routing to a healthy instance.</li>
-<li>SpilloverCount: the total number of requests that were rejected because the surge queue is full.</li>
+<li><strong>SurgeQueueLength</strong>: The total of request (in HTTP listener) or connection (TCP listener) that are pending routing to a healthy instance.</li>
+<li><strong>SpilloverCount</strong>: the total number of requests that were rejected because the surge queue is full.</li>
 </ul>
 <p>For request tracing, each HTTP request has an added custom header "X-Amzn-Trace-Id". This is useful in logs / distributed tracing platform to track a single request.</p>
 <h3>Auto Scaling - Instance Refresh</h3>
@@ -448,14 +459,14 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <p>Short: IAC but for AWS only. You are able to visualization with Infrastructure Composer to see how components are related to each other in Cloudformation. </p>
 <p>How it works?:</p>
 <ul>
-<li>You should separate for create many stacks, each stack for specific resource (VPC/Network/App stacks).</li>
-<li>You need to upload template to S3 then reference it in Cloudformation. </li>
-<li>To update template, you will have to upload new version of template, can not edit previous.</li>
+<li>You should create many stacks separately, each stack for specific resource (VPC/Network/App stacks).</li>
+<li>You need to upload template to S3 then refers it in the CloudFormation. </li>
+<li>To update template, you will have to upload new version of template, can not edit previous, so you will be able to rollback to previous revision in case new version is messed up!</li>
 <li>Stacks are defined by name. Delete stack will delete any resource/artifact created via that.</li>
 <li>You can deploy using manual way or via CLI / CD tools of AWS.</li>
 <li>Templates could be in YAML or JSON format, YAML is prefered</li>
 </ul>
-<p>Building Blocks: we will deep dive in each section below soon:</p>
+<p>Building Blocks, we will deep dive in each section below soon:</p>
 <ul>
 <li>AWSTemplateFormatVersion: Identifies the capabilities of template</li>
 <li>Description: description, comment LOL</li>
@@ -510,21 +521,23 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <span class="w">          </span><span class="nt">Value</span><span class="p">:</span><span class="w"> </span><span class="kt">!Ref</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EnvName</span>
 </code></pre></div>
 
-<p><code>EnvName</code> is used in 7 places — deploy with <code>EnvName=prod</code> and everything updates automatically.</p>
-<p>Two ways to reference a parameter:
-- <code>!Ref EnvName</code> — returns the raw value, use when assigning directly to a field
-- <code>!Sub "${EnvName}-web-server"</code> — use when you need string interpolation (prefix/suffix)</p>
+<p><code>EnvName</code> is used in 7 places, deploy with <code>EnvName=prod</code> and everything updates automatically.</p>
+<p>Two ways to reference a parameter:</p>
+<ul>
+<li><code>!Ref EnvName</code> — returns the raw value, use when assigning directly to a field</li>
+<li><code>!Sub "${EnvName}-web-server"</code> — use when you need string interpolation (prefix/suffix)</li>
+</ul>
 <p>Exam information: </p>
 <ul>
-<li>AllowedValues: allow user select only allowed values.</li>
-<li>NoEcho: to not display, echo the sensitive data like password.</li>
+<li><strong>AllowedValues</strong>: allow user select only allowed values in a parameters.</li>
+<li><strong>NoEcho</strong>: to not display, echo the sensitive data like password.</li>
 </ul>
-<p>Pre-defined / Pseudo parameters xD</p>
+<p>Pre-defined / Pseudo parameters:</p>
 <p><img alt="pseudo" src="./images/2026/06/24.png"></p>
 <h3>Mappings</h3>
 <p>This section I tell the AI create the content I want from what I understand xD.</p>
-<p>Static variables hardcoded in the template — no user input, no dynamic lookup. Use when you know the values in advance and they vary by some fixed dimension (region, environment, arch).</p>
-<p>Classic use case: AMI IDs. AMIs are region-specific — <code>ami-0ff8a91507f77f867</code> in <code>us-east-1</code> is a completely different image than <code>ami-0bdb828fd58c52235</code> in <code>us-west-1</code>. Mappings let you encode that lookup table once and resolve it automatically based on the current region.</p>
+<p>Static variables hardcoded in the template, no user input and no dynamic lookup. Use when you know the values in advance and they vary by some fixed dimension (region, environment, arch).</p>
+<p>Classic use case: AMI IDs. AMIs are region-specific with <code>ami-0ff8a91507f77f867</code> in <code>us-east-1</code> is a completely different image than <code>ami-0bdb828fd58c52235</code> in <code>us-west-1</code>. Mappings let you encode that lookup table once and resolve it automatically based on the current region.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Mappings</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">RegionMap</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">us-east-1</span><span class="p">:</span>
@@ -542,13 +555,11 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <span class="w">      </span><span class="nt">InstanceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">t2.micro</span>
 </code></pre></div>
 
-<p><code>!FindInMap [MapName, TopLevelKey, SecondLevelKey]</code> — three-level lookup, always this structure.</p>
-<p><code>!Ref "AWS::Region"</code> is a pseudo parameter — AWS injects the current region automatically, no user input needed. That's what makes this pattern useful: deploy the same template to any region and it picks the right AMI ID.</p>
+<p><code>!FindInMap [MapName, TopLevelKey, SecondLevelKey]</code> are three-level lookup, always this structure.</p>
+<p><code>!Ref "AWS::Region"</code> is a pseudo parameter. AWS injects the current region automatically, no user input needed. That's what makes this pattern useful: deploy the same template to any region and it picks the right AMI ID.</p>
 <p>Mappings vs Parameters: if the value is truly static and predictable (like AMI IDs per region), use Mappings. If it needs to vary per deployment based on user input, use Parameters.</p>
 <h3>Outputs and Exports</h3>
-<p>Holy shiet, If I use AI too much, this fucking article will be more than 2k lines =.=. </p>
-<p>So for outputs, think like output in terraform ok?</p>
-<p>For exports, export in 1 stack, import in another stack</p>
+<p>Holy shiet, If I use AI too much, this fucking article will be more than 2k lines.  So for outputs, think like output in terraform ok? For exports, export in 1 stack, import in another stack: </p>
 <p>Stack 1: export</p>
 <div class="highlight"><pre><span></span><code><span class="nt">Outputs</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">StackSSHSecurityGroup</span><span class="p">:</span>
@@ -613,8 +624,8 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <li>Stack Policy: protect your resource from unintended update, default all resources are protected, specify an explicit ALLOW for the resources you want to be allowed to be updated.</li>
 <li>Termination Protection: to prevent accidental deletes on Cloudformation, enable this.</li>
 <li>Custom resources: Running lambda function to empty s3 bucket before delete bucket. Define by "Type: Custom::MyCustomResource" and required ServiceToken which can be SNS/Lambda ARN.</li>
-<li>Dynamic references: refer to external values stored in SSM parameter store or Secrets Manager. Format: {{resolve:service-name:reference-key}}. Service name value supports: ssm, ssm-secure, secretsmanager.</li>
-<li>Propertie ManageMasterUsersPassword = true, Cloudformation will create a secret in Secrets Manager and it's rotation</li>
+<li>Dynamic references: refer to external values stored in SSM parameter store or Secrets Manager. Format: <strong>{{resolve:service-name:reference-key}}</strong>. Service name value supports: ssm, ssm-secure, secretsmanager.</li>
+<li>Propertie <strong>ManageMasterUsersPassword</strong> = true, Cloudformation will create a secret in Secrets Manager and it's rotation</li>
 <li>For UserData in cloudformation, but it will always show success in cloudformation even script in user data failed.</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="nt">Resources</span><span class="p">:</span>
@@ -631,11 +642,12 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 </code></pre></div>
 
 <ul>
-<li>And yeah issue in user data scripts could be fail and will give us hardtime to debug, that is why CloudFormation provide a better way, it is cfn-init, let's take a look at this picture. Instead of writing 100+ lines of raw bash, you declare packages/files/commands/services in the <code>AWS::CloudFormation::Init</code> metadata, then just call <code>cfn-init</code> from UserData to run it. Main benefit is declarative and maintainable, not some magic bash script anymore. It also logs to <code>/var/log/cfn-init.log</code> on the instance so debugging is a nice side bonus xD</li>
+<li>And yeah issue in user data scripts could be fail and will give us hardtime to debug, that is why CloudFormation provide a better way, it is <strong>cfn-init</strong>, let's take a look at this picture below. Instead of writing 100+ lines of raw bash, you declare packages/files/commands/services in the <strong>AWS::CloudFormation::Init</strong> metadata, then just call <strong>cfn-init</strong> from UserData to run it. Main benefit is declarative and maintainable, not some magic bash script anymore. It also logs to <strong>/var/log/cfn-init.log</strong> on the instance so debugging is a nice side bonus xD.</li>
 </ul>
 <p><img alt="cfn-init" src="./images/2026/06/25.png"></p>
 <ul>
-<li>cfn-signal is not really a "debug" tool, it is a synchronization mechanism. Normally CloudFormation marks an EC2 instance as <code>CREATE_COMPLETE</code> as soon as it's "running", it has no idea whether your UserData/cfn-init actually succeeded inside. With a <code>CreationPolicy</code> attached, CloudFormation will pause and wait for a signal from the instance. At the end of your bootstrap script you call <code>cfn-signal -e $? ...</code>, exit code 0 means success, non-zero (or timeout with no signal at all) means failure, and then stack rolls back (deleted), like we talked about some lines above xD. This is also what makes ASG rolling update wait for each instance to be healthy before moving to the next one.</li>
+<li><strong>cfn-signal</strong> is not really a "debug" tool, it is a synchronization mechanism. Think of it like healthchecks.io, where your script sends a "success" ping to a URL, and if the ping fails or times out, an alert/rollback is triggered). </li>
+<li>for <strong>cfn-signal</strong> normally CloudFormation marks an EC2 instance as <code>CREATE_COMPLETE</code> as soon as it's "running", it has no idea whether your UserData/cfn-init actually succeeded inside. With a <code>CreationPolicy</code> attached, CloudFormation will pause and wait for a signal from the instance. At the end of your bootstrap script you call <code>cfn-signal -e $? ...</code>, exit code 0 means success, non-zero (or timeout with no signal at all) means failure, and then stack rolls back (deleted), like we talked about some lines above xD. This is also what makes ASG rolling update wait for each instance to be healthy before moving to the next one.</li>
 <li>Nested stack: DRY LOL, mindset is same with gitlab template repo.</li>
 <li>Depends On: depend on other resource before create xD. For example we have 2 fucking resources are EC2instances and S3 Bucket, we set S3bucket depend on EC2instance, that mean s3bucket will not create until ec2instance is created.</li>
 <li>StackSets: holy fucking shit, this is just deploy 1 cloudformation template to multiple AWS account and multiple fucking region at the same time.</li>
@@ -650,17 +662,17 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <ul>
 <li>StackFailures: Onfailure = rollback (default) or Do nothing (resource in state CREATE_FAILED) for debug purpose I think or event DELETE for fucking clean.</li>
 </ul>
+<h3>Conclusion</h3>
+<p>We need to understand and remember this section more because it will related to AWS Devops Pro certification path.</p>
 <hr>
 <h1>Section 6: Lambda for CloudOps</h1>
-<p>Lambda is FAAS, run on-demand, limited by time (short executions).</p>
-<p>Lambda support container image but they are not prefer, ECS/Fargate is preferred for running containers. And for the most important, it is integrations but a lot of AWS services by built-in.</p>
+<p>Lambda is FAAS, run on-demand, limited by time (short executions). Lambda support container image but they are not prefer, ECS/Fargate are more preferred for running containers. And for the most important, it is integrations with a lot of AWS services by built-in.</p>
 <p><img alt="lambda" src="./images/2026/06/26.png"></p>
 <h3>Some note for Lambda</h3>
 <ul>
 <li>Most example for Lambda is serverless cronjob I guess. </li>
 <li>We can view lambda logs from CW logs. </li>
-<li>Max memory supports for Lambda is 10Gb</li>
-<li>/tmp storage: max is also 10GB</li>
+<li>Max memory supports for Lambda is 10Gb. <strong>/tmp storage</strong>: max is also 10GB.</li>
 <li>Integration with CW Events / EventBridge: Create trigger every 1 hour that trigger Lambda function to perform a specific task.</li>
 </ul>
 <hr>
@@ -677,16 +689,17 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <p>Some notes:</p>
 <ul>
 <li>Remember only ssd (gp/io series) can be used as boot volume for high performance.</li>
-<li>We can make EBS snapshots in AWS like snapshot in volume of OpenStack, same logic. AWS create a service called Amazon Data Lifecycle Manager to manage creation,retention and deletion of EBS snapshots and EBS-backed AMIs. </li>
-<li>Locked at the AZ level.</li>
-<li>If you need more iops and is frequently running out of iops, increase volume size of EBS</li>
+<li>We can make EBS snapshots in AWS like snapshot in volume of OpenStack, same logic. AWS create a service called <strong>Amazon Data Lifecycle Manager</strong> to manage <strong>only</strong> creation,retention and deletion of EBS snapshots &amp; EBS-backed AMIs. </li>
+<li>Locked at the AZ level. If you need more iops and is frequently running out of iops, increase volume size of EBS.</li>
 </ul>
 <h3>EFS - Elastic File System</h3>
-<p>It is fucking managed NFS. Available at region level, it means you can mount NFS from any EC2 in any AZs in that fucking region.</p>
-<p>We again, as a related storage service in AWS, it will have storage classes:</p>
+<p>It is fucking managed NFS. Available at region level, it means you can mount NFS from any EC2 in any AZs in that fucking region. We have lifecycle management feature - move file after N days, as a related storage service in AWS, it will have standard storage tiers:</p>
 <ul>
-<li>Storage tiers (lifecycle management feature - move file after N days): Standard, Infrequent Access, Archive.</li>
+<li>Standard.</li>
+<li>Infrequent Access (IA).</li>
+<li>Archive.</li>
 </ul>
+<p><strong>In case you forget: IA and Archive will reduce cost but also increase latency</strong></p>
 <hr>
 <h1>Section 8: Amazon S3</h1>
 <h3>S3 - Bucket</h3>
@@ -705,10 +718,10 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 </ul>
 <h3>Pre-signed URL</h3>
 <p>Use case: let user download file from private S3 bucket without create IAM user or make public bucket.</p>
-<p>How it works?:</p>
+<p>How it works:</p>
 <ul>
-<li>Credential + signature embeded directly into URL</li>
-<li>Object still private, but anyone have URL can access</li>
+<li>Credential and Signature embeded directly into URL.</li>
+<li>Object still private, but anyone have URL can access.</li>
 </ul>
 <h3>S3 security: Bucket Policy</h3>
 <p>User-based: IAM policies</p>
@@ -732,19 +745,19 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <li>Grant access to another account (Cross Account)</li>
 </ul>
 <h3>AWS S3 Access Methods from an EC2 Instance</h3>
-<p>Not related but I want to put here to improve my understand. There are two primary ways to grant an Amazon EC2 instance access to an AWS S3 bucket. </p>
-<p>Method 1: Using IAM Roles (Recommended / Best Practice)</p>
+<p>Not related to the exam, but I want to put here to improve my understand. There are two primary ways to grant an Amazon EC2 instance access to an AWS S3 bucket.</p>
+<p><strong>Method 1: Using IAM Roles (Recommended / Best Practice)</strong></p>
 <ul>
 <li>Mechanism: Attach an IAM Role (via an IAM Instance Profile) directly to the EC2 instance.</li>
 <li>Authentication: The AWS CLI/SDK inside the VM automatically retrieves temporary, rotating credentials from the Instance Metadata Service (IMDS) at <a href="http://169.254.169.254">http://169.254.169.254</a>.</li>
 <li>Configuration: No credentials configuration required inside the VM. You only need to install the AWS CLI and run commands immediately.</li>
 <li>Security: High security. It eliminates the risk of hardcoded keys and avoids credential leakage since AWS manages key rotation automatically.</li>
 </ul>
-<p>Method 2: Using IAM User Credentials (Not Recommended for EC2)</p>
+<p><strong>Method 2: Using IAM User Credentials (Not Recommended for EC2)</strong></p>
 <ul>
 <li>Mechanism: Create a dedicated IAM User and generate a pair of long-term Access Key ID and Secret Access Key.</li>
 <li>Authentication: The VM authenticates using these static, long-term credentials.</li>
-<li>Configuration: Requires manual setup inside the VM by either running aws configure (saved in ~/.aws/credentials) or injecting them as environment variables (AWS_ACCESS_KEY_ID &amp; AWS_SECRET_ACCESS_KEY).</li>
+<li>Configuration: Requires manual setup inside the VM by either running aws configure (saved in ~/.aws/credentials) or injecting them as environment variables (<strong>AWS_ACCESS_KEY_ID</strong> &amp; <strong>AWS_SECRET_ACCESS_KEY</strong>).</li>
 <li>Security: Low security for EC2. If the VM is compromised or the image is shared, the static credentials could be exposed, leading to unauthorized access from anywhere.</li>
 </ul>
 <p>Key Takeaway:</p>
@@ -752,15 +765,14 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <li>Use Method 1 (IAM Role) for resources inside AWS (like EC2 instances).</li>
 <li>Use Method 2 (IAM User) only for resources outside AWS (like local development machines or external servers).</li>
 </ul>
-<p>Not related but for IAM User, without checking the 'Provide user access to the AWS Management Console' option, we are essentially creating a Machine-to-Machine (M2M) / Robot account meant solely for programmatic access via APIs, CLI, or SDKs</p>
+<p>Not related but for IAM User, without checking the <strong>Provide user access to the AWS Management Console</strong> option, we are essentially creating a <strong>Machine-to-Machine (M2M) / Robot account</strong> meant solely for programmatic access via APIs, CLI, or SDKs.</p>
 <h3>Troubleshooting</h3>
-<p>After enable Versioning, you have to wait atleast 15 minutes to be fully progated. During that time you may expected error: HTTP 404 NoSuchKey when trying to get Objects created or updated.</p>
+<p>After enable Versioning, you have to wait atleast 15 minutes to be fully progated. During that time you may expected error: <strong>HTTP 404 NoSuchKey</strong> when trying to get Objects created or updated.</p>
 <h3>S3 Replication (CRR &amp; SRR)</h3>
-<p>Replication using asynchronous mostly all the time. Same for Azure storage blob container, we need to enable versioning for replication!</p>
-<p>Use cases:</p>
+<p>Replication using asynchronous mostly all the time. Same for Azure storage blob container, we need to enable versioning for replication! Use cases:</p>
 <ul>
-<li>CRR: Compliance (store data in required region), low latency access from user region, replication across account</li>
-<li>SRR: log aggreration (Like Mysql master-slave, we did analytic from slave node, not master node). Live replication between prod and test account</li>
+<li><strong>CRR</strong>: Compliance (store data in required region), low latency access from user region, replication across account</li>
+<li><strong>SRR</strong>: log aggreration (Like Mysql master-slave, we did analytic from slave node, not master node). Live replication between prod and test account</li>
 </ul>
 <p>Only new objects are gonna replicate after enable replication, if you want replicate exists object, use S3 Batch Replication. Version ID also going to get replicated in destination bucket xD</p>
 <p>We can replicate delete markers from source to target, Deletions with version ID are not replicated, prevent malicious deletes.</p>
@@ -821,12 +833,29 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <p>Great feature, that help you decide when to transition objects to right storage class for cost saving. Recommendations for Standard and Standard IA (Infrequently Access). Output file is CSV report</p>
 <p>Report is updated daily, 24-48 hours to start seeing data analysis.</p>
 <h3>Lifecycle policies</h3>
-<p>Moving between storage classes, alright? We could have 2 separated transition, one for current version and one for Noncurrent version.</p>
+<p>Moving between storage classes, alright? We could have 2 separated transition, one for <strong>current version</strong> and one for <strong>non-current version</strong>.</p>
 <h3>S3 Event Notification</h3>
-<p>Handle event happens in S3 bucket, then trigger to SNS/SQS/Lambda for handle event. And yeah, everything required permission, SNS/SQS/Lambda are not exception.</p>
+<p>Handle event happens in S3 bucket, then trigger to SNS/SQS/Lambda for handle event. And yeah, everything required permission, SNS/SQS/Lambda are not an exception.</p>
 <p>So let's take an example for SNS topic, we create IAM Policy that attach to SNS Topic to allow S3 bucket send message directly to SNS Topic, same for SQS queue and Lambda function.</p>
-<p>And one more thing that all events from S3 will be send to AWS EventBridge, so from EventBridge can we have rules sent to more than 18++ AWS services as destination. EventBridge provide more options like Advanced Filter(metadata, object size...), Multiple Destination, EventBridge Capabilities....</p>
-<p>Worthing to mention, AWS EventBridge = event-driven</p>
+<p>Basically, you attach this <strong>Resource-based Policy</strong> to the <strong>destination</strong> (SNS Topic, SQS Queue, or Lambda Function). <strong>NOT</strong> the S3 bucket:</p>
+<ul>
+<li><strong>SNS Topic Policy</strong>: Allows S3 to perform <code>sns:Publish</code> on the topic.</li>
+<li><strong>SQS Queue Policy</strong>: Allows S3 to perform <code>sqs:SendMessage</code> on the queue.</li>
+<li><strong>Lambda Function Policy</strong>: Allows S3 to perform <code>lambda:InvokeFunction</code> on the function.</li>
+</ul>
+<p>Generic template:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Principal&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;Service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s3.amazonaws.com&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sns:Publish&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// OR sqs:SendMessage OR lambda:InvokeFunction</span>
+<span class="w">  </span><span class="nt">&quot;Resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:...&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// ARN of SNS/SQS/Lambda</span>
+<span class="w">  </span><span class="nt">&quot;Condition&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;ArnLike&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;aws:SourceArn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:s3:::my-bucket&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>And one more thing that all events from S3 will be send to AWS EventBridge, so from EventBridge can we have rules sent to more than 18++ AWS services as destination. EventBridge provide more options like Advanced Filter(metadata, object size...), Multiple Destination, EventBridge Capabilities... and so on. Worth to mention, AWS EventBridge = event-driven.</p>
 <h3>S3 Inventory</h3>
 <p>List objects and their corresponding metadata. Usage:</p>
 <ul>
@@ -947,36 +976,16 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 </ul>
 <p>From Single-AZ to Multi-AZ: new DB is restored from snapshot in new AZ then synchronization is established between the two databases.</p>
 <h3>Extra section not related to AWS</h3>
-<p>Ok, there are 3 replication formats in MySQL:</p>
+<p>Ok, there are 3 replication formats in MySQL, but worth, really worth to understand how Mysql Replication works!</p>
 <ul>
-<li>
-<ol>
-<li>Statement-based replication: master write exactly query we did, then slave replay it. Cons: will be issue if related to function like <code>NOW()</code>. Because <code>NOW()</code> from master at 12:00 will be something like 12:03 in slave, diff issue bro!</li>
-</ol>
-</li>
-<li>
-<ol>
-<li>Row-based replication: instead of write query SQL, master will record every change of "rows" (data changed). So Slave will replay exactly what is binlog, no diff issue. Cons: if we run update that target 1M rows, Binlog will increase way too big instead write simple 1 sql query.</li>
-</ol>
-</li>
-<li>
-<ol>
-<li>Mixed-base replication: This is default method of modern MySQL and is exactly what AWS RDS use in common I guess xD. It will make priority for Statement-based, but if any query contain something dangerous like NOW() , UUID(), RAND(), it will convert to Row-based to make data consistency!</li>
-</ol>
-</li>
+<li><strong>Statement-based replication</strong>: master write exactly query we did, then slave replay it. Cons: will be issue if related to function like <code>NOW()</code>. Because <code>NOW()</code> from master at 12:00 will be something like 12:03 in slave, diff issue bro!</li>
+<li><strong>Row-based replication</strong>: instead of write query SQL, master will record every change of "rows" (data changed). So Slave will replay exactly what is binlog, no diff issue. Cons: if we run update that target 1M rows, Binlog will increase way too big instead write simple 1 sql query.</li>
+<li><strong>Mixed-based replication</strong>: This is default method of modern MySQL and is exactly what AWS RDS use in common I guess xD. It will make priority for Statement-based, but if any query contain something dangerous like <strong>NOW(), UUID(), RAND()</strong>, it will convert to <strong>Row-based</strong> to make data consistency!</li>
 </ul>
 <p>How sync work in Threads? So to understand why it called Async, we need to imagin that in replica side, there are 2 Threads work separately:</p>
 <ul>
-<li>
-<ol>
-<li>IO Thread (Ship): This shipper have a mission that connect to Master, if see any new Binlog, it will copy back into Slave node to a temp file called "Relay Log".</li>
-</ol>
-</li>
-<li>
-<ol>
-<li>SQL Thread (Worker): This worker just collect row/qery from Relay Log to replay data into Slave node.</li>
-</ol>
-</li>
+<li><strong>IO Thread</strong> (Ship): This shipper have a mission that connect to Master, if see any new Binlog, it will copy back into Slave node to a temp file called "Relay Log".</li>
+<li><strong>SQL Thread</strong> (Worker): This worker just collect row/qery from Relay Log to replay data into Slave node.</li>
 </ul>
 <h3>Performance Insights</h3>
 <p>This feature expensive AF, I think most company will use self-hosted stack instead using AWS if there are giant log/metric (high throughput/high cardinality)!</p>
@@ -987,9 +996,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <p>I fail with RDS backup, it only able to take backup from standby, even Read replicas still is a standby with read traffic, so it can not make sure you have the fucking latest data to promote standby to active. And 2 fail question because I did skip them xDD</p>
 <hr>
 <h1>Section 14: Monitoring, Auditing and Performance</h1>
-<p>Holy fucking shit, pay more to gain more metric or faster interval when we have fucking Prometheus/victoriaMetrics?</p>
-<p>And custom metric for what when we have fucking node exporter that include 99% what we need. </p>
-<p>For anomaly detection instead of using CloudWatch we can use following in Prometheus for example:</p>
+<p>Holy fucking shit, pay more to gain more metric or faster interval when we have fucking Prometheus/victoriaMetrics! And custom metric for what when we have fucking node exporter that include 99% what we need. For anomaly detection instead of using CloudWatch we can use following in Prometheus for example:</p>
 <ul>
 <li><a href="https://prometheus.io/docs/prometheus/latest/querying/functions/#predict_linear">predict_linear</a></li>
 <li>Compare current week with last week:</li>
@@ -1003,17 +1010,17 @@ abs(
 </code></pre></div>
 
 <p>Custom dashboard in CloudWatch (3$/month after free dashboard)? Hmm, we have metrics, we can draw any dashboard we want in Grafana. </p>
-<p>CW Synthetics Canary = Blackbox Monitoring. LOLLLL But Synthetics Canary can do more with headless google chrome browser, not only monitoring....</p>
+<p>CW Synthetics Canary = <strong>Blackbox Monitoring</strong> like zabbix/prometheus blackbox exporter. But Synthetics Canary can do more with headless google chrome browser, not only monitoring....</p>
 <h3>EventBridge Content Filtering</h3>
 <p>Worth money feature I guess.</p>
-<p>Cost optimization:</p>
+<p><strong>Cost optimization</strong>:</p>
 <ul>
 <li>Without filtering: lambda trigger 1M times --&gt; holy fucking AWS billing</li>
 <li>With filtering: EventBridge stop right front door, only event have right condition go through to trigger Lambda.</li>
 </ul>
-<p>Decoupling: No need to handle if/else for event in Lambda</p>
-<p>Powerful Matching Operators: Check exists, filtering numberic range, filtering with suffix,prefix, ip address....</p>
-<p>With Input Transformation: zero cost and cost saving because we don't need to parse data and it is fucking free!</p>
+<p><strong>Decoupling</strong>: No need to handle if/else for event in Lambda</p>
+<p><strong>Powerful Matching Operators</strong>: Check exists, filtering numberic range, filtering with suffix,prefix, ip address....</p>
+<p><strong>With Input Transformation</strong>: zero cost and cost saving because we don't need to parse data and it is fucking free!</p>
 <h3>AWS CloudTrail</h3>
 <ul>
 <li>Get history of events / API calls made within your AWS account.</li>
@@ -1024,8 +1031,8 @@ abs(
 <h3>AWS Config Overview</h3>
 <p>AWS Config = Azure Policy + Azure Resource Graph</p>
 <p>Record configuration Changes and evaluate resources against compliance rules, remediation action...</p>
-<p>Configuration timeline / time travel: Like 2h AM last sunday, how EC2 instance is configured with which spec, secGroup open which port???</p>
-<p>Resource Relationship Tracking: visualize relationship between resources. If EBS config changed, AWS Config tell exactly where EBS disk is attached to which EC2, which VPS!</p>
+<p><strong>Configuration timeline / time travel</strong>: Like 2h AM last sunday, how EC2 instance is configured with which spec, secGroup open which port???</p>
+<p><strong>Resource Relationship Tracking</strong>: visualize relationship between resources. If EBS config changed, AWS Config tell exactly where EBS disk is attached to which EC2, which VPC!</p>
 <hr>
 <h1>Section 15: AWS Account Management</h1>
 <h3>SCP - Service Control Policy</h3>
@@ -1048,12 +1055,28 @@ abs(
 </code></pre></div>
 
 <p>SCP doesn't work with Management Account, it is able to deny root user aswell.</p>
-<p>In fact, SCP is just filter, if SCP allow but in IAM Policy of user don't have permissions, that user still able to make it works!</p>
+<p>In fact, SCP is just a filter. It does <strong>not</strong> grant permissions; it only sets the maximum permission boundaries (the "guardrail").</p>
+<ul>
+<li>If the SCP <strong>allows</strong> it, but the user's IAM Policy <strong>does not</strong>, the user <strong>cannot</strong> do it.</li>
+<li>If the IAM Policy <strong>allows</strong> it, but the SCP <strong>denies</strong> it (or doesn't allow it), the user <strong>cannot</strong> do it.</li>
+</ul>
+<p>Think of it exactly like a <strong>Network ACL (NACL) and a Security Group (SG)</strong>:</p>
+<ul>
+<li><strong>NACL (SCP)</strong>: Subnet-level firewall (defines what can/cannot enter the account).</li>
+<li><strong>Security Group (IAM Policy)</strong>: Instance-level firewall (defines what the specific identity is actually permitted to do).</li>
+<li><strong>Rule</strong>: Both must allow the action. If either blocks it (or doesn't allow it), the action is denied.</li>
+</ul>
 <h3>Other shit</h3>
 <ul>
 <li>AWS Control Tower = Azure Landing Zone. AWS Control Tower is service that handle multiple aws account or orchestrator.</li>
-<li>AWS Service Catalog: self-service portal with tag option(group them by tag)... Seem like Backstage! And able to share service catalog to other account in same ORG. User can use service catalog to deploy safely, no need admin aws permission!</li>
-<li>Create Billing alarm with CW metric and SNS topic. Basically when metric reached condition, CloudWatch Alarm will send a message to SNS topic that contain some information (alarm name, reason for alert, current money). After that SNS topic will push notify to email or some webhooks.</li>
+<li>AWS Service Catalog: self-service portal with tag option(group them by tag)... Seem like <strong>Backstage</strong>! And able to share service catalog to other account in same ORG. User can use service catalog to deploy safely, no need admin aws permission!</li>
+<li>Create Billing alarm with CW metric and SNS topic:<ul>
+<li><strong>Important constraint</strong>: The billing metric (<code>EstimatedCharges</code>) is <strong>only</strong> available in <code>us-east-1</code> (N. Virginia). <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/monitor_estimated_charges_with_cloudwatch.html#creating_billing_alarm_with_wizard">You must create the alarm there</a>.</li>
+<li><strong>Prerequisite</strong>: You must enable <strong>"Receive Billing Alerts"</strong> in the Billing Preferences console first.</li>
+<li><strong>Frequency</strong>: The metric is updated only every 4-6 hours (not real-time).</li>
+<li>Basically when the metric reaches the threshold, CloudWatch Alarm pushes a message containing alarm info (alarm name, reason, cost details) to the SNS topic, which notifies subscribers (emails, webhooks).</li>
+</ul>
+</li>
 <li>AWS Billing Conductor for customizing and presenting AWS billing data, common use cases: enterprise, finance team, managed service provider (MSP)...</li>
 </ul>
 <hr>
@@ -1117,50 +1140,51 @@ abs(
 <tr>
 <td>Loadbalancer</td>
 <td>Roundrobin</td>
-<td></td>
+<td>Probabilistic (by weight)</td>
 <td>Roundrobin</td>
 </tr>
 </tbody>
 </table>
 <p>Other routing policies:</p>
 <ul>
-<li>Geolocation: based user location or where user want to be from (VPN xD)</li>
-<li>Geoproximity: pretty new for me, route traffic to your resources based on the geographic location of users and resources. For example we need to remember this keyword for shift traffic by increasing bias....</li>
-<li>Ip-based routing: routing based on client's IP address. Use case: optimize performance, network costs. Example: route end users from a particular ISP to a specific endpoint..</li>
-<li>Alias Record: This is fuckin' unique feature of AWS only that allow map domain to AWS services directly, use-able on root domain also and free fuckin' traffic DNS fee!</li>
-<li>Inbound resolver: On-premise ask AWS</li>
-<li>Oubound resolver: AWS ask On-premise</li>
+<li><strong>Geolocation</strong>: based user location or where user want to be from (VPN xD)</li>
+<li><strong>Geoproximity</strong>: pretty new for me, route traffic to your resources based on the geographic location of users and resources. For example we need to remember this keyword for shift traffic by increasing bias....</li>
+<li><strong>IP-based routing</strong>: routing based on client's IP address. Use case: optimize performance, network costs. Example: route end users from a particular ISP to a specific endpoint..</li>
+<li><strong>Alias Record</strong>: This is fuckin' unique feature of AWS only that allow map domain to AWS services directly, use-able on root domain also and free fuckin' traffic DNS fee!</li>
+<li><strong>Inbound resolver</strong>: On-premise ask AWS.</li>
+<li><strong>Outbound resolver</strong>: AWS ask On-premise.</li>
 </ul>
 <p>Other shits:</p>
 <ul>
-<li>DNS Query loggin' available only in Public Hosted Zones and ofc can send to CW Logs</li>
-<li>Resolver DNS Firewall: filter <code>outbound</code> DNS queries going out through Route53 resolver.</li>
+<li><strong>Route 53 Query Logging for Public Hosted Zones</strong>: Enabled directly on the hosted zone. Logs are sent <strong>only</strong> to <strong>CloudWatch Logs</strong> (the log group <strong>must</strong> be created in <code>us-east-1</code>).</li>
+<li><strong>Route 53 Resolver Query Logging for Private Hosted Zones / VPC queries</strong>: You cannot enable query logging directly on private hosted zones. Instead, you must use <strong>Route 53 Resolver Query Logging</strong> at the VPC level. These logs can be sent to <strong>CloudWatch Logs, S3, or Kinesis Data Firehose</strong>.</li>
+<li><strong>Resolver DNS Firewall</strong>: filter <code>outbound</code> DNS queries going out through Route53 resolver.</li>
 <li>If we want setup APEX Domain (It is fuckin' Alias Record) for S3 bucket with static hosting enabled, the bucket name must the same as APEX Domain (Root domain, zone Apex....)</li>
 </ul>
 <hr>
 <h1>Section 20: Networking - VPC</h1>
-<p>When you create a subnet remember that you are only able to use subnet range - 5 IPs that is reversed by AWS, pretty same like how VPC in Azure works! The smallest subnet you can use is /28 which has 16 IPs total - 5 reversed IPs = 11 useable IPs!</p>
-<p>Actually, we have a lot of fun in this section!</p>
+<p>When you create a subnet remember that you are only able to use subnet range - <strong>5 IPs</strong> that is reversed by AWS, pretty same like how VPC in Azure works! The smallest subnet you can use is <strong>/28</strong> which has 16 IPs total - 5 reversed IPs = 11 useable IPs!</p>
+<p>Actually, we're gonna make a lot of fun together. <strong><a href="https://www.youtube.com/watch?v=njtfNPB-YKg">Insert Tuco sentence from Breaking Bad here 0:51</a></strong></p>
 <h3>Subnets</h3>
 <p>You may see a lot of tutorial related to create public/private subnet in VPC in AWS. But you may don't know why like me in the past xD, let's talk about it:</p>
 <ul>
-<li>Private Subnet: we often use this to place our applications, for example EC2 instances running Web/Application workloads.</li>
-<li>Public Subnet: Bastion, ALB. For example, we would never put DB instances in a Public Subnet...</li>
+<li><strong>Private Subnet</strong>: we often use this to place our applications, for example EC2 instances running Web/Application workloads.</li>
+<li><strong>Public Subnet</strong>: Bastion, ALB. For example, we would never put DB instances in a Public Subnet, for interface facing.</li>
 </ul>
-<p>Without route table, can we use EC2 instance connect? No, it still need access to establish SSH to IP of EC2 instance, because without routing properly (missing route 0.0.0.0/0 that point to IGW), so packet return from EC2 don't know which way for packet return back to AWS/Internet. This is easy to understand if you have working in the past with VMWare VDC XD. I'm talking about EC2 Instance Connect.</p>
+<p>Without route table, can we use EC2 instance connect? No, it still need access to establish SSH to IP of EC2 instance, because without routing properly (missing route 0.0.0.0/0 that point to IGW), so packet return from EC2 don't know which way for packet return back to AWS/Internet. This is easy to understand if you have working in the past with VMWare VDC.</p>
 <p>With EC2 Instance Connect Endpoint (EIC Endpoint), released in 2023, no need route to IGW, no need public IP either!</p>
 <p>So for 3 tiers application as theory:</p>
 <ul>
-<li>Presentation tier: ALB -&gt; Public Subnet (require atleast 2 AZ for HA)</li>
-<li>Apllication tier: EC2 instances/ECS/EKS Worker group....  -&gt; Private Subnet</li>
-<li>Data tier: RDS -&gt; Private subnet, different with subnet of application tier</li>
+<li><strong>Presentation tier</strong>: ALB -&gt; Public Subnet (require atleast 2 AZ for HA)</li>
+<li><strong>Application tier</strong>: EC2 instances/ECS/EKS Worker group....  -&gt; Private Subnet</li>
+<li><strong>Data tier</strong>: RDS -&gt; Private subnet, different with subnet of application tier</li>
 </ul>
 <h3>NAT Gateway</h3>
-<p>Pretty easier than NAT Instance, because it is fuckin' managed service. You only need to add route from your instance to NAT Gateway, that's all! </p>
+<p>Pretty sure it is fuckin' easier than NAT Instance, because it is fuckin' managed service. You only need to add route from your instance to NAT Gateway, that's all! </p>
 <h3>NACL</h3>
 <ul>
 <li>NACL works at subnet level, not instance level like SecGroup.</li>
-<li>Not like SecGroup which is statefull, NACL is stateless, need define rule for both inbound/outbound!</li>
+<li>Not like SecGroup which is stateful, NACL is stateless, need define rule for both inbound/outbound!</li>
 <li>Rule based number, lower number, higher priority. Support both Allow/Deny while SecGroup has only Allow. If you have rule number 100 is Deny and rule number 120 is Allow, then it will deny and stop processing for that target!</li>
 <li>Each VPC has a default NACL, auto allow all traffic in/out and attach by default for all subnet in that VPC.</li>
 <li>1 VPC can have more than 1 NACL (Default NACL + custom NACL).</li>
@@ -1170,8 +1194,14 @@ abs(
 <h3>VPC Endpoints</h3>
 <p>Private endpoints connection, we have 2 type of endpoints:</p>
 <ul>
-<li>Interface Endpoint: it creates 1 ENI (Elastic Network Interface) with private IP that attach into your <code>subnet</code>, instance in your VPC route to that subnet can use ENI, support most AWS services. Then your application can use that private domain name (if enable Private DNS) to connect to AWS Services. Cost money by hour and GB data processed!</li>
-<li>Gateway Endpoints: Free!. Muse be used as target in route table, it means you need to add route for specific ip range via Gateway Endpoints. Only support S3 and DynamoDB</li>
+<li><strong>Interface Endpoint</strong>: Creates an ENI (Elastic Network Interface) with a private IP in your subnet.<ul>
+<li><strong>Security</strong>: You can attach a Security Group directly to it to control inbound traffic (e.g., allow port 443 from your App instances).</li>
+<li><strong>Resolution</strong>: Uses Private DNS to map the AWS service endpoint directly to this private IP.</li>
+<li><strong>Coverage</strong>: Supports most AWS services.</li>
+<li><strong>Cost</strong>: Costs money per hour and per GB data processed.</li>
+</ul>
+</li>
+<li><strong>Gateway Endpoints</strong>: Free!. Muse be used as target in route table, it means you need to add route for specific ip range via Gateway Endpoints. Only support S3 and DynamoDB</li>
 </ul>
 <h3>Other shits:</h3>
 <ul>
@@ -1202,11 +1232,11 @@ abs(
 <p><a href="https://aws.amazon.com/network-firewall/">AWS Network Firewall</a> is a managed, stateful Layer 3 to Layer 7 service for Amazon VPCs. It offers deep packet inspection, intrusion detection and prevention (IPS), and web filtering...</p>
 </li>
 <li><a href="https://docs.aws.amazon.com/vpc/latest/userguide/working-with-managed-prefix-lists.html">Customer-managed prefix lists</a> allow you to define and maintain your own sets of IP address ranges, known as prefixes, within AWS.</li>
-<li>VPC Reachability Analyzer tool: analyze connection between 2 VPC, show which component not allow/block connection. Cost money for each analyze!</li>
-<li>VPC peering, this is easy to understand, right? But even you setup already in dashboard, you still need to modify both route table on both side the VPC you are connecting, so each subnet knows how to route traffic through the peering connection. It is pretty easy to understand if you are familiar with setup routing in Linux.</li>
-<li>Like other VPC Peering, for example Azure, VPC Peering is not transitive!</li>
+<li><strong>VPC Reachability Analyzer tool</strong>: analyze connection between 2 VPC, show which component not allow/block connection. Cost money for each analyze!</li>
+<li><strong>VPC peering</strong>, this is easy to understand, right? But even you setup already in dashboard, you still need to modify both route table on both side the VPC you are connecting, so each subnet knows how to route traffic through the peering connection. It is pretty easy to understand if you are familiar with setup routing in Linux.</li>
+<li>Like other <strong>VPC Peering</strong>, for example Azure, VPC Peering is not transitive!</li>
 <li>So you know limit with VPC Peering, we have Transit Gateway that able to resolve pain of VPC Peering in scenario you have thousands of VPC....</li>
-<li>VPC Block Public Access</li>
+<li><strong>VPC Block Public Access (BPA)</strong>: A global "kill switch" at the Account/Org level to block all Internet Gateway (IGW) traffic to prevent accidental public exposure. You can exclude/whitelist specific subnets (like ALB/Bastion) that need internet.</li>
 </ul>
 <p><img alt="Transit Gateway" src="./images/2026/07/02.png"></p>
 <ul>
@@ -1214,9 +1244,9 @@ abs(
 </ul>
 <p><img alt="Transit Gateway inter-region" src="./images/2026/07/03.png"></p>
 <ul>
-<li>AWS PrivateLink: connect to your service in other VPC without exposing to public.</li>
-<li>Traffic Mirroring: yes, mirroring, you know what it means. Use case route the traffic to security appliances that you manage to analyze traffic without affect production workload!</li>
-<li>Egress-only internet gateway: Used for IPv6 only. You must update the route tables like IGW or NAT GW. Oh IPv6 have no fuckin' private address, they are all public/route able in internet! So your EC2 instance may have IPv6 but it may get un-wanted access. That is why we have fuckin' Egress-only internet gateway! Nice thing to know about IPv6! This is what I really love when learning!</li>
+<li><strong>AWS PrivateLink</strong>: connect to your service in other VPC without exposing to public.</li>
+<li><strong>Traffic Mirroring</strong>: yes, mirroring, you know what it means. Use case route the traffic to security appliances that you manage to analyze traffic without affect production workload!</li>
+<li><strong>Egress-only internet gateway</strong>: Used for IPv6 only. You must update the route tables like IGW or NAT GW. Oh IPv6 have no fuckin' private address, they are all public/route able in internet! So your EC2 instance may have IPv6 but it may get un-wanted access. That is why we have fuckin' Egress-only internet gateway! Nice thing to know about IPv6! This is what I really love when learning!</li>
 <li>Egress-only IGW is fuckin' free! It doesn't need to translate private ip to public ip like NAT Gateway (IPv4)!</li>
 <li><a href="https://aws.amazon.com/blogs/networking-and-content-delivery/vpc-block-public-access/">VPC Block Public Access</a> is a simple, declarative control that authoritatively blocks incoming (ingress) and outgoing (egress) VPC traffic through AWS provided internet paths!</li>
 <li>Again, SecGroup is stateful and NACL is stateless. Remember it! On-prem reflection: Openstack vs Vmware VDC!</li>
