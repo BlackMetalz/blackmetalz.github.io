@@ -1036,7 +1036,12 @@ abs(
 <hr>
 <h1>Section 15: AWS Account Management</h1>
 <h3>SCP - Service Control Policy</h3>
-<p>So for example, we can restrict specific AWS account in our Org that not able list s3 buckets by use Deny action on s3:ListAllMyBuckets, even that account has Admin. Example SCP code:</p>
+<p>So for example, we can restrict specific AWS account in our Org that not able list s3 buckets by use Deny action on s3:ListAllMyBuckets, even that account has Admin or an IAM user has policy that allow s3:ListAllMyBuckets, why?</p>
+<ul>
+<li><strong>Explicit Deny wins</strong>: In AWS IAM policy evaluation, an explicit deny always overrides any allow, no matter where it is defined (in IAM policies, Resource policies, or SCPs).</li>
+<li><strong>SCPs set the limit</strong>: Service Control Policies (SCPs) define the maximum available permissions for the accounts in an organization. If an SCP denies an action (like s3:ListAllMyBuckets), no user or role in that account can perform it, even if their local IAM policies explicitly allow it.</li>
+</ul>
+<p>Example SCP code:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;Statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
