@@ -17,16 +17,16 @@
 
 <meta name="keywords" content="aws, certification, Knowledge Base, " />
 
-<meta property="og:title" content="[WIP] Prepare for AWS Certified CloudOps Engineer Associate SOA-C03 2026 exam "/>
-<meta property="og:url" content="https://blackmetalz.github.io/wip-prepare-for-aws-certified-cloudops-engineer-associate-soa-c03-2026-exam.html" />
+<meta property="og:title" content="Prepare for AWS Certified CloudOps Engineer Associate SOA-C03 2026 exam "/>
+<meta property="og:url" content="https://blackmetalz.github.io/prepare-for-aws-certified-cloudops-engineer-associate-soa-c03-2026-exam.html" />
 <meta property="og:description" content="" />
 <meta property="og:site_name" content="Kienlt&#39;s notebook" />
 <meta property="og:article:author" content="kienlt" />
-<meta property="og:article:published_time" content="2026-06-14T00:00:00+07:00" />
-<meta name="twitter:title" content="[WIP] Prepare for AWS Certified CloudOps Engineer Associate SOA-C03 2026 exam ">
+<meta property="og:article:published_time" content="2026-07-20T00:00:00+07:00" />
+<meta name="twitter:title" content="Prepare for AWS Certified CloudOps Engineer Associate SOA-C03 2026 exam ">
 <meta name="twitter:description" content="">
 
-        <title>[WIP] Prepare for AWS Certified CloudOps Engineer Associate SOA-C03 2026 exam  · Kienlt&#39;s notebook
+        <title>Prepare for AWS Certified CloudOps Engineer Associate SOA-C03 2026 exam  · Kienlt&#39;s notebook
 </title>
         <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
 
@@ -68,8 +68,8 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="https://blackmetalz.github.io/wip-prepare-for-aws-certified-cloudops-engineer-associate-soa-c03-2026-exam.html">
-                [WIP] Prepare for AWS Certified CloudOps Engineer Associate SOA-C03 2026 exam
+            <a href="https://blackmetalz.github.io/prepare-for-aws-certified-cloudops-engineer-associate-soa-c03-2026-exam.html">
+                Prepare for AWS Certified CloudOps Engineer Associate SOA-C03 2026 exam
             </a>
         </h1>
     </header>
@@ -80,7 +80,7 @@
             
             <h1>Introduction</h1>
 <p>I start the progress by using <a href="udemy.com/course/aws-certified-cloudops-associate/">Stephane Maarek's course</a></p>
-<p>Honestly, if I keep studying the same way I always have in the past which is memorization keyword, I'm going to fail this exam for fuckin' sure. The real problem is I don't have hands-on AWS experience — I work with Kubernetes and on-premises stuff day to day, so a lot of this is purely theoretical for me. Watching videos and taking notes clearly isn't enough when the exam throws scenario-based questions at you that only make sense if you've actually touched the console.</p>
+<p>Honestly, if I keep studying the same way I always have in the past which is memorization keyword, I'm going to fail this exam for fuckin' sure. The real problem is I don't have hands-on AWS experience. I work with Kubernetes and on-premises stuff day to day, so a lot of this is purely theoretical for me. Watching videos and taking notes clearly isn't enough when the exam throws scenario-based questions at you that only make sense if you've actually touched the console.</p>
 <h3>Learning Sections</h3>
 <p>I will follow Udemy course, no idea if this article will be more than 1k5 lines long....</p>
 <ul>
@@ -176,7 +176,7 @@
 <p>Unified CW Agent - procstat Plugin will come to exam:</p>
 <ul>
 <li>Collect metrics and monitor system utilization of individual process (support both Linux/Window)</li>
-<li>Select which process to monitor by pid_file/process name/pattern... This shit is free in CheckMK</li>
+<li>Select which process to monitor by pid_file/process name/pattern... This shit is free in <strong>CheckMK</strong></li>
 <li>Metrics collected by procstat plugin begins with "procstat" prefix.</li>
 </ul>
 <p>Conclusion: CW agent not only push metrics, it is also able to push logs to CW. Detailed Monitoring won't help you get RAM, it just gives you faster intervals on the same limited set of metrics.</p>
@@ -186,11 +186,11 @@
 <p>So for common we have 3 status check: failed system (host hardware), failed instance (our instance) and attached EBS.</p>
 <p>With CW Metrics and Recovery</p>
 <ul>
-<li>Option 1: CW Alarm, recover/restart EC2 instance on metric trigger (if StatusCheckFailed_System == 1 for example). Then send notification using SNS (Remember, SNS is <strong>push-based</strong> service, not a pull/polling service. You do not need to build a consumer that constantly checks the topic at intervals)</li>
+<li>Option 1: CW Alarm, recover/restart EC2 instance on metric trigger (if <strong>StatusCheckFailed_System</strong> == 1 for example). Then send notification using SNS (Remember, SNS is <strong>push-based</strong> service, not a pull/polling service. You do not need to build a consumer that constantly checks the topic at intervals)</li>
 </ul>
 <p><img alt="CW alarm" src="./images/2026/06/19.png"></p>
 <ul>
-<li>Option 2: By default, an ASG uses EC2 status checks (StatusCheckFailed_System and StatusCheckFailed_Instance) to monitor the health of its instances and yeah, ASG launch new instance replaced failed instance.</li>
+<li>Option 2: By default, an ASG uses EC2 status checks (<strong>StatusCheckFailed_System</strong> and <strong>StatusCheckFailed_Instance</strong>) to monitor the health of its instances and yeah, ASG launch new instance replaced failed instance.</li>
 </ul>
 <p>So after we config CW Alarm, we can test it by using CLI:</p>
 <div class="highlight"><pre><span></span><code>aws<span class="w"> </span>cloudwatch<span class="w"> </span>set-alarm-state<span class="w"> </span>--alarm-name<span class="w"> </span>name-here-bro<span class="w"> </span>--state-value<span class="w"> </span>ALARM<span class="w"> </span>--state-reason<span class="w"> </span><span class="s2">&quot;testing how recover in action after alarm triggered&quot;</span>
@@ -199,7 +199,7 @@
 <p>Also worth to mention action in CW Alarm:</p>
 <ul>
 <li>Recover: moves the instance to new physical host hardware (AWS migrates it), then starts it up.</li>
-<li>Reboot: restarts the OS on the same physical host (For example: StatusCheckFailed_Instance, action will be reboot)</li>
+<li>Reboot: restarts the OS on the same physical host (For example: <strong>StatusCheckFailed_Instance</strong>, action will be reboot)</li>
 </ul>
 <h3>EC2 Hibernate</h3>
 <p>Short: keep in-memory state in EBS volume, next time you start EC2 instance, you will load exactly state of your instance before hibernate and shutdown.</p>
@@ -214,12 +214,12 @@
 <h3>Instance Scheduler on AWS</h3>
 <p>Yeah, that is how we save every bucks when running in Cloud. Features:</p>
 <ul>
-<li>Supports EC2 instances, EC2 ASG and RDS instances.</li>
+<li>Supports EC2 instances and RDS instances. (Do NOT use this for EC2 ASG, because if it stops an instance in ASG, ASG thinks that instance is dead/unhealthy then terminates and recreates it. For ASG scheduling, use ASG Scheduled Actions/Scaling instead!)</li>
 <li>Schedules are managed in a DynamoDB table.</li>
 <li>Stop/Start instance by using resource's tag and Lambda.</li>
 <li>Works in cross-account and cross-region resources.</li>
 </ul>
-<p>We have to create instance scheduler via Cloudformation --&gt; Stack --&gt; create stack or use exists template to create this fuckin' stack, after that we have a lot of created resources!</p>
+<p>We have to create instance scheduler via CloudFormation --&gt; Stack --&gt; create stack or use exists template to create this fuckin' stack, after that we have a lot of created resources!</p>
 <p><img alt="Instance Schduler" src="./images/2026/06/21.png"></p>
 <hr>
 <h1>Section 2: AMI - Amazon Machine Image</h1>
@@ -237,7 +237,7 @@
 <p>And in window of new Image Builder, we need to add a role for it also (Create a role with multiple required policies) and last one was Distributed settings where you can define where AMI will be distributed.</p>
 <p>Cross-Account AMI sharing: you can share AMI with another AWS account that AMI can have unencrypted or encrypted volumes via customer managed key (You need to share managed key as well, so they can decrypt the encrypted AMI).</p>
 <p>AMI in Production: add tag to AMI and use policy to approve only AMI have tags.</p>
-<p>Holy fuck, remember AMI is region locked can not be shared with other regions, only able to share in AZs</p>
+<p>Holy fuck, remember AMI is region locked. You can copy it to other regions, but cannot share it directly. Sharing with other AWS accounts is region-wide (available across all AZs in that region, not locked to single AZ).</p>
 <hr>
 <h1>Section 3: Managing EC2 at Scale - Systems Manager (SSM)</h1>
 <h3>Overview</h3>
@@ -403,7 +403,7 @@ aws<span class="w"> </span>ssm<span class="w"> </span>get-parameters-by-path<spa
                                               always trustworthy
 
 
-<span class="gh">#</span> Unsafe, getting fake-ip
+<span class="gh">#</span> Unsafe, can get fake-able ip
 client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[0].strip()
 <span class="gh">#</span> Safe, getting real-client-ip which control by ALB, it can not goes wrong!
 client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1].strip()                       
@@ -423,7 +423,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <h3>Gateway Load Balancer (GWLB)</h3>
 <p>Gateway for network virtual appliances (NVA) in AWS (Ex: Firewalls, Intrusion Detection, Deep packet inspection and so on..). </p>
 <p>Flow: <strong>User/Internet Gateway</strong> --&gt; <strong>GWLB</strong> --&gt; <strong>3rd-party NVA</strong> (If passed, traffic will be sent to GWLB otherwise drop) --&gt; <strong>GWLB</strong> --&gt; <strong>Backend</strong></p>
-<p>Operates at Layer 3 - Ip Packets. Exam perspective: Use GENEVE protocol on port 6801 (right if you use GWLB)</p>
+<p>Operates at Layer 3 - Ip Packets. Exam perspective: Use GENEVE protocol on port 6081 (remember 6081, not 6801 or other shit!)</p>
 <h3>ELB - Server Name Indication (SNI)</h3>
 <p>Used in scenario where you have multiple domain that point to same ALB/NLB, each domain serving specific target group.</p>
 <h3>Connection Draining</h3>
@@ -455,8 +455,8 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <p>Metrics are collected every 1 minutes</p>
 <hr>
 <h1>Section 5: CloudFormation for CloudOps</h1>
-<p>ah shit, here we go again, i forfeited this fucking section 2 times when I'm learning this section for AWS DOP-C02 in 2024 and 2025.... Yaml developer, a lot of fucking hooks =.=</p>
-<p>Short: IAC but for AWS only. You are able to visualization with Infrastructure Composer to see how components are related to each other in Cloudformation. </p>
+<p>ah shit, here we go again. I <strong>forfeited</strong> this fucking section 2 times when I'm learning this section for AWS DOP-C02 in 2024 and 2025.... YAML developer, a lot of fucking hooks =.=</p>
+<p>Short: IAC but for AWS only. You are able to visualization with Infrastructure Composer to see how components are related to each other in CloudFormation. </p>
 <p>How it works?:</p>
 <ul>
 <li>You should create many stacks separately, each stack for specific resource (VPC/Network/App stacks).</li>
@@ -478,7 +478,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <li>Template helpers, we have references and functions.</li>
 </ul>
 <h3>Resources</h3>
-<p>Resources are the core of Cloudformation template (this is the only one mandatory in whole template of Cloudformation.)</p>
+<p>Resources are the core of CloudFormation template (this is the only one mandatory in whole template of CloudFormation.)</p>
 <h3>Parameters</h3>
 <p>This section I tell the AI create the content I want from what I understand xD.</p>
 <p>Dynamic inputs for your template. The main benefit: define a value once in Parameters, reference it in multiple places — when you need to change it, update only the parameter instead of hunting down every hardcoded value across the template.</p>
@@ -619,14 +619,14 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 </ul>
 <h3>Other useful sections</h3>
 <ul>
-<li>Delete policy: default will delete resource on delete cloudformation stack, but we don't want to delete S3 bucket, we set <strong>DeletionPolicy=Retain</strong>, and last one is snapshot (create one final snapshot before delete the resource, works for some supported resource). </li>
+<li>Delete policy: default will delete resource on delete CloudFormation stack, but we don't want to delete S3 bucket, we set <strong>DeletionPolicy=Retain</strong>, and last one is snapshot (create one final snapshot before delete the resource, works for some supported resource). </li>
 <li>Update replace policy: same idea with deletion policy but apply only during stack updates. </li>
 <li>Stack Policy: protect your resource from unintended update, default all resources are protected, specify an explicit ALLOW for the resources you want to be allowed to be updated.</li>
-<li>Termination Protection: to prevent accidental deletes on Cloudformation, enable this.</li>
+<li>Termination Protection: to prevent accidental deletes on CloudFormation, enable this.</li>
 <li>Custom resources: Running lambda function to empty s3 bucket before delete bucket. Define by "Type: Custom::MyCustomResource" and required ServiceToken which can be SNS/Lambda ARN.</li>
 <li>Dynamic references: refer to external values stored in SSM parameter store or Secrets Manager. Format: <strong>{{resolve:service-name:reference-key}}</strong>. Service name value supports: ssm, ssm-secure, secretsmanager.</li>
-<li>Propertie <strong>ManageMasterUsersPassword</strong> = true, Cloudformation will create a secret in Secrets Manager and it's rotation</li>
-<li>For UserData in cloudformation, but it will always show success in cloudformation even script in user data failed.</li>
+<li>Propertie <strong>ManageMasterUsersPassword</strong> = true, CloudFormation will create a secret in Secrets Manager and it's rotation</li>
+<li>For UserData in CloudFormation, but it will always show success in CloudFormation even script in user data failed.</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="nt">Resources</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">MyInstance</span><span class="p">:</span>
@@ -648,14 +648,14 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <ul>
 <li><strong>cfn-signal</strong> is not really a "debug" tool, it is a synchronization mechanism. Think of it like healthchecks.io, where your script sends a "success" ping to a URL, and if the ping fails or times out, an alert/rollback is triggered). </li>
 <li>for <strong>cfn-signal</strong> normally CloudFormation marks an EC2 instance as <code>CREATE_COMPLETE</code> as soon as it's "running", it has no idea whether your UserData/cfn-init actually succeeded inside. With a <code>CreationPolicy</code> attached, CloudFormation will pause and wait for a signal from the instance. At the end of your bootstrap script you call <code>cfn-signal -e $? ...</code>, exit code 0 means success, non-zero (or timeout with no signal at all) means failure, and then stack rolls back (deleted), like we talked about some lines above xD. This is also what makes ASG rolling update wait for each instance to be healthy before moving to the next one.</li>
-<li>Nested stack: DRY LOL, mindset is same with gitlab template repo.</li>
+<li>Nested stack: DRY LOL, mindset is same with GitLab template repo.</li>
 <li>Depends On: depend on other resource before create xD. For example we have 2 fucking resources are EC2instances and S3 Bucket, we set S3bucket depend on EC2instance, that mean s3bucket will not create until ec2instance is created.</li>
-<li>StackSets: holy fucking shit, this is just deploy 1 cloudformation template to multiple AWS account and multiple fucking region at the same time.</li>
-<li>Drift: It is same like state drift in terraform, little different drift detection in cloudformation need to trigger manually or schedule, not like terraform plan.</li>
+<li>StackSets: holy fucking shit, this is just deploy 1 CloudFormation template to multiple AWS account and multiple fucking region at the same time.</li>
+<li>Drift: It is same like state drift in terraform, little different drift detection in CloudFormation need to trigger manually or schedule, not like terraform plan.</li>
 <li>Troubleshooting: </li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="o">-</span><span class="w"> </span><span class="n">DELETE_FAILED</span><span class="o">:</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="n">must</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">emptied</span><span class="w"> </span><span class="kr">before</span><span class="w"> </span><span class="n">deleting</span><span class="w"> </span><span class="n">such</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="n">S3</span><span class="w"> </span><span class="kr">or</span><span class="w"> </span><span class="n">SecGroup</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="kr">not</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">deleted</span><span class="w"> </span><span class="n">until</span><span class="w"> </span><span class="kr">all</span><span class="w"> </span><span class="n">EC2</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">fucking</span><span class="w"> </span><span class="kr">group</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">gone</span><span class="p">.</span><span class="w"> </span><span class="n">With</span><span class="w"> </span><span class="n">DeletionPolicy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Retain</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="kr">skip</span><span class="w"> </span><span class="n">fucking</span><span class="w"> </span><span class="n">deletion</span><span class="p">.</span>
-<span class="o">-</span><span class="w"> </span><span class="n">UPDATE_ROLLBACK_FAILED</span><span class="o">:</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="n">changed</span><span class="w"> </span><span class="n">outside</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">Cloudformation</span><span class="p">.</span>
+<span class="o">-</span><span class="w"> </span><span class="n">UPDATE_ROLLBACK_FAILED</span><span class="o">:</span><span class="w"> </span><span class="n">resource</span><span class="w"> </span><span class="n">changed</span><span class="w"> </span><span class="n">outside</span><span class="w"> </span><span class="kr">of</span><span class="w"> </span><span class="n">CloudFormation</span><span class="p">.</span>
 <span class="o">-</span><span class="w"> </span><span class="kr">And</span><span class="w"> </span><span class="n">more</span><span class="p">,</span><span class="w"> </span><span class="n">I</span><span class="s">&#39;m fucking lazy right now!</span>
 </code></pre></div>
 
@@ -666,7 +666,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <p>We need to understand and remember this section more because it will related to AWS Devops Pro certification path.</p>
 <hr>
 <h1>Section 6: Lambda for CloudOps</h1>
-<p>Lambda is FAAS, run on-demand, limited by time (short executions). Lambda support container image but they are not prefer, ECS/Fargate are more preferred for running containers. And for the most important, it is integrations with a lot of AWS services by built-in.</p>
+<p>Lambda is <strong>FAAS</strong>, run on-demand, limited by time (short executions). Lambda support container image but they are not prefer, ECS/Fargate are more preferred for running containers. And for the most important, it is integrations with a lot of AWS services by built-in.</p>
 <p><img alt="lambda" src="./images/2026/06/26.png"></p>
 <h3>Some note for Lambda</h3>
 <ul>
@@ -693,7 +693,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <li>Locked at the AZ level. If you need more iops and is frequently running out of iops, increase volume size of EBS.</li>
 </ul>
 <h3>EFS - Elastic File System</h3>
-<p>It is fucking managed NFS. Available at region level, it means you can mount NFS from any EC2 in any AZs in that fucking region. We have lifecycle management feature - move file after N days, as a related storage service in AWS, it will have standard storage tiers:</p>
+<p>It is fuckin' <strong>managed NFS</strong>. Available at region level, it means you can mount NFS from any EC2 in any AZs in that fucking region. We have lifecycle management feature - move file after N days, as a related storage service in AWS, it will have standard storage tiers:</p>
 <ul>
 <li>Standard.</li>
 <li>Infrequent Access (IA).</li>
@@ -717,7 +717,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <li>Custom or Purpose-built hardware: only storage data in high-performance hardware, doesn't use same infrastructure with standard S3.</li>
 </ul>
 <h3>Pre-signed URL</h3>
-<p>Use case: let user download file from private S3 bucket without create IAM user or make public bucket.</p>
+<p>Use case: let user download file from private S3 bucket without create IAM user or make public bucket (Like SAS from Azure Storage!)</p>
 <p>How it works:</p>
 <ul>
 <li>Credential and Signature embeded directly into URL.</li>
@@ -767,7 +767,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 </ul>
 <p>Not related but for IAM User, without checking the <strong>Provide user access to the AWS Management Console</strong> option, we are essentially creating a <strong>Machine-to-Machine (M2M) / Robot account</strong> meant solely for programmatic access via APIs, CLI, or SDKs.</p>
 <h3>Troubleshooting</h3>
-<p>After enable Versioning, you have to wait atleast 15 minutes to be fully progated. During that time you may expected error: <strong>HTTP 404 NoSuchKey</strong> when trying to get Objects created or updated.</p>
+<p>Don't mistake S3 Versioning propagation with S3 Replication Time Control (RTC) which has a 15-minute SLA. Versioning is active immediately once enabled, so no fucking propagation delay of 15 minutes here! If you get a 404 NoSuchKey, it's just because the key doesn't exist, not because versioning is lagging.</p>
 <h3>S3 Replication (CRR &amp; SRR)</h3>
 <p>Replication using asynchronous mostly all the time. Same for Azure storage blob container, we need to enable versioning for replication! Use cases:</p>
 <ul>
@@ -817,7 +817,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <td style="text-align: left;"><strong>Archive</strong></td>
 <td style="text-align: left;"><strong>S3 Glacier Flexible Retrieval</strong></td>
 <td style="text-align: left;">Archive (Rarely accessed data)</td>
-<td style="text-align: left;">180 days</td>
+<td style="text-align: left;">90 days</td>
 <td style="text-align: left;">1 minute to 12 hours</td>
 </tr>
 <tr>
@@ -965,8 +965,7 @@ client_ip = request.headers[&quot;X-Forwarded-For&quot;].split(&quot;,&quot;)[-1
 <p>RDS read replicas for read scalability:</p>
 <ul>
 <li>Up to 15 read replicas (holy fucking shit, 15 replicas node. LOL. In entire my career, maximum slave node was only 3 which split into 3 zones not include master node).</li>
-<li>Available within AZ, Cross AZ or Cross Region.</li>
-<li>Replication is ASYNC.</li>
+<li>Available within AZ, Cross AZ or Cross Region. Replication is ASYNC.</li>
 <li>For RDS Read Replicas within the same region, you don't need pay the network fee when data goes from current AZ to another AZ.</li>
 </ul>
 <p>RDS Multi AZ (DR):</p>
@@ -1161,6 +1160,9 @@ abs(
 </ul>
 <p>Other shits:</p>
 <ul>
+<li>A <strong>Public Hosted Zone</strong> is a container that holds DNS records for a domain that you want to be accessible on the public internet.</li>
+<li>A <strong>Private Hosted Zone</strong> is a container that holds DNS records for a domain that you want to resolve only within one or more of your Amazon VPCs.</li>
+<li>Both <strong>Public/Private Hosted Zone</strong> available inside Amazon <strong>Route 53</strong>. Nothing to say more about Public Hosted Zone but for Private Hosted Zone, you will be able to select the VPCs you want to associate it with!</li>
 <li><strong>Route 53 Query Logging for Public Hosted Zones</strong>: Enabled directly on the hosted zone. Logs are sent <strong>only</strong> to <strong>CloudWatch Logs</strong> (the log group <strong>must</strong> be created in <code>us-east-1</code>).</li>
 <li><strong>Route 53 Resolver Query Logging for Private Hosted Zones / VPC queries</strong>: You cannot enable query logging directly on private hosted zones. Instead, you must use <strong>Route 53 Resolver Query Logging</strong> at the VPC level. These logs can be sent to <strong>CloudWatch Logs, S3, or Kinesis Data Firehose</strong>.</li>
 <li><strong>Resolver DNS Firewall</strong>: filter <code>outbound</code> DNS queries going out through Route53 resolver.</li>
@@ -1176,7 +1178,7 @@ abs(
 <li><strong>Private Subnet</strong>: we often use this to place our applications, for example EC2 instances running Web/Application workloads.</li>
 <li><strong>Public Subnet</strong>: Bastion, ALB. For example, we would never put DB instances in a Public Subnet, for interface facing.</li>
 </ul>
-<p>Without route table, can we use EC2 instance connect? No, it still need access to establish SSH to IP of EC2 instance, because without routing properly (missing route 0.0.0.0/0 that point to IGW), so packet return from EC2 don't know which way for packet return back to AWS/Internet. This is easy to understand if you have working in the past with VMWare VDC.</p>
+<p>Without route table, can we use EC2 instance connect? No, it still need access to establish SSH to IP of EC2 instance, because without routing properly (missing route <strong>0.0.0.0/0</strong> that point to IGW), so packet return from EC2 don't know which way for packet return back to AWS/Internet. This is easy to understand if you have working in the past with VMWare VDC.</p>
 <p>With EC2 Instance Connect Endpoint (EIC Endpoint), released in 2023, no need route to IGW, no need public IP either!</p>
 <p>So for 3 tiers application as theory:</p>
 <ul>
@@ -1185,7 +1187,16 @@ abs(
 <li><strong>Data tier</strong>: RDS -&gt; Private subnet, different with subnet of application tier</li>
 </ul>
 <h3>NAT Gateway</h3>
-<p>Pretty sure it is fuckin' easier than NAT Instance, because it is fuckin' managed service. You only need to add route from your instance to NAT Gateway, that's all! </p>
+<p>Pretty sure it is fuckin' easier than NAT Instance, because it is fuckin' managed service. You only need to add route from your instance to NAT Gateway, that's all! But we still need to remember litte things:</p>
+<ul>
+<li>Public NAT Gateway (Standard Internet Access) -&gt; Must be in a Public Subnet.</li>
+<li>Private NAT Gateway (Internal Routing Only) -&gt; Can be in a Private Subnet</li>
+</ul>
+<p>Conclusion:</p>
+<ul>
+<li>Need to download packages from the internet? Public subnet only.</li>
+<li>Need to connect to an overlapping private VPC/on-premises network without internet access? Private subnet.</li>
+</ul>
 <h3>NACL</h3>
 <ul>
 <li>NACL works at subnet level, not instance level like SecGroup.</li>
@@ -1206,11 +1217,11 @@ abs(
 <li><strong>Cost</strong>: Costs money per hour and per GB data processed.</li>
 </ul>
 </li>
-<li><strong>Gateway Endpoints</strong>: Free!. Muse be used as target in route table, it means you need to add route for specific ip range via Gateway Endpoints. Only support S3 and DynamoDB</li>
+<li><strong>Gateway Endpoints</strong>: Free!. Muse be used as target in route table, it means you need to add route for specific ip range via Gateway Endpoints. Only support <strong>S3 and DynamoDB</strong></li>
 </ul>
 <h3>Other shits:</h3>
 <ul>
-<li>You need to know how to calculate CIDR in your head without CIDR tool during exam xD. For example 10.0.4.0/28. So 32-28=4, 2^4=16 (16 IPs). Then you can see what is right answer here. Note: I wish I understand this earlier during AZ-104 exam....</li>
+<li>You need to know how to calculate CIDR in your head without CIDR tool during exam xD. For example <strong>10.0.4.0/28</strong>. So 32-28=4, 2^4=16 (16 IPs). Then you can see what is right answer here. Note: I wish I understand this earlier during AZ-104 exam....</li>
 </ul>
 <p><img alt="cidr question" src="./images/2026/07/04.png"></p>
 <ul>
@@ -1237,11 +1248,11 @@ abs(
 <p><a href="https://aws.amazon.com/network-firewall/">AWS Network Firewall</a> is a managed, stateful Layer 3 to Layer 7 service for Amazon VPCs. It offers deep packet inspection, intrusion detection and prevention (IPS), and web filtering...</p>
 </li>
 <li><a href="https://docs.aws.amazon.com/vpc/latest/userguide/working-with-managed-prefix-lists.html">Customer-managed prefix lists</a> allow you to define and maintain your own sets of IP address ranges, known as prefixes, within AWS.</li>
+<li><strong>VPC Block Public Access (BPA)</strong>: A global "kill switch" at the Account/Org level to block all Internet Gateway (IGW) traffic to prevent accidental public exposure. You can exclude/whitelist specific subnets (like ALB/Bastion) that need internet.</li>
 <li><strong>VPC Reachability Analyzer tool</strong>: analyze connection between 2 VPC, show which component not allow/block connection. Cost money for each analyze!</li>
 <li><strong>VPC peering</strong>, this is easy to understand, right? But even you setup already in dashboard, you still need to modify both route table on both side the VPC you are connecting, so each subnet knows how to route traffic through the peering connection. It is pretty easy to understand if you are familiar with setup routing in Linux.</li>
 <li>Like other <strong>VPC Peering</strong>, for example Azure, VPC Peering is not transitive!</li>
 <li>So you know limit with VPC Peering, we have Transit Gateway that able to resolve pain of VPC Peering in scenario you have thousands of VPC....</li>
-<li><strong>VPC Block Public Access (BPA)</strong>: A global "kill switch" at the Account/Org level to block all Internet Gateway (IGW) traffic to prevent accidental public exposure. You can exclude/whitelist specific subnets (like ALB/Bastion) that need internet.</li>
 </ul>
 <p><img alt="Transit Gateway" src="./images/2026/07/02.png"></p>
 <ul>
@@ -1282,8 +1293,21 @@ abs(
 <p>NOTE: As of March 28, 2023, the AWS Certified SysOps Administrator - Associate exam will not include exam labs until further notice..... They should make exam hard like Azure (AZ-104) hard AF!!!!</p>
 <hr>
 <h1>Secret Weapons</h1>
+<p>I used this course to practice and test my knowledge: </p>
+<p><a href="https://www.udemy.com/course/prepare-for-aws-certified-cloudops-engineer-associate-exam/">Prepare for AWS Certified CloudOps Engineer - Associate exam</a></p>
 <hr>
 <h1>Conclusion</h1>
+<ul>
+<li>
+<p>Not too bad, but yeah, this article is lack of domain 4 and 5 I guess or I didn't remember them well..
+<img alt="report" src="./images/2026/07/07.png"></p>
+</li>
+<li>
+<p>I didn't remember correct what <strong>GWLB</strong> do exactly during exam or not sure <strong>Amazon Macie</strong> can do scan sensitive data on S3 only or able to scan on other datasource.</p>
+</li>
+<li>The amount of service you need to memorize is a lot.</li>
+<li>It still easier a lot than Azure AZ-104 LOL. Possible done within a week if you worked with AWS before (I haven't work in AWS single day, just doing some labs....).</li>
+</ul>
 
 
              
@@ -1302,7 +1326,7 @@ abs(
         </div>
         <section id="article-sidebar" class="span2">
             <h4>Published</h4>
-            <time itemprop="dateCreated" datetime="2026-06-14T00:00:00+07:00">Sun 14 June 2026</time>
+            <time itemprop="dateCreated" datetime="2026-07-20T00:00:00+07:00">Mon 20 July 2026</time>
             <h4>Category</h4>
             <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
             <h4>Tags</h4>
