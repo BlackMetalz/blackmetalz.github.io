@@ -79,7 +79,7 @@
         <div class="span8 offset2 article-content">
             
             <h1>Intro</h1>
-<p>I thought I understood ArgoCD well enough in the past I ran ArgoCD with multiple K8s clusters inside it (&gt;10 clusters), and had around 500-600 ArgoCD applications in multiple k8s clusters. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the Certified Argo Project Associate (CAPA), it was a fuckin' joke to me, no fuckin' value gained! So that is the reason this article was born to help me understand the "basic" knowledge of ArgoCD!</p>
+<p>I thought I understood ArgoCD well enough in the past I ran ArgoCD with multiple K8s clusters inside it (&gt;10 clusters), and had around 500-600 ArgoCD applications in multiple k8s clusters. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the <strong>Certified Argo Project Associate (CAPA)</strong>, it was a fuckin' joke to me, no fuckin' value gained! So that is the reason this article was born to help me understand the "basic" knowledge of ArgoCD!</p>
 <p>Ok, we will go through the sections below in this article:</p>
 <ul>
 <li>Architecture &amp; Reconciliation loop</li>
@@ -105,7 +105,7 @@
 <li><strong>argocd-redis</strong>: Cache the rendered manifests, without Redis, each check sync, repo server will need to clone Git and render helm again! That is why we need fuckin' cache!</li>
 </ul>
 <h3>Dynamic View</h3>
-<p>Here is the flow:</p>
+<p>Here is the flow (combining <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/architecture/">Architecture</a> and <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/webhook/">Webhook</a> docs):</p>
 <p>Git commit --&gt; Webhook --&gt; argocd-server (sets refresh annotation on Application CR) --&gt; application-controller (watches Application CRs, detects refresh annotation) --&gt; application-controller asks repo-server --&gt; repo-server clones &amp; renders manifests (caching via Redis) --&gt; returns rendered YAML to application-controller --&gt; application-controller compares with live state (K8S API) --&gt; applies diff to K8s cluster (if out-of-sync).</p>
 <h3>Kubernetes Controller Manager: Real-time Watch (Event-Driven)</h3>
 <p>In K8s, Controllers (like the ReplicaSet Controller, Deployment Controller) set up an <a href="https://kubernetes.io/docs/reference/using-api/api-concepts/#efficient-detection-of-changes">HTTP Streaming Watch</a> watch mechanism to the kube-apiserver. For example:</p>
@@ -413,6 +413,7 @@ brew<span class="w"> </span>install<span class="w"> </span>kubeseal
 </code></pre></div>
 
 <p>This is because our AppProject didn't permit it yet. Here is the <a href="https://gitlab.com/kienlt-gitlab-ci-demo/gitops-bootstrap/-/commit/3066c35480ca6df5f01ef2b5f1ebff7d666e2e0c">commit</a> that fixes it.</p>
+<p><img alt="fix AppProject" src="./images/2026/07/17.png"></p>
 <p>After this change, we finally see both clusters showing "Successful" in their Connection Status:</p>
 <p><img alt="clusters" src="./images/2026/07/16.png"></p>
 <p>This pattern is commonly used for Multi-Cluster GitOps to architect High Availability (HA) and Disaster Recovery (DR) in production environments. But everything comes with a trade-off at a higher level, nothing is perfect and there is no fuckin' free lunch!</p>
@@ -439,8 +440,8 @@ brew<span class="w"> </span>install<span class="w"> </span>kubeseal
 </code></pre></div>
 
 <ul>
-<li>Advantage: Centralized management—you only need a single UI dashboard to monitor the entire system.</li>
-<li>Disadvantage: Single Point of Failure. If Cluster 1 goes down, we cannot deploy or update workloads on Cluster 2 and 3. However, existing workloads will continue running fine—this only affects new deployments.</li>
+<li>Advantage: Centralized management, you only need a single UI dashboard to monitor the entire system.</li>
+<li>Disadvantage: Single Point of Failure. If Cluster 1 goes down, we cannot deploy or update workloads on Cluster 2 and 3. However, existing workloads will continue running fine, this only affects new deployments.</li>
 </ul>
 <p>Alternative pattern: Decentralized. Each cluster runs its own ArgoCD instance separately, watching the same GitOps repo! The catch is we have to manage multiple UI dashboards and it consumes slightly more cluster resources.</p>
 <p>Furthermore, we also need to handle traffic redirection (failover) when Cluster 1 goes down and tackle data replication challenges for stateful apps. But I won't cover those here due to complexity. Maybe in the future once I get the fuckin' chance xD.</p>

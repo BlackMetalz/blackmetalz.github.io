@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-07-26T00:00:00+07:00</updated><entry><title>Understand ArgoCD architecture with theory and hands-on</title><link href="https://blackmetalz.github.io/understand-argocd-architecture-with-theory-and-hands-on.html" rel="alternate"/><published>2026-07-26T00:00:00+07:00</published><updated>2026-07-26T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-07-26:/understand-argocd-architecture-with-theory-and-hands-on.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
-&lt;p&gt;I thought I understood ArgoCD well enough in the past I ran ArgoCD with multiple K8s clusters inside it (&amp;gt;10 clusters), and had around 500-600 ArgoCD applications in multiple k8s clusters. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the Certified Argo Project Associate (CAPA), it was a fuckin' joke to me, no fuckin' value gained! So that is the reason this article was born to help me understand the "basic" knowledge of ArgoCD!&lt;/p&gt;
+&lt;p&gt;I thought I understood ArgoCD well enough in the past I ran ArgoCD with multiple K8s clusters inside it (&amp;gt;10 clusters), and had around 500-600 ArgoCD applications in multiple k8s clusters. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the &lt;strong&gt;Certified Argo Project Associate (CAPA)&lt;/strong&gt;, it was a fuckin' joke to me, no fuckin' value gained! So that is the reason this article was born to help me understand the "basic" knowledge of ArgoCD!&lt;/p&gt;
 &lt;p&gt;Ok, we will go through the sections below in this article:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Architecture &amp;amp; Reconciliation loop&lt;/li&gt;
@@ -26,7 +26,7 @@
 &lt;li&gt;&lt;strong&gt;argocd-redis&lt;/strong&gt;: Cache the rendered manifests, without Redis, each check sync, repo server will need to clone Git and render helm again! That is why we need fuckin' cache!&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3&gt;Dynamic View&lt;/h3&gt;
-&lt;p&gt;Here is the flow:&lt;/p&gt;
+&lt;p&gt;Here is the flow (combining &lt;a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/architecture/"&gt;Architecture&lt;/a&gt; and &lt;a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/webhook/"&gt;Webhook&lt;/a&gt; docs):&lt;/p&gt;
 &lt;p&gt;Git commit --&amp;gt; Webhook --&amp;gt; argocd-server (sets refresh annotation on Application CR) --&amp;gt; application-controller (watches Application CRs, detects refresh annotation) --&amp;gt; application-controller asks repo-server --&amp;gt; repo-server clones &amp;amp; renders manifests (caching via Redis) --&amp;gt; returns rendered YAML to application-controller --&amp;gt; application-controller compares with live state (K8S API) --&amp;gt; applies diff to K8s cluster (if out-of-sync).&lt;/p&gt;
 &lt;h3&gt;Kubernetes Controller Manager: Real-time Watch (Event-Driven)&lt;/h3&gt;
 &lt;p&gt;In K8s, Controllers (like the ReplicaSet Controller, Deployment Controller) set up an &lt;a href="https://kubernetes.io/docs/reference/using-api/api-concepts/#efficient-detection-of-changes"&gt;HTTP Streaming Watch&lt;/a&gt; watch mechanism to the kube-apiserver. For example:&lt;/p&gt;
@@ -334,6 +334,7 @@ brew&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;This is because our AppProject didn't permit it yet. Here is the &lt;a href="https://gitlab.com/kienlt-gitlab-ci-demo/gitops-bootstrap/-/commit/3066c35480ca6df5f01ef2b5f1ebff7d666e2e0c"&gt;commit&lt;/a&gt; that fixes it.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="fix AppProject" src="./images/2026/07/17.png"&gt;&lt;/p&gt;
 &lt;p&gt;After this change, we finally see both clusters showing "Successful" in their Connection Status:&lt;/p&gt;
 &lt;p&gt;&lt;img alt="clusters" src="./images/2026/07/16.png"&gt;&lt;/p&gt;
 &lt;p&gt;This pattern is commonly used for Multi-Cluster GitOps to architect High Availability (HA) and Disaster Recovery (DR) in production environments. But everything comes with a trade-off at a higher level, nothing is perfect and there is no fuckin' free lunch!&lt;/p&gt;
@@ -360,8 +361,8 @@ brew&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Advantage: Centralized management—you only need a single UI dashboard to monitor the entire system.&lt;/li&gt;
-&lt;li&gt;Disadvantage: Single Point of Failure. If Cluster 1 goes down, we cannot deploy or update workloads on Cluster 2 and 3. However, existing workloads will continue running fine—this only affects new deployments.&lt;/li&gt;
+&lt;li&gt;Advantage: Centralized management, you only need a single UI dashboard to monitor the entire system.&lt;/li&gt;
+&lt;li&gt;Disadvantage: Single Point of Failure. If Cluster 1 goes down, we cannot deploy or update workloads on Cluster 2 and 3. However, existing workloads will continue running fine, this only affects new deployments.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Alternative pattern: Decentralized. Each cluster runs its own ArgoCD instance separately, watching the same GitOps repo! The catch is we have to manage multiple UI dashboards and it consumes slightly more cluster resources.&lt;/p&gt;
 &lt;p&gt;Furthermore, we also need to handle traffic redirection (failover) when Cluster 1 goes down and tackle data replication challenges for stateful apps. But I won't cover those here due to complexity. Maybe in the future once I get the fuckin' chance xD.&lt;/p&gt;
