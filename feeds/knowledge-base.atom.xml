@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-07-26T00:00:00+07:00</updated><entry><title>Understand ArgoCD architecture with theory and hands-on</title><link href="https://blackmetalz.github.io/understand-argocd-architecture-with-theory-and-hands-on.html" rel="alternate"/><published>2026-07-26T00:00:00+07:00</published><updated>2026-07-26T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-07-26:/understand-argocd-architecture-with-theory-and-hands-on.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
-&lt;p&gt;I thought I understood ArgoCD well enough in the past I ran ArgoCD with multiple K8s clusters inside it (&amp;gt;10 clusters), and had around 500-600 ArgoCD applications in multiple k8s clusters. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the &lt;strong&gt;Certified Argo Project Associate (CAPA)&lt;/strong&gt;, it was a fuckin' joke to me, no fuckin' value gained! So that is the reason this article was born to help me understand the "basic" knowledge of ArgoCD!&lt;/p&gt;
+&lt;p&gt;I thought I understood ArgoCD well enough. In the past, I ran ArgoCD with multiple K8s clusters inside it (&amp;gt;10 clusters), and had around 500-600 ArgoCD applications in multiple k8s clusters. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the &lt;strong&gt;Certified Argo Project Associate (CAPA)&lt;/strong&gt;, it was a fuckin' joke to me, no fuckin' value gained! So that is the reason this article was born to help me understand the "basic" knowledge of ArgoCD!&lt;/p&gt;
 &lt;p&gt;Ok, we will go through the sections below in this article:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Architecture &amp;amp; Reconciliation loop&lt;/li&gt;
@@ -16,26 +16,7 @@
 &lt;p&gt;&lt;img alt="Architecture" src="./images/2026/06/02.png"&gt;&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;&lt;a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/architecture/"&gt;Architecture&lt;/a&gt; &amp;amp; Reconciliation loop&lt;/h1&gt;
-&lt;p&gt;ArgoCD is not a fuckin' monolith; it's a fuckin' workload that commonly runs in the &lt;strong&gt;argocd&lt;/strong&gt; namespace.&lt;/p&gt;
-&lt;p&gt;First, I thought ArgoCD's watch mechanism was the same as K8s's watch mechanism, but it turns out there's a little difference, let's figure it out!&lt;/p&gt;
-&lt;h3&gt;Static View&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;argocd-server&lt;/strong&gt;: API Gateway, take request from UI/CLI, check auth/RBAC of user only.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;argocd-repo-server&lt;/strong&gt;: clone Git, run &lt;strong&gt;helm template&lt;/strong&gt; or &lt;strong&gt;kustomize build&lt;/strong&gt; to render raw yaml.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;argocd-application-controller&lt;/strong&gt;: where we runs reconciliation loop to see the drift between the desired state (rendered YAML from repo-server) versus live state in k8s.. This is only component that call the API to apply manifest.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;argocd-redis&lt;/strong&gt;: Cache the rendered manifests, without Redis, each check sync, repo server will need to clone Git and render helm again! That is why we need fuckin' cache!&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3&gt;Dynamic View&lt;/h3&gt;
-&lt;p&gt;Here is the flow (combining &lt;a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/architecture/"&gt;Architecture&lt;/a&gt; and &lt;a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/webhook/"&gt;Webhook&lt;/a&gt; docs):&lt;/p&gt;
-&lt;p&gt;Git commit --&amp;gt; Webhook --&amp;gt; argocd-server (sets refresh annotation on Application CR) --&amp;gt; application-controller (watches Application CRs, detects refresh annotation) --&amp;gt; application-controller asks repo-server --&amp;gt; repo-server clones &amp;amp; renders manifests (caching via Redis) --&amp;gt; returns rendered YAML to application-controller --&amp;gt; application-controller compares with live state (K8S API) --&amp;gt; applies diff to K8s cluster (if out-of-sync).&lt;/p&gt;
-&lt;h3&gt;Kubernetes Controller Manager: Real-time Watch (Event-Driven)&lt;/h3&gt;
-&lt;p&gt;In K8s, Controllers (like the ReplicaSet Controller, Deployment Controller) set up an &lt;a href="https://kubernetes.io/docs/reference/using-api/api-concepts/#efficient-detection-of-changes"&gt;HTTP Streaming Watch&lt;/a&gt; watch mechanism to the kube-apiserver. For example:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Desired State: state stored in ETCD ( for example "replicas: 1")&lt;/li&gt;
-&lt;li&gt;Actual State: actual state of the pod in the cluster&lt;/li&gt;
-&lt;li&gt;When something changes: the kube-apiserver sends an event to let the Controller Manager know. The Controller Manager sees actual pod replicas = 0, but desired = 1, so it makes a request to the kube-apiserver to create pod replicas that match the desired state. That is why when we delete a pod in a deployment with 1 replica, it automatically brings up a new pod!&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Conclusion: K8s works in an event-driven way, if an event appears, it reacts and makes the change.&lt;/p&gt;
+&lt;p&gt;ArgoCD is a workload that commonly runs in the &lt;strong&gt;argocd&lt;/strong&gt; namespace. I thought ArgoCD's watch mechanism was the same as K8s's watch mechanism, but it turns out there's a little difference, let's figure it out!&lt;/p&gt;
 &lt;h3&gt;Difference between ArgoCD and Kubernetes&lt;/h3&gt;
 &lt;table&gt;
 &lt;thead&gt;
@@ -47,13 +28,13 @@
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td&gt;Source keep desired state&lt;/td&gt;
+&lt;td&gt;Source of desired state&lt;/td&gt;
 &lt;td&gt;etcd&lt;/td&gt;
 &lt;td&gt;Git repository (outside of cluster)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;How to recognize changes&lt;/td&gt;
-&lt;td&gt;Watch API (Real-time events) from Kube-ApiServer&lt;/td&gt;
+&lt;td&gt;Watch API (Real-time events) from kube-apiserver&lt;/td&gt;
 &lt;td&gt;Git side: Polling (default 3m) or Webhook. Live-cluster side: Watch API / Informer (same as K8s controller)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -63,24 +44,42 @@
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h3&gt;Overview when combining ArgoCD + K8s&lt;/h3&gt;
-&lt;p&gt;Actually when we use GitOps (ArgoCD + K8s), we're using a double &lt;strong&gt;reconciliation&lt;/strong&gt; loop:&lt;/p&gt;
+&lt;h3&gt;Static View&lt;/h3&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;First loop&lt;/strong&gt; (ArgoCD): compare Git (desired) versus K8s object spec read via kube-apiserver (this is &lt;code&gt;actual&lt;/code&gt; from ArgoCD's view, but it's also exactly what feeds into loop 2 below as &lt;code&gt;desired&lt;/code&gt;). If Gitops repo changes, or someone drifts the live spec away from Git (and selfHeal: true is set), ArgoCD re-applies via kube-apiserver to overwrite the drift back to match Git.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;argocd-server&lt;/strong&gt;: API Gateway, takes requests from UI/CLI, checks auth/RBAC of user only.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;argocd-repo-server&lt;/strong&gt;: clones Git, runs &lt;strong&gt;helm template&lt;/strong&gt; or &lt;strong&gt;kustomize build&lt;/strong&gt; to render raw yaml.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;argocd-application-controller&lt;/strong&gt;: where we run reconciliation loop to see the drift between the desired state (rendered YAML from repo-server) versus live state in k8s. This is the only component that calls the API to apply manifests.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;argocd-redis&lt;/strong&gt;: Caches the rendered manifests. Without Redis, each sync check, repo-server will need to clone Git and render helm again! That is why we need fuckin' cache!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Dynamic View&lt;/h3&gt;
+&lt;p&gt;Here is the flow (combining &lt;a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/architecture/"&gt;Architecture&lt;/a&gt; and &lt;a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/webhook/"&gt;Webhook&lt;/a&gt; docs):&lt;/p&gt;
+&lt;p&gt;&lt;img alt="ArgoCD Flows" src="./images/2026/07/18.png"&gt;&lt;/p&gt;
+&lt;h3&gt;Kubernetes Controller Manager: Real-time Watch (Event-Driven)&lt;/h3&gt;
+&lt;p&gt;In K8s, Controllers (like the ReplicaSet Controller, Deployment Controller) set up an &lt;a href="https://kubernetes.io/docs/reference/using-api/api-concepts/#efficient-detection-of-changes"&gt;HTTP Streaming Watch&lt;/a&gt; mechanism to the kube-apiserver:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Desired State&lt;/strong&gt;: state stored in etcd (for example "replicas: 1")&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Actual State&lt;/strong&gt;: actual state of the pod in the cluster&lt;/li&gt;
+&lt;li&gt;When something changes: the kube-apiserver sends an event to let the Controller Manager know. The Controller Manager sees actual pod replicas = 0, but desired = 1, so it makes a request to the kube-apiserver to create pod replicas that match the desired state. That is why when we delete a pod in a deployment with 1 replica, it automatically brings up a new pod!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Conclusion&lt;/strong&gt;: K8s works in an event-driven way, if an event appears, it reacts and makes the change.&lt;/p&gt;
+&lt;h3&gt;Overview when combining ArgoCD + K8s&lt;/h3&gt;
+&lt;p&gt;Actually, when we use GitOps (ArgoCD + K8s), we're using a double &lt;strong&gt;reconciliation&lt;/strong&gt; loop:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;First loop&lt;/strong&gt; (ArgoCD): compare Git (desired) versus K8s object spec read via kube-apiserver (this is &lt;code&gt;actual&lt;/code&gt; from ArgoCD's view, but it's also exactly what feeds into loop 2 below as &lt;code&gt;desired&lt;/code&gt;). If the GitOps repo changes, or someone drifts the live spec away from Git (and selfHeal: true is set), ArgoCD re-applies via kube-apiserver to overwrite the drift back to match Git.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Second loop&lt;/strong&gt; (Kubernetes, independent of ArgoCD): compare K8s object spec in etcd (desired at this layer) versus actual runtime state (is the pod really running as spec says?). If the pod dies, K8s controllers recreate it to match spec.&lt;/li&gt;
 &lt;li&gt;When someone uses &lt;code&gt;kubectl delete pod&lt;/code&gt;, K8s controllers will recreate that pod (ofc, I'm talking about Deployment/ReplicaSet, not a fuckin' standalone pod)&lt;/li&gt;
-&lt;li&gt;If someone uses &lt;code&gt;kubectl edit deployment&lt;/code&gt; to change a resource/spec, ArgoCD will notice and change it back to match the data in Git (if selfHeal: true)&lt;/li&gt;
+&lt;li&gt;If someone uses &lt;code&gt;kubectl edit deployment&lt;/code&gt; to change a resource/spec, ArgoCD will notice and change it back to match the data in Git (if &lt;strong&gt;selfHeal: true&lt;/strong&gt;)&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;And one more thing that worth to mentioning: &lt;a href="https://kubernetes.io/docs/concepts/extend-kubernetes/operator/"&gt;Kube-operators&lt;/a&gt; using same mechanism like &lt;strong&gt;second loop&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;And one more thing worth mentioning: &lt;a href="https://kubernetes.io/docs/concepts/extend-kubernetes/operator/"&gt;Kube-operators&lt;/a&gt; use the same mechanism as the &lt;strong&gt;second loop&lt;/strong&gt;&lt;/p&gt;
 &lt;h3&gt;Reconciliation Fight (War between 2 reconciliation loops)&lt;/h3&gt;
 &lt;p&gt;We have an easy example to understand: HPA (Horizontal Pod Autoscaler)&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Desired state in Git: Deployment with &lt;strong&gt;replicas:2&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;ArgoCD loop: read Git , see &lt;strong&gt;replicas:2&lt;/strong&gt;, apply to K8S.&lt;/li&gt;
-&lt;li&gt;K8S HPA Controller Loop: See pod resource reached condition to scale, update Deployment spec in K8S cluster to &lt;strong&gt;replicas:5&lt;/strong&gt; for example.&lt;/li&gt;
-&lt;li&gt;ArgoCD loop: (if enable &lt;strong&gt;selfHeal: true&lt;/strong&gt;): Scan cluster, see actual &lt;strong&gt;replicas:5&lt;/strong&gt; while Git defined &lt;strong&gt;replicas:2&lt;/strong&gt; (Drift). ArgoCD update deployment spec that match in Git defined.&lt;/li&gt;
+&lt;li&gt;ArgoCD loop: reads Git, sees &lt;strong&gt;replicas:2&lt;/strong&gt;, apply to K8S.&lt;/li&gt;
+&lt;li&gt;K8S HPA Controller Loop: sees pod resource reached condition to scale, updates Deployment spec in K8S cluster to &lt;strong&gt;replicas:5&lt;/strong&gt; for example.&lt;/li&gt;
+&lt;li&gt;ArgoCD loop: (if enable &lt;strong&gt;selfHeal: true&lt;/strong&gt;): Scan cluster, see actual &lt;strong&gt;replicas:5&lt;/strong&gt; while Git defined &lt;strong&gt;replicas:2&lt;/strong&gt; (Drift). ArgoCD updates the deployment spec to match what Git defined.&lt;/li&gt;
 &lt;li&gt;K8S HPA Controller Loop: scale up again because pod reached condition to scale.&lt;/li&gt;
-&lt;li&gt;Result: It creates an infinity loop causing unnecessary churn (constant rollouts, wasted resources) and potential service disruption.&lt;/li&gt;
+&lt;li&gt;Result: It creates an infinite loop causing unnecessary churn (constant rollouts, wasted resources) and potential service disruption.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;This is actually a very common real-world issue unless you configure ArgoCD to ignore the replicas field using &lt;a href="https://argo-cd.readthedocs.io/en/stable/user-guide/diffing/#application-level-configuration"&gt;&lt;strong&gt;ignoreDifferences&lt;/strong&gt;&lt;/a&gt;, or &lt;strong&gt;omit the replicas&lt;/strong&gt; field from Git completely xD&lt;/p&gt;
 &lt;hr&gt;
@@ -106,7 +105,7 @@
 
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="c1"&gt;# 2. Destination: Where to deploy the resources&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;destination&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;server&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#39;https://kubernetes.default.svc&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Cluster API URL (this refers to the local cluster). We could define to other cluster if we have.&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;server&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;#39;https://kubernetes.default.svc&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Cluster API URL (this refers to the local cluster). We could point to another cluster if we have one.&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;namespace&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;guestbook&lt;/span&gt;&lt;span class="w"&gt;                     &lt;/span&gt;&lt;span class="c1"&gt;# Target namespace in your cluster&lt;/span&gt;
 
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="c1"&gt;# 3. Sync Policy: How Argo CD handles configuration drift&lt;/span&gt;
@@ -120,7 +119,7 @@
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/"&gt;ApplicationSet&lt;/a&gt;: a controller that runs separately (known as the &lt;strong&gt;argocd-applicationset-controller&lt;/strong&gt; pod in the argocd namespace). Its job is to generate multiple Applications from 1 template + generator(s), it doesn't do the sync job itself, it just creates/updates/deletes the Application resource, then application-controller does that part.&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/"&gt;ApplicationSet&lt;/a&gt;: a controller that runs separately (known as the &lt;strong&gt;argocd-applicationset-controller&lt;/strong&gt; pod in the argocd namespace). Its job is to generate multiple Applications from 1 template + generator(s), it doesn't do the sync job itself, it just creates/updates/deletes the Application resource, then &lt;strong&gt;application-controller&lt;/strong&gt; does that part.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;argoproj.io/v1alpha1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;ApplicationSet&lt;/span&gt;
@@ -166,15 +165,15 @@
 &lt;h3&gt;Flow between ApplicationSet and Application in ArgoCD&lt;/h3&gt;
 &lt;p&gt;So basically, the flow in order from ApplicationSet to Application:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Update the value file of ApplicationSet, or add a new folder in the Gitops repo (generator source changes), applicationset-controller learns about the changes via periodic requeue (polling interval) or webhook.&lt;/li&gt;
-&lt;li&gt;ApplicationSet runs a generator (for example git-dir), asking argocd-repo-server for help to checkout the repo and list folders that match the pattern.&lt;/li&gt;
-&lt;li&gt;argocd-repo-server will checkout git, list the folders/files that match the pattern, then return a raw parameter list to applicationset-controller. After that, applicationset-controller renders the templates with those parameters, feeding into &lt;code&gt;template:&lt;/code&gt;, we call this the wanted, or expected, Application.&lt;/li&gt;
-&lt;li&gt;Then applicationset-controller compares the expected Application vs the current Application; if there's a diff, it modifies/updates the current Application.&lt;/li&gt;
+&lt;li&gt;Update the value file of &lt;strong&gt;applicationSet&lt;/strong&gt;, or add a new folder in the Gitops repo (generator source changes), &lt;strong&gt;applicationset-controller&lt;/strong&gt; learns about the changes via periodic requeue (polling interval) or webhook.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ApplicationSet&lt;/strong&gt; runs a generator (for example git-dir), asking &lt;strong&gt;argocd-repo-server&lt;/strong&gt; for help to checkout the repo and list folders that match the pattern.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;argocd-repo-server&lt;/strong&gt; will checkout git, list the folders/files that match the pattern, then return a raw parameter list to &lt;strong&gt;applicationset-controller&lt;/strong&gt;. After that, &lt;strong&gt;applicationset-controller&lt;/strong&gt; renders the templates with those parameters.&lt;/li&gt;
+&lt;li&gt;Then &lt;strong&gt;applicationset-controller&lt;/strong&gt; compares the expected Application vs the current Application; if there's a diff, it modifies/updates the current Application.&lt;/li&gt;
 &lt;li&gt;After that, the current Application gets compared against live-state, the result is the Sync/OutOfSync status you often see.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr&gt;
 &lt;h1&gt;&lt;a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#clusters"&gt;Cluster Registration&lt;/a&gt;&lt;/h1&gt;
-&lt;p&gt;So basically, for cluster registration in ArgoCD, application-controller calls the endpoint of the kube-apiserver of the destination cluster (the same idea as &lt;code&gt;kubectl --context X&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;So basically, for cluster registration in ArgoCD, &lt;strong&gt;application-controller&lt;/strong&gt; calls the endpoint of the &lt;strong&gt;kube-apiserver&lt;/strong&gt; of the destination cluster (the same idea as &lt;code&gt;kubectl --context X&lt;/code&gt;).&lt;/p&gt;
 &lt;p&gt;The destination cluster credential is saved as a Secret in the argocd namespace of the cluster hosting ArgoCD. It must have the label &lt;code&gt;argocd.argoproj.io/secret-type: cluster&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Fields:&lt;/p&gt;
 &lt;ul&gt;
@@ -182,8 +181,8 @@
 &lt;li&gt;&lt;code&gt;server&lt;/code&gt;: endpoint&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;config&lt;/code&gt;: JSON of bearerToken, tlsClientConfig/exec-based&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;application-controller reads the secret via a separate informer/watch, it doesn't go through the manifest-render pipeline (repo-server) like a normal Application does.&lt;/p&gt;
-&lt;p&gt;Mostly we use argocd-vault-plugin for the secret, we only store the path that defines where the secret is saved in Vault.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;application-controller&lt;/strong&gt; reads the secret via a separate informer/watch, it doesn't go through the manifest-render pipeline (&lt;strong&gt;repo-server&lt;/strong&gt;) like a normal Application does.&lt;/p&gt;
+&lt;p&gt;Mostly we use &lt;strong&gt;argocd-vault-plugin&lt;/strong&gt; for the secret, we only store the path that defines where the secret is saved in Vault.&lt;/p&gt;
 &lt;p&gt;The Application delivering the Secret must target &lt;code&gt;destination.name: in-cluster&lt;/code&gt;, which is the built-in cluster, meaning the cluster hosting ArgoCD. This Secret needs to be stored in the local argocd namespace, not the destination cluster!&lt;/p&gt;
 &lt;p&gt;Provisioning the actual credential (ServiceAccount + ClusterRole + Binding + mint token) on the destination cluster is a separate concern, ArgoCD itself doesn't do this:&lt;/p&gt;
 &lt;ul&gt;
@@ -206,7 +205,7 @@ The cluster only actually shows up in ArgoCD (Settings &amp;gt; Clusters, usable
 &lt;li&gt;Second (Software, defined and enforced by ArgoCD): only allows requests permitted by clusterResourceWhitelist/namespaceResourceWhitelist, sourceRepos, and destinations, anything outside that gets blocked.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;An Application's &lt;code&gt;spec.project&lt;/code&gt; must reference an AppProject that already exists, validated right at Application creation time, before it even gets to sync. No AppProject means the Application object fails to even get created, full stop.&lt;/p&gt;
-&lt;p&gt;AppProject whitelists namespace-scoped resources by default, but cluster-scoped resources (like ClusterRole, CustomResourceDefinition, and Namespace itself) are blocked by default. If your app uses CreateNamespace=true, ArgoCD will fail to sync unless you explicitly whitelist the Namespace kind under clusterResourceWhitelist.&lt;/p&gt;
+&lt;p&gt;AppProject whitelists &lt;strong&gt;namespace-scoped&lt;/strong&gt; resources by default, but cluster-scoped resources (like ClusterRole, CustomResourceDefinition, and Namespace itself) are blocked by default. If your app uses &lt;strong&gt;CreateNamespace=true&lt;/strong&gt;, ArgoCD will fail to sync unless you explicitly whitelist the Namespace kind under clusterResourceWhitelist.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Sync mechanics deep dive&lt;/h1&gt;
 &lt;ul&gt;
@@ -231,7 +230,7 @@ The cluster only actually shows up in ArgoCD (Settings &amp;gt; Clusters, usable
 &lt;p&gt;&lt;strong&gt;Note on Kubernetes Security:&lt;/strong&gt; Please remember once decrypted inside the cluster, the output is a standard Kubernetes &lt;code&gt;Secret&lt;/code&gt; (which is only base64 encoded, unless you've explicitly enabled &lt;a href="https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/"&gt;etcd encryption-at-rest&lt;/a&gt;). Sealed Secrets (and Vault) only solve "Secret-in-Git" security, not "Secret-at-Rest" inside etcd. Back in 2024, it took me a whole week to realize this....&lt;/p&gt;
 &lt;hr&gt;
 &lt;h1&gt;Hands-on Lab&lt;/h1&gt;
-&lt;p&gt;We have 2 fuckin' repo:&lt;/p&gt;
+&lt;p&gt;We have 2 fuckin' repos:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;First, &lt;a href="https://gitlab.com/kienlt-gitlab-ci-demo/gitops-bootstrap"&gt;gitops-bootstrap&lt;/a&gt; which is the Platform/SRE control plane repo storing bootstrap manifests (we only need to apply the root-app manually once to kickstart the cluster)&lt;/li&gt;
 &lt;li&gt;Second, &lt;a href="https://gitlab.com/kienlt-gitlab-ci-demo/gitops-manifests"&gt;gitops-manifests&lt;/a&gt; where we store application configs (which are scanned and applied automatically by the ApplicationSet)&lt;/li&gt;
@@ -244,16 +243,16 @@ application.argoproj.io/bootstrap-app&lt;span class="w"&gt; &lt;/span&gt;created
 &lt;span class="c1"&gt;# Remember to get init password and port-forward to access ArgoCD UI locally.&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;After that we have first connected repo:&lt;/p&gt;
+&lt;p&gt;After that, we have our first connected repo:&lt;/p&gt;
 &lt;p&gt;&lt;img alt="connected repo" src="./images/2026/07/07.png"&gt;&lt;/p&gt;
 &lt;p&gt;And our applications:&lt;/p&gt;
 &lt;p&gt;&lt;img alt="apps" src="./images/2026/07/08.png"&gt;&lt;/p&gt;
-&lt;p&gt;Oh, what is wrong to prevent ArgoCD sync the application?&lt;/p&gt;
+&lt;p&gt;Oh, what went wrong to prevent ArgoCD from syncing the application?&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;resource&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;Namespace&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;is&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;not&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;permitted&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;project&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;lab&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;project&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;img alt="sync issue" src="./images/2026/07/09.png"&gt;&lt;/p&gt;
-&lt;p&gt;I'm pretty fuckin' sure that caused by destination we defined in here that allow only namespace with this pattern: &lt;strong&gt;lab-&lt;/strong&gt;*&lt;/p&gt;
+&lt;p&gt;I'm pretty fuckin' sure that's caused by the destination we defined here that allows only namespaces with this pattern: &lt;strong&gt;lab-&lt;/strong&gt;*&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;argoproj.io/v1alpha1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;AppProject&lt;/span&gt;
 &lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -273,9 +272,9 @@ application.argoproj.io/bootstrap-app&lt;span class="w"&gt; &lt;/span&gt;created
 
 &lt;p&gt;No, I was wrong, LOL. Here is &lt;a href="https://gitlab.com/kienlt-gitlab-ci-demo/gitops-bootstrap/-/commit/b0f7a5d58cebcadadfc5a4b7a367ff365f03f631"&gt;the fix&lt;/a&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;img alt="fix sync issue" src="./images/2026/07/10.png"&gt;&lt;/p&gt;
-&lt;p&gt;Click sync again, an expected version will be like this!&lt;/p&gt;
+&lt;p&gt;Click sync again, and the expected version will look like this!&lt;/p&gt;
 &lt;p&gt;&lt;img alt="fix sync issue" src="./images/2026/07/11.png"&gt;&lt;/p&gt;
-&lt;p&gt;And for testing, i added 3 more repos and wait for &lt;a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Controlling-Resource-Modification/#prevent-an-applicationsets-child-apps-from-being-deleted-or-modified"&gt;3 minutes&lt;/a&gt; (default interval that &lt;strong&gt;applicationSet-controller&lt;/strong&gt; will scan repo &lt;strong&gt;gitops-manifest&lt;/strong&gt;)&lt;/p&gt;
+&lt;p&gt;And for testing, I added 3 more repos and waited for &lt;a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Controlling-Resource-Modification/#prevent-an-applicationsets-child-apps-from-being-deleted-or-modified"&gt;3 minutes&lt;/a&gt; (default interval that &lt;strong&gt;applicationSet-controller&lt;/strong&gt; will scan repo &lt;strong&gt;gitops-manifest&lt;/strong&gt;)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kienlt@Luongs-MacBook-Pro&lt;span class="w"&gt; &lt;/span&gt;gitops-manifests&lt;span class="w"&gt; &lt;/span&gt;%&lt;span class="w"&gt; &lt;/span&gt;ll&lt;span class="w"&gt; &lt;/span&gt;apps
 total&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;
 drwxr-xr-x@&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;6&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kienlt&lt;span class="w"&gt;  &lt;/span&gt;staff&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;192&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;25&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Jul&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;17&lt;/span&gt;:32&lt;span class="w"&gt; &lt;/span&gt;.
@@ -286,9 +285,9 @@ drwxr-xr-x@&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;5&lt;/span&
 drwxr-xr-x@&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;5&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kienlt&lt;span class="w"&gt;  &lt;/span&gt;staff&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="m"&gt;160&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;20&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Jul&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;:43&lt;span class="w"&gt; &lt;/span&gt;lab-nginx
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;It will appears in &lt;strong&gt;bootstrap-app&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;They will appear in &lt;strong&gt;bootstrap-app&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt="bootstrap-app" src="./images/2026/07/12.png"&gt;&lt;/p&gt;
-&lt;p&gt;ok, we have setup connected repo, we have setup applicationSet that generate Argo Applications. Next we will move to cluster registration, we commonly regist cluster via argocd-cli. But I want to show you another approach that is using gitops way!&lt;/p&gt;
+&lt;p&gt;Ok, we have set up a connected repo, we have set up an &lt;strong&gt;applicationSet&lt;/strong&gt; that generates ArgoCD Applications. Next, we will move to cluster registration. We commonly register clusters via &lt;strong&gt;argocd-cli&lt;/strong&gt;, but I want to show you another approach that uses the GitOps way!&lt;/p&gt;
 &lt;p&gt;Before that, we need to setup/install Bitnami Sealed Secret because we are gonna push secret to gitops...&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Run this in current cluster, where ArgoCD installed!&lt;/span&gt;
 kubectl&lt;span class="w"&gt; &lt;/span&gt;apply&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.22.0/controller.yaml
@@ -297,7 +296,7 @@ kubectl&lt;span class="w"&gt; &lt;/span&gt;apply&lt;span class="w"&gt; &lt;/span
 brew&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;kubeseal
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;We create a raw cluster secret in local named: &lt;strong&gt;raw-cluster-register.yaml&lt;/strong&gt;, Please notice that &lt;strong&gt;bearerToken&lt;/strong&gt; is actually field &lt;strong&gt;token&lt;/strong&gt; under users section. If you are using managed k8s for testing like me, remove &lt;strong&gt;tlsClientConfig&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;We create a raw cluster secret locally named: &lt;strong&gt;raw-cluster-register.yaml&lt;/strong&gt;. Please notice that &lt;strong&gt;bearerToken&lt;/strong&gt; is actually field &lt;strong&gt;token&lt;/strong&gt; under users section. If you are using managed k8s for testing like me, remove &lt;strong&gt;tlsClientConfig&lt;/strong&gt;.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;apiVersion&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;v1&lt;/span&gt;
 &lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;Secret&lt;/span&gt;
 &lt;span class="nt"&gt;metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -318,16 +317,18 @@ brew&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="no"&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Then run the fuckin command to encrypt it and store it in bootstrap repo.&lt;/p&gt;
+&lt;p&gt;Then run the fuckin command to encrypt it and store it in the bootstrap repo.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubeseal&lt;span class="w"&gt; &lt;/span&gt;--format&lt;span class="o"&gt;=&lt;/span&gt;yaml&lt;span class="w"&gt; &lt;/span&gt;&amp;lt;&lt;span class="w"&gt; &lt;/span&gt;raw-cluster-register.yaml&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;bootstrap/cluster-registration.yaml
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;Commit it to &lt;strong&gt;gitops-bootstrap&lt;/strong&gt; repo. Then refresh in &lt;strong&gt;bootstrap-app&lt;/strong&gt;, we will have new sealedSecret resource&lt;/p&gt;
+&lt;p&gt;Commit it to the &lt;strong&gt;gitops-bootstrap&lt;/strong&gt; repo. Then refresh &lt;strong&gt;bootstrap-app&lt;/strong&gt;, and we will have a new SealedSecret resource&lt;/p&gt;
 &lt;p&gt;&lt;img alt="sealed Secret" src="./images/2026/07/13.png"&gt;&lt;/p&gt;
 &lt;p&gt;But cluster is "Unknown"?&lt;/p&gt;
 &lt;p&gt;&lt;img alt="cluster status" src="./images/2026/07/14.png"&gt;&lt;/p&gt;
 &lt;p&gt;Don't panic! ArgoCD handles cluster &lt;strong&gt;connections lazily&lt;/strong&gt;. It won't actively probe the cluster API unless there is at least one Application targeting it. Once we deploy a test application to &lt;strong&gt;kienlt-cluster2&lt;/strong&gt;, the status will immediately transition to Successful (or show auth/network errors if we fucked up the token/API endpoint).&lt;/p&gt;
-&lt;p&gt;We commit &lt;a href="https://gitlab.com/kienlt-gitlab-ci-demo/gitops-bootstrap/-/commit/4965f0745ad75f1bc4314245a597c81b821fb4c5"&gt;this change&lt;/a&gt; to the &lt;strong&gt;gitops-bootstrap&lt;/strong&gt; repo, then hit the refresh button on the &lt;strong&gt;bootstrap-app&lt;/strong&gt; in ArgoCD:&lt;/p&gt;
+&lt;p&gt;We commit &lt;a href="https://gitlab.com/kienlt-gitlab-ci-demo/gitops-bootstrap/-/commit/4965f0745ad75f1bc4314245a597c81b821fb4c5"&gt;this change&lt;/a&gt; to the &lt;strong&gt;gitops-bootstrap&lt;/strong&gt; repo, then hit the refresh button on the &lt;strong&gt;bootstrap-app&lt;/strong&gt; in ArgoCD.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="git to matrix generator" src="./images/2026/07/19.png"&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Why switch from Git generator to Matrix generator?&lt;/strong&gt; The original Git generator only scans folders in &lt;code&gt;apps/*&lt;/code&gt; and generates one Application per folder, but the &lt;code&gt;destination.server&lt;/code&gt; in the template is hardcoded to a single cluster. It has no awareness of other registered clusters. By switching to a Matrix generator (&lt;code&gt;clusters: {}&lt;/code&gt; × &lt;code&gt;git: {directories: apps/*}&lt;/code&gt;), we create a &lt;strong&gt;cross-product&lt;/strong&gt;: every folder × every registered cluster = one Application. So 4 folders × 2 clusters = 8 Applications instead of just 4. And when we add Cluster 3 in the future, &lt;code&gt;clusters: {}&lt;/code&gt; auto-discovers it, no ApplicationSet changes needed!&lt;/p&gt;
 &lt;p&gt;&lt;img alt="new applications" src="./images/2026/07/15.png"&gt;&lt;/p&gt;
 &lt;p&gt;But we run into an issue on the new Cluster 2 xD: &lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;application&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;destination&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;server&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;https://hidden.com&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;namespace&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;lab-new-nginx&amp;#39;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;do&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;not&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;match&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;any&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;of&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;the&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;allowed&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;destinations&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;project&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;lab-project&amp;#39;&lt;/span&gt;
@@ -361,8 +362,8 @@ brew&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Advantage: Centralized management, you only need a single UI dashboard to monitor the entire system.&lt;/li&gt;
-&lt;li&gt;Disadvantage: Single Point of Failure. If Cluster 1 goes down, we cannot deploy or update workloads on Cluster 2 and 3. However, existing workloads will continue running fine, this only affects new deployments.&lt;/li&gt;
+&lt;li&gt;Advantage: Centralized management — you only need a single UI dashboard to monitor the entire system.&lt;/li&gt;
+&lt;li&gt;Disadvantage: Single Point of Failure. If Cluster 1 goes down, we cannot deploy or update workloads on Clusters 2 and 3. However, existing workloads will continue running fine — this only affects new deployments.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Alternative pattern: Decentralized. Each cluster runs its own ArgoCD instance separately, watching the same GitOps repo! The catch is we have to manage multiple UI dashboards and it consumes slightly more cluster resources.&lt;/p&gt;
 &lt;p&gt;Furthermore, we also need to handle traffic redirection (failover) when Cluster 1 goes down and tackle data replication challenges for stateful apps. But I won't cover those here due to complexity. Maybe in the future once I get the fuckin' chance xD.&lt;/p&gt;
