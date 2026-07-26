@@ -1,0 +1,32 @@
+```mermaid
+sequenceDiagram
+    participant Git as Git Repo
+    participant WH as Webhook
+    participant API as argocd-server
+    participant CR as Application CR
+    participant AC as application-controller
+    participant RS as argocd-repo-server
+    participant Redis as argocd-redis
+    participant K8S as K8s API (Live Cluster)
+
+    Git->>WH: 1. Git commit (push event)
+    WH->>API: 2. POST /api/webhook
+    API->>CR: 3. Set refresh annotation
+    Note over CR: argocd.argoproj.io/refresh=normal
+
+    AC->>CR: 4. Watch detects annotation change
+    AC->>RS: 5. Request rendered manifests
+    RS->>Redis: 6a. Check cache
+    alt Cache miss
+        RS->>Git: 6b. Clone repo
+        RS->>RS: 6c. helm template / kustomize build
+        RS->>Redis: 6d. Store in cache
+    end
+    RS->>AC: 7. Return rendered YAML (desired state)
+
+    AC->>K8S: 8. Read live state
+    AC->>AC: 9. Compare desired vs live state
+    alt Out-of-Sync
+        AC->>K8S: 10. Apply diff (kubectl apply)
+    end
+```
