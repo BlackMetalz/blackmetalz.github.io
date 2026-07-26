@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-07-26T00:00:00+07:00</updated><entry><title>Understand ArgoCD architecture with theory and hands-on</title><link href="https://blackmetalz.github.io/understand-argocd-architecture-with-theory-and-hands-on.html" rel="alternate"/><published>2026-07-26T00:00:00+07:00</published><updated>2026-07-26T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-07-26:/understand-argocd-architecture-with-theory-and-hands-on.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/all.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-07-27T00:00:00+07:00</updated><entry><title>Prepare for GCP - Associate Cloud Engineer Certification</title><link href="https://blackmetalz.github.io/prepare-for-gcp-associate-cloud-engineer-certification.html" rel="alternate"/><published>2026-07-27T00:00:00+07:00</published><updated>2026-07-27T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-07-27:/prepare-for-gcp-associate-cloud-engineer-certification.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
+&lt;p&gt;Ah shit, here we go again xD. This time is Google Cloud, my first time. Please prepare new trial account with &lt;strong&gt;300$&lt;/strong&gt;, we will use it for 3 months in a row. Not sure I can do what I'm aiming for (Cloud Engineer Associate + DevOps Pro). In this article, I'm mainly using resource from &lt;a href="https://www.udemy.com/course/gcp-associate-cloud-engineer-certification/"&gt;Udemy course&lt;/a&gt; and visit &lt;a href="https://cloud.google.com/learn/certification/cloud-engineer/"&gt;Associate Cloud Engineer&lt;/a&gt; link for me information!&lt;/p&gt;
+&lt;p&gt;Useful links:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.skills.google/paths/11"&gt;Train for the exam&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://services.google.com/fh/files/misc/associate_cloud_engineer_exam_guide_english.pdf"&gt;Exam Guide&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Section of the exam:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Section 1: Setting up a cloud solution environment (~20% of the exam)&lt;/li&gt;
+&lt;li&gt;Section 2: Planning and implementing a cloud solution (~30% of the exam)&lt;/li&gt;
+&lt;li&gt;Section 3: Ensuring the successful operation of a cloud solution (~30% of the
+exam)&lt;/li&gt;
+&lt;li&gt;Section 4: Configuring access and security (~20% of the exam)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;Concept of project in GCP&lt;/h3&gt;
+&lt;p&gt;A project is the main container for all your resources. (Ref: ResourceGroup at Azure)&lt;/p&gt;</content><category term="Knowledge Base"/><category term="gcp"/><category term="certification"/></entry><entry><title>Understand ArgoCD architecture with theory and hands-on</title><link href="https://blackmetalz.github.io/understand-argocd-architecture-with-theory-and-hands-on.html" rel="alternate"/><published>2026-07-26T00:00:00+07:00</published><updated>2026-07-26T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-07-26:/understand-argocd-architecture-with-theory-and-hands-on.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
 &lt;p&gt;I thought I understood ArgoCD well enough. In the past, I ran ArgoCD with multiple K8s clusters inside it (&amp;gt;10 clusters), and had around 500-600 ArgoCD applications in multiple k8s clusters. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the &lt;strong&gt;Certified Argo Project Associate (CAPA)&lt;/strong&gt;, it was a fuckin' joke to me, no fuckin' value gained! So that is the reason this article was born to help me understand the "basic" knowledge of ArgoCD!&lt;/p&gt;
 &lt;p&gt;Ok, we will go through the sections below in this article:&lt;/p&gt;
 &lt;ul&gt;
