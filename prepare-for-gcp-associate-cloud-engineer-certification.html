@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Intro</h1>
+            <h1>1.Intro</h1>
 <p>Ah shit, here we go again xD. This time is Google Cloud, my first time. Please prepare new trial account with <strong>300$</strong>, we will use it for 3 months in a row. Not sure I can do what I'm aiming for (Cloud Engineer Associate + DevOps Pro). In this article, I'm mainly using resource from <a href="https://www.udemy.com/course/gcp-associate-cloud-engineer-certification/">Udemy course</a> and visit <a href="https://cloud.google.com/learn/certification/cloud-engineer/">Associate Cloud Engineer</a> link for me information!</p>
 <p>Useful links:</p>
 <ul>
@@ -93,8 +93,42 @@
 exam)</li>
 <li>Section 4: Configuring access and security (~20% of the exam)</li>
 </ul>
+<hr>
+<h1>2.Resource Hierarchy</h1>
 <h3>Concept of project in GCP</h3>
 <p>A project is the main container for all your resources. (Ref: ResourceGroup at Azure)</p>
+<h3>Resource Hierarchy</h3>
+<p>Same like Azure, pretty familiar xD. Permissions management in GCP work with mechanism inheritance. GCP Resource Hierarchy has 4 levels: Organization, Folders, Projects and Resources.</p>
+<p><img alt="GCP Resource Hierarchy" src="https://docs.cloud.google.com/static/resource-manager/img/cloud-hierarchy.svg"></p>
+<h3>Manage Projects</h3>
+<p>We can use this for tracking costs of specific project like this</p>
+<p><img alt="Tracking resource" src="../images/2026/07/20.png"></p>
+<h3>Organization Policies VS IAM</h3>
+<p>Nothing new for me, no need to explain detailed: </p>
+<ul>
+<li>Org Policies: WHAT can be done (Example: Edit/Create a policy for resource location lock, only allow to create instance in specific location like es-east1/europe-west1.)</li>
+<li>IAM: WHO can do something.</li>
+</ul>
+<h3>API</h3>
+<p>For some services, we need to enable before use it!</p>
+<p><img alt="Tracking resource" src="../images/2026/07/21.png"></p>
+<h3>Cloud Identity</h3>
+<p><strong>WHO</strong> is the people that allow to do <strong>WHAT</strong></p>
+<ul>
+<li>Cloud Identity: Manages the "WHO"</li>
+<li>IAM: Manages the "WHAT"</li>
+</ul>
+<p>Best practice is manage people with group for sure, not only in GCP. For example in Elasticsearch, we create a role called data-reader that has permission to read indices <code>kienlt-data-*</code>, then we add right user to that role, so we don't need to create multiple role for each user or remove user from that role when they are no longer needed, pretty common practice I believe!</p>
+<h3>Asset Inventory</h3>
+<p>Inventory of everything in your GCP. Is the central catalog for every single resource in yuor GCP Org.</p>
+<p>I remember when my boss ask me to create inventory of whole system on-premises, it would take shit load of time... But in GCP, there are already service for this shit!</p>
+<h3>Cloud Billing Account</h3>
+<p>A single billing account can pay for thoudsands of projects, centralizing financial control. And need to remember that billing accounts are "Separate" from projects in GCP (to use paid service, a project must be linked to an active cloud billing account so Google know where to send the fuckin' bill!)</p>
+<p>Ofc, like other public cloud providers, you are able to view the cost with labels...</p>
+<h3>Other shit</h3>
+<ul>
+<li>We can setting billing exports to BigQuery to analyze the costs?</li>
+</ul>
 
 
              
