@@ -129,6 +129,29 @@ exam)</li>
 <ul>
 <li>We can setting billing exports to BigQuery to analyze the costs?</li>
 </ul>
+<h1>3. IAM</h1>
+<p>Just little more detail of Cloud Identity I told above!</p>
+<h3>Impersonate</h3>
+<p>GCP IAM Impersonation example, impersonate GCP Service Account to test permission read storage. So you don't need to use serviceAccount Key Json (More fuckin' secure!)</p>
+<div class="highlight"><pre><span></span><code>gcloud<span class="w"> </span>storage<span class="w"> </span>ls<span class="w"> </span>gs://my-company-bucket<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--impersonate-service-account<span class="o">=</span>app-reader@my-project.iam.gserviceaccount.com
+</code></pre></div>
+
+<p>You feel like familiar with something in K8S? right? Yes, exactly! It is fuckin' serviceAccount in K8S. Example test serviceAccount <strong>developer-sa</strong> in namespace <strong>dev</strong> if it is able to get pods!</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>dev<span class="w"> </span>--as<span class="o">=</span>system:serviceaccount:dev:developer-sa
+</code></pre></div>
+
+<h3>Fine-grained accounts</h3>
+<p>Format: </p>
+<div class="highlight"><pre><span></span><code><span class="o">[</span><span class="n">app-name</span><span class="o">]-[</span><span class="n">env</span><span class="o">]-[</span><span class="n">purpose</span><span class="o">]-</span><span class="n">sa</span>
+</code></pre></div>
+
+<p>And yes, fuckin' <strong>Least privileges</strong> please!</p>
+<h3>Workload vs Workforce Identity Federation</h3>
+<ul>
+<li>Workforce: for human</li>
+<li>Workload: for machine</li>
+</ul>
 
 
              

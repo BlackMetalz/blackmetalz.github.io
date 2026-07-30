@@ -49,6 +49,29 @@ exam)&lt;/li&gt;
 &lt;h3&gt;Other shit&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;We can setting billing exports to BigQuery to analyze the costs?&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1&gt;3. IAM&lt;/h1&gt;
+&lt;p&gt;Just little more detail of Cloud Identity I told above!&lt;/p&gt;
+&lt;h3&gt;Impersonate&lt;/h3&gt;
+&lt;p&gt;GCP IAM Impersonation example, impersonate GCP Service Account to test permission read storage. So you don't need to use serviceAccount Key Json (More fuckin' secure!)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;gcloud&lt;span class="w"&gt; &lt;/span&gt;storage&lt;span class="w"&gt; &lt;/span&gt;ls&lt;span class="w"&gt; &lt;/span&gt;gs://my-company-bucket&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;--impersonate-service-account&lt;span class="o"&gt;=&lt;/span&gt;app-reader@my-project.iam.gserviceaccount.com
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;You feel like familiar with something in K8S? right? Yes, exactly! It is fuckin' serviceAccount in K8S. Example test serviceAccount &lt;strong&gt;developer-sa&lt;/strong&gt; in namespace &lt;strong&gt;dev&lt;/strong&gt; if it is able to get pods!&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;pods&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;dev&lt;span class="w"&gt; &lt;/span&gt;--as&lt;span class="o"&gt;=&lt;/span&gt;system:serviceaccount:dev:developer-sa
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3&gt;Fine-grained accounts&lt;/h3&gt;
+&lt;p&gt;Format: &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="n"&gt;app-name&lt;/span&gt;&lt;span class="o"&gt;]-[&lt;/span&gt;&lt;span class="n"&gt;env&lt;/span&gt;&lt;span class="o"&gt;]-[&lt;/span&gt;&lt;span class="n"&gt;purpose&lt;/span&gt;&lt;span class="o"&gt;]-&lt;/span&gt;&lt;span class="n"&gt;sa&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;And yes, fuckin' &lt;strong&gt;Least privileges&lt;/strong&gt; please!&lt;/p&gt;
+&lt;h3&gt;Workload vs Workforce Identity Federation&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Workforce: for human&lt;/li&gt;
+&lt;li&gt;Workload: for machine&lt;/li&gt;
 &lt;/ul&gt;</content><category term="Knowledge Base"/><category term="gcp"/><category term="certification"/></entry><entry><title>Understand ArgoCD architecture with theory and hands-on</title><link href="https://blackmetalz.github.io/understand-argocd-architecture-with-theory-and-hands-on.html" rel="alternate"/><published>2026-07-26T00:00:00+07:00</published><updated>2026-07-26T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-07-26:/understand-argocd-architecture-with-theory-and-hands-on.html</id><summary type="html"/><content type="html">&lt;h1&gt;Intro&lt;/h1&gt;
 &lt;p&gt;I thought I understood ArgoCD well enough. In the past, I ran ArgoCD with multiple K8s clusters inside it (&amp;gt;10 clusters), and had around 500-600 ArgoCD applications in multiple k8s clusters. But I was a contributor there, not the one who built it from scratch, and it turns out I had 100% misconceptions that I often ran into. Even though I had the &lt;strong&gt;Certified Argo Project Associate (CAPA)&lt;/strong&gt;, it was a fuckin' joke to me, no fuckin' value gained! So that is the reason this article was born to help me understand the "basic" knowledge of ArgoCD!&lt;/p&gt;
 &lt;p&gt;Ok, we will go through the sections below in this article:&lt;/p&gt;
