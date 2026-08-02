@@ -129,6 +129,7 @@ exam)</li>
 <ul>
 <li>We can setting billing exports to BigQuery to analyze the costs?</li>
 </ul>
+<hr>
 <h1>3. IAM</h1>
 <p>Just little more detail of Cloud Identity I told above!</p>
 <h3>Impersonate</h3>
@@ -152,6 +153,49 @@ exam)</li>
 <li>Workforce: for human</li>
 <li>Workload: for machine</li>
 </ul>
+<hr>
+<h1>4. Compute &amp; Scaling</h1>
+<h3>VM Access</h3>
+<p>We can login with IAM instead of SSH or User/Password. Actually behind the scene, GCP did many many thing it in:</p>
+<ul>
+<li><a href="https://docs.cloud.google.com/compute/docs/oslogin?authuser=1">OS Login</a></li>
+<li><a href="https://docs.cloud.google.com/compute/docs/images/guest-agent-functions?authuser=1">Guest agent functionality</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/guest-oslogin">Github Guest Os Login</a></li>
+</ul>
+<p>Default Google-provided OS images already included the Guest Agent and OS Login packages come pre-installed and pre-configured. So we don't need to install them manually xD.</p>
+<p>The OS Login Package provides the actual binaries and Linux modules that communicate with GCP (detail in Github above):</p>
+<ul>
+<li>Authorized Keys Command</li>
+<li>NSS Modules</li>
+<li>PAM(Pluggable Authentication Modules) Modules: You will like me feel like the last word "Modules" is little duplicate, but actually they are widely used. For example: ATM machine -&gt; Automated Teller Machine machine, PDF format -&gt; Portable Document Format format, SQL language -&gt; Structured Query Language language. That is how we talk in common of software engineering I guess xD</li>
+</ul>
+<h3>Managed Instance Group (MIG)</h3>
+<p>Nothing to write here, they are almost exactly fuckin' same like Auto Scaling Group in AWS. LOL</p>
+<hr>
+<h1>5. Google Kubernetes Engine (GKE)</h1>
+<p>This one worth to mention since this is new for me.</p>
+<p><img alt="GKE Standard vs Pilot" src="../images/2026/07/22.png"></p>
+<p>And yes, we have same thing in Azure + AWS:</p>
+<ul>
+<li>Azure: Azure Container Apps or AKS Automatic</li>
+<li>AWS: AWS Fargate (cho EKS / ECS)</li>
+</ul>
+<h3>K8S</h3>
+<p>This courses include some basic K8S knowledge, great for newbie I believe!</p>
+<h3>Cluster Autoscaling</h3>
+<p>Reference: <a href="https://docs.cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler?authuser=1">About GKE cluster autoscaling</a></p>
+<div class="highlight"><pre><span></span><code>Cluster autoscaler makes these scaling decisions based on the resource requests (rather than actual resource utilization) of Pods running on that node pool&#39;s nodes. It periodically checks the status of Pods and nodes, and takes action
+</code></pre></div>
+
+<p>That is little different in GKE, so it will only add new nodes based pending (Unschedulable) pods, not CPU Utilization of Node. This works both for standard and autopilot cluster.</p>
+<h3>Workload Identity</h3>
+<p>It is the recommended, secure way for GKE pods to access GCP services. And we have same business logic in public cloud providers:</p>
+<ul>
+<li>AWS: IAM Roles for Service Accounts (IRSA)</li>
+<li>Azure/GCP: Workload Identity</li>
+</ul>
+<hr>
+<h1>6.</h1>
 
 
              
