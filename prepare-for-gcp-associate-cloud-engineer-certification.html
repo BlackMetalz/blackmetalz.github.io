@@ -195,7 +195,29 @@ exam)</li>
 <li>Azure/GCP: Workload Identity</li>
 </ul>
 <hr>
-<h1>6.</h1>
+<h1>6. Serverless with Cloud Run</h1>
+<h3>Cloud run services (Serverless containers)</h3>
+<ul>
+<li>GCP: Cloud Run</li>
+<li>AWS: Fargate or App Runner</li>
+<li>Azure: Azure Container Apps / App Service Container</li>
+</ul>
+<h3>Cloud run function (Serverless functions)</h3>
+<ul>
+<li>GCP: Cloud Run Functions</li>
+<li>AWS: Lambda</li>
+<li>Azure: Azure Functions</li>
+</ul>
+<h3>Event Trigger for function</h3>
+<ul>
+<li>GCP: Eventarc or Pub/Sub</li>
+<li>AWS: EventBridge</li>
+<li>Azure: Azure Event Grid</li>
+</ul>
+<h3>Example with Eventarc</h3>
+<p>This is fuckin' popular example that would appear in every tutorial, LOL. When user upload an image to Cloud Storage Bucket (S3), Eventarc will catch this event and trigger Cloud Run Function to handle (resize image, extract metadata of image and write to somewhere?)</p>
+<p>Another example would to mention: Pub/Sub will related to decoupling services (using Eventarc). Also remember, there is no fuckin' persistant data in Cloud Run Service (But mount NFS or publish data to Cloud Storage are fine xD)</p>
+<hr>
 
 
              
