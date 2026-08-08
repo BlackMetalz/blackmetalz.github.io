@@ -295,6 +295,35 @@ exam)</li>
 </ul>
 <h3>Cloud NGFW</h3>
 <p>It is fuckin' stateful, meaning you only need to allow ingress and it will allow egress for you! No need a seprate egress rule.</p>
+<h3>Shared VPC</h3>
+<p>No need to talk about VPC Peering but shared VPC, one network, many projects:</p>
+<ul>
+<li>Multiple projects share the same VPC</li>
+<li>Centralized control by networking team</li>
+<li>One set of firewall rules for all</li>
+</ul>
+<h3>Private access to google services private</h3>
+<p>How to enable:</p>
+<ul>
+<li>Per subnet setting (you can turn it on in subnet setting)</li>
+<li>Internal traffic only</li>
+<li>Google services only.</li>
+</ul>
+<p>What we can access via private services:</p>
+<ul>
+<li>Cloud Storage</li>
+<li>BigQuery</li>
+<li>Pub/Sub</li>
+<li>Cloud Logging &amp; Monitoring</li>
+<li>Container Registry</li>
+<li>Artifact Registry</li>
+</ul>
+<p>If you need internet access, you will need cloud NAT, hmm what about Cloud NAT:</p>
+<ul>
+<li>One Cloud Nat gateway for the fuckin' entire subnet or region.</li>
+<li>Auto scals to handle traffic from thousands of VMs.</li>
+<li>Outbound only.</li>
+</ul>
 
 
              
