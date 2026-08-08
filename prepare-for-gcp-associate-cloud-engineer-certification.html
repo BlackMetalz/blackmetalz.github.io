@@ -251,18 +251,20 @@ exam)</li>
 </ul>
 <hr>
 <h1>8. Managed Databases in GCP</h1>
-<p>Relational (SQL) options:</p>
+<h3>Relational (SQL) options</h3>
 <ul>
 <li>Cloud SQL: Mysql, PostgreSQL, SQL Server...</li>
 <li>AlloyDB: PostgreSQL by GCP, not fuckin' open source xD, like Aurora in AWS.</li>
-<li>Cloud Spanner: like DynamoDB in AWS</li>
+<li>Cloud Spanner: like DynamoDB in AWS (able scale horizontally to handle write loads that exceed the capacity of a single server)</li>
 </ul>
-<p>NoSQL options:</p>
+<h3>NoSQL options</h3>
 <ul>
 <li>Firestore: Document database, like MongoDB. Perfect for mobile/web apps</li>
 <li>Bigtable: Clickhouse or TiFlash in TIDB?</li>
 <li>MemoryStore: Redis/Memcached</li>
 </ul>
+<h3>Backup &amp; Recovery</h3>
+<p>Point-in-Time Recovery (PITR): A new database instance is created with a new IP address; the original instance remains untouched.</p>
 <h3>High availability and read replicas</h3>
 <p>It is just like AWS, nothing specials...</p>
 <h3>Other shit</h3>
@@ -285,6 +287,14 @@ exam)</li>
 <p>Filestore = managed NFS, for Linux. NetApp (NFS or SMB file services, for Window mostly!)</p>
 <hr>
 <h1>11. Virtual Private Cloud (VPC) Networking</h1>
+<p>Unlike AWS or Azure, a Google VPC is <strong>Global</strong> by default, remember this!</p>
+<h3>Subnet</h3>
+<ul>
+<li>Subnets are regional resources. THey are Cross-zone (meaning a single subnet spans all zones within its region!)</li>
+<li>When IPs in subnet run out of IP, zero downtime expansion, I meaning it is able to change the subnet mask (ex: from /24 to /20) without fuckin' downtime! And yeah expand is easy but not able to shrink xD, like volumes.</li>
+</ul>
+<h3>Cloud NGFW</h3>
+<p>It is fuckin' stateful, meaning you only need to allow ingress and it will allow egress for you! No need a seprate egress rule.</p>
 
 
              
