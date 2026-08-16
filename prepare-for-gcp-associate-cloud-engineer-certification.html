@@ -198,6 +198,10 @@ exam)</li>
 <li>AWS: IAM Roles for Service Accounts (IRSA)</li>
 <li>Azure/GCP: Workload Identity</li>
 </ul>
+<p>Example and scenario: Configure Workload Identity to bind a Kubernetes service account to a Google Cloud service account. This is little long but useful, that is why I put it here</p>
+<div class="highlight"><pre><span></span><code><span class="n">Workload</span><span class="w"> </span><span class="n">Identity</span><span class="w"> </span><span class="n">Federation</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">GKE</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">Google</span><span class="s1">&#39;s recommended and most secure method for GKE workloads to access Google Cloud APIs. You enable Workload Identity on the cluster, create a Kubernetes service account (KSA) in your namespace, create a Google Cloud IAM service account (GSA) with appropriate Cloud Storage permissions, then bind the KSA to the GSA using IAM policy bindings. When pods run using the annotated KSA, the GKE metadata server automatically exchanges the Kubernetes token for short-lived Google Cloud credentials, allowing the pod to authenticate to Cloud Storage APIs without any keys. This eliminates key management, follows least privilege (each workload gets distinct identity), provides full audit trails, and is explicitly recommended in CIS GKE Benchmarks.</span>
+</code></pre></div>
+
 <hr>
 <h1>6. Serverless with Cloud Run</h1>
 <h3>Cloud run services (Serverless containers)</h3>
@@ -246,7 +250,7 @@ exam)</li>
 <li>And use lifecycle for know, autoclass for unknown. Age condition then set storage class actions.</li>
 <li>Autoclass ignores file size &lt; 128Kb by default, it only transitions to Nearline (unless you configured it for Archive).</li>
 <li>And even with Automation, remember minimum durations: Nearline(30 days), Coldline(90 days), Archive (365 days)</li>
-<li>Uniform Bucket-Level access is the standard, no need legacy ACL and required to use feature like Managed Folders.</li>
+<li>Uniform Bucket-Level access is the standard, no need legacy ACL and required to use feature like Managed Folders. And enabling Uniform bucket-level access will disable existing object-level ACLs.</li>
 </ul>
 <h3>Storage Transfer Service (STS)</h3>
 <ul>
@@ -335,6 +339,10 @@ exam)</li>
 <li>Standard Tier: cheaper, more hops, can not use global LB.</li>
 <li>Premium Tier: cost more, less hops (which mean faster, low latency).</li>
 </ul>
+<h3>Other shit</h3>
+<ul>
+<li>When autoscaling based on Load Balancing capacity, you must first define the capacity (Maximum RPS) in the Backend Service. Once defined, configure the autoscaler to maintain a target utilization percentage (commonly 80%) of that capacity.</li>
+</ul>
 <hr>
 <h1>13. Infrastructure as Code (IaC)</h1>
 <p>LOL, first time I heard about <strong>Config Connector</strong>, you have k8s cluster running in GCP, manifest with kind Storage Bucket, kubectl apply that fuckin' file, config connector calls GCP APIs.</p>
@@ -349,8 +357,7 @@ exam)</li>
 <p>Nothing much worht to mention here, except Gemini Cloud, since we sent logs, metrics to GCP and simply we only need ask Gemini what is the fuckin' wrong, it's accuracy about 70-80%. Pretty sure we need to validate it before apply xD</p>
 <hr>
 <h1>15. Logging</h1>
-<p>GCP Cloud logging = AWS CloudWatch Logs</p>
-<h3>Some shit</h3>
+<p>GCP Cloud logging = AWS CloudWatch Logs.</p>
 <ul>
 <li>Log Buckets are container within cloud logging. _Required bucket stores for 400 days and can not be disabled. _Default bucket stores for 30 days by default,retention can be optimized.</li>
 <li>Buckets are regional, a specialized, database-like engine built exclusively inside Cloud Logging.</li>
@@ -361,6 +368,17 @@ exam)</li>
 <li>Cloud Trace is for tracing, find latency bottlenecks, why this shit takes 5 seconds to complete!</li>
 <li>Cloud Profiler is for code performance: Finding cpu/memory leaks in specific functions.</li>
 <li>Query Insight helps you identify slow SQL queries in Cloud SQL based on CPU and latency.</li>
+</ul>
+<h3>Log Router Sink</h3>
+<p>Log Router sinks are the standard method for exporting GCP logs to supported destinations for long-term storage and analysis.</p>
+<hr>
+<h1>16. Other shit</h1>
+<ul>
+<li><strong>Gemini Enterprise Agent Platform Workbench</strong> instances are Jupyter notebook-based development environments on Google Cloud. No need to manage infrastructure.</li>
+<li>Google Cloud's <strong>Cloud Hub</strong> is a free central dashboard that unifies operations data, health metrics, maintenance events, and cost optimization insights for your cloud applications and projects. It lets you monitor resources across different projects in one single place.</li>
+<li><strong>Backup for GKE</strong> is a fully managed Google Cloud service designed to protect, manage, and restore application data and Kubernetes resources in Google Kubernetes Engine (GKE) clusters.</li>
+<li><strong>Workforce identity pools</strong> are Google Cloud organization-level containers used in <strong>Workforce Identity Federation</strong> to manage external user identities (like employees or partners).</li>
+<li><strong>A cloud asset inventory</strong> is a centralized service or database that tracks, monitors, and analyzes cloud infrastructure resources, configurations, and identity policies across a project, organization, or multicloud environment. It provides visibility into virtual machines, storage, networks, and access controls</li>
 </ul>
 
 
