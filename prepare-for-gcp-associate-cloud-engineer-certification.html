@@ -127,7 +127,8 @@ exam)</li>
 <p>Ofc, like other public cloud providers, you are able to view the cost with labels...</p>
 <h3>Other shit</h3>
 <ul>
-<li>We can setting billing exports to BigQuery to analyze the costs?</li>
+<li>We can setting billing exports to BigQuery to analyze the costs!</li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/running-queries"><strong>A BigQuery dry run</strong></a> allows you to estimate the number of bytes a query will scan, validate its syntax, and check object existence for free, without using query slots or processing data</li>
 </ul>
 <hr>
 <h1>3. IAM</h1>
@@ -263,7 +264,7 @@ exam)</li>
 <ul>
 <li>Cloud SQL: Mysql, PostgreSQL, SQL Server...</li>
 <li>AlloyDB: PostgreSQL by GCP, not fuckin' open source xD, like Aurora in AWS.</li>
-<li>Cloud Spanner: like DynamoDB in AWS (able scale horizontally to handle write loads that exceed the capacity of a single server)</li>
+<li>Cloud Spanner: like DynamoDB in AWS (able scale horizontally to handle write loads that exceed the capacity of a single server). Which is offer SLA of 99.99%</li>
 </ul>
 <h3>NoSQL options</h3>
 <ul>
@@ -278,6 +279,7 @@ exam)</li>
 <h3>Other shit</h3>
 <ul>
 <li>Want a centralized view -&gt; go for Database Center</li>
+<li><a href="https://cloud.google.com/products/alloydb?hl=en">AlloyDB</a> is a fully managed PostgreSQL-compatible database service for your most demanding enterprise database workloads </li>
 </ul>
 <h3>Cloud Managed Services vs. Open-Source Equivalents</h3>
 <p>Not related but I want to put here, everytime I see services in AWS/GCP/Azure, I often search if there is same solution but <strong>open-source</strong>. So here is my little research:</p>
@@ -377,10 +379,14 @@ exam)</li>
 <li><strong>Gemini Enterprise Agent Platform Workbench</strong> instances are Jupyter notebook-based development environments on Google Cloud. No need to manage infrastructure.</li>
 <li>Google Cloud's <strong>Cloud Hub</strong> is a free central dashboard that unifies operations data, health metrics, maintenance events, and cost optimization insights for your cloud applications and projects. It lets you monitor resources across different projects in one single place.</li>
 <li><strong>Backup for GKE</strong> is a fully managed Google Cloud service designed to protect, manage, and restore application data and Kubernetes resources in Google Kubernetes Engine (GKE) clusters.</li>
-<li><strong>Workforce identity pools</strong> are Google Cloud organization-level containers used in <strong>Workforce Identity Federation</strong> to manage external user identities (like employees or partners).</li>
+<li><strong>Workforce identity pools</strong> are Google Cloud organization-level containers used in <strong>Workforce Identity Federation</strong> to manage external user identities (like employees or partners). Possible we can use Microsoft Entra ID to login with gloud commands with <strong>Workforce Identity Federation</strong>.</li>
 <li><strong>A cloud asset inventory</strong> is a centralized service or database that tracks, monitors, and analyzes cloud infrastructure resources, configurations, and identity policies across a project, organization, or multicloud environment. It provides visibility into virtual machines, storage, networks, and access controls</li>
 <li><a href="https://docs.cloud.google.com/shell/docs/configuring-cloud-shell"><strong>Environment customization</strong></a> allows you to install additional packages into your Cloud Shell environment when it starts. Cloud Shell automatically runs the script, $HOME/.customize_environment, when your instance boots up. Unlike .profile or .bashrc, this script runs once when Cloud Shell boots (rather than once for each shell login).</li>
 <li>Google Cloud's <a href="https://docs.cloud.google.com/iap/docs/using-tcp-forwarding"><strong>Identity-Aware Proxy</strong></a> (IAP) TCP forwarding enables secure, encrypted connections to administrative services (such as SSH and RDP) on virtual machine instances over private internal IPs. It removes the need for public IP addresses or jump hosts (bastion hosts) by routing traffic through HTTPS.</li>
+<li>Google Cloud's <a href="https://cloud.google.com/tpu?hl=en"><strong>Tensor Processing Units</strong></a> (TPUs) are custom-built to help speed up machine learning workloads</li>
+<li><a href="https://docs.cloud.google.com/firewall/docs/firewall-policies"><strong>Hierarchical firewall policies</strong></a> let you create and enforce a consistent firewall policy across your organization</li>
+<li><a href="https://oneuptime.com/blog/post/2026-02-17-how-to-set-up-inbound-dns-forwarding-to-allow-on-premises-queries-to-cloud-dns-in-gcp/"><strong>Inbound forwarding</strong></a> is used to allow on-premises networks to resolve names hosted in Cloud DNS. While you would use a private zone, the specific step of configuring a server policy is for hybrid connectivity (on-prem to cloud)</li>
+<li><a href="https://cloud.google.com/blog/products/management-tools/active-assist-comes-to-google-cloud"><strong>Active Assist</strong></a> refers to the portfolio of tools used in Google Cloud to generate recommendations and insights to help you optimize your Google Cloud projects</li>
 </ul>
 
 
