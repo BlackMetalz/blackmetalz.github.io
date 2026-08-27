@@ -88,10 +88,10 @@
 <p>Section of the exam:</p>
 <ul>
 <li>Section 1: Setting up a cloud solution environment (~20% of the exam)</li>
-<li>Section 2: Planning and implementing a cloud solution (~30% of the exam)</li>
-<li>Section 3: Ensuring the successful operation of a cloud solution (~30% of the
-exam)</li>
-<li>Section 4: Configuring access and security (~20% of the exam)</li>
+<li>Section 2: Planning and configuring a cloud solution (~10% of the exam)</li>
+<li>Section 3: Deploying and implementing a cloud solution (~30% of the exam)</li>
+<li>Section 4: Ensuring successful operation of a cloud solution (~30% of the exam)</li>
+<li>Section 5: Configuring access and security (~10% of the exam)</li>
 </ul>
 <hr>
 <h1>2.Resource Hierarchy</h1>
@@ -247,7 +247,7 @@ exam)</li>
 <ul>
 <li>Signed URL in GCP (GCS) = SAS Token in Azure (Blob Storage) = Presigned URL in AWS (S3)</li>
 <li>Delete encryption key = permanent data loss, because there is no way to decrypt files storage in bucket without key (But we have Pending deletion for key and soft delete for files in bucket. So don't worry if accident happens xD).</li>
-<li>Lifecycle policy management: same as other, move files from current classes to other classes or delete it for costs saving. And 1 thing interests about it, there is no fuckin' "Early Deletion Fees"</li>
+<li>Lifecycle policy management: same as other, move files from current classes to other classes or delete it for costs saving. But wait, early deletion fees STILL apply if objects are deleted or overwritten before their minimum duration (30d Nearline, 90d Coldline, 365d Archive)! Though transitions themselves are free, and Autoclass buckets are exempt from early deletion fees.</li>
 <li>And use lifecycle for know, autoclass for unknown. Age condition then set storage class actions.</li>
 <li>Autoclass ignores file size &lt; 128Kb by default, it only transitions to Nearline (unless you configured it for Archive).</li>
 <li>And even with Automation, remember minimum durations: Nearline(30 days), Coldline(90 days), Archive (365 days)</li>
@@ -264,12 +264,21 @@ exam)</li>
 <ul>
 <li>Cloud SQL: Mysql, PostgreSQL, SQL Server...</li>
 <li>AlloyDB: PostgreSQL by GCP, not fuckin' open source xD, like Aurora in AWS.</li>
-<li>Cloud Spanner: like DynamoDB in AWS (able scale horizontally to handle write loads that exceed the capacity of a single server). Which is offer SLA of 99.99%</li>
+<li>Cloud Spanner: horizontally scalable Relational (SQL) database (AWS doesn't have a direct equivalent, but think of it as managed CockroachDB/YugabyteDB). Offers a signature SLA of 99.999% for multi-region (and 99.99% for single-region).</li>
 </ul>
 <h3>NoSQL options</h3>
 <ul>
 <li>Firestore: Document database, like MongoDB. Perfect for mobile/web apps</li>
-<li>Bigtable: Clickhouse or TiFlash in TIDB?</li>
+<li>Bigtable: Wide-column NoSQL database, same as Apache HBase or Apache Cassandra. (Clickhouse/TiFlash are OLAP column stores, their actual GCP equivalent is BigQuery, not Bigtable).</li>
+<li><strong>Use cases</strong>: IoT data, clickstreams, time-series, financial data. Massive scale, high-throughput, and low latency (TB to PB).</li>
+<li><strong>Key exam points</strong>:<ul>
+<li><strong>Single index</strong>: Data is only indexed by the row key. </li>
+<li><strong>Avoid Hotspotting</strong>: Sequential row keys (like raw timestamps or alphabetical ID sequences) cause traffic to hit a single node (hotspotting). Prevent this by salting (pre-pending a hash), reversing IDs, or promoting fields.</li>
+<li><strong>Dynamic scale</strong>: Storage is decoupled from compute. You can dynamically add/remove nodes to scale throughput/IOPS without downtime or data migration.</li>
+<li><strong>Storage Types</strong>: SSD (default, recommended for low-latency queries) vs HDD (recommended for large historical/archival datasets where latency isn't critical).</li>
+<li><strong>Tooling</strong>: Use the <code>cbt</code> CLI tool to interact with and query Bigtable.</li>
+</ul>
+</li>
 <li>MemoryStore: Redis/Memcached</li>
 </ul>
 <h3>Backup &amp; Recovery</h3>
@@ -361,7 +370,7 @@ exam)</li>
 <h1>15. Logging</h1>
 <p>GCP Cloud logging = AWS CloudWatch Logs.</p>
 <ul>
-<li>Log Buckets are container within cloud logging. _Required bucket stores for 400 days and can not be disabled. _Default bucket stores for 30 days by default,retention can be optimized.</li>
+<li>Log Buckets are container within cloud logging. <strong>_Required</strong> bucket stores for 400 days and can not be disabled. <strong>_Default</strong> bucket stores for 30 days by default,retention can be optimized.</li>
 <li>Buckets are regional, a specialized, database-like engine built exclusively inside Cloud Logging.</li>
 <li>Log Analytics allows you to run SQL queries directly against your log data without exporting it to BigQuery.</li>
 <li>You can upgrade existing bucket to use Log Analytics.</li>
