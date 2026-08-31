@@ -78,14 +78,14 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p><img alt="alt text" src="images/2025/12/17.png"></p>
-<h1>Prerequisite</h1>
+            <p><img alt="alt text" src="images/2025/12/17.png" /></p>
+<h1 id="prerequisite">Prerequisite</h1>
 <ul>
 <li>Basic knowledge of <a href="https://blackmetalz.github.io/mastering-gitops-crushing-the-certified-gitops-associate-cgoa-exam.html">GitOps</a></li>
 <li>ArgoCD setup installation, <a href="https://blackmetalz.github.io/canaryblue-green-deployment-with-argo-rollouts.html">ArgoCD Rollout</a></li>
 </ul>
-<h1>Section needs to understand</h1>
-<h3>What is the purpose of the <code>argocd-repo-server</code> component?</h3>
+<h1 id="section-needs-to-understand">Section needs to understand</h1>
+<h3 id="what-is-the-purpose-of-the-argocd-repo-server-component">What is the purpose of the <code>argocd-repo-server</code> component?</h3>
 <p>Short answer: <code>git clone</code> and <code>generate manifests</code></p>
 <p>The <code>argocd-repo-server</code> has two main responsibilities:</p>
 <ul>
@@ -99,7 +99,7 @@
 <li>Return Manifests: <code>repo-server</code> will read content of manifests then return it to <code>Application Controller</code> (argocd-application-controller)</li>
 </ol>
 <p>Document here: <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/directory/">https://argo-cd.readthedocs.io/en/stable/user-guide/directory/</a></p>
-<h3>What is Argo Workflows?</h3>
+<h3 id="what-is-argo-workflows">What is Argo Workflows?</h3>
 <p>Wow, I never heard about Argo Workflows before, only 2 component that I know before were ArgoCD and Argo Rollouts. So let get into work!</p>
 <p>Argo Workflows is an open source container-native workflow engine for orchestrating parallel jobs on Kubernetes, native for K8S, Argo Workflows is implemented as a Kubernetes CRD. </p>
 <p>Each step in the workflow is a container. Hmm, this seems not correct. Let me correct it: </p>
@@ -108,7 +108,7 @@
 
 <p>Example: It works same as Jenkins, GitHub Actions, or GitLab CI. It does Checkout code -&gt; Build Docker Image -&gt; Run Test -&gt; Push into Registry.</p>
 <p>Document: <a href="https://argoproj.github.io/workflows/">https://argoproj.github.io/workflows/</a></p>
-<h3>How do steps in a workflow pass data to each other?</h3>
+<h3 id="how-do-steps-in-a-workflow-pass-data-to-each-other">How do steps in a workflow pass data to each other?</h3>
 <p>The section above is for this question!</p>
 <p>Short answer: There are 2 types of data you can pass to each other</p>
 <ul>
@@ -205,16 +205,16 @@
 <li>If you write with word <code>steps</code>, ex: <code>outputs.parameters</code> it will be resulted as invalid syntax.</li>
 </ul>
 <p>Almost 90 lines for simple explanation xD. But its worth!</p>
-<h3>What is the primary CRD for Argo Workflows?</h3>
+<h3 id="what-is-the-primary-crd-for-argo-workflows">What is the primary CRD for Argo Workflows?</h3>
 <p>As for the name and what we have go through, it is <code>Workflow</code>.</p>
-<h3>In Argo Workflows, what is a 'Suspend' template?</h3>
+<h3 id="in-argo-workflows-what-is-a-suspend-template">In Argo Workflows, what is a 'Suspend' template?</h3>
 <p>We can simply understand it as Pause of Workflow!</p>
 <p>Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/suspending/">https://argo-workflows.readthedocs.io/en/latest/walk-through/suspending/</a></p>
 <div class="highlight"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="k">suspend</span><span class="w"> </span><span class="n">template</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">template</span><span class="w"> </span><span class="k">type</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="k">suspend</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">workflow</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n n-Quoted">`duration`</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n n-Quoted">`indefinitely`</span><span class="p">.</span>
 </code></pre></div>
 
 <p>For exam, I think it can be best remember with <code>Suspend = Manual Approval</code></p>
-<h3>Let's learn about Argo Events</h3>
+<h3 id="lets-learn-about-argo-events">Let's learn about Argo Events</h3>
 <p>This is 4th project from <a href="https://argoproj.github.io/">Argo Project</a> which I have no idea before xD</p>
 <div class="highlight"><pre><span></span><code><span class="n">Argo</span><span class="w"> </span><span class="n">Events</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">event</span><span class="o">-</span><span class="n">based</span><span class="w"> </span><span class="n">dependency</span><span class="w"> </span><span class="n">manager</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Kubernetes</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">helps</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">define</span><span class="w"> </span><span class="n">multiple</span><span class="w"> </span><span class="n">dependencies</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">variety</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="n">sources</span><span class="w"> </span><span class="n">like</span><span class="w"> </span><span class="n">webhook</span><span class="p">,</span><span class="w"> </span><span class="n">s3</span><span class="p">,</span><span class="w"> </span><span class="n">schedules</span><span class="p">,</span><span class="w"> </span><span class="n">streams</span><span class="w"> </span><span class="n">etc</span><span class="o">.</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">trigger</span><span class="w"> </span><span class="n">Kubernetes</span><span class="w"> </span><span class="n">objects</span><span class="w"> </span><span class="n">after</span><span class="w"> </span><span class="n">successful</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="n">dependencies</span><span class="w"> </span><span class="n">resolution</span>
 </code></pre></div>
@@ -254,9 +254,9 @@
 <ul>
 <li>Trigger: Once the dependency is met, it creates the Argo Workflow resource in the cluster.</li>
 </ul>
-<h3>Tell me about AnalysisRun in Argo Rollouts</h3>
+<h3 id="tell-me-about-analysisrun-in-argo-rollouts">Tell me about AnalysisRun in Argo Rollouts</h3>
 <p>AnalysisRun is the initialization of AnalysisTemplate. It is responsible for querying the metrics provider and deciding whether the deployment should continue or be rolled back.</p>
-<h3>What is Sync Phases and Waves in ArgoCD?</h3>
+<h3 id="what-is-sync-phases-and-waves-in-argocd">What is Sync Phases and Waves in ArgoCD?</h3>
 <p>Document: <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#sync-phases-and-waves">https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/#sync-phases-and-waves</a></p>
 <p>Sync Waves (The "Order"):</p>
 <ul>
@@ -353,24 +353,24 @@ This only run after second step is Healthy</li>
 <li><code>BeforeHookCreation</code>: Delete old before create new one</li>
 <li><code>HookFailed</code>: Delete hook if fails</li>
 </ul>
-<h3>Argo Workflows - DAG templates</h3>
+<h3 id="argo-workflows-dag-templates">Argo Workflows - DAG templates</h3>
 <p>As an alternative to specifying sequences of steps, you can define a workflow as a directed-acyclic graph (DAG) by specifying the dependencies of each task. DAGs can be simpler to maintain for complex workflows and allow for maximum parallelism when running tasks.</p>
 <p>Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/">https://argo-workflows.readthedocs.io/en/latest/walk-through/dag/</a></p>
-<h3>Which CLI tool is used for Argo Rollouts?</h3>
+<h3 id="which-cli-tool-is-used-for-argo-rollouts">Which CLI tool is used for Argo Rollouts?</h3>
 <p>Document: <a href="https://argo-rollouts.readthedocs.io/en/stable/features/kubectl-plugin/">https://argo-rollouts.readthedocs.io/en/stable/features/kubectl-plugin/</a></p>
 <p>Answer: <code>kubectl argo rollouts</code></p>
-<h3>What is the 'Executor' in Argo Workflows?</h3>
+<h3 id="what-is-the-executor-in-argo-workflows">What is the 'Executor' in Argo Workflows?</h3>
 <p>Document: <a href="https://argo-workflows.readthedocs.io/en/latest/workflow-executors/">https://argo-workflows.readthedocs.io/en/latest/workflow-executors/</a></p>
 <p>The executor is a process that conforms to a specific interface that allows Argo to perform certain actions like capturing artifacts, logs, etc... Emissary is the default executor (From version 3.3+, before was Docker!)</p>
-<h3>Which CLI tool is used for Argo Workflows?</h3>
+<h3 id="which-cli-tool-is-used-for-argo-workflows">Which CLI tool is used for Argo Workflows?</h3>
 <p>Answer: <code>argo</code>
 Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/argo-cli/">https://argo-workflows.readthedocs.io/en/latest/walk-through/argo-cli/</a></p>
-<h3>Which command deletes all completed workflows?</h3>
+<h3 id="which-command-deletes-all-completed-workflows">Which command deletes all completed workflows?</h3>
 <div class="highlight"><pre><span></span><code>argo delete --completed
 </code></pre></div>
 
 <p>Related Document: <a href="https://github.com/argoproj/argo-workflows/blob/main/docs/cli/argo_delete.md">https://github.com/argoproj/argo-workflows/blob/main/docs/cli/argo_delete.md</a></p>
-<h3>How do you run a script (e.g., Python) directly inside a workflow step without building a custom image?</h3>
+<h3 id="how-do-you-run-a-script-eg-python-directly-inside-a-workflow-step-without-building-a-custom-image">How do you run a script (e.g., Python) directly inside a workflow step without building a custom image?</h3>
 <p>Short Answer: Use the <code>script</code> template type instead of <code>container</code></p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="n">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="n">argoproj</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
@@ -397,13 +397,13 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 
 <p>Document where I copy code xD: </p>
 <p><a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/">https://argo-workflows.readthedocs.io/en/latest/walk-through/scripts-and-results/</a></p>
-<h3>Which annotation allows you to delete a resource from the cluster but keep it in Git without Argo CD recreating it immediately?</h3>
+<h3 id="which-annotation-allows-you-to-delete-a-resource-from-the-cluster-but-keep-it-in-git-without-argo-cd-recreating-it-immediately">Which annotation allows you to delete a resource from the cluster but keep it in Git without Argo CD recreating it immediately?</h3>
 <p>Resource Exclusion or annotation</p>
 <div class="highlight"><pre><span></span><code>argocd.argoproj.io/compare-options: IgnoreExtraneous
 </code></pre></div>
 
 <p>Document: <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/compare-options/">https://argo-cd.readthedocs.io/en/stable/user-guide/compare-options/</a></p>
-<h3>What is argocd-image-updater?</h3>
+<h3 id="what-is-argocd-image-updater">What is argocd-image-updater?</h3>
 <p>Another "WoW, what is this?"</p>
 <p>So basically it is a tool to automatically update the container images of Kubernetes workloads that are managed by Argo CD as the name of it "ArgoCD image updater" xD</p>
 <p>Document: <a href="https://argocd-image-updater.readthedocs.io/en/stable/">https://argocd-image-updater.readthedocs.io/en/stable/</a></p>
@@ -431,7 +431,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <li>Git Write-back: it commits into gitops repo (create new commit with message like: "Update image to v1.1")</li>
 <li>Argo CD API (Imperative): It updates the Application resource directly in the cluster via Argo CD API, without modifying Git.</li>
 </ul>
-<h3>ArgoCD Notifications</h3>
+<h3 id="argocd-notifications">ArgoCD Notifications</h3>
 <p>Argo CD Notifications is a controller that continuously monitors Argo CD applications and sends alerts to external services (like Slack, Email, Telegram, Discord, or Webhooks) when specific events occur.</p>
 <p>It relies on three main concepts:</p>
 <ol>
@@ -440,7 +440,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <li><strong>Services:</strong> Defines <strong>where</strong> to send it (the destination credentials).</li>
 </ol>
 <p>Document: <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/">Argo CD Docs - Notifications</a></p>
-<h3>What are Application URLs (External URLs)?</h3>
+<h3 id="what-are-application-urls-external-urls">What are Application URLs (External URLs)?</h3>
 <p>This feature allows you to <strong>access your deployed application</strong> directly from the Argo CD UI (via a small "launch" icon on the Service or Ingress resource).</p>
 <p>How it works:</p>
 <ul>
@@ -451,7 +451,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 </code></pre></div>
 
 <p>Document: <a href="https://argo-cd.readthedocs.io/en/stable/user-guide/external-url/">External URL</a></p>
-<h3>Argo Workflows: Artifacts - Passing Files/Folders between Steps</h3>
+<h3 id="argo-workflows-artifacts-passing-filesfolders-between-steps">Argo Workflows: Artifacts - Passing Files/Folders between Steps</h3>
 <p>Different from Parameters (string), Artifacts used to pass files/folders between steps.</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">create-file</span>
 <span class="w">  </span><span class="nt">container</span><span class="p">:</span>
@@ -479,7 +479,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <li>Artifacts = files/folders, stored in S3/GCS/Minio (configurable)</li>
 <li>Artifact storage options: s3, gcs, azure, oss, hdfs, artifactory</li>
 </ul>
-<h3>Argo Workflows: WorkflowTemplate vs ClusterWorkflowTemplate</h3>
+<h3 id="argo-workflows-workflowtemplate-vs-clusterworkflowtemplate">Argo Workflows: WorkflowTemplate vs ClusterWorkflowTemplate</h3>
 <p>Same concept as ConfigMap vs ClusterRole!</p>
 <ul>
 <li>WorkflowTemplate: Namespaced, only usable within same namespace</li>
@@ -494,7 +494,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <span class="w">      </span>#<span class="w"> </span><span class="nv">clusterScope</span>:<span class="w"> </span><span class="nv">true</span><span class="w">        </span>#<span class="w"> </span><span class="nv">Add</span><span class="w"> </span><span class="nv">this</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">ClusterWorkflowTemplate</span>
 </code></pre></div>
 
-<h3>Argo Workflows: CronWorkflow - Scheduled Workflows</h3>
+<h3 id="argo-workflows-cronworkflow-scheduled-workflows">Argo Workflows: CronWorkflow - Scheduled Workflows</h3>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CronWorkflow</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -517,7 +517,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <li>Forbid: Skip if previous still running</li>
 <li>Replace: Kill previous, start new</li>
 </ul>
-<h3>Argo Workflows: Retry Strategy &amp; Timeout</h3>
+<h3 id="argo-workflows-retry-strategy-timeout">Argo Workflows: Retry Strategy &amp; Timeout</h3>
 <div class="highlight"><pre><span></span><code><span class="n">templates</span><span class="o">:</span>
 <span class="o">-</span><span class="w"> </span><span class="n">name</span><span class="o">:</span><span class="w"> </span><span class="n">flaky</span><span class="o">-</span><span class="n">step</span>
 <span class="w">  </span><span class="n">retryStrategy</span><span class="o">:</span>
@@ -545,7 +545,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <span class="w">    </span><span class="n">activeDeadlineSeconds</span><span class="o">:</span><span class="w"> </span><span class="mi">600</span><span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">Template</span><span class="w"> </span><span class="n">level</span><span class="o">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="n">min</span><span class="w"> </span><span class="n">max</span>
 </code></pre></div>
 
-<h3>Argo Workflows: Parallelism - withItems, withParam, withSequence</h3>
+<h3 id="argo-workflows-parallelism-withitems-withparam-withsequence">Argo Workflows: Parallelism - withItems, withParam, withSequence</h3>
 <div class="highlight"><pre><span></span><code><span class="x"># Static list</span>
 <span class="x">- name: process</span>
 <span class="x">  template: process-file</span>
@@ -570,7 +570,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <li>withParam: Dynamic JSON array from previous step</li>
 <li>withSequence: Generate numbers</li>
 </ul>
-<h3>Argo Workflows: Exit Handler - Finally block</h3>
+<h3 id="argo-workflows-exit-handler-finally-block">Argo Workflows: Exit Handler - Finally block</h3>
 <div class="highlight"><pre><span></span><code><span class="n">spec</span><span class="o">:</span>
 <span class="w">  </span><span class="n">entrypoint</span><span class="o">:</span><span class="w"> </span><span class="n">main</span>
 <span class="w">  </span><span class="n">onExit</span><span class="o">:</span><span class="w"> </span><span class="n">cleanup</span><span class="o">-</span><span class="n">handler</span><span class="w">         </span><span class="err">#</span><span class="w"> </span><span class="n">Always</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">end</span><span class="o">!</span>
@@ -583,7 +583,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 </code></pre></div>
 
 <p>CAPA exam note: onExit runs regardless of success/failure - like finally in code.</p>
-<h3>ArgoCD: Application Source Types</h3>
+<h3 id="argocd-application-source-types">ArgoCD: Application Source Types</h3>
 <p>ArgoCD supports multiple source types. When no <code>Chart.yaml</code> or <code>kustomization.yaml</code> found, it defaults to Directory (plain YAML).</p>
 <div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">source</span><span class="p">:</span>
@@ -607,7 +607,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 </code></pre></div>
 
 <p>CAPA exam note: Know the difference between helm.values (inline) vs helm.valueFiles (from file)</p>
-<h3>ArgoCD: Sync Options</h3>
+<h3 id="argocd-sync-options">ArgoCD: Sync Options</h3>
 <p>Common sync options via annotation or Application spec:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">metadata</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
@@ -618,7 +618,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 </code></pre></div>
 
 <p>CAPA exam note: SelfHeal + Prune = fully automated GitOps (no manual intervention)</p>
-<h3>ArgoCD: Health Status vs Sync Status</h3>
+<h3 id="argocd-health-status-vs-sync-status">ArgoCD: Health Status vs Sync Status</h3>
 <p>Two different things!</p>
 <ul>
 <li>Sync Status: Is cluster state = Git state? (Synced, OutOfSync)</li>
@@ -626,7 +626,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 </ul>
 <p>Example: App can be Synced but Degraded (manifests applied but pods crashing)</p>
 <p>CAPA exam note: Refresh = check, Sync = apply</p>
-<h3>ArgoCD: AppProject - RBAC for Applications</h3>
+<h3 id="argocd-appproject-rbac-for-applications">ArgoCD: AppProject - RBAC for Applications</h3>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AppProject</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -653,7 +653,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 </code></pre></div>
 
 <p>CAPA exam note: default project allows everything. Create custom projects to restrict source repos, destinations, and resource types.</p>
-<h3>ArgoCD: ApplicationSet - Generate Multiple Apps</h3>
+<h3 id="argocd-applicationset-generate-multiple-apps">ArgoCD: ApplicationSet - Generate Multiple Apps</h3>
 <p>Instead of creating 10 Applications manually, use ApplicationSet:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ApplicationSet</span>
@@ -690,7 +690,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <li><code>matrix</code>: Combine multiple generators</li>
 </ul>
 <p>CAPA exam note: App of Apps = manual setup, ApplicationSet = dynamic/automated generation</p>
-<h3>Argo Rollouts: AnalysisTemplate vs ClusterAnalysisTemplate</h3>
+<h3 id="argo-rollouts-analysistemplate-vs-clusteranalysistemplate">Argo Rollouts: AnalysisTemplate vs ClusterAnalysisTemplate</h3>
 <p>Same pattern again - namespaced vs cluster-wide:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AnalysisTemplate</span><span class="w">          </span><span class="c1"># or ClusterAnalysisTemplate</span>
@@ -721,7 +721,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <li>count: How many times to run the measurement</li>
 <li>interval: Time between measurements</li>
 </ul>
-<h3>Argo Events: EventBus - Transport Layer</h3>
+<h3 id="argo-events-eventbus-transport-layer">Argo Events: EventBus - Transport Layer</h3>
 <p>EventBus is the backbone that connects EventSources to Sensors. Think of it as message queue.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventBus</span>
@@ -749,7 +749,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <li>Default name is default - if you name it differently, must reference in EventSource/Sensor</li>
 <li>NATS = simple, Jetstream = persistent, Kafka = enterprise scale</li>
 </ul>
-<h3>Argo Events: Common EventSource Types</h3>
+<h3 id="argo-events-common-eventsource-types">Argo Events: Common EventSource Types</h3>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EventSource</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -793,7 +793,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 </code></pre></div>
 
 <p>CAPA exam note: One EventSource can have multiple sources of same or different types.</p>
-<h3>Argo Events: Sensor - Trigger Conditions &amp; Filters</h3>
+<h3 id="argo-events-sensor-trigger-conditions-filters">Argo Events: Sensor - Trigger Conditions &amp; Filters</h3>
 <p>Filter events before triggering:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sensor</span>
@@ -840,7 +840,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <li>context: Filter by event metadata</li>
 <li>exprs: CEL expressions for complex logic</li>
 </ul>
-<h3>Argo Events: Multiple Dependencies - AND/OR Logic</h3>
+<h3 id="argo-events-multiple-dependencies-andor-logic">Argo Events: Multiple Dependencies - AND/OR Logic</h3>
 <div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">dependencies</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webhook-dep</span>
@@ -858,7 +858,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 </code></pre></div>
 
 <p>CAPA exam note: Default behavior (no conditions) = AND logic (all dependencies must be satisfied)</p>
-<h3>Argo Events: Trigger Types</h3>
+<h3 id="argo-events-trigger-types">Argo Events: Trigger Types</h3>
 <p>Sensor can trigger different resources:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">triggers</span><span class="p">:</span>
 <span class="w">  </span><span class="c1"># 1. Create Argo Workflow</span>
@@ -897,7 +897,7 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 </code></pre></div>
 
 <p>CAPA exam note: Most common trigger = Argo Workflow, but can trigger <strong>any K8s resource</strong> or external services.</p>
-<h3>Argo Events: Complete Flow Diagram</h3>
+<h3 id="argo-events-complete-flow-diagram">Argo Events: Complete Flow Diagram</h3>
 <div class="highlight"><pre><span></span><code><span class="err">┌─────────────┐</span><span class="w">     </span><span class="err">┌──────────┐</span><span class="w">     </span><span class="err">┌─────────┐</span><span class="w">     </span><span class="err">┌──────────┐</span>
 <span class="err">│</span><span class="w"> </span><span class="n">EventSource</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="n">EventBus</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="n">Sensor</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="err">│</span><span class="w"> </span><span class="n">Workflow</span><span class="w"> </span><span class="err">│</span>
 <span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="n">webhook</span><span class="p">,</span><span class="w">   </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="n">NATS</span><span class="o">/</span><span class="w">   </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="n">filter</span><span class="w"> </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="kr">or</span><span class="w"> </span><span class="kr">any</span><span class="w">  </span><span class="err">│</span>
@@ -912,10 +912,10 @@ Document: <a href="https://argo-workflows.readthedocs.io/en/latest/walk-through/
 <li>EventBus: HOW events are transported</li>
 <li>Sensor: WHAT to do when events match (filter + trigger)</li>
 </ul>
-<h1>My secret weapon: Mock Exam</h1>
+<h1 id="my-secret-weapon-mock-exam">My secret weapon: Mock Exam</h1>
 <p>Udemy practice test:</p>
 <p><a href="https://www.udemy.com/course/complete-certified-argo-project-associate-capa-exam-prep/">https://www.udemy.com/course/complete-certified-argo-project-associate-capa-exam-prep/</a></p>
-<h1>Exam note:</h1>
+<h1 id="exam-note">Exam note:</h1>
 <ul>
 <li>Exam duration: 90 minutes</li>
 <li>Exam questions: 60 questions</li>

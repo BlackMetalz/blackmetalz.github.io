@@ -85,7 +85,7 @@
 <li><a href="https://blackmetalz.github.io/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html">Demystifying CNI: When Kubernetes "Borrows" Plugins to Build Its Network</a></li>
 <li><strong>How Cilium CNI works in K8S</strong> <em>(You are here)</em></li>
 </ul>
-<hr>
+<hr />
 <p>In <a href="https://blackmetalz.github.io/container-networking-series-part-3-demystifying-cni-when-kubernetes-borrows-plugins-to-build-its-network.html">Part 3</a>, we stripped the CNI flow down to bare metal: <strong>a binary + env vars + JSON on stdin</strong>. That contract does not change with Cilium. container runtime/CRI still calls a CNI plugin. What changes is what the plugin and its agent do after that call.</p>
 <p>If you want a easier Kubernetes networking refresher before going deeper, I also wrote another intro-level post <a href="https://blackmetalz.github.io/sharing-what-ive-learned-about-kubernetes-networking-part-2.html">back in 01-2025</a>. Even beginner level can read it pretty well (I'm bad at that time xD)</p>
 <p>One correction before we start: "Cilium means iptables is gone" is too simplistic. The more accurate version is:</p>
@@ -95,8 +95,8 @@
 <li>Depending on the feature set and host config, you may still see some iptables rules on the node</li>
 </ul>
 <p>So the real win is not "iptables disappears completely". The real win is that the hot Kubernetes networking path no longer depends on kube-proxy building giant iptables chains for every Service.</p>
-<hr>
-<h2>1. Prerequisites (Setup)</h2>
+<hr />
+<h2 id="1-prerequisites-setup">1. Prerequisites (Setup)</h2>
 <p>To follow this lab on <strong>Ubuntu 24.04</strong>, you need those softwares installed:</p>
 <ol>
 <li><strong>Docker</strong> to run Kind</li>
@@ -121,7 +121,7 @@ cgroup2fs
 </code></pre></div>
 
 <p>If those 2 checks are wrong, fix the host first. Otherwise the cluster may come up, but kube-proxy replacement can fail in confusing ways.</p>
-<h3>Install Cilium CLI</h3>
+<h3 id="install-cilium-cli">Install Cilium CLI</h3>
 <div class="highlight"><pre><span></span><code><span class="nv">CILIUM_CLI_VERSION</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt<span class="k">)</span>
 <span class="nv">CLI_ARCH</span><span class="o">=</span>amd64
 <span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>uname<span class="w"> </span>-m<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;aarch64&quot;</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>uname<span class="w"> </span>-m<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;arm64&quot;</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
@@ -145,14 +145,14 @@ cilium<span class="w"> </span>image<span class="w"> </span><span class="o">(</sp
 cilium<span class="w"> </span>image<span class="w"> </span><span class="o">(</span>stable<span class="o">)</span>:<span class="w"> </span>v1.19.1
 </code></pre></div>
 
-<hr>
-<h2>2. Decoding the Core Concepts</h2>
-<h3>Pod Networking Flow with Cilium</h3>
-<p><img alt="cilium flow overview" src="./images/2026/03/09.png"></p>
-<h3>What exactly is eBPF?</h3>
+<hr />
+<h2 id="2-decoding-the-core-concepts">2. Decoding the Core Concepts</h2>
+<h3 id="pod-networking-flow-with-cilium">Pod Networking Flow with Cilium</h3>
+<p><img alt="cilium flow overview" src="./images/2026/03/09.png" /></p>
+<h3 id="what-exactly-is-ebpf">What exactly is eBPF?</h3>
 <p>Think of eBPF as a way to run <strong>small, verified programs inside the Linux kernel</strong>. You do not rebuild the kernel. You do not reboot the machine. You load a program, the kernel verifies it, then attaches it to specific hooks in the networking path.</p>
 <p>That means packets can be inspected, forwarded, dropped, NATed, or load-balanced <strong>inside kernel space</strong>, without punting every decision to userspace tools.</p>
-<h3>What changes when the CNI is Cilium?</h3>
+<h3 id="what-changes-when-the-cni-is-cilium">What changes when the CNI is Cilium?</h3>
 <p>With a more traditional K8S setup, the flow often looks like this:</p>
 <div class="highlight"><pre><span></span><code>Pod -&gt; veth -&gt; routing -&gt; kube-proxy / iptables / IPVS -&gt; destination
 </code></pre></div>
@@ -162,17 +162,17 @@ cilium<span class="w"> </span>image<span class="w"> </span><span class="o">(</sp
 </code></pre></div>
 
 <p>More precisely, Cilium can use <strong>TC(Traffic Control) hooks</strong>, <strong>socket-level load-balancing</strong>, and in some cases <strong>XDP(eXpress Data Path)</strong>, depending on which feature is in play.</p>
-<h3>Cilium can replace kube-proxy</h3>
+<h3 id="cilium-can-replace-kube-proxy">Cilium can replace kube-proxy</h3>
 <p>In a standard cluster, <code>kube-proxy</code> watches Services and installs iptables or IP Virtual Server (IPVS) rules so <code>ClusterIP</code>, <code>NodePort</code>, and friends actually work.</p>
 <p>In a kube-proxy-free Cilium cluster, Cilium does that job itself. It stores Service and backend mappings in <strong>BPF maps</strong>, so when traffic hits a Service IP, the translation happens in the eBPF datapath instead of an iptables chain.</p>
 <p>That is why in this lab we explicitly disable kube-proxy and tell Cilium to take over.</p>
 <p>Important: Cilium deploys an agent on every Kubernetes node as a DaemonSet. The CNI plugin is invoked during Pod setup, and the local cilium-agent maintains endpoint state and programs the eBPF datapath on that node.</p>
-<h3>Cilium Identity</h3>
+<h3 id="cilium-identity">Cilium Identity</h3>
 <p>This is one of Cilium's killer ideas.</p>
 <p>Instead of treating workloads as "just IP addresses", Cilium assigns them <strong>security identities</strong> derived from labels. Policies are then evaluated against identities, not just raw IPs.</p>
 <p>That matters because Pod IPs are ephemeral. Labels are usually a better description of intent.</p>
-<hr>
-<h2>3. Lab: Seeing Cilium in Action</h2>
+<hr />
+<h2 id="3-lab-seeing-cilium-in-action">3. Lab: Seeing Cilium in Action</h2>
 <p>This walkthrough intentionally uses:</p>
 <ul>
 <li><strong>Kind</strong> as the cluster runtime</li>
@@ -181,7 +181,7 @@ cilium<span class="w"> </span>image<span class="w"> </span><span class="o">(</sp
 <li><strong>Cilium as both CNI and Service datapath</strong></li>
 </ul>
 <p>We will also pin the demo pods to <strong>different worker nodes</strong> so cross-node traffic is guaranteed instead of being left to scheduler luck.</p>
-<h3>Step 1: Create a Kind cluster for Cilium</h3>
+<h3 id="step-1-create-a-kind-cluster-for-cilium">Step 1: Create a Kind cluster for Cilium</h3>
 <p>Create <code>kind-cilium-config.yaml</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cluster</span>
 <span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kind.x-k8s.io/v1alpha4</span>
@@ -238,7 +238,7 @@ root@kienlt-lab-utilities:~#<span class="w"> </span>k<span class="w"> </span>-n<
 Error<span class="w"> </span>from<span class="w"> </span>server<span class="w"> </span><span class="o">(</span>NotFound<span class="o">)</span>:<span class="w"> </span>daemonsets.apps<span class="w"> </span><span class="s2">&quot;kube-proxy&quot;</span><span class="w"> </span>not<span class="w"> </span>found
 </code></pre></div>
 
-<h3>Step 2: Install Cilium in kube-proxy-free mode</h3>
+<h3 id="step-2-install-cilium-in-kube-proxy-free-mode">Step 2: Install Cilium in kube-proxy-free mode</h3>
 <p>This is the most important step, so be explicit instead of relying on defaults.</p>
 <p>First, get the control-plane container IP. In kube-proxy-free mode, Cilium needs a direct API server address from the start:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">API_SERVER_IP</span><span class="o">=</span><span class="k">$(</span>docker<span class="w"> </span>inspect<span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}&#39;</span><span class="w"> </span>kind-control-plane<span class="k">)</span>
@@ -335,7 +335,7 @@ kube-controller-manager-kind-control-plane<span class="w">   </span><span class=
 kube-scheduler-kind-control-plane<span class="w">            </span><span class="m">1</span>/1<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>4m44s<span class="w">   </span><span class="m">172</span>.21.0.4<span class="w">     </span>kind-control-plane<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
 </code></pre></div>
 
-<h3>Step 2.1: Run a smoke test before going deeper</h3>
+<h3 id="step-21-run-a-smoke-test-before-going-deeper">Step 2.1: Run a smoke test before going deeper</h3>
 <p>TLDR: <strong>Don't run it unless you want to see a wall of text and time consuming. LOLL</strong></p>
 <p>Command to create wall of text and time consuming:</p>
 <div class="highlight"><pre><span></span><code>cilium<span class="w"> </span>connectivity<span class="w"> </span><span class="nb">test</span>
@@ -370,8 +370,8 @@ kube-scheduler-kind-control-plane<span class="w">            </span><span class=
 <li>policy paths</li>
 </ul>
 <p>If this fails, stop and fix the installation first. Do not continue to the tracing section while the base connectivity test is red.</p>
-<hr>
-<h2>4. Prove That Cilium Replaced kube-proxy</h2>
+<hr />
+<h2 id="4-prove-that-cilium-replaced-kube-proxy">4. Prove That Cilium Replaced kube-proxy</h2>
 <p>We want an explicit signal, not guesswork.</p>
 <p>Pick any Cilium agent pod:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">CILIUM_POD</span><span class="o">=</span><span class="k">$(</span>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-l<span class="w"> </span>k8s-app<span class="o">=</span>cilium<span class="w"> </span>-o<span class="w"> </span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.items[0].metadata.name}&#39;</span><span class="k">)</span>
@@ -395,14 +395,14 @@ KubeProxyReplacement:<span class="w">    </span>True<span class="w">   </span><s
 </code></pre></div>
 
 <p>That line is much stronger evidence than "iptables looks short today".</p>
-<h3>A note about iptables</h3>
+<h3 id="a-note-about-iptables">A note about iptables</h3>
 <p>You can still inspect iptables if you want, but use it as a side observation, not as the primary proof:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>kind-control-plane<span class="w"> </span>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-L<span class="w"> </span>-n
 </code></pre></div>
 
 <p>You may still see some rules depending on the environment. That does <strong>not</strong> invalidate the point. What matters is whether Kubernetes Service handling and policy enforcement are happening in the Cilium datapath.</p>
-<hr>
-<h2>5. Create Deterministic Cross-Node Workloads</h2>
+<hr />
+<h2 id="5-create-deterministic-cross-node-workloads">5. Create Deterministic Cross-Node Workloads</h2>
 <p>Instead of <code>kubectl run</code> and hoping the scheduler spreads the pods out, pin them yourself for this lab.</p>
 <p>Create <code>cilium-demo.yaml</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1</span>
@@ -469,8 +469,8 @@ nginx-svc<span class="w">   </span>ClusterIP<span class="w">   </span><span clas
 <li><code>curl-client</code> runs on <code>kind-worker2</code></li>
 <li><code>nginx-svc</code> gets a <code>ClusterIP</code></li>
 </ul>
-<hr>
-<h2>6. Inspect the eBPF Service Map</h2>
+<hr />
+<h2 id="6-inspect-the-ebpf-service-map">6. Inspect the eBPF Service Map</h2>
 <p>Now that a real Service exists, inspect how Cilium programs it:</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span>cilium-dbg<span class="w"> </span>bpf<span class="w"> </span>lb<span class="w"> </span>list
 </code></pre></div>
@@ -508,8 +508,8 @@ SERVICE<span class="w"> </span>ADDRESS<span class="w">               </span>BACK
 
 <p>So we can see service <code>10.110.49.77:80</code> is mapped to pod <code>10.244.2.122:80</code>. Kinda great for me, we would able to see which service is map to which backend address without kubectl, only need cilium-dbg bpf command xD.</p>
 <p>kubectl get svc shows the Kubernetes intent. cilium-dbg bpf lb list shows the datapath truth actually programmed into the kernel.</p>
-<hr>
-<h2>7. Trace Cross-Node Traffic</h2>
+<hr />
+<h2 id="7-trace-cross-node-traffic">7. Trace Cross-Node Traffic</h2>
 <p>We want to prove 2 things:</p>
 <ol>
 <li>direct Pod IP traffic across nodes</li>
@@ -564,8 +564,8 @@ svcIP:200
 <li>no kube-proxy exists in the cluster</li>
 </ul>
 <p>That combination is the real proof.</p>
-<hr>
-<h2>8. IPAM in This Lab</h2>
+<hr />
+<h2 id="8-ipam-in-this-lab">8. IPAM in This Lab</h2>
 <p>This lab uses:</p>
 <div class="highlight"><pre><span></span><code>ipam.mode=kubernetes
 </code></pre></div>
@@ -588,12 +588,12 @@ kind-worker2<span class="w">         </span><span class="m">10</span>.244.2.0/24
 <li>Cilium allocates Pod IPs from that per-node range</li>
 <li>Cilium still enforces policy and does Service load-balancing in eBPF</li>
 </ol>
-<h3>Wait, I thought Cilium uses <code>CiliumNode</code> CRDs for IPAM?</h3>
+<h3 id="wait-i-thought-cilium-uses-ciliumnode-crds-for-ipam">Wait, I thought Cilium uses <code>CiliumNode</code> CRDs for IPAM?</h3>
 <p>That is also true, but <strong>not in this exact lab mode</strong>.</p>
 <p>On many generic Cilium installs, the default is <strong>cluster-pool IPAM</strong>, where Cilium Operator assigns per-node PodCIDRs and you inspect that through <code>CiliumNode</code> resources.</p>
 <p>If you want to explore that mode in another lab, <code>kubectl get ciliumnodes -o yaml</code> is a great command. But for this Kind walkthrough, <code>ipam.mode=kubernetes</code> is the cleaner path.</p>
-<hr>
-<h2>9. Identity-Based Network Policy</h2>
+<hr />
+<h2 id="9-identity-based-network-policy">9. Identity-Based Network Policy</h2>
 <p>Now let's use labels, not IPs, to block traffic.</p>
 <p>First, inspect identities:</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>kube-system<span class="w"> </span><span class="nb">exec</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CILIUM_POD</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span>cilium-dbg<span class="w"> </span>identity<span class="w"> </span>list
@@ -655,8 +655,8 @@ curl:<span class="w"> </span><span class="o">(</span><span class="m">28</span><s
 kubectl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> </span>cilium-demo.yaml
 </code></pre></div>
 
-<hr>
-<h2>10. Summary</h2>
+<hr />
+<h2 id="10-summary">10. Summary</h2>
 <p>Not really a summary but here you go.</p>
 <table>
 <thead>
@@ -712,15 +712,15 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> 
 <li>observability</li>
 </ul>
 <p>And when kube-proxy is removed, Cilium is not just "another CNI plugin". It becomes the thing driving a large part of the cluster network data plane.</p>
-<hr>
-<h2>11. Cilium Certified Associate (CCA) Exam</h2>
+<hr />
+<h2 id="11-cilium-certified-associate-cca-exam">11. Cilium Certified Associate (CCA) Exam</h2>
 <p>In case you are interest with, you can go to this link (my blog also xD):</p>
 <p><a href="https://blackmetalz.github.io/prepare-for-the-cilium-certified-associate-cca-exam.html">Prepare for the Cilium Certified Associate (CCA) Exam</a></p>
-<h2>12. eBPF explain in Cilium context</h2>
+<h2 id="12-ebpf-explain-in-cilium-context">12. eBPF explain in Cilium context</h2>
 <p>To be honest, I still messed up with this, can not explain meaning I'm not fully understand.</p>
 <p>So all I know is that Cilium uses eBPF to replace kube-proxy and policy enforcement. But it is not enough to explain how it works. So again, what the fuck is eBPF? </p>
 <p>eBPF = extended Berkeley Packet Filter (packet filter, remember this damn word!). It allows you write a small program (C is the most common language to write eBPF program, then compile to bytecode), load into kernel, kernel verify that fucking program (make sure no fucking infinite loop, no memory leak, and so on..) then attach it into 1 specific <code>hook point</code></p>
-<h3>Hook point</h3>
+<h3 id="hook-point">Hook point</h3>
 <p>I will try to write down small part, if fully, it will be overload for me.</p>
 <div class="highlight"><pre><span></span><code><span class="n">Packet</span><span class="w"> </span><span class="n">into</span><span class="w"> </span><span class="n">NIC</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">XDP</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">TC</span><span class="w"> </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">Socket</span><span class="o">-</span><span class="n">level</span><span class="w"> </span><span class="n">hooks</span>
 </code></pre></div>
@@ -731,7 +731,7 @@ kubectl<span class="w"> </span>delete<span class="w"> </span>-f<span class="w"> 
 <li>Socket-level hooks: Cilium use Socket LB for translate service IP before packet create --&gt; avoid DNAT completely.</li>
 </ul>
 <p>That is what I understand, but Linux network look like fun if I deep dive more. But that's it for now!</p>
-<hr>
+<hr />
 <p><strong>References:</strong></p>
 <ul>
 <li><a href="https://docs.cilium.io/">Cilium Documentation</a></li>

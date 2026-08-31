@@ -78,12 +78,12 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Introduction</h1>
+            <h1 id="introduction">Introduction</h1>
 <p>This document outlines the deployment of a Kubernetes v1.31.9 HA cluster on Ubuntu 24.04 using Kubespray v2.27.1.</p>
 <p>Objective: Establish a robust lab environment with minimum requirements. It can be upgraded to production later by simply adding more worker nodes and migrating to dedicated master nodes.
 Topology: 3-node HA architecture (Control Plane, Etcd, and Worker roles on all nodes).</p>
-<h1>Installation with Ansible</h1>
-<h3>Prerequisite</h3>
+<h1 id="installation-with-ansible">Installation with Ansible</h1>
+<h3 id="prerequisite">Prerequisite</h3>
 <p>Required: ssh to others machine with ssh key defined in ssh config, no password!</p>
 <div class="highlight"><pre><span></span><code><span class="err">#</span><span class="w"> </span><span class="n">Run</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">jump</span><span class="w"> </span><span class="k">host</span>
 <span class="err">#</span><span class="w"> </span><span class="k">add</span><span class="o">-</span><span class="n">apt</span><span class="o">-</span><span class="n">repository</span><span class="w"> </span><span class="o">--</span><span class="n">yes</span><span class="w"> </span><span class="o">--</span><span class="k">update</span><span class="w"> </span><span class="nl">ppa</span><span class="p">:</span><span class="n">ansible</span><span class="o">/</span><span class="n">ansible</span>
@@ -151,7 +151,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <span class="n">kube_network_plugin_multus</span><span class="p">:</span><span class="w"> </span><span class="bp">false</span>
 </code></pre></div>
 
-<h3>CNI - Cilium configuration</h3>
+<h3 id="cni-cilium-configuration">CNI - Cilium configuration</h3>
 <p>Ok, for this lab I would replace Calico with Cilium. So change <code>kube_network_plugin calico</code> to <code>kube_network_plugin: cilium</code>. Then everything will use default, I don't have any problem with <code>kube_service_address</code> or <code>kube_pods_subnet</code> since this is lab xD</p>
 <p>Also enable <code>cilium_kube_proxy_replacement</code> with <code>strict</code> and others here: <code>inventory/kienlt-cluster/group_vars/k8s_cluster/k8s-net-cilium.yml</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">cilium_kube_proxy_replacement</span><span class="o">:</span><span class="w"> </span><span class="n">strict</span>
@@ -159,7 +159,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <span class="n">cilium_enable_hubble_ui</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;{{ cilium_enable_hubble }}&quot;</span>
 </code></pre></div>
 
-<h3>Cluster Bootstrap</h3>
+<h3 id="cluster-bootstrap">Cluster Bootstrap</h3>
 <p>Run this, take a coffee and wait for it finish. Estimate about 15-20 minutes.</p>
 <div class="highlight"><pre><span></span><code>ansible-playbook<span class="w"> </span>-i<span class="w"> </span>inventory/kienlt-cluster/inventory.ini<span class="w"> </span>cluster.yml
 </code></pre></div>
@@ -173,7 +173,7 @@ node3<span class="w">                      </span>:<span class="w"> </span><span
 Sunday<span class="w"> </span><span class="m">21</span><span class="w"> </span>December<span class="w"> </span><span class="m">2025</span><span class="w">  </span><span class="m">14</span>:01:09<span class="w"> </span>+0700<span class="w"> </span><span class="o">(</span><span class="m">0</span>:00:00.089<span class="o">)</span><span class="w">       </span><span class="m">0</span>:11:59.291<span class="w"> </span>*******
 </code></pre></div>
 
-<h3>Setup kubectl in jump host</h3>
+<h3 id="setup-kubectl-in-jump-host">Setup kubectl in jump host</h3>
 <p>Kubeconfig setup</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span><span class="nv">$HOME</span>/.kube
 <span class="c1"># Get file from node1 to Jump Host</span>
@@ -215,7 +215,7 @@ sudo<span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span>
 k9s<span class="w"> </span>version
 </code></pre></div>
 
-<h3>Upgrade cluster with Kubespray (Optional for lab xD)</h3>
+<h3 id="upgrade-cluster-with-kubespray-optional-for-lab-xd">Upgrade cluster with Kubespray (Optional for lab xD)</h3>
 <p>Don't upgrade unless you have some experience! It took 2 hours for debug and rollback in my case! xD</p>
 <p>From what I'm understanding, need to check out to new branch/tag that have support to version we want. Example I want to upgrade from <code>v1.31.9</code> to <code>v1.32.0</code>, current tag is <code>v2.27.1</code>. List all 2.2x tag by</p>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>tag<span class="w"> </span>-l<span class="w"> </span><span class="s2">&quot;v2.2*&quot;</span><span class="p">|</span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">10</span>
@@ -266,7 +266,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </code></pre></div>
 
 <p>Expected output with some issue with Cilium. But I don't want to investigate too much time for this issue. Because Cilium still working xD!!!</p>
-<h3>In scenario, you still want a clean cluster</h3>
+<h3 id="in-scenario-you-still-want-a-clean-cluster">In scenario, you still want a clean cluster</h3>
 <p>For reset: <code>git checkout v2.27.1</code> </p>
 <p>Change <code>cilium_kube_proxy_replacement: "true"</code> from <code>cilium_kube_proxy_replacement: strict</code></p>
 <p>Change <code>kube_version: v1.31.9</code></p>
@@ -282,7 +282,7 @@ sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/127
 k<span class="w"> </span>get<span class="w"> </span>nodes
 </code></pre></div>
 
-<h1>I'm to lazy to finish this shit -.-</h1>
+<h1 id="im-to-lazy-to-finish-this-shit-">I'm to lazy to finish this shit -.-</h1>
 
 
              

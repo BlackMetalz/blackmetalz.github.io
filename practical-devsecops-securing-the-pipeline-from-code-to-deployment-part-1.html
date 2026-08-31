@@ -78,13 +78,13 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h3>This series will contain 3 parts:</h3>
+            <h3 id="this-series-will-contain-3-parts">This series will contain 3 parts:</h3>
 <ul>
 <li>Part 1. Secure Coding Practices: Tools and Techniques for DevSecOps. (<strong>We are here!</strong>)</li>
 <li>Part 2. Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps.</li>
 <li>Part 3. Automating Security: Integrating DevSecOps into CI/CD with Jenkins.</li>
 </ul>
-<h1>Introduction to DevSecOps</h1>
+<h1 id="introduction-to-devsecops">Introduction to DevSecOps</h1>
 <p>DevSecOps is an approach that integrates security practices within the DevOps process. It involves:</p>
 <ul>
 <li><strong>Security Integration</strong>: Embedding security throughout the entire development lifecycle</li>
@@ -101,7 +101,7 @@
 <li>Managing vulnerabilities throughout the application lifecycle</li>
 </ol>
 <p>This approach ensures that security is not a bottleneck but rather an integrated part of the development process.</p>
-<h1>Component in this Part</h1>
+<h1 id="component-in-this-part">Component in this Part</h1>
 <ol>
 <li>Talisman</li>
 <li>Mutation Testing:<ul>
@@ -113,10 +113,10 @@
 <li>Sonarqube</li>
 <li>Dependency Checks</li>
 </ol>
-<hr>
-<h1>1. Talisman</h1>
+<hr />
+<h1 id="1-talisman">1. Talisman</h1>
 <p>Talisman is a tool that scans git changesets to ensure that potential secrets or sensitive information do not leave the developer's workstation.</p>
-<h3>Why should we use Talisman?</h3>
+<h3 id="why-should-we-use-talisman">Why should we use Talisman?</h3>
 <ul>
 <li>
 <p>Let me give you an example, <a href="https://www.theregister.com/2015/01/06/dev_blunder_shows_github_crawling_with_keyslurping_bots/"><strong>Dev put AWS keys on Github. Then BAD THINGS happened</strong></a></p>
@@ -140,7 +140,7 @@
 </code></pre></div>
 
 <p>The first one can be avoided if we use Talisman. Pre-commit / Pre-push hooks can be installed on the developer's workstations to avoid them (They can bypass this step also). We are all human and errors are hard to avoid, that is why we should use tools/policies to recheck if we are doing wrong xD.</p>
-<h3>Install</h3>
+<h3 id="install">Install</h3>
 <ul>
 <li>Visit <a href="https://thoughtworks.github.io/talisman/docs/installation">https://thoughtworks.github.io/talisman/docs/installation</a> </li>
 <li>For a demo, i will install only for a Single Project</li>
@@ -163,7 +163,7 @@ talisman_linux_amd64:<span class="w"> </span>OK
 Talisman<span class="w"> </span>successfully<span class="w"> </span>installed<span class="w"> </span>to<span class="w"> </span><span class="s1">&#39;.git/hooks/pre-push&#39;</span>.
 </code></pre></div>
 
-<h3>Usage</h3>
+<h3 id="usage">Usage</h3>
 <ul>
 <li>Here is small a demo with Golang: <a href="https://gist.github.com/BlackMetalz/08ec9f3e985c7796f65ae36b06004f35">demo-repo</a></li>
 <li>What happens when i try to push?</li>
@@ -234,11 +234,11 @@ error:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> <
 <ul>
 <li>It works as expected, the secrets are not able to push. And it even tells us how to ignore them if they are not secret xD</li>
 </ul>
-<hr>
-<h1>2. Mutation Testing</h1>
+<hr />
+<h1 id="2-mutation-testing">2. Mutation Testing</h1>
 <p>Mutation testing is essentially a way of testing your unit tests. By introducing small changes (mutations) to your source code and running your unit tests against these modified versions, you can verify if your tests are capable of catching the errors. If your unit tests detect and fail on these mutations, it indicates that your tests are robust and effective. If not, it suggests that your tests might need improvement</p>
 <p>Since there is no framework for multiple languages, i will try to go one by one with Python explain since I'm confident with it most. Hope it will not be too longs xD</p>
-<h3>Little explains:</h3>
+<h3 id="little-explains">Little explains:</h3>
 <ol>
 <li>
 <p>Mutation testing works by:</p>
@@ -257,15 +257,15 @@ error:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> <
 </ul>
 </li>
 </ol>
-<h3>2.1. Golang</h3>
+<h3 id="21-golang">2.1. Golang</h3>
 <ul>
 <li>Repo: <a href="https://github.com/BlackMetalz/mutation-testing-golang">https://github.com/BlackMetalz/mutation-testing-golang</a></li>
 </ul>
-<h3>2.2. Java</h3>
+<h3 id="22-java">2.2. Java</h3>
 <ul>
 <li>Repo: <a href="https://github.com/BlackMetalz/mutation-testing-Java">https://github.com/BlackMetalz/mutation-testing-Java</a></li>
 </ul>
-<h3>2.3. Python</h3>
+<h3 id="23-python">2.3. Python</h3>
 <ul>
 <li>Repo: <a href="https://github.com/BlackMetalz/mutation-testing-python">https://github.com/BlackMetalz/mutation-testing-python</a></li>
 <li>You may want to read the repo first, below is just a highlight of how mutation testing works.</li>
@@ -350,23 +350,23 @@ error:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> <
 ⠋<span class="w"> </span><span class="mi">7</span><span class="o">/</span><span class="mi">7</span><span class="w">  </span>🎉<span class="w"> </span><span class="mi">7</span><span class="w">  </span>⏰<span class="w"> </span><span class="mi">0</span><span class="w">  </span>🤔<span class="w"> </span><span class="mi">0</span><span class="w">  </span>🙁<span class="w"> </span><span class="mi">0</span><span class="w">  </span>🔇<span class="w"> </span><span class="mi">0</span>
 </code></pre></div>
 
-<hr>
-<h1>3. Sonarqube</h1>
+<hr />
+<h1 id="3-sonarqube">3. Sonarqube</h1>
 <ul>
 <li>Is a Static Application Security Testing</li>
 </ul>
-<h3>Purpose:</h3>
+<h3 id="purpose">Purpose:</h3>
 <ul>
 <li>SonarQube is a continuous code quality and security tool that performs static code analysis.</li>
 <li>It helps to detect code smells, bugs, security vulnerabilities, and duplications in your codebase.</li>
 </ul>
-<h3>How it Works:</h3>
+<h3 id="how-it-works">How it Works:</h3>
 <ul>
 <li>SonarQube analyzes the source code without executing it</li>
 <li>It uses various rules and patterns to identify issues in the code.</li>
 <li>The analysis results are displayed on a dashboard, providing a clear overview of the code quality</li>
 </ul>
-<h3>Metrics:</h3>
+<h3 id="metrics">Metrics:</h3>
 <ul>
 <li>Code Smells: Maintainability issues that do not necessarily indicate a bug but could lead to potential problems.</li>
 <li>Bugs: Errors in the code that could cause incorrect behavior.</li>
@@ -374,27 +374,27 @@ error:<span class="w"> </span>failed<span class="w"> </span>to<span class="w"> <
 <li>Duplications: Duplicate code blocks that should be consolidated.</li>
 <li>Coverage: The percentage of code covered by tests.</li>
 </ul>
-<h3>Use Cases:</h3>
+<h3 id="use-cases">Use Cases:</h3>
 <ul>
 <li>Continuous integration and delivery pipelines.</li>
 <li>Monitoring code quality over time.</li>
 <li>Ensuring compliance with coding standards and best practices.</li>
 <li>Identifying and fixing security vulnerabilities.</li>
 </ul>
-<h3>Optional</h3>
+<h3 id="optional">Optional</h3>
 <ul>
 <li>There is a config for Code Quality Gate status, that only checks for Code Smell, not <code>Coverage</code></li>
 </ul>
-<h3>Example for Sonarqube</h3>
+<h3 id="example-for-sonarqube">Example for Sonarqube</h3>
 <ul>
 <li>This link include Sonarqube integrated with Jenkins Pipeline<a href="https://medium.com/@kienlt.qn/my-devops-journey-with-jenkins-argocd-and-gitops-tools-e61a57201361"><strong>My DevOps Journey: with Jenkins, ArgoCD, and GitOps Tools</strong></a> </li>
 </ul>
-<hr>
-<h1>4. Dependency Checks</h1>
+<hr />
+<h1 id="4-dependency-checks">4. Dependency Checks</h1>
 <ul>
 <li>Dependency-Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project's dependencies.</li>
 </ul>
-<h3>Common way to dependency checks in several languages:</h3>
+<h3 id="common-way-to-dependency-checks-in-several-languages">Common way to dependency checks in several languages:</h3>
 <ul>
 <li>Java: <code>mvn dependency-check:check</code></li>
 <li>Python: pip-audit ( I don't like <code>safety</code> since it required login to run xD)</li>
@@ -473,7 +473,7 @@ Use<span class="w"> </span><span class="s1">&#39;-show verbose&#39;</span><span 
 </code></pre></div>
 
 <p>Solution: upgrade the go version to fix it xD.</p>
-<h1>Ref</h1>
+<h1 id="ref">Ref</h1>
 <ul>
 <li>https://chatgpt.com/ xD</li>
 <li>https://github.com/thoughtworks/talisman</li>

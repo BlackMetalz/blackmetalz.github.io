@@ -78,17 +78,17 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p><img alt="alt text" src="images/2025/12/19.png"></p>
-<h1>OpenTelemetry Certified Associate (OTCA) overview</h1>
-<hr>
-<h3>1. Observability Fundamentals</h3>
+            <p><img alt="alt text" src="images/2025/12/19.png" /></p>
+<h1 id="opentelemetry-certified-associate-otca-overview">OpenTelemetry Certified Associate (OTCA) overview</h1>
+<hr />
+<h3 id="1-observability-fundamentals">1. Observability Fundamentals</h3>
 <p>Understanding the "Why" before the "How."</p>
 <ul>
 <li><strong>The Three Pillars:</strong> Deep dive into <strong>Traces, Metrics, and Logs</strong>.</li>
 <li><strong>The Need for OpenTelemetry:</strong> Solving "Vendor Lock-in" and standardizing telemetry data collection.</li>
 <li><strong>Monitoring vs. Observability:</strong> Understanding the difference between knowing "what" is happening vs. "why" it is happening.</li>
 </ul>
-<h3>2. OpenTelemetry Core Architecture</h3>
+<h3 id="2-opentelemetry-core-architecture">2. OpenTelemetry Core Architecture</h3>
 <p>The backbone of the project.</p>
 <ul>
 <li><strong>The OTel Collector:</strong> Understanding the data pipeline: <strong>Receivers</strong> (ingestion), <strong>Processors</strong> (transformation), and <strong>Exporters</strong> (destination).</li>
@@ -103,7 +103,7 @@
    └─ Span D - call service C (trace_id: 123, span_id: D1, parent: A1)
 </code></pre></div>
 
-<h3>3. OpenTelemetry Specification</h3>
+<h3 id="3-opentelemetry-specification">3. OpenTelemetry Specification</h3>
 <p>Key concepts and data models.</p>
 <ul>
 <li><strong>Resources:</strong> Metadata describing the entity producing the telemetry (e.g., <code>service.name</code>, <code>host.id</code>).</li>
@@ -111,29 +111,29 @@
 <li><strong>Metrics:</strong> Learning about different instrument types: <strong>Counter, UpDownCounter, Histogram, and Gauge</strong>.</li>
 <li><strong>Logs:</strong> How OTel bridges the gap with legacy logging systems.</li>
 </ul>
-<h3>4. Instrumentation Approaches</h3>
+<h3 id="4-instrumentation-approaches">4. Instrumentation Approaches</h3>
 <p>How to get data out of your applications.</p>
 <ul>
 <li><strong>Automatic Instrumentation:</strong> Using Agents or SDKs to collect data without changing the application code (Zero-code approach).</li>
 <li><strong>Manual Instrumentation:</strong> Using the <strong>OpenTelemetry API</strong> and <strong>SDK</strong> to manually define custom spans and metrics within the business logic.</li>
 <li><strong>API vs. SDK:</strong> Understanding the distinction (API is for instrumentation; SDK is for configuration and processing).</li>
 </ul>
-<h3>5. Configuration &amp; Deployment Patterns</h3>
+<h3 id="5-configuration-deployment-patterns">5. Configuration &amp; Deployment Patterns</h3>
 <p>Putting OTel into production.</p>
 <ul>
 <li><strong>Deployment Modes:</strong> Difference between running the Collector as an <strong>Agent</strong> (Sidecar/DaemonSet) vs. a <strong>Gateway</strong> (Standalone service).</li>
 <li><strong>Collector Configuration:</strong> Mastering the YAML structure (<code>extensions</code>, <code>receivers</code>, <code>processors</code>, <code>exporters</code>, and <code>service pipelines</code>).</li>
 <li><strong>Sampling:</strong> Understanding <strong>Head-based sampling</strong> vs. <strong>Tail-based sampling</strong> to manage data volume and costs.</li>
 </ul>
-<h3>6. Ecosystem &amp; Interoperability</h3>
+<h3 id="6-ecosystem-interoperability">6. Ecosystem &amp; Interoperability</h3>
 <ul>
 <li><strong>CNCF Landscape:</strong> OpenTelemetry’s role as a CNCF incubated project.</li>
 <li><strong>Compatibility:</strong> How OTel interacts with other tools like <strong>Prometheus</strong>, <strong>Jaeger</strong>, <strong>Zipkin</strong>, and <strong>Fluentd</strong>.</li>
 <li><strong>Semantic Conventions:</strong> The importance of standardized naming for attributes across different technologies.</li>
 </ul>
-<hr>
-<h1>Sections That Need to Be Understood</h1>
-<h3>1. Context Propagation (The "Glue" of Tracing)</h3>
+<hr />
+<h1 id="sections-that-need-to-be-understood">Sections That Need to Be Understood</h1>
+<h3 id="1-context-propagation-the-glue-of-tracing">1. Context Propagation (The "Glue" of Tracing)</h3>
 <p><em>Domain: OpenTelemetry API and SDK</em></p>
 <p>Distributed tracing cannot work without <strong>Context Propagation</strong>. This is the mechanism that transfers metadata (Trace ID, Span ID) from service A to service B to connect spans into a complete trace.</p>
 <ul>
@@ -152,7 +152,7 @@
 <li><a href="https://www.w3.org/TR/trace-context/">W3C Trace Context Specification</a></li>
 </ul>
 </blockquote>
-<h3>2. OTel Metrics Instruments (vs. Prometheus)</h3>
+<h3 id="2-otel-metrics-instruments-vs-prometheus">2. OTel Metrics Instruments (vs. Prometheus)</h3>
 <p><em>Domain: OpenTelemetry API and SDK</em></p>
 <p>Unlike Prometheus which has only 4 basic metric types, OpenTelemetry divides them further to map accurately to various backends. It is crucial to distinguish when to use which.</p>
 <ul>
@@ -175,7 +175,7 @@
 <li><a href="https://opentelemetry.io/docs/specs/otel/metrics/data-model/">OTel Specification: Metrics Data Model</a></li>
 </ul>
 </blockquote>
-<h3>3. Sampling Strategies (Head vs. Tail)</h3>
+<h3 id="3-sampling-strategies-head-vs-tail">3. Sampling Strategies (Head vs. Tail)</h3>
 <p><em>Domain: The OpenTelemetry Collector &amp; API/SDK</em></p>
 <p>To save storage costs and bandwidth, we cannot store 100% of traces. Sampling is the technique to decide whether to keep or drop a trace.</p>
 <ul>
@@ -198,7 +198,7 @@
 <li><a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/tailsamplingprocessor/README.md">Tail Sampling Processor (Collector Contrib)</a></li>
 </ul>
 </blockquote>
-<h3>4. Collector Deployment Patterns</h3>
+<h3 id="4-collector-deployment-patterns">4. Collector Deployment Patterns</h3>
 <p><em>Domain: The OpenTelemetry Collector</em></p>
 <p>The Collector is the "heart" of the OTel architecture. There are 3 main deployment models to master for the exam:</p>
 <ol>
@@ -219,7 +219,7 @@
 <li><a href="https://github.com/open-telemetry/opentelemetry-operator#deployment-modes">OTel Operator Patterns</a></li>
 </ul>
 </blockquote>
-<h3>5. Semantic Conventions (Standardization)</h3>
+<h3 id="5-semantic-conventions-standardization">5. Semantic Conventions (Standardization)</h3>
 <p><em>Domain: OpenTelemetry API and SDK</em></p>
 <p>OTel defines how attributes are named to ensure consistency across systems. Backends rely on this standard to render charts automatically.</p>
 <ul>
@@ -241,7 +241,7 @@
 <li><a href="https://opentelemetry.io/docs/specs/semconv/general/trace/">Existing Registry</a></li>
 </ul>
 </blockquote>
-<h3>6. Telemetry Signal Status</h3>
+<h3 id="6-telemetry-signal-status">6. Telemetry Signal Status</h3>
 <p><em>Domain: Fundamentals of Observability</em></p>
 <p>Not everything in OTel is "Production Ready" (Stable). The exam may ask about the status of signals to know the reliability level when using them.</p>
 <ul>
@@ -256,7 +256,7 @@
 <li><a href="https://opentelemetry.io/status/">OTel Feature Status</a></li>
 </ul>
 </blockquote>
-<h3>7. SDK Mechanics: Processors &amp; Exporters</h3>
+<h3 id="7-sdk-mechanics-processors-exporters">7. SDK Mechanics: Processors &amp; Exporters</h3>
 <p><em>Domain: The OpenTelemetry API and SDK (SDK Pipelines)</em></p>
 <p>Just knowing "how to send data" is not enough; the exam asks <em>how</em> data flows inside the application before going out.</p>
 <ul>
@@ -277,7 +277,7 @@
 <li><a href="https://opentelemetry.io/docs/languages/java/instrumentation/#span-processors">Java SDK Examples</a></li>
 </ul>
 </blockquote>
-<h3>8. Collector Scaling &amp; Data Transformation</h3>
+<h3 id="8-collector-scaling-data-transformation">8. Collector Scaling &amp; Data Transformation</h3>
 <p><em>Domain: The OpenTelemetry Collector (Scaling, Transforming Data)</em></p>
 <p>Deploying a single Collector is easy, but scaling a Collector cluster to handle millions of spans per second is a different challenge.</p>
 <ul>
@@ -296,7 +296,7 @@
 <li><a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor">Transform Processor (OTTL)</a></li>
 </ul>
 </blockquote>
-<h3>9. Debugging &amp; Observability of the Pipeline</h3>
+<h3 id="9-debugging-observability-of-the-pipeline">9. Debugging &amp; Observability of the Pipeline</h3>
 <p><em>Domain: Maintaining and Debugging Observability Pipelines</em></p>
 <p>How do you monitor the monitor (the OTel Collector) itself?</p>
 <ul>
@@ -315,7 +315,7 @@
 <li><a href="https://opentelemetry.io/docs/collector/configuration/#extensions">Management (Extensions)</a></li>
 </ul>
 </blockquote>
-<h3>10. Handling Backpressure &amp; Reliability</h3>
+<h3 id="10-handling-backpressure-reliability">10. Handling Backpressure &amp; Reliability</h3>
 <p><em>Domain: Maintaining and Debugging Observability Pipelines (Error Handling)</em></p>
 <p>When the backend (Jaeger/Elasticsearch) is dead or overloaded, what does the Collector do?</p>
 <ul>
@@ -330,7 +330,7 @@
 <li><a href="https://opentelemetry.io/docs/collector/configuration/#processors">Recommended Processors Config</a></li>
 </ul>
 </blockquote>
-<h3>11. Schema Management</h3>
+<h3 id="11-schema-management">11. Schema Management</h3>
 <p><em>Domain: Maintaining and Debugging Observability Pipelines (Schema Management)</em></p>
 <p>When Semantic Conventions change (e.g., rename <code>http.method</code> -&gt; <code>http.request.method</code>), how to ensure the system doesn't break?</p>
 <ul>
@@ -343,7 +343,7 @@
 <li><a href="https://opentelemetry.io/docs/specs/otel/schemas/">Telemetry Schemas</a></li>
 </ul>
 </blockquote>
-<h3>12. MeterProvider and Metric Exporter</h3>
+<h3 id="12-meterprovider-and-metric-exporter">12. MeterProvider and Metric Exporter</h3>
 <ul>
 <li>
 <p><strong>MeterProvider:</strong> The entry point for the Metrics API. It provides <code>Meter</code> instances, 
@@ -358,7 +358,7 @@
 </li>
 </ul>
 <p>This concept is required to know! xD (You can guess the reason!)</p>
-<h3>13. API vs SDK Distinction</h3>
+<h3 id="13-api-vs-sdk-distinction">13. API vs SDK Distinction</h3>
 <ul>
 <li>
 <p><strong>API:</strong> Defines interfaces for instrumentation (creating spans, metrics). 
@@ -372,13 +372,13 @@
 <blockquote>
 <p><strong>Key Point:</strong> Libraries should only depend on API. Applications configure SDK.</p>
 </blockquote>
-<h3>14. Instrumentation Scope</h3>
+<h3 id="14-instrumentation-scope">14. Instrumentation Scope</h3>
 <p>Each telemetry source is identified by an Instrumentation Scope:
 - <code>name</code>: Instrumentation library name (e.g., <code>@opentelemetry/instrumentation-http</code>)
 - <code>version</code>: Library version
 - <code>schema_url</code>: Semantic convention version</p>
 <p>This helps identify which library generated which telemetry.</p>
-<h3>15. Collector Config Structure (Order matters!)</h3>
+<h3 id="15-collector-config-structure-order-matters">15. Collector Config Structure (Order matters!)</h3>
 <div class="highlight"><pre><span></span><code><span class="nt">extensions</span><span class="p">:</span><span class="w">    </span><span class="c1"># Health check, zpages, auth</span>
 <span class="nt">receivers</span><span class="p">:</span><span class="w">     </span><span class="c1"># Data ingestion (OTLP, Jaeger, Prometheus)</span>
 <span class="nt">processors</span><span class="p">:</span><span class="w">    </span><span class="c1"># Data transformation (batch, filter, transform)</span>
@@ -393,20 +393,20 @@
 <span class="w">      </span><span class="nt">exporters</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">...</span><span class="p p-Indicator">]</span>
 </code></pre></div>
 
-<hr>
-<h1>Honest recommend</h1>
+<hr />
+<h1 id="honest-recommend">Honest recommend</h1>
 <ul>
 <li>Before taking mock exam: read all pages about 4-5 times. I know it takes a lot of time, but it is my recommendation, since I don't want to write another 1000+ lines in a single article xD</li>
 <li>And yeah, the exam OTCA is about concept, how component work or their relationship. Not much detail for configuration.</li>
 </ul>
 <p><a href="https://opentelemetry.io/docs/what-is-opentelemetry/">https://opentelemetry.io/docs/what-is-opentelemetry/</a></p>
-<hr>
-<h1>My Secret Weapon: Mock Exam</h1>
+<hr />
+<h1 id="my-secret-weapon-mock-exam">My Secret Weapon: Mock Exam</h1>
 <p>After absorbing all the concepts above, there's one more crucial step before you're truly exam-ready: <strong>practice with mock exams</strong>.</p>
 <p>I used this Udemy course to prepare, and it made a real difference:</p>
 <p><a href="https://www.udemy.com/course/complete-opentelemetry-certified-associate-otca-exam-prep">Complete OpenTelemetry Certified Associate (OTCA) Exam Prep</a></p>
-<hr>
-<h1>Final Wrap</h1>
+<hr />
+<h1 id="final-wrap">Final Wrap</h1>
 <ul>
 <li>I passed the OTCA exam with a score of <strong>77/100</strong> — not a perfect score, but enough to get the job done.</li>
 <li>This article contains everything I wish I had when I started preparing.</li>

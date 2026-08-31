@@ -78,10 +78,10 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Article intro</h1>
+            <h1 id="article-intro">Article intro</h1>
 <p>Today, I will write an article about what I have been doing with Galera MySQL for testing fault tolerance and self-healing behavior of MySQL Galera Cluster.</p>
 <p>Assumed you have MySQL Galera cluster installed, so I don't need to guide from begin!</p>
-<p><img alt="Galera Cluster" src="images/2025/11/10.png"></p>
+<p><img alt="Galera Cluster" src="images/2025/11/10.png" /></p>
 <p>Lab Information:</p>
 <div class="highlight"><pre><span></span><code># Cluster 1 - segment 0
 10.5.1.5 mysql-galera-db-1
@@ -97,23 +97,23 @@
 10.5.2.133 mysql-galera-db-7
 </code></pre></div>
 
-<h3>Quick Intro: MySQL Galera Cluster</h3>
+<h3 id="quick-intro-mysql-galera-cluster">Quick Intro: MySQL Galera Cluster</h3>
 <p>MySQL Galera Cluster is a <strong>multi-master, synchronous replication</strong> solution providing <strong>high availability</strong> and <strong>data consistency</strong> across nodes. It uses <a href="https://mariadb.com/docs/galera-cluster/galera-architecture/introduction-to-galera-architecture#the-wsrep-api"><strong>WSREP API</strong></a> and <a href="https://mariadb.com/docs/galera-cluster/high-availability/understanding-quorum-monitoring-and-recovery#quorum-calculation"><strong>quorum-based voting</strong></a> to maintain cluster integrity. Key components:</p>
 <ul>
 <li><strong>Nodes</strong>: Active database instances (read/write)</li>
 <li><a href="https://mariadb.com/docs/galera-cluster/readme/mariadb-galera-cluster-usage-guide#galera-arbitrator"><strong>Galera Arbitrator (garb)</strong></a>: Lightweight arbitrator for quorum in even-node setups</li>
 </ul>
-<h3>Lab 1: Isolate Segment 1 → Write 1M Records to Segment 0 → Rejoin Segment 1</h3>
+<h3 id="lab-1-isolate-segment-1-write-1m-records-to-segment-0-rejoin-segment-1">Lab 1: Isolate Segment 1 → Write 1M Records to Segment 0 → Rejoin Segment 1</h3>
 <p>Test split-brain prevention, quorum, and IST/SST recovery.</p>
-<h3>Lab 2: Block Traffic Between Segment 0 &amp; 1 (Garb Still Reachable)</h3>
+<h3 id="lab-2-block-traffic-between-segment-0-1-garb-still-reachable">Lab 2: Block Traffic Between Segment 0 &amp; 1 (Garb Still Reachable)</h3>
 <p>Validate Garb’s role in quorum decision during partial network partition.</p>
-<h3>Lab 3: Simulate Unstable Network with TC (Packet Loss, Latency, Reorder)</h3>
+<h3 id="lab-3-simulate-unstable-network-with-tc-packet-loss-latency-reorder">Lab 3: Simulate Unstable Network with TC (Packet Loss, Latency, Reorder)</h3>
 <p>Use Linux <strong>Traffic Control (<code>tc</code>)</strong> – built-in, powerful, zero-install – to inject</p>
 <ul>
 <li><code>loss</code> (e.g. 5%)</li>
 <li><code>delay</code> (jitter) (e.g. 200ms ± 50ms)</li>
 </ul>
-<h3>Quick Monitor</h3>
+<h3 id="quick-monitor">Quick Monitor</h3>
 <p>Tools/CLI will use during lab: <code>sysbench</code>, <code>tc</code>, <code>iptables</code>, <code>systemctl</code>, <code>journalctl</code></p>
 <div class="highlight"><pre><span></span><code>root@mysql-galera-db-3:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;show global status where Variable_name rlike &#39;wsrep_(ready|connected|cluster_size|local_state_comment|local_recv_queue_avg|flow_control_paused|cluster_status)&#39;;&quot;</span>
 +------------------------------+-----------+
@@ -139,8 +139,8 @@
 <li>wsrep_ready: Should be "ON"</li>
 <li>wsrep_cluster_conf_id: This is interesting metric, for every node join/leave, quorum loss &amp; recovery, network issues, this will be increased. If number increasing way too fast -&gt; big problem!</li>
 </ul>
-<hr>
-<h1>Lab 1: Isolate Segment 1 → Write 1M Records to Segment 0 → Rejoin Segment</h1>
+<hr />
+<h1 id="lab-1-isolate-segment-1-write-1m-records-to-segment-0-rejoin-segment">Lab 1: Isolate Segment 1 → Write 1M Records to Segment 0 → Rejoin Segment</h1>
 <p>Status before graceful shutdown.</p>
 <div class="highlight"><pre><span></span><code>root@mysql-galera-db-1:~#<span class="w"> </span>mysql<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;SHOW STATUS LIKE &#39;wsrep_cluster_%&#39;;&quot;</span>
 +----------------------------+--------------------------------------+
@@ -220,8 +220,8 @@ Nodes in segment 1 doesn't send state transfer, Nodes in segment 0 have no idea 
 </code></pre></div>
 
 <p>Cluster only can recover when nodes in segment 1 start again, this is unrealistic, therefore we will go to next case.</p>
-<hr>
-<h1>Lab 2: Block Traffic Between Segment 0 &amp; 1 (Garb Still Reachable)</h1>
+<hr />
+<h1 id="lab-2-block-traffic-between-segment-0-1-garb-still-reachable_1">Lab 2: Block Traffic Between Segment 0 &amp; 1 (Garb Still Reachable)</h1>
 <div class="highlight"><pre><span></span><code><span class="c1"># Do this in 3 node of segment 1</span>
 iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.5.1.5<span class="w"> </span>-j<span class="w"> </span>DROP
 iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-s<span class="w"> </span><span class="m">10</span>.5.3.7<span class="w"> </span>-j<span class="w"> </span>DROP
@@ -401,10 +401,10 @@ total<span class="w"> </span><span class="m">2</span>.6G
 </code></pre></div>
 
 <p>Quite heavy, open Wireshark then open the tcpdump file.</p>
-<p><img alt="wireshark" src="images/2025/11/11.png"></p>
+<p><img alt="wireshark" src="images/2025/11/11.png" /></p>
 <p>Looking confused and not understanding much, I should probably do the wireshark course =_=. However, if it's difficult, ask, and here is the answer</p>
 <p>Based on this tcpdump data, <del>I analyze as follows</del>, I copy this from Claude AI xD</p>
-<h3>Key Observation</h3>
+<h3 id="key-observation">Key Observation</h3>
 <p>Node 10.5.2.133 is acting as a clear relay/coordinator.</p>
 <p>Communication Pattern:</p>
 <ul>
@@ -433,7 +433,7 @@ total<span class="w"> </span><span class="m">2</span>.6G
 <li>Node 10.5.2.133 sends messages almost simultaneously to all nodes</li>
 <li>Latency is very low, indicating this is a local network</li>
 </ul>
-<h3>Conclusion</h3>
+<h3 id="conclusion">Conclusion</h3>
 <p>10.5.2.133 is definitely a relay/hub node, not just participating in voting.</p>
 <p>Well of course there must be evidence since I used explanation from AI. First is this article: <a href="http://blog.yannickjaquier.com/mariadb/galera-arbitrator-as-an-odd-node-in-galera-cluster.html">http://blog.yannickjaquier.com/mariadb/galera-arbitrator-as-an-odd-node-in-galera-cluster.html</a> (search keyword relay)</p>
 <p>Reality on node garb</p>
@@ -480,7 +480,7 @@ root@mysql-galera-db-6:~#<span class="w"> </span>mysql<span class="w"> </span>-e
 +----------------------------+--------------------------------------+
 </code></pre></div>
 
-<h3>What's next?</h3>
+<h3 id="whats-next">What's next?</h3>
 <p>Turn on garb node again to test if traffic goes through garb node?</p>
 <div class="highlight"><pre><span></span><code>root@mysql-galera-db-7:~#<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>garb
 
@@ -590,7 +590,7 @@ safe_to_bootstrap: 1
 <li>0 = should not bootstrap from this node</li>
 <li>Last shutdown node usually has value 1</li>
 </ul>
-<h3>Correct recovery procedure</h3>
+<h3 id="correct-recovery-procedure">Correct recovery procedure</h3>
 <p>Add a link for credibility: </p>
 <ul>
 <li><a href="https://galeracluster.com/documentation/html_docs_remove-wsrep-new-cluster/documentation/crash-recovery.html">https://galeracluster.com/documentation/html_docs_remove-wsrep-new-cluster/documentation/crash-recovery.html</a></li>
@@ -625,8 +625,8 @@ mysqld_bootstrap
 systemctl<span class="w"> </span>start<span class="w"> </span>mysql
 </code></pre></div>
 
-<hr>
-<h1>Lab 3: Simulate Unstable Network with TC (Packet Loss, Latency, Reorder)</h1>
+<hr />
+<h1 id="lab-3-simulate-unstable-network-with-tc-packet-loss-latency-reorder_1">Lab 3: Simulate Unstable Network with TC (Packet Loss, Latency, Reorder)</h1>
 <p>Scenario: Simulate a slow network scenario by dropping packages, increasing network latency. We have many tools but the 2 most prominent tools in this are</p>
 <ul>
 <li>tc (Traffic Control) Built-in Linux: available, powerful, no need to install additional</li>
@@ -912,31 +912,31 @@ on its membership. If the members cannot reach consensus on the liveness of a no
 cluster operations.
 </code></pre></div>
 
-<hr>
-<h1>Conclusion</h1>
+<hr />
+<h1 id="conclusion_1">Conclusion</h1>
 <p>Through these three comprehensive lab scenarios, we've explored the fault tolerance and self-healing capabilities of MySQL Galera Cluster under various network conditions. Here are the key takeaways:</p>
-<h3>Lab 1: Segment Isolation &amp; Data Synchronization</h3>
+<h3 id="lab-1-segment-isolation-data-synchronization">Lab 1: Segment Isolation &amp; Data Synchronization</h3>
 <p><strong>Key Findings:</strong></p>
 <ul>
 <li><strong>Graceful shutdown</strong>: Cluster handles segment isolation cleanly. When 3 nodes (segment 1) shutdown gracefully, the remaining 4 nodes (segment 0 + garbd) maintain quorum and continue operations. Upon rejoin, data synchronizes seamlessly using IST/SST.</li>
 <li><strong>Ungraceful shutdown (kill -9)</strong>: Leads to split-brain suspicion. All segments enter <code>non-Primary</code> state to prevent conflicting writes. Recovery requires manual intervention via bootstrap procedure.</li>
 <li><strong>Recovery procedure</strong>: Critical to identify the node with highest <code>seqno</code> in <code>grastate.dat</code> for safe bootstrap. The <code>mysqld --wsrep-recover</code> command is essential when all nodes show <code>seqno: -1</code>.</li>
 </ul>
-<h3>Lab 2: Network Partition with Garbd Relay</h3>
+<h3 id="lab-2-network-partition-with-garbd-relay">Lab 2: Network Partition with Garbd Relay</h3>
 <p><strong>Key Findings:</strong></p>
 <ul>
 <li><strong>Garbd as relay</strong>: When segment 0 and segment 1 cannot communicate directly (via iptables blocks), Galera Arbitrator acts as a message relay, maintaining cluster integrity and enabling data synchronization between isolated segments.</li>
 <li><strong>Garbd failure impact</strong>: If garbd goes down during network partition, both segments lose quorum and enter <code>non-Primary</code> state, requiring manual recovery.</li>
 <li><strong>Network validation</strong>: Always verify connectivity with <code>nc</code> and <code>ping</code> when troubleshooting. Tcpdump analysis confirms garbd's relay behavior - receiving data from all nodes and broadcasting to others.</li>
 </ul>
-<h3>Lab 3: Network Instability Simulation</h3>
+<h3 id="lab-3-network-instability-simulation">Lab 3: Network Instability Simulation</h3>
 <p><strong>Key Findings:</strong></p>
 <ul>
 <li><strong>Good network conditions</strong> (≤5% packet loss, ~50ms latency, ±10ms jitter): Cluster operates normally with successful data replication across segments.</li>
 <li><strong>Poor network conditions</strong> (≥30% packet loss, ~100ms latency, ±50ms jitter): Cluster fails to reach consensus on membership, causing all nodes to enter <code>non-Primary</code> state.</li>
 <li><strong>Consensus before quorum</strong>: The critical insight is that Galera requires <strong>unanimous consensus</strong> on cluster membership before calculating quorum. With high packet loss, nodes see different membership views, preventing consensus - even if majority would support quorum.</li>
 </ul>
-<h3>Best Practices Learned</h3>
+<h3 id="best-practices-learned">Best Practices Learned</h3>
 <ol>
 <li><strong>Monitoring</strong>: Track <code>wsrep_cluster_conf_id</code> - rapid increases indicate cluster instability (nodes joining/leaving frequently).</li>
 <li><strong>Recovery preparation</strong>: Document which node has the latest data (<code>grastate.dat</code> with highest <code>seqno</code>) before maintenance.</li>
@@ -944,7 +944,7 @@ cluster operations.
 <li><strong>Network requirements</strong>: Maintain packet loss &lt;5% and latency &lt;100ms for stable operations. Higher packet loss leads to consensus failure.</li>
 <li><strong>Split-brain prevention</strong>: Galera's conservative approach (entering <code>non-Primary</code> on suspicion) prevents data conflicts but requires manual recovery.</li>
 </ol>
-<h3>Final Thoughts</h3>
+<h3 id="final-thoughts">Final Thoughts</h3>
 <p>MySQL Galera Cluster demonstrates robust synchronous replication with strong consistency guarantees. However, it's sensitive to network quality - requiring stable, low-latency connections. The arbitrator (garbd) is not just a "voting member" but can actively relay messages during network partitions, making its placement crucial for multi-segment deployments.</p>
 <p>Understanding the difference between <strong>consensus</strong> (all nodes agree on membership) and <strong>quorum</strong> (majority calculation) is fundamental to troubleshooting Galera clusters. Always ensure your network infrastructure meets Galera's requirements: &lt;5% packet loss, &lt;100ms latency, and reliable connectivity between all nodes.</p>
 <p>For production deployments, combine these insights with proper monitoring, documented recovery procedures, and regular disaster recovery drills to ensure your Galera cluster can handle real-world network challenges.</p>

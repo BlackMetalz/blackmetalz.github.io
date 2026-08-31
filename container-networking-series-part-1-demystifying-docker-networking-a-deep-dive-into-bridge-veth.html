@@ -86,15 +86,15 @@
 <li><a href="https://blackmetalz.github.io/container-networking-series-part-4-how-cilium-cni-works-in-k8s.html">How Cilium CNI works in K8S</a></li>
 </ul>
 <p>I guess I'm not the only one who gets confused with Docker networking. Let's try to understand it better!</p>
-<h2>Prerequisites</h2>
+<h2 id="prerequisites">Prerequisites</h2>
 <ul>
 <li>Ubuntu 24.04</li>
 <li>Docker installed.</li>
 <li>Bridge Utils: <code>apt install bridge-utils -y</code></li>
 </ul>
-<h2>Bridge Network flow</h2>
+<h2 id="bridge-network-flow">Bridge Network flow</h2>
 <p>I think I will only talk about this, since this is default network in docker.</p>
-<p><img alt="iptables DNAT" src="./images/2026/03/03.png"></p>
+<p><img alt="iptables DNAT" src="./images/2026/03/03.png" /></p>
 <p>Let's get started:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:80<span class="w"> </span>--name<span class="w"> </span>nginx-demo<span class="w"> </span>nginx
 </code></pre></div>
@@ -142,9 +142,9 @@ DNAT<span class="w">       </span><span class="m">6</span><span class="w">    </
 <li>Packet travels through a <code>veth pair</code> into the container's network namespace</li>
 <li>nginx receives it on port 80</li>
 </ol>
-<h2>Hmmm, how Bridge (docker0) and veth works?</h2>
+<h2 id="hmmm-how-bridge-docker0-and-veth-works">Hmmm, how Bridge (docker0) and veth works?</h2>
 <p>Before running any commands, here's the full picture of what we're about to explore:</p>
-<p><img alt="Full flow" src="./images/2026/03/02.png"></p>
+<p><img alt="Full flow" src="./images/2026/03/02.png" /></p>
 <p>What is <code>veth</code>? It is a virtual ethernet pair, it is like a tunnel between two network namespaces.</p>
 <p>What is <code>Network Namespace (netns)</code>? It is a feature of Linux kernel that allows you to create isolated network environments.</p>
 <p>There are 3 keys component that need to be understood:</p>
@@ -153,7 +153,7 @@ DNAT<span class="w">       </span><span class="m">6</span><span class="w">    </
 <li><code>veth pair</code>: 2 way tunnel, 1 plugged into docker0, 1 plugged into container</li>
 <li><code>Network Namespace</code>: the reason why container have it's own <code>eth0</code> interface, complete isolated with host network</li>
 </ul>
-<h2>Verifying the Bridge and veth Pairs</h2>
+<h2 id="verifying-the-bridge-and-veth-pairs">Verifying the Bridge and veth Pairs</h2>
 <p>We mentioned docker0, let's check it. (I have more than 1 container running, so you probably see more than 1 veth)</p>
 <div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>brctl<span class="w"> </span>show
 bridge<span class="w"> </span>name<span class="w">         </span>bridge<span class="w"> </span>id<span class="w">           </span>STP<span class="w"> </span>enabled<span class="w"> </span>interfaces
@@ -171,7 +171,7 @@ docker0<span class="w">             </span><span class="m">8000</span>.fa5bcf9b5
 </code></pre></div>
 
 <p>Notice <code>veth37c4b71@if2</code> — the <code>@if2</code> means this interface is paired with interface index 2 on the other side (inside the container).</p>
-<h2>Network Namespaces (netns)</h2>
+<h2 id="network-namespaces-netns">Network Namespaces (netns)</h2>
 <p>Each container runs in its own network namespace. Let's inspect it to confirm the veth pairing.</p>
 <p>We can list all netns with <code>ip netns list</code></p>
 <div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>ip<span class="w"> </span>netns<span class="w"> </span>list
@@ -217,7 +217,7 @@ nginx-demo-ns<span class="w"> </span><span class="o">(</span>id:<span class="w">
 <span class="c1">## </span>
 </code></pre></div>
 
-<h2>Look inside the container's network namespace</h2>
+<h2 id="look-inside-the-containers-network-namespace">Look inside the container's network namespace</h2>
 <p>Check <code>veth pairing</code></p>
 <div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>sudo<span class="w"> </span>ip<span class="w"> </span>netns<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>nginx-demo-ns<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span>show<span class="w"> </span>eth0
 <span class="m">2</span>:<span class="w"> </span>eth0@if10:<span class="w"> </span>&lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt;<span class="w"> </span>mtu<span class="w"> </span><span class="m">1500</span><span class="w"> </span>qdisc<span class="w"> </span>noqueue<span class="w"> </span>state<span class="w"> </span>UP<span class="w"> </span>mode<span class="w"> </span>DEFAULT<span class="w"> </span>group<span class="w"> </span>default
@@ -264,8 +264,8 @@ nginx-demo-ns<span class="w"> </span><span class="o">(</span>id:<span class="w">
 </code></pre></div>
 
 <p>so inside container, interface <code>eth0</code> is linked with <code>veth37c4b71@if2</code> which have interface index is 10. And <code>veth37c4b71@if2</code> is linked with <code>docker0</code> bridge.</p>
-<h2>Visualizing the pairing</h2>
-<p><img alt="veth pairing" src="./images/2026/03/04.png"></p>
+<h2 id="visualizing-the-pairing">Visualizing the pairing</h2>
+<p><img alt="veth pairing" src="./images/2026/03/04.png" /></p>
 <p>You can use this command to see it more clearly</p>
 <div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>ip<span class="w"> </span>netns<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>nginx-demo-ns<span class="w"> </span>ethtool<span class="w"> </span>-S<span class="w"> </span>eth0
 NIC<span class="w"> </span>statistics:
@@ -280,7 +280,7 @@ NIC<span class="w"> </span>statistics:
 </code></pre></div>
 
 <p>Why we need this fucking veth pair? Because <code>Network Namespace</code> is isolated, so we need a tunnel to connect them.</p>
-<h2>Docker-Proxy</h2>
+<h2 id="docker-proxy">Docker-Proxy</h2>
 <p>In this article, I haven't mentioned any keyword related to "docker-proxy". Why?</p>
 <p>It works together with <code>iptables</code> but have lower priority. In essence, networking stack of Linux handle packet at kernel level before it has a chance to processed by docker-proxy in User-space. So if <code>iptables</code> process the packet, the packet will go to container directly without passing through <code>docker-proxy</code>. If packet does not match any rule in <code>iptables</code>, it will go to <code>docker-proxy</code> to process for edge case like traffic from localhost itself.</p>
 <p>Why it is created? to solve what problem?</p>
@@ -313,8 +313,8 @@ root<span class="w">      </span><span class="m">538372</span><span class="w">  
 root<span class="w">      </span><span class="m">559752</span><span class="w">  </span><span class="m">558312</span><span class="w">  </span><span class="m">0</span><span class="w"> </span><span class="m">11</span>:37<span class="w"> </span>pts/0<span class="w">    </span><span class="m">00</span>:00:00<span class="w"> </span>grep<span class="w"> </span>--color<span class="o">=</span>auto<span class="w"> </span>docker-proxy
 </code></pre></div>
 
-<hr>
-<h2>Conclusion</h2>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
 <p>I hope this post help you understand how docker networking works.</p>
 
 

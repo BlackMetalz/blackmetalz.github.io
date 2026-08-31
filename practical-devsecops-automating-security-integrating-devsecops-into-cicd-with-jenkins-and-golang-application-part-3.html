@@ -78,13 +78,13 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h3>This series will contain 3 parts:</h3>
+            <h3 id="this-series-will-contain-3-parts">This series will contain 3 parts:</h3>
 <ul>
 <li>Part 1. Secure Coding Practices: Tools and Techniques for DevSecOps.</li>
 <li>Part 2. Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps. </li>
 <li>Part 3. Automating Security: Integrating DevSecOps into CI/CD with Jenkins. (<strong>We are here!</strong>)</li>
 </ul>
-<h3>Before continue:</h3>
+<h3 id="before-continue">Before continue:</h3>
 <ul>
 <li>This is an extra part of <a href="https://medium.com/@kienlt.qn/my-devops-journey-with-jenkins-argocd-and-gitops-tools-e61a57201361">My DevOps Journey: with Jenkins, ArgoCD, and GitOps Tools
 </a></li>
@@ -100,10 +100,10 @@
 <li>This includes only the Golang application. </li>
 <li>Pipeline for Devsecops is not clean, needs some rewriting xD</li>
 </ul>
-<h3>Workflow Overview</h3>
-<p><img alt="Devsecops Overview" src="images/2025/02/23th_1.png">
+<h3 id="workflow-overview">Workflow Overview</h3>
+<p><img alt="Devsecops Overview" src="images/2025/02/23th_1.png" />
 Dependency check is included in <code>Code quality check</code> step i guess xD</p>
-<h3>Dependency check</h3>
+<h3 id="dependency-check">Dependency check</h3>
 <ul>
 <li>I will install <code>golang.org/x/vuln/cmd/govulncheck@latest</code> package to check for vulnerabilities in dependencies</li>
 <li>Output example from pipeline, it means my dependencies don't have any vulnerability and are good to go!</li>
@@ -118,7 +118,7 @@ Dependency check is included in <code>Code quality check</code> step i guess xD<
 <span class="o">+</span><span class="w"> </span><span class="n">govulncheck</span><span class="w"> </span><span class="p">.</span><span class="o">/</span><span class="p">...</span>
 </code></pre></div>
 
-<h3>OPA config test</h3>
+<h3 id="opa-config-test">OPA config test</h3>
 <ul>
 <li>
 <p>I will not allow it if the Dockerfile of the application has the following conditions:</p>
@@ -137,11 +137,11 @@ Dependency check is included in <code>Code quality check</code> step i guess xD<
 
 <ul>
 <li>Output with issues:<ul>
-<li><img alt="OPA issues" src="images/2025/02/23th_2.png"></li>
+<li><img alt="OPA issues" src="images/2025/02/23th_2.png" /></li>
 </ul>
 </li>
 </ul>
-<h3>Vulnerability Scan k8s - Kubesec</h3>
+<h3 id="vulnerability-scan-k8s-kubesec">Vulnerability Scan k8s - Kubesec</h3>
 <ul>
 <li>One more check to make sure our manifest is not fucked up with security concerns.</li>
 <li>Output may be too long, that is why i hide them in the pipeline and show only the result. Exit 0 if all resources don't have a score lower than 0</li>
@@ -162,7 +162,7 @@ Dependency check is included in <code>Code quality check</code> step i guess xD<
 <span class="o">+</span><span class="w"> </span><span class="k">exit</span><span class="w"> </span><span class="mi">0</span>
 </code></pre></div>
 
-<h3>Dynamic Application Testing (DAST) with OWASP ZAP ( Zed Attack Proxy)</h3>
+<h3 id="dynamic-application-testing-dast-with-owasp-zap-zed-attack-proxy">Dynamic Application Testing (DAST) with OWASP ZAP ( Zed Attack Proxy)</h3>
 <ul>
 <li>This may not is the best practice if this step put behind after deployed to k8s. But this is just for a demo and introduction so yeah. xD</li>
 <li>My repo for the demo which was deployed to k8s: https://github.com/BlackMetalz/Golang-Webapp-Testing</li>
@@ -194,9 +194,9 @@ FAIL-NEW: 0 FAIL-INPROG: 0  WARN-NEW: 1 WARN-INPROG: 0  INFO: 0 IGNORE: 0   PASS
 <li>I still have no idea why it still gives some warning at this time, because time is limited, i will investigate later in the near future.</li>
 <li>I would ignore anything below critical. Only break the build if it is critical in the pipeline!</li>
 </ul>
-<h3>Completed steps of Devsecops for Golang application</h3>
-<p><img alt="Sample devsecops" src="images/2025/02/23th_3.png"></p>
-<h1>Ref:</h1>
+<h3 id="completed-steps-of-devsecops-for-golang-application">Completed steps of Devsecops for Golang application</h3>
+<p><img alt="Sample devsecops" src="images/2025/02/23th_3.png" /></p>
+<h1 id="ref">Ref:</h1>
 <ul>
 <li><a href="https://github.com/zaproxy/zaproxy">https://github.com/zaproxy/zaproxy</a></li>
 <li><a href="https://medium.com/@kienlt.qn/my-devops-journey-with-jenkins-argocd-and-gitops-tools-e61a57201361">My DevOps Journey: with Jenkins, ArgoCD, and GitOps Tools</a></li>

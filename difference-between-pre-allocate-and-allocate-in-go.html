@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Introduction</h1>
+            <h1 id="introduction">Introduction</h1>
 <p>While learning Goroutine and Channel, I found there is something interesting about pre-allocate and allocate in Go. That is the reason I wrote this article xD</p>
 <p><strong>TLDR</strong>: Use pre-allocate when you have fixed size of data. Example for fixed size of data:</p>
 <div class="highlight"><pre><span></span><code><span class="c1">// Create slice with fixed size</span>
@@ -87,8 +87,8 @@
 <span class="nx">newMap</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
 </code></pre></div>
 
-<hr>
-<h1>Story</h1>
+<hr />
+<h1 id="story">Story</h1>
 <p>I was just comparing two functions to see which one is cleaner (preparing for new article related to the <a href="https://github.com/BlackMetalz/lazy-hole">lazy-hole</a> project)</p>
 <p>First example:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">slowCheck</span><span class="p">(</span><span class="nx">servers</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="nx">Server</span><span class="w"> </span><span class="p">{</span>
@@ -123,8 +123,8 @@
 </code></pre></div>
 
 <p>I was like, wow, what is that? How is it different/better? Then new question: how can I see it is better, is there any way I can see it is better? It's time to benchmark bro!!!</p>
-<hr>
-<h1>Difference between pre-allocate and allocate</h1>
+<hr />
+<h1 id="difference-between-pre-allocate-and-allocate">Difference between pre-allocate and allocate</h1>
 <p>We need to init project first!</p>
 <div class="highlight"><pre><span></span><code>go<span class="w"> </span>mod<span class="w"> </span>init<span class="w"> </span>demo
 touch<span class="w"> </span>main_test.go<span class="w"> </span><span class="c1"># yes, only need main_test</span>
@@ -308,8 +308,8 @@ ok<span class="w">      </span>demo<span class="w">    </span><span class="m">12
 </tbody>
 </table>
 <p>Hmm, only 1 iteration and 8 allocations. No idea why it needs 8 allocations. I will try to learn more about it someday, not today xD</p>
-<hr>
-<h1>Growth Factor of Slice</h1>
+<hr />
+<h1 id="growth-factor-of-slice">Growth Factor of Slice</h1>
 <p>Another interesting thing to research. What I understand:</p>
 <ul>
 <li>Each resize would equal 1 malloc</li>
@@ -323,8 +323,8 @@ ok<span class="w">      </span>demo<span class="w">    </span><span class="m">12
 <li><a href="https://go.dev/blog/slices-intro#growing-slices-the-copy-and-append-functions">slices-intro</a></li>
 <li><a href="https://go.dev/ref/spec#Appending_and_copying_slices">Appending_and_copying_slices</a></li>
 </ul>
-<hr>
-<h1>Conclusion</h1>
+<hr />
+<h1 id="conclusion">Conclusion</h1>
 <p>Resource: <a href="https://alexanderobregon.substack.com/p/go-testing-benchmarks-and-how-they">https://alexanderobregon.substack.com/p/go-testing-benchmarks-and-how-they</a></p>
 <p>Just remember to use pre-allocate when you have fixed size of data. </p>
 
@@ -351,7 +351,7 @@ ok<span class="w">      </span>demo<span class="w">    </span><span class="m">12
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article">
                 <li><a href="https://blackmetalz.github.io/tags.html#code-ref">code
-                    <span class="superscript">4</span>
+                    <span class="superscript">5</span>
 </a></li>
             </ul>
 <h4>Contact</h4>

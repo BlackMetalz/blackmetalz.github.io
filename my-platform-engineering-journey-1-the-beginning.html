@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>My Platform Engineering Journey #1: The Beginning</h1>
+            <h1 id="my-platform-engineering-journey-1-the-beginning">My Platform Engineering Journey #1: The Beginning</h1>
 <p>It began with a Saturday morning coffee meeting with former colleagues. He demonstrated what he had been working on over the past three months, and I was truly amazed. He had built not just a user-friendly all-in-one portal, but specifically</p>
 <ul>
 <li>Ticket system: Tracks progress stages and involved personnel, with notifications</li>
@@ -92,28 +92,28 @@
 <li><a href="https://internaldeveloperplatform.org/">InternalDeveloperPlatform.org</a></li>
 <li><a href="https://www.youtube.com/watch?v=ghzsBm8vOms">Platform engineering vs DevOps</a></li>
 </ul>
-<hr>
-<h1>Let's talk about salary, career opportunities</h1>
+<hr />
+<h1 id="lets-talk-about-salary-career-opportunities">Let's talk about salary, career opportunities</h1>
 <ul>
 <li>Most people will you tell that a Platform Engineer will have a higher salary than DevOps/SRE/CloudOps/Infrastructure engineers. But it will be the same result if you replace the word DevOps vs SRE/CloudOps/etc... xD. So what is the point? In my personal opinion, it depended on what you have built/are able to build, not fancy certifications or beautiful resume/curriculum vitae (It is my personal opinion, I repeated xD)</li>
 <li>When I'm writing this article, I don't have much of an idea about career opportunities. I just like the keyword Platform Engineering and what its capabilities are, that's all, nothing more. And this will consume about 6 months of mine to achieve the basic stuff, I guess xD</li>
 </ul>
-<hr>
-<h1>Problems to be resolved - repeated DevOps tasks</h1>
-<h3>First example - repeated tasks</h3>
+<hr />
+<h1 id="problems-to-be-resolved-repeated-devops-tasks">Problems to be resolved - repeated DevOps tasks</h1>
+<h3 id="first-example-repeated-tasks">First example - repeated tasks</h3>
 <p>I'm currently working in a DevOps Engineer role. I managed GitLab groups that have hundreds of repositories and 50 repositories needed to be set with CI/CD (even rewrite Dockerfile to best practices!), monitoring, and so on. </p>
 <p>When I begin to set up, the first 10 repositories are completely fine, it costs about 3 hours (because they are all Go and Python). But from the 11th repositories, I have a feeling that I'm doing a repeated job and this is not the first time, before was Jenkins. So I'm starting to think there is no solution that would allow me to escape from this boring task?</p>
-<h3>Second example complicated for users (Developers):</h3>
+<h3 id="second-example-complicated-for-users-developers">Second example complicated for users (Developers):</h3>
 <ul>
 <li>They need to remember which URL is for their application logs or how to query for their service.</li>
 <li>Which Grafana dashboard and query is correct for their service's metrics?</li>
 <li>How to check their service status, is their pod gets restarted by OOM or crashes, and do they know the reason if they don't have access to the K8s cluster? (And even with alert and notify sometimes you still need to check what is going on to make sure xD)</li>
 </ul>
-<h3>Third example</h3>
+<h3 id="third-example">Third example</h3>
 <p>When I moved to a new company, each of the teams had their own DevOps and config CI/CD by their own, self-managed infrastructure -&gt; duplicate effort.</p>
 <p>A lot of stuff I have been reading, but only one thing made me feel interested. That is Platform Engineering, after watching its concepts, I think this is the key to solving problems I have seen in the past (In the past not only a lack of experience, I also lacked knowledge!)</p>
-<hr>
-<h1>What do I know/understand about Platform Engineering?</h1>
+<hr />
+<h1 id="what-do-i-knowunderstand-about-platform-engineering">What do I know/understand about Platform Engineering?</h1>
 <ul>
 <li>It is based on DevOps and allows DevOps to scale, so it will not gonna replace DevOps. Platform Engineering evolves from DevOps!</li>
 <li>Centralized developer-facing services/tools (portal is an interface in Platform Engineering)</li>
@@ -122,14 +122,14 @@
 <li>Cover every operational necessity of the entire lifecycle (services &amp; applications).</li>
 <li>Automation &amp; Standardization, Compliance, Governance &amp; Security by design.</li>
 </ul>
-<hr>
-<h1>Golden path for developers</h1>
+<hr />
+<h1 id="golden-path-for-developers">Golden path for developers</h1>
 <p>From what I've learned so far... It will have a project, CI/CD pipelines, and document templates for developers.
 - Less time to ask deploy to where, who is involved in that step, then the goal will be less time spent for new developer onboarding?
 - Everything at 1 portal, easy to remember, less effort to learn, well documented?</p>
 <p>That is my expectation: build for developers, used by developers.</p>
-<hr>
-<h1>Standardization, Compliance, Governance &amp; Security by design</h1>
+<hr />
+<h1 id="standardization-compliance-governance-security-by-design">Standardization, Compliance, Governance &amp; Security by design</h1>
 <p>Another important thing I want to talk about. The problems were that not every developer in our company is equal; some developers lack knowledge, some developers are lazy and afraid of change. For example, I will talk about myself, I'm not only lacking basic knowledge but also lazy AF, I don't want new things since I will have to relearn and always have the thought that using new tools will be a waste of time and that the tool will be sent to the graveyard soon xD. Hmm, seems like an unrelated story to this section =.=</p>
 <p>Let's take some examples from my knowledge.</p>
 <p>Standardization: Standard for Dockerfile is what we want to achieve, for example,  with Golang, a multi build layer, use <a href="https://github.com/GoogleContainerTools/distroless">Distroless</a> as an image to run the application and non-root users. We will not need to configure User and Group ID in the securityContext of K8S pod/containers....</p>
@@ -176,8 +176,8 @@
 <p>Most of us know how it works, how we can secure it, but we won't implement it anyway with a ton of excuses! We can not force every Golang application but if they use our IDP, this will be the default, right? xD</p>
 <p>After Standardization, after standardization? I think I already included some basic security stuff to reduce surface attack. Compliance and Governance? Developers using our product used what we defined!</p>
 <p>Wait, I mentioned the word "product", yes. We should treat IDP (internal developer platform, not internal developer portal, haha) as a "product".</p>
-<hr>
-<h1>Treat IDP as a product</h1>
+<hr />
+<h1 id="treat-idp-as-a-product">Treat IDP as a product</h1>
 <p>Why product, is it another internal tool?. Because developers are the main users here:</p>
 <ul>
 <li>Mindset shift: Developers are internal customers.</li>
@@ -185,11 +185,11 @@
 <li>We need to understand developer pain points and then solve for them.</li>
 <li>What would I approach? Implement basic stuff, tight feedback loop until we get MVP (Minimum Viable Platform).</li>
 </ul>
-<hr>
-<h1>What's Next?</h1>
+<hr />
+<h1 id="whats-next">What's Next?</h1>
 <p>In the next part, I'll share about Backstage (I'm learning it, btw). It is a component to make the Internal Platform Portal, not the whole IDP</p>
-<hr>
-<h1>Conclusion</h1>
+<hr />
+<h1 id="conclusion">Conclusion</h1>
 <p>To be honest, I'm still learning about this anyway. I estimated that this shit will cost 6 months of my time to have a running demo with my current ability.</p>
 <p>I guess there is some hidden, wrong stuff/theory I wrote in this article, if you know, please give me feedback to improve!</p>
 <p>Platform Engineer will not resolve the golden path for everything, only with "right implementation!"</p>

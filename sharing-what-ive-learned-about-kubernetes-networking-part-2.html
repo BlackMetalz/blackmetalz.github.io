@@ -79,13 +79,13 @@
         <div class="span8 offset2 article-content">
             
             <p>In the second part, I will talk about Container network interface (CNI), Cilium CNI and some compare with Network policies and Cilium network policies.</p>
-<h1>CNI</h1>
-<h3>What is CNI:</h3>
+<h1 id="cni">CNI</h1>
+<h3 id="what-is-cni">What is CNI:</h3>
 <ul>
 <li>Is a framework for configuring network interfaces in Linux containers, providing connectivity, and ensuring network isolation.</li>
 <li>CNI Plugin standardizes and simplifies Kubernetes networking.</li>
 </ul>
-<h3>How CNI Works:</h3>
+<h3 id="how-cni-works">How CNI Works:</h3>
 <ul>
 <li>CNI works by invoking a network plugin that handles network configuration for containers. When a container is created, the container runtime calls the CNI plugin to set the container network interface.</li>
 <li>Works in K8S:</li>
@@ -94,13 +94,13 @@
 <span class="w">                                           </span><span class="o">--&gt;</span><span class="w"> </span><span class="n">invoke</span><span class="w"> </span><span class="n">CNI</span><span class="p">,</span><span class="w"> </span><span class="n">create</span><span class="w"> </span><span class="n">network</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">veth</span><span class="w"> </span><span class="n">then</span><span class="w"> </span><span class="nf">map</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="n">network</span>
 </code></pre></div>
 
-<h3>CNI specification:</h3>
+<h3 id="cni-specification">CNI specification:</h3>
 <ul>
 <li>A Json configuration file that specifies the desired network setup.</li>
 <li>Standard commands: ADD, DEL, CHECK to manage network interfaces.</li>
 <li>The plugin must handle these commands and return results in a  predefined format.</li>
 </ul>
-<h3>CNI community popularity:</h3>
+<h3 id="cni-community-popularity">CNI community popularity:</h3>
 <p>The following table summarizes different GitHub metrics to give you an idea of each project's popularity and activity levels. This data was collected in December 2024.</p>
 <table>
 <thead>
@@ -144,11 +144,11 @@
 </tr>
 </tbody>
 </table>
-<h1>Cilium CNI</h1>
-<h3>What is Cilium</h3>
+<h1 id="cilium-cni">Cilium CNI</h1>
+<h3 id="what-is-cilium">What is Cilium</h3>
 <p>Cilium is an open-source networking and security solution designed for Kubernetes and other container orchestration platforms. Its primary purpose is to provide secure and efficient network connectivity between application services deployed in cloud-native environments. Cilium leverages <code>eBPF</code> (extended Berkeley Packet Filter) technology to dynamically insert code into the Linux kernel, enabling high-performance packet processing and security enforcement.</p>
 <p>As a CNI (Container Network Interface) plugin, Cilium offers advanced networking features, robust security policies, and deep observability capabilities. These features make it an ideal choice for modern cloud-native applications that require scalable and secure network infrastructure.</p>
-<h3>Key Features</h3>
+<h3 id="key-features">Key Features</h3>
 <ul>
 <li>
 <p><strong>eBPF</strong>
@@ -167,25 +167,25 @@ Cilium integrates seamlessly with service meshes like Istio, providing enhanced 
 Cilium offers robust observability features through <code>Hubble</code>, which provides deep visibility into network traffic and security events.</p>
 </li>
 </ul>
-<h3>eBPF explain</h3>
+<h3 id="ebpf-explain">eBPF explain</h3>
 <p>I think you haven't understood clearly about eBPF (so am i), so i tried to spend time reading the document, trying to understand it and explain it here xD.</p>
-<h4>1. <strong>Think of it as a plugin system for the kernel</strong> that can help with monitoring, networking, and security:</h4>
+<h4 id="1-think-of-it-as-a-plugin-system-for-the-kernel-that-can-help-with-monitoring-networking-and-security">1. <strong>Think of it as a plugin system for the kernel</strong> that can help with monitoring, networking, and security:</h4>
 <ul>
 <li>Observe: Watch what’s happening inside the system (e.g., track network packets, file operations, etc.).</li>
 <li>Act: Modify or filter data in real time (e.g., drop a suspicious network packet).</li>
 </ul>
-<h4>2. <strong>Why is it useful?</strong>:</h4>
+<h4 id="2-why-is-it-useful">2. <strong>Why is it useful?</strong>:</h4>
 <p>Normally, to add new functionality to the Linux kernel, you'd have to rebuild or modify the kernel—a risky and complex task. eBPF solves this by:
 - Letting you "inject" tiny programs dynamically.
 - Running these programs in a safe sandbox to ensure they can’t crash or harm the system.
 - Being fast because the programs run directly inside the kernel.</p>
-<h4>3. <strong>Simple Analogy</strong>: Imagine the Linux kernel is a busy post office:</h4>
+<h4 id="3-simple-analogy-imagine-the-linux-kernel-is-a-busy-post-office">3. <strong>Simple Analogy</strong>: Imagine the Linux kernel is a busy post office:</h4>
 <ul>
 <li>Every day, it processes letters (network packets, file reads, system events).</li>
 <li>If you wanted to filter out spam mail (e.g., suspicious packets), you'd normally need to rewrite the post office's internal processes (modify the kernel).</li>
 <li>But with eBPF, you can simply write a small "mailroom plugin" that works alongside the post office to filter spam as the letters pass through without changing how the post office works.</li>
 </ul>
-<h4>4. <strong>Example: Network Packet Filtering</strong>. Let’s say you want to block network packets coming from a suspicious IP address.</h4>
+<h4 id="4-example-network-packet-filtering-lets-say-you-want-to-block-network-packets-coming-from-a-suspicious-ip-address">4. <strong>Example: Network Packet Filtering</strong>. Let’s say you want to block network packets coming from a suspicious IP address.</h4>
 <ul>
 <li><strong>Without eBPF</strong>:<ul>
 <li>You might need to install complex tools or write custom firewall rules.</li>
@@ -203,7 +203,7 @@ Cilium offers robust observability features through <code>Hubble</code>, which p
 </ul>
 </li>
 </ul>
-<h4>5. <strong>Additional example of how network packet filter</strong>:</h4>
+<h4 id="5-additional-example-of-how-network-packet-filter">5. <strong>Additional example of how network packet filter</strong>:</h4>
 <p>I think i need some example code for easier imagination, the same method which i used to better understand the issue.</p>
 <ul>
 <li><strong>Install required for Debian-based system</strong>:</li>
@@ -294,7 +294,7 @@ This will load the eBPF program and attach it to the specified network interface
 </li>
 </ul>
 <p><strong>P/s: This is generated from Copilot xD</strong>, but it should give an idea of why eBPF is strong and useful.</p>
-<h3>Cilium eBPF</h3>
+<h3 id="cilium-ebpf">Cilium eBPF</h3>
 <ul>
 <li>First, i think you need to check if Cilium is enabled in hybrid mode or strict mode or not</li>
 </ul>
@@ -332,20 +332,20 @@ This will load the eBPF program and attach it to the specified network interface
 </li>
 </ul>
 <p>More examples can be found here: <a href="https://archive.fosdem.org/2020/schedule/event/replacing_iptables_with_ebpf/attachments/slides/3622/export/events/attachments/replacing_iptables_with_ebpf/slides/3622/Cilium_FOSDEM_2020.pdf">replacing_iptables_with_ebpf</a></p>
-<h3>Common commands of the cilium</h3>
+<h3 id="common-commands-of-the-cilium">Common commands of the cilium</h3>
 <div class="highlight"><pre><span></span><code>cilium-health status
 cilium status
 </code></pre></div>
 
-<h3>Cilium Observability: Hubble</h3>
+<h3 id="cilium-observability-hubble">Cilium Observability: Hubble</h3>
 <ul>
 <li>There are many ways to enable Hubble and Hubble UI, so i won't talk details here.</li>
 <li>View network flows in real-time: <code>hubble observe</code></li>
 <li>Port forward to use Hubble UI: <code>kubectl port-forward -n kube-system svc/hubble-ui 12000:80</code>
-<img alt="alt text" src="images/2025/01/20th_1.png"></li>
+<img alt="alt text" src="images/2025/01/20th_1.png" /></li>
 <li>
 <p>As you can see, very useful for Observability, debugging, and tracing!, even more, it shows which packets get dropped so we can have an  idea of where to check, at this point, it is caused by CNP (Cilium Network Policy).
-<img alt="alt text" src="images/2025/01/20th_2.png"></p>
+<img alt="alt text" src="images/2025/01/20th_2.png" /></p>
 </li>
 <li>
 <p>For CLI mode which i prefer for debugging xD</p>
@@ -368,8 +368,8 @@ cilium status
 <span class="n">Jan</span><span class="w"> </span><span class="mi">23</span><span class="w"> </span><span class="mi">09</span><span class="p">:</span><span class="mi">36</span><span class="p">:</span><span class="mf">09.440</span><span class="p">:</span><span class="w"> </span><span class="n">default</span><span class="o">/</span><span class="n">kienlt</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">tools</span><span class="p">:</span><span class="mi">54729</span><span class="w"> </span><span class="p">(</span><span class="n">ID</span><span class="p">:</span><span class="mi">46060</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">kube</span><span class="o">-</span><span class="n">system</span><span class="o">/</span><span class="n">rke2</span><span class="o">-</span><span class="n">coredns</span><span class="o">-</span><span class="n">rke2</span><span class="o">-</span><span class="n">coredns</span><span class="o">-</span><span class="mi">565</span><span class="n">dfc7d75</span><span class="o">-</span><span class="mi">78</span><span class="n">ql9</span><span class="w"> </span><span class="p">(</span><span class="n">ID</span><span class="p">:</span><span class="mi">8648</span><span class="p">)</span><span class="w"> </span><span class="n">pre</span><span class="o">-</span><span class="n">xlate</span><span class="o">-</span><span class="n">rev</span><span class="w"> </span><span class="n">TRACED</span><span class="w"> </span><span class="p">(</span><span class="n">UDP</span><span class="p">)</span>
 </code></pre></div>
 
-<h1>Cilium Network policies</h1>
-<h3>Comparison</h3>
+<h1 id="cilium-network-policies">Cilium Network policies</h1>
+<h3 id="comparison">Comparison</h3>
 <ul>
 <li><strong>Kubernetes Network Policies</strong>: Kubernetes network policies are used to control the traffic between pods. They are defined using the NetworkPolicy resource.</li>
 </ul>
@@ -449,7 +449,7 @@ cilium status
 </ul>
 </li>
 </ul>
-<h3>A real example of Cilium Network policies</h3>
+<h3 id="a-real-example-of-cilium-network-policies">A real example of Cilium Network policies</h3>
 <ul>
 <li>Before I'm able to write this, i wasted 3-4 hours for checking and testing why we can't have rules that allow both allow/deny. Simply it doesn't support &gt;.&gt;</li>
 </ul>
@@ -511,13 +511,13 @@ spec:
 </code></pre></div>
 
 <p>Specials thanks to <code>isovalent.com</code> for the tutorials xD ( included reference link below)</p>
-<h1>Conclusion</h1>
+<h1 id="conclusion">Conclusion</h1>
 <ul>
 <li>I had a little hard time understanding, but in the end, mostly i got it at some percent xD.</li>
 <li>K8S is complicated, understand a small part will lead to a bigger part. Just don't give up, keep going!</li>
 <li>Learning with ChatGPT and Copilot is faster than doing research with only yourself!</li>
 </ul>
-<h1>Reference:</h1>
+<h1 id="reference">Reference:</h1>
 <ul>
 <li><a href="https://ranchermanager.docs.rancher.com/">https://ranchermanager.docs.rancher.com/</a></li>
 <li><a href="https://docs.cilium.io/en/stable/overview/intro/">https://docs.cilium.io/en/stable/overview/intro/</a></li>

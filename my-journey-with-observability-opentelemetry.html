@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Introduction to Observability</h1>
+            <h1 id="introduction-to-observability">Introduction to Observability</h1>
 <p>It has 3 pillar we need to know in my knowledge:</p>
 <ul>
 <li>Metrics</li>
@@ -86,19 +86,19 @@
 <li>Traces</li>
 </ul>
 <p>So we will talk about Tracing in this article and it will come with OpenTelemetry(OTel)</p>
-<h1>What is Open Telemetry (OTel)</h1>
+<h1 id="what-is-open-telemetry-otel">What is Open Telemetry (OTel)</h1>
 <p>It is an observability framework for generating, collecting, and exporting telemetry data such as traces, metrics, and logs. But i will talk only about traces in this article. Metrics and Logs will be introduced in another article with some following information:</p>
 <ul>
 <li>Metrics: Response time, request volume, ingress success rate, status... via Prometheus standard.</li>
 <li>Logs: Application send log to stdout and save those logs for debugging in Elasticsearch, VictoriaLogs with Fluentbit in K8S...</li>
 </ul>
 <p>Although OTel supports all of them but i will use only using traces for a demo right now xD</p>
-<h1>Let's get started with a sample Go project with OTel</h1>
-<h3>Setup quick OTel collector and Jaeger which can be considered as a backend in Localhost</h3>
+<h1 id="lets-get-started-with-a-sample-go-project-with-otel">Let's get started with a sample Go project with OTel</h1>
+<h3 id="setup-quick-otel-collector-and-jaeger-which-can-be-considered-as-a-backend-in-localhost">Setup quick OTel collector and Jaeger which can be considered as a backend in Localhost</h3>
 <ul>
 <li>
 <p>Flows: 
-<img alt="Work Flows" src="images/2025/03/03rd_1.png"></p>
+<img alt="Work Flows" src="images/2025/03/03rd_1.png" /></p>
 </li>
 <li>
 <p>Docker compose script:</p>
@@ -172,7 +172,7 @@
 <span class="mi">3466</span><span class="n">baff1cb6</span><span class="w">   </span><span class="n">otel</span><span class="o">/</span><span class="n">opentelemetry</span><span class="o">-</span><span class="n">collector</span><span class="o">-</span><span class="nl">contrib</span><span class="p">:</span><span class="mf">0.120.0</span><span class="w">   </span><span class="ss">&quot;/otelcol-contrib --…&quot;</span><span class="w">   </span><span class="mi">2</span><span class="w"> </span><span class="n">days</span><span class="w"> </span><span class="n">ago</span><span class="w">    </span><span class="n">Up</span><span class="w"> </span><span class="mi">7</span><span class="w"> </span><span class="n">hours</span><span class="w">          </span><span class="mf">0.0.0.0</span><span class="err">:</span><span class="mi">4317</span><span class="o">-</span><span class="mi">4318</span><span class="o">-&gt;</span><span class="mi">4317</span><span class="o">-</span><span class="mi">4318</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span><span class="w"> </span><span class="o">[</span><span class="n">::</span><span class="o">]</span><span class="err">:</span><span class="mi">4317</span><span class="o">-</span><span class="mi">4318</span><span class="o">-&gt;</span><span class="mi">4317</span><span class="o">-</span><span class="mi">4318</span><span class="o">/</span><span class="n">tcp</span><span class="p">,</span><span class="w"> </span><span class="mi">55678</span><span class="o">-</span><span class="mi">55679</span><span class="o">/</span><span class="n">tcp</span><span class="w">                                                       </span><span class="n">opentelemetry</span><span class="o">-</span><span class="k">go</span><span class="o">-</span><span class="n">app</span><span class="o">-</span><span class="n">otel</span><span class="o">-</span><span class="n">collector</span><span class="o">-</span><span class="mi">1</span>
 </code></pre></div>
 
-<h3>Setup Application exposes data</h3>
+<h3 id="setup-application-exposes-data">Setup Application exposes data</h3>
 <p>I will leave my repo here: <a href="https://github.com/BlackMetalz/otel-go-app-sample">https://github.com/BlackMetalz/otel-go-app-sample</a></p>
 <ul>
 <li>Example when you request to path: <code>/products</code>. It will connect to DB and some functions which i used to make "accident scenario"</li>
@@ -250,19 +250,19 @@
 <span class="p">}</span>
 </code></pre></div>
 
-<h3>View the traces with Jaeger UI</h3>
+<h3 id="view-the-traces-with-jaeger-ui">View the traces with Jaeger UI</h3>
 <ul>
 <li>Let's take a look at UI to see how many spans and each span take how long for duration. First, i filter for Min Duration as 2 seconds, which means request have more than 2 seconds to respond.</li>
 </ul>
-<p><img alt="filter jaeger" src="images/2025/03/03rd_2.png"></p>
+<p><img alt="filter jaeger" src="images/2025/03/03rd_2.png" /></p>
 <ul>
 <li>Then i take a look at the request with 3 seconds duration. You can see clearly each span takes how long to complete the handle</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/03rd_3.png"></p>
+<p><img alt="alt text" src="images/2025/03/03rd_3.png" /></p>
 <ul>
 <li>I will look at span <strong>processData</strong></li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/03rd_4.png">
+<p><img alt="alt text" src="images/2025/03/03rd_4.png" />
 Source code here: <a href="https://github.com/BlackMetalz/otel-go-app-sample/blob/main/utils/mysql.go#L112-L124">https://github.com/BlackMetalz/otel-go-app-sample/blob/main/utils/mysql.go#L112-L124</a></p>
 <div class="highlight"><pre><span></span><code><span class="c1">// processData simulates additional processing with a delay and possible error</span>
 <span class="kd">func</span><span class="w"> </span><span class="nx">processData</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">products</span><span class="w"> </span><span class="p">[]</span><span class="nx">Product</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -280,7 +280,7 @@ Source code here: <a href="https://github.com/BlackMetalz/otel-go-app-sample/blo
 </code></pre></div>
 
 <p>That is where 1.5 duration comes from in package utils which is matched with <code>otel.scope.name</code></p>
-<h1>Deployment</h1>
+<h1 id="deployment">Deployment</h1>
 <p>Assume I'm gonna deploy my application to k8s. And before going into detail, i would tell a real story.</p>
 <p>When Open Tracing (<a href="https://opentracing.io/">https://opentracing.io/</a> archived!) was introduced by Platform team in my company, the new technology looked promising, many Dev team tried it but gave up due to performance drop hard, which caused everyone left Open Tracing, only Platform team used till today.</p>
 <p>So what's wrong? </p>
@@ -347,7 +347,7 @@ Source code here: <a href="https://github.com/BlackMetalz/otel-go-app-sample/blo
 <span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">otel-collector-config</span>
 </code></pre></div>
 
-<h1>Other notes</h1>
+<h1 id="other-notes">Other notes</h1>
 <p>Record tracing never been easy on application that have large traffic.</p>
 <ul>
 <li><a href="https://static.googleusercontent.com/media/research.google.com/en//archive/papers/dapper-2010-1.pdf">Google may use 0.01 to 0.1% request for sampling rate?</a>. This is just my guess xD, btw start sampling with rate like 1%!</li>
@@ -357,13 +357,13 @@ Source code here: <a href="https://github.com/BlackMetalz/otel-go-app-sample/blo
 <li>Instrument Only Critical Paths: Only tracing what is important ( API, logic and bottleneck), avoid add trace everywhere!</li>
 <li>Monitor and Tune Overhead: Please monitor CPU/Mem/Network usage of tracing and adjust/tweak sampling/export settings!</li>
 </ul>
-<h1>Conclusion</h1>
+<h1 id="conclusion">Conclusion</h1>
 <ul>
 <li>Code/ some context is mostly generated by AI with my promt since I'm not developer, just a system guy want to learn Go xD</li>
 <li>Personally, i don't think OTel is good approach for junior developer, expect use from middle developer!</li>
 <li>Again, i only understand little about tracing, you will not see part Metrics and Logging of OTel in this article.</li>
 </ul>
-<h1>Ref:</h1>
+<h1 id="ref">Ref:</h1>
 <ul>
 <li><a href="https://opentelemetry.io/docs/">https://opentelemetry.io/docs/</a></li>
 <li><a href="https://learn.datadoghq.com/courses/introduction-to-observability">https://learn.datadoghq.com/courses/introduction-to-observability</a></li>

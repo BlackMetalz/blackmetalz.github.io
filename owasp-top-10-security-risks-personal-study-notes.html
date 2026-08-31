@@ -78,15 +78,15 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Introduction to OWASP (Opensource Web Application Security Project)</h1>
+            <h1 id="introduction-to-owasp-opensource-web-application-security-project">Introduction to OWASP (Opensource Web Application Security Project)</h1>
 <p>Objective: Understand the top 10 most common web application attacks, their impact, and how these attacks can be prevented or mitigated!</p>
 <p>Resource usage:
 <a href="https://fpt.udemy.com/course/web-application-security-for-absolute-beginners-no-coding/">Learn OWASP top 10 risks!</a></p>
 <p>The story for this article: since my company, where I work, forced every employee to finish the course above, I want to write down something about my ability, or what I understood while watching the resource. I will put my story about some security issues I have faced before to remind me not fucked up again!</p>
-<hr>
-<h1>Top 10 OWASP and more</h1>
+<hr />
+<h1 id="top-10-owasp-and-more">Top 10 OWASP and more</h1>
 <p>It could be already outdated, but I'm here to learn its essence and concepts; name or definition could be changed, but the essence never!</p>
-<h3>Injection</h3>
+<h3 id="injection">Injection</h3>
 <p>I think it is best known as "SQL Injection". Example, if we don't validate input <strong>username = "admin' OR '1'='1' --"</strong>. Then our code will be fucked if:</p>
 <div class="highlight"><pre><span></span><code><span class="n">SQL</span> <span class="n">Injection</span>  
 <span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
@@ -98,7 +98,7 @@
 
 <p>It is already prevented by most modern frameworks today, but it's better to know its essence instead of using a framework without understanding why it is secure!</p>
 <p><a href="https://owasp.org/Top10/2025/A05_2025-Injection/">Resource here</a></p>
-<h3>Broken Authentication and Session Management</h3>
+<h3 id="broken-authentication-and-session-management">Broken Authentication and Session Management</h3>
 <p>Prevent "Impersonate":</p>
 <ul>
 <li>Use a strong password, multi-factor authentication.</li>
@@ -106,12 +106,12 @@
 <li>Log out or expire session after xxx amount of time.</li>
 </ul>
 <p>And something else I didn't really understand</p>
-<h3>Cross-site Scripting (XSS)</h3>
+<h3 id="cross-site-scripting-xss">Cross-site Scripting (XSS)</h3>
 <p>Why XSS? because CSS will get mis-understand related with Cascading Style Sheets xD</p>
 <p>What is it? Still same like injection but executed by browser</p>
 <p>How to mitigate? Just alway untrust the fucking input data!</p>
 <p><a href="https://owasp.org/www-community/attacks/xss/">Resource here</a></p>
-<h3>Broken Access Control</h3>
+<h3 id="broken-access-control">Broken Access Control</h3>
 <p>I could tell a story related to this, so it is about a lazy issue. Back in 2017, I was working with the role of System Admin and yeah manual tester as well, LOL. When my department (4 people) is creating a new tool for internal usage. When the tool was about to finish and ready to release, the leader asked me to test and report if any issues were found. </p>
 <p>So in the user view, the menu of the manager is hidden, but you can still access the manager page by entering the direct URL xD. I asked why that was. He just told skip it, haha.</p>
 <p>So let me provide a simple issue by pseudocode</p>
@@ -125,7 +125,7 @@ app.get(&#39;/admin&#39;,<span class="w"> </span>(req,<span class="w"> </span>re
 </code></pre></div>
 
 <p><a href="https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/">Resource here</a></p>
-<h3>Security Misconfiguration</h3>
+<h3 id="security-misconfiguration">Security Misconfiguration</h3>
 <p>Yes, this is simple to understand, misconfiguration will fucked you up!</p>
 <p>The most common issue is enabling fucking debug flag! Developers deploy themself; no one verifies or validates changes for deployment! This simple misconfiguration can lead to many, many more problems later!</p>
 <p>The example I really remember about: Path traversal via misconfigured NGINX alias</p>
@@ -141,7 +141,7 @@ ALLOWED_HOSTS=[&#39;yourdomain.com&#39;]
 SECRET_KEY=os.environ.get(&#39;SECRET_KEY&#39;)  # From env, not hardcode
 </code></pre></div>
 
-<h3>Sensitive Data Exposure</h3>
+<h3 id="sensitive-data-exposure">Sensitive Data Exposure</h3>
 <p>The resource showed back in 2017, it was using MD5/SHA1 hash solution, which is well-known as insecure</p>
 <div class="highlight"><pre><span></span><code><span class="gh">#</span> Bad
 password_hash = md5(password)
@@ -158,12 +158,12 @@ password_hash = bcrypt.hash(password, 12)
 <div class="highlight"><pre><span></span><code>logger.info(f&quot;Processing card: ****{card[-4:]}&quot;) # Show only last 4 fucking number!
 </code></pre></div>
 
-<h3>Insufficient Attack Protection</h3>
+<h3 id="insufficient-attack-protection">Insufficient Attack Protection</h3>
 <p>It was updated to: <code>Security Logging and Monitoring Failures - A09:2021</code></p>
 <p>When I'm learning this section, the first thing I thought was <code>Rate Limit</code>, we should not trust users even if it was deployed to the internal environment, who knows in the future they will not fucked us up? Just set the fucking <code>Rate Limit</code> to prevent issues in the future!</p>
 <p>Other key protections are: <code>Account Lockout</code>, <code>Automated Response</code>, and <code>Web Application Firewall (WAF).</code></p>
 <p>Conclusion: Defense in depth!</p>
-<h3>Cross-site request forgery (CSRF)</h3>
+<h3 id="cross-site-request-forgery-csrf">Cross-site request forgery (CSRF)</h3>
 <p>I think I was familiar with this before long time ago, but I never understood it, haha. So an example with PHP - Laravel. </p>
 <p>So, CSRF protection prevents an attacker from using the <code>authenticated session</code> of a victim to send an illegal request.</p>
 <p>CSRF Token generated with the user session. When sending a request to the server, it will go together. Server validates by checking the token to see if it matches with session.</p>
@@ -173,7 +173,7 @@ password_hash = bcrypt.hash(password, 12)
 </ul>
 <p>And only need to use CSRF for state-changing requests: POST/PUT/DELETE/PATCH. Other state like GET/HEAD/OPTIONS is not needed!</p>
 <p><a href="https://laravel.com/docs/12.x/csrf#preventing-csrf-requests">Resource - CSRF Protection</a></p>
-<h3>Using Components with Known Vulnerabilities</h3>
+<h3 id="using-components-with-known-vulnerabilities">Using Components with Known Vulnerabilities</h3>
 <p>We can understand that they are a third-party component.</p>
 <ul>
 <li>Virtual Patch: Workaround by block, limit access, or whatever, but do not fix the real issue! Short-term solutions, bro!</li>
@@ -193,7 +193,7 @@ requests==2.31.0  # Patched version
 <li>Containers/images (Docker base images)</li>
 <li>Dependencies of dependencies (transitive dependencies)</li>
 </ul>
-<h3>Underprotected APIs</h3>
+<h3 id="underprotected-apis">Underprotected APIs</h3>
 <p>This is basic, nothing much to tell, I guess...</p>
 <p>Simple example on a project I recently used. The Pydantic package used data validation library for Python.</p>
 <p>I remember I used it to validate both requests to the API and responses from the API.</p>
@@ -232,21 +232,21 @@ requests==2.31.0  # Patched version
 
 <p>For response validation, you can use Google to search, but putting it here is not necessary, haha</p>
 <p>And put the fucking <strong>Rate Limit</strong></p>
-<h3>XML external entities (XXE)</h3>
+<h3 id="xml-external-entities-xxe">XML external entities (XXE)</h3>
 <p>No idea about this much, I guess I haven't used this feature before</p>
 <p>But good to know how to prevent in a scenario where you are <code>processing XML data</code>.</p>
 <p><a href="https://portswigger.net/web-security/xxe">XXE injection</a></p>
-<h3>Insecure deserialization</h3>
+<h3 id="insecure-deserialization">Insecure deserialization</h3>
 <p>Hmm, from what I'm understanding, it is not only validate serialized object, also need to validate deserilialized object progress?</p>
 <p><a href="https://semgrep.dev/docs/learn/vulnerabilities/insecure-deserialization/python">Resource</a></p>
-<h3>Insufficient logging and monitoring</h3>
+<h3 id="insufficient-logging-and-monitoring">Insufficient logging and monitoring</h3>
 <p>Lack of logging and monitoring, which is unable to discover an attack when it happens or has happened!</p>
 <p>Basically, make a system with fully logged (but only with useful logs) and monitored (with useful metrics), sounds easy, but in fact it is hard AF!!!</p>
 <p>Simple example AF to help you/me to understand: log when a user enters wrong credentials and notify if there are like 10 failed logins from a single account / single IP (Which can be known as brute-force!)</p>
-<h3></h3>
-<hr>
-<h1>Updated OWASP from 2021 -&gt; 2025 xD</h1>
-<h3>Software and data integrity failures</h3>
+<h3 id="_1"></h3>
+<hr />
+<h1 id="updated-owasp-from-2021-2025-xd">Updated OWASP from 2021 -&gt; 2025 xD</h1>
+<h3 id="software-and-data-integrity-failures">Software and data integrity failures</h3>
 <p>What was that? Supply chain attack</p>
 <p>What the hell is <strong>Supply chain attack?</strong> When the third-party software, tools, or dependencies your product relies on become compromised, outdated, or malicious without you noticing!</p>
 <p>How to prevent or reduce the risk of being attacked? I think there are some basic things, like scanning for CVE/Vulnerable, using an image tag with a hash, not a tag, because they could be changed</p>
@@ -259,7 +259,7 @@ requests==2.31.0  # Patched version
 <span class="w">  </span>nginx:latest
 </code></pre></div>
 
-<h3>Server-side Request Forgery</h3>
+<h3 id="server-side-request-forgery">Server-side Request Forgery</h3>
 <p>So basically, just don't trust anyone, anything, even if they are in the same internal network.</p>
 <p>Zero trust (Never trust, always verify) for everything:</p>
 <ul>
@@ -268,25 +268,25 @@ requests==2.31.0  # Patched version
 <li>Service authentication/authorization: Yes, trust fucking no one, even in the internal network!</li>
 <li>Monitor and Alert! </li>
 </ul>
-<hr>
-<h1>Extra section</h1>
-<h3>Defense in depth</h3>
+<hr />
+<h1 id="extra-section">Extra section</h1>
+<h3 id="defense-in-depth">Defense in depth</h3>
 <p><a href="https://www.oracle.com/a/ocom/docs/security/modern-defense-in-depth.pdf">MODERN Defense In-Depth!</a></p>
 <p>It could be boring while reading, but in fact, they did really great to provide complete information, covering almost everything you need to do!</p>
-<h3>STRIDE</h3>
+<h3 id="stride">STRIDE</h3>
 <p>Hmm, this appears in the exam Kubernetes and Cloud Native Security Associate (KCSA). I would prefer not to talk about it here!</p>
 <div class="highlight"><pre><span></span><code><span class="err">#</span><span class="w"> </span><span class="nx">Search</span><span class="w"> </span><span class="nx">google</span><span class="w"> </span><span class="k">for</span><span class="p">:</span><span class="w"> </span><span class="nx">STRIDE</span><span class="w"> </span><span class="nx">framework</span>
 <span class="nx">The</span><span class="w"> </span><span class="nx">STRIDE</span><span class="w"> </span><span class="nx">framework</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">threat</span><span class="w"> </span><span class="nx">modeling</span><span class="w"> </span><span class="nx">methodology</span><span class="w"> </span><span class="nx">developed</span><span class="w"> </span><span class="nx">by</span><span class="w"> </span><span class="nx">Microsoft</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">help</span><span class="w"> </span><span class="nx">identify</span><span class="w"> </span><span class="nx">potential</span><span class="w"> </span><span class="nx">security</span><span class="w"> </span><span class="nx">threats</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">software</span><span class="w"> </span><span class="nx">by</span><span class="w"> </span><span class="nx">categorizing</span><span class="w"> </span><span class="nx">them</span><span class="w"> </span><span class="nx">into</span><span class="w"> </span><span class="nx">six</span><span class="w"> </span><span class="nx">types</span><span class="p">:</span><span class="w"> </span><span class="nx">Spoofing</span><span class="p">,</span><span class="w"> </span><span class="nx">Tampering</span><span class="p">,</span><span class="w"> </span><span class="nx">Repudiation</span><span class="p">,</span><span class="w"> </span><span class="nx">Information</span><span class="w"> </span><span class="nx">Disclosure</span><span class="p">,</span><span class="w"> </span><span class="nx">Denial</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">Service</span><span class="p">,</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">Elevation</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">Privilege</span><span class="p">,</span><span class="w"> </span><span class="nx">each</span><span class="w"> </span><span class="nx">corresponding</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">core</span><span class="w"> </span><span class="nx">security</span><span class="w"> </span><span class="nx">property</span><span class="w"> </span><span class="k">like</span><span class="w"> </span><span class="nx">Authenticity</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="nx">Confidentiality</span><span class="p">,</span><span class="w"> </span><span class="nx">guiding</span><span class="w"> </span><span class="nx">developers</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">find</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">fix</span><span class="w"> </span><span class="nx">vulnerabilities</span><span class="w"> </span><span class="nx">early</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">Software</span><span class="w"> </span><span class="nx">Development</span><span class="w"> </span><span class="nx">Life</span><span class="w"> </span><span class="nx">Cycle</span><span class="w"> </span><span class="p">(</span><span class="nx">SDLC</span><span class="p">).</span><span class="w"> </span>
 </code></pre></div>
 
-<h3>What I'm missing?</h3>
+<h3 id="what-im-missing">What I'm missing?</h3>
 <p>I think some sections below are missing, but I'm too lazy to continue xDD</p>
 <ul>
 <li>Security Headers</li>
 <li>Secrets Management</li>
 </ul>
-<hr>
-<h1>Conclusion</h1>
+<hr />
+<h1 id="conclusion">Conclusion</h1>
 <p>The course I used to write this article is great, I believe. Great explanation for something I used to see but never understood its essence!</p>
 <p>And most of it can be reduced by implementing a correct CI/CD pipeline. I would like to give a link to my DevSecOps pipeline here xD:</p>
 <ul>

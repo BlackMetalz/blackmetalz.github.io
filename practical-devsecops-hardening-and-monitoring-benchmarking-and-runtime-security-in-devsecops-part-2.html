@@ -78,13 +78,13 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h3>This series will contain 3 parts:</h3>
+            <h3 id="this-series-will-contain-3-parts">This series will contain 3 parts:</h3>
 <ul>
 <li>Part 1. Secure Coding Practices: Tools and Techniques for DevSecOps.</li>
 <li>Part 2. Hardening and Monitoring: Benchmarking and Runtime Security in DevSecOps. (<strong>We are here!</strong>)</li>
 <li>Part 3. Automating Security: Integrating DevSecOps into CI/CD with Jenkins.</li>
 </ul>
-<h1>Component in this part</h1>
+<h1 id="component-in-this-part">Component in this part</h1>
 <ul>
 <li>Open Policy Agent (OPA)</li>
 <li>Cis Benchmarking and Kube-bench</li>
@@ -92,16 +92,16 @@
 <li>KubeSec/Kube-scan</li>
 <li>Istio &amp; mTLS</li>
 </ul>
-<hr>
-<h1>1.Open Policy Agent</h1>
+<hr />
+<h1 id="1open-policy-agent">1.Open Policy Agent</h1>
 <p>Open Policy Agent (OPA) is an open-source, general-purpose policy engine that allows you to enforce policies across a wide range of systems and services. Here are the key points about OPA:</p>
-<h3>What is OPA?</h3>
+<h3 id="what-is-opa">What is OPA?</h3>
 <ul>
 <li>Purpose: OPA is designed to decouple policy decision-making from the application logic, providing a unified way to enforce policies across your stack.</li>
 <li>Language: OPA uses a high-level declarative language called Rego to write policies.</li>
 <li>Flexibility: It can be integrated with various systems such as Kubernetes, CI/CD pipelines, API gateways, microservices, and more.</li>
 </ul>
-<h3>It looks like things are complicated, right? Don't worry, i will provide simple examples</h3>
+<h3 id="it-looks-like-things-are-complicated-right-dont-worry-i-will-provide-simple-examples">It looks like things are complicated, right? Don't worry, i will provide simple examples</h3>
 <p>Challenges:</p>
 <ul>
 <li>I don't allow image tags to be <code>latest</code> which can be security considering.</li>
@@ -138,20 +138,20 @@ FAIL<span class="w"> </span>-<span class="w"> </span>test_Dockerfile/Dockerf
 
 <p>So when we integrate this into the CICD Pipeline, it will break the build if checks are not passed!
 You can add more custom rules with your policy.</p>
-<hr>
-<h1>2. Kube-bench</h1>
+<hr />
+<h1 id="2-kube-bench">2. Kube-bench</h1>
 <p>Kube-bench is a tool that Checks Kubernetes Security Configuration:</p>
 <ul>
 <li>Runs automated tests against your Kubernetes clusters.</li>
 <li>Verifies compliance with the CIS benchmark of K8S (a set of globally recognized best practices for securely configuring IT systems).</li>
 <li>Tests both control plane and worker nodes.</li>
 </ul>
-<h3>Installation:</h3>
+<h3 id="installation">Installation:</h3>
 <div class="highlight"><pre><span></span><code>wget<span class="w"> </span><span class="s2">&quot;https://github.com/aquasecurity/kube-bench/releases/download/v0.10.2/kube-bench_0.10.2_linux_amd64.deb&quot;</span>
 sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-f<span class="w"> </span>./kube-bench_0.10.2_linux_amd64.deb
 </code></pre></div>
 
-<h3>Usage:</h3>
+<h3 id="usage">Usage:</h3>
 <ul>
 <li>You need to install it to every node, yes holy shiet indeed if you want to use kube-bench cli.</li>
 <li>Run with example output in a worker node using a version of rke1: <code>v1.28.9</code> so i would like to use profile <code>rke-cis-1.24</code> to benchmark</li>
@@ -214,10 +214,10 @@ I0215 11:42:25.895790 1020849 check.go:310] Output:
 5 checks INFO
 </code></pre></div>
 
-<hr>
-<h1>3. Kubesec</h1>
+<hr />
+<h1 id="3-kubesec">3. Kubesec</h1>
 <p>Kubesec is a Security risk analysis for Kubernetes resources. It provides detailed insights and recommendations on how to improve the security posture of your Kubernetes manifests.</p>
-<h3>Installation &amp;&amp; Usage:</h3>
+<h3 id="installation-usage">Installation &amp;&amp; Usage:</h3>
 <p>This can be used without installation by sending your deployment manifest to the Kubesec server.</p>
 <p>Example: I include timeout to prevent stuck in the pipeline. And manifest <a href="https://gist.github.com/BlackMetalz/84e5bccdbe186ca1ee6e9fe837ff275b">passed-deployment.yaml</a></p>
 <div class="highlight"><pre><span></span><code><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nf">max</span><span class="o">-</span><span class="nc">time</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="o">-</span><span class="n">sSX</span><span class="w"> </span><span class="n">POST</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">data</span><span class="o">-</span><span class="nc">binary</span><span class="w"> </span><span class="nv">@passed</span><span class="o">-</span><span class="n">deployment</span><span class="p">.</span><span class="n">yaml</span><span class="w"> </span><span class="nl">https</span><span class="p">:</span><span class="o">//</span><span class="n">v2</span><span class="p">.</span><span class="n">kubesec</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">scan</span>
@@ -281,13 +281,13 @@ I0215 11:42:25.895790 1020849 check.go:310] Output:
 <span class="nv">....</span>
 </code></pre></div>
 
-<hr>
-<h1>4. Istio and mTLS (Mutual Transport Layer Security)</h1>
+<hr />
+<h1 id="4-istio-and-mtls-mutual-transport-layer-security">4. Istio and mTLS (Mutual Transport Layer Security)</h1>
 <p>I think it will be overwhelming for me if i include it in this post. I will write separately for Istio, Service Mesh, and mTLS… in another article.</p>
-<hr>
-<h1>5. Falco</h1>
+<hr />
+<h1 id="5-falco">5. Falco</h1>
 <p>Falco is an open-source runtime security tool originally developed by Sysdig. It is designed to monitor and detect unexpected behavior in your Kubernetes (k8s) clusters. Falco focuses on providing real-time security monitoring by analyzing the behavior of applications, containers, hosts, and network activity.</p>
-<h3>Example Use Cases:</h3>
+<h3 id="example-use-cases">Example Use Cases:</h3>
 <ol>
 <li>
 <p><strong>Detecting Container Breakouts</strong>:
@@ -302,7 +302,7 @@ Falco can detect if an application or container attempts to run with elevated pr
 Falco can monitor network connections and alert on unusual patterns, such as unexpected outbound connections from a container.</p>
 </li>
 </ol>
-<h3>Deployment in Kubernetes:</h3>
+<h3 id="deployment-in-kubernetes">Deployment in Kubernetes:</h3>
 <p>To deploy Falco in a Kubernetes cluster, you can use the Helm chart provided by the Falco community. Below are the basic steps to get started:</p>
 <ol>
 <li><strong>Add the Falco Helm Repository</strong>:</li>
@@ -323,14 +323,14 @@ helm<span class="w"> </span>repo<span class="w"> </span>update
 </code></pre></div>
 
 <p>This will deploy Falco as a DaemonSet, ensuring it runs on all nodes in your cluster and starts monitoring system calls and other activities.</p>
-<h3>Demo:</h3>
+<h3 id="demo">Demo:</h3>
 <p>I create separate repo with some examples for Falco: <a href="https://github.com/BlackMetalz/falco">https://github.com/BlackMetalz/falco</a></p>
 <p>Forward message to telegram when event with priority <strong>ERROR</strong> happened and rule <strong>Terminal shell in container</strong> ( I was <strong>overrided</strong> default rule with priority from Notice to Error for demo!)</p>
-<p><img alt="Falco Telegram" src="images/2025/02/17th_1.png"></p>
+<p><img alt="Falco Telegram" src="images/2025/02/17th_1.png" /></p>
 <p>Show it in UI:</p>
-<p><img alt="Falco UI" src="images/2025/02/17th_2.png"></p>
-<hr>
-<h1>Ref:</h1>
+<p><img alt="Falco UI" src="images/2025/02/17th_2.png" /></p>
+<hr />
+<h1 id="ref">Ref:</h1>
 <ul>
 <li><a href="https://github.com/gbrindisi/dockerfile-security">https://github.com/gbrindisi/dockerfile-security</a> (outdated)</li>
 <li><a href="https://github.com/controlplaneio/kubesec">https://github.com/controlplaneio/kubesec</a></li>

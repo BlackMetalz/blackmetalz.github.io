@@ -78,8 +78,8 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p><img alt="alt text" src="images/2025/12/14.png"></p>
-<h1>Sections</h1>
+            <p><img alt="alt text" src="images/2025/12/14.png" /></p>
+<h1 id="sections">Sections</h1>
 <ul>
 <li>Prerequisite</li>
 <li>Hello World - Backstage</li>
@@ -91,23 +91,23 @@
 <li>Prepare for Certified Backstage Associate Exam</li>
 <li>Conclusion</li>
 </ul>
-<hr>
-<h1>Prerequisite</h1>
+<hr />
+<h1 id="prerequisite">Prerequisite</h1>
 <ul>
 <li>I assume you already have a local backstage instance running. So I don't need to repeat most of the content that already appear in <a href="https://backstage.io/docs/">https://backstage.io/docs/</a> with well-structured documents!</li>
 <li>Basics of GitOps and other knowledge like Dockerfile, GitLab CI</li>
 <li>Need an instance of LDAP for authentication because I will use it in this article.</li>
 <li>You don't really need to know JavaScript, Typescript... AI(ChatGPT/Claude/Gemini/Deepseek/Grok....) are your friends!</li>
 </ul>
-<hr>
-<h1>Hello World - Backstage</h1>
+<hr />
+<h1 id="hello-world-backstage">Hello World - Backstage</h1>
 <ul>
 <li>Backstage is an open source framework for building developer portals. I know there are a lot of alternatives for Backstage, but I like Backstage since it is open source, and it is a great way to build internal developer portal in my opinion!</li>
 <li>So a Backstage project will have a workspace with backend (packages/backend) and frontend (packages/app).</li>
 <li>Configuration Central: <a href="https://backstage.io/docs/conf/">app-config.yaml</a>, everything you need to config for Backstage is here.</li>
 </ul>
-<hr>
-<h1>Backstage with LDAP integration - For Authentication</h1>
+<hr />
+<h1 id="backstage-with-ldap-integration-for-authentication">Backstage with LDAP integration - For Authentication</h1>
 <p>Before we start, in this article I don't use database to store, only use default in-memory configuration!</p>
 <p>So, what do we want to do first after having Backstage running on port 3000? It is authentication! So I'm going to do with LDAP, if you want to set up LDAP with docker-compose for quick testing, take a look here <a href="https://github.com/BlackMetalz/docker-compose/tree/main/ldap-osixia">https://github.com/BlackMetalz/docker-compose/tree/main/ldap-osixia</a></p>
 <p>After set up, we are having LDAP users and LDAP credential for set up with following setting in <a href="https://gitlab.com/kienlt-backstage/backstage-authentication-with-ldap/-/commit/2090fa55e82916847a84e7a0ab28760dbbc3fb96#9ff0e6dee7e839f6bab79d2f712f4a7fff9c8bb1">app-config.yaml</a>.</p>
@@ -193,12 +193,12 @@ packages/backend/package.json:<span class="w">    </span><span class="s2">&quot;
 <li><code>packages/backend/src/index.ts</code></li>
 </ul>
 <p>And the result</p>
-<p><img alt="alt text" src="images/2025/12/01.png"></p>
+<p><img alt="alt text" src="images/2025/12/01.png" /></p>
 <p>Use example LDAP user for login, and we have this (Forget about components, I will talk about them later soon!)</p>
-<p><img alt="alt text" src="images/2025/12/02.png"></p>
+<p><img alt="alt text" src="images/2025/12/02.png" /></p>
 <p>So we already set up authentication for Backstage, but yes only authentication, authorization not include in this introduction article!</p>
-<hr>
-<h1>Remote Location - Manage your configuration with GitOps style</h1>
+<hr />
+<h1 id="remote-location-manage-your-configuration-with-gitops-style">Remote Location - Manage your configuration with GitOps style</h1>
 <p>In this section, we are going to ingest Components/API from remote location, the idea is make it like GitOps style, central location, single source of truth for Components/API. </p>
 <p>You can take a look in <a href="https://gitlab.com/kienlt-backstage/backstage-authentication-with-ldap/-/commit/618556bf716476316c1a534e3cdbbd21b8eda670#9ff0e6dee7e839f6bab79d2f712f4a7fff9c8bb1">this commit</a> for more detail. </p>
 <div class="highlight"><pre><span></span><code><span class="nt">catalog</span><span class="p">:</span>
@@ -210,8 +210,8 @@ packages/backend/package.json:<span class="w">    </span><span class="s2">&quot;
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">allow</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">Component</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">API</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">Group</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">Resource</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">Location</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">Template</span><span class="p p-Indicator">]</span>
 </code></pre></div>
 
-<hr>
-<h1>Custom Backstage UI</h1>
+<hr />
+<h1 id="custom-backstage-ui">Custom Backstage UI</h1>
 <p>For example, I want to add new button in sidebar. I can do it via like <a href="https://gitlab.com/kienlt-backstage/backstage-authentication-with-ldap/-/commit/c5b9d293a88447b65fa0812d6d130eaba320c39c">this commit</a></p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">ExtensionIcon</span><span class="w"> </span><span class="kn">from</span><span class="w"> </span><span class="s1">&#39;@material-ui/icons/Extension&#39;</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">LibraryBooks</span><span class="w"> </span><span class="kn">from</span><span class="w"> </span><span class="s1">&#39;@material-ui/icons/LibraryBooks&#39;</span><span class="p">;</span>
@@ -230,16 +230,16 @@ packages/backend/package.json:<span class="w">    </span><span class="s2">&quot;
 </code></pre></div>
 
 <p>The result, it will create a button to location defined in <code>to</code> property, sound easy right?</p>
-<p><img alt="alt text" src="images/2025/12/03.png"></p>
+<p><img alt="alt text" src="images/2025/12/03.png" /></p>
 <p>Other example I want to show that is custom thing show in tab CI/CD inside a component:</p>
-<p><img alt="alt text" src="images/2025/12/04.png"></p>
+<p><img alt="alt text" src="images/2025/12/04.png" /></p>
 <p>And here is how I do it via <a href="https://gitlab.com/kienlt-backstage/backstage-authentication-with-ldap/-/commit/2624df002a5942e847fdaeb95b0c344dda2e4e71">this commit</a></p>
 <p>It needs a plugin. Install the required plugin this way:</p>
 <div class="highlight"><pre><span></span><code>yarn<span class="w"> </span>workspace<span class="w"> </span>backend<span class="w"> </span>add<span class="w"> </span>@immobiliarelabs/backstage-plugin-gitlab
 </code></pre></div>
 
-<hr>
-<h1>First Backstage plugin</h1>
+<hr />
+<h1 id="first-backstage-plugin">First Backstage plugin</h1>
 <p>This took a lot of my time for a simple plugin. So I will introduce proxy configuration in this section as well. You know when we call content from frontend, It will not work because of CORS, that is why we need to use proxy, and proxy in this scenario is our backend. Here is how we config our proxy:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">proxy</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">endpoints</span><span class="p">:</span>
@@ -260,14 +260,14 @@ packages/backend/package.json:<span class="w">    </span><span class="s2">&quot;
 <p>And <a href="https://gitlab.com/kienlt-backstage/backstage-authentication-with-ldap/-/commit/f997649e69e51d37b34fb6adb69ebae56a13c057">the commit</a> for the plugin with big help of AI (Gemini in this scenario)</p>
 <p>I even learned how to publish the package to npmjs.com haha. Here is the package link: <a href="https://www.npmjs.com/package/@kienlt/backstage-plugin-random-quote">https://www.npmjs.com/package/@kienlt/backstage-plugin-random-quote</a></p>
 <p>And it's source code: <a href="https://gitlab.com/kienlt-backstage/backstage-plugin-random-quote">https://gitlab.com/kienlt-backstage/backstage-plugin-random-quote</a>. You can take a look with commit to see some pain I go through to make it works. And the result of simple plugin (Random Quote).</p>
-<p><img alt="alt text" src="images/2025/12/05.png"></p>
-<hr>
-<h1>Backstage Scaffolder - Golden Path</h1>
+<p><img alt="alt text" src="images/2025/12/05.png" /></p>
+<hr />
+<h1 id="backstage-scaffolder-golden-path">Backstage Scaffolder - Golden Path</h1>
 <p>The idea was from my previous leader back in 2022-2023, we are trying to find a solution for automation that have a form to create full CI/CD deployment. User(Developer) only need to enter which language, service type (api/website). Kinda like some simple information and the backend will process from A-&gt;Z that create best practice example code include Dockerfile and other components based service type. At that time, I understood the idea but could not make it work.</p>
 <p>Until today, I'm learning Backstage and remember the past, ohh, Backstage Software Template (Backstage Scaffolder) is the solution for that issue.</p>
 <p>Here is how <a href="https://gitlab.com/kienlt-backstage/backstage-authentication-with-ldap/-/commit/341cae4713ec0ab390fc6b4ae7a8affe6027ad4e">it implemented via commit</a></p>
 <p>We need GitLab Token with following information (For Demo):</p>
-<p><img alt="alt text" src="images/2025/12/06.png"></p>
+<p><img alt="alt text" src="images/2025/12/06.png" /></p>
 <p>And update in app-config.yaml for scan.</p>
 <div class="highlight"><pre><span></span><code><span class="n">catalog</span><span class="o">:</span>
 <span class="w">  </span><span class="n">providers</span><span class="o">:</span>
@@ -286,19 +286,19 @@ packages/backend/package.json:<span class="w">    </span><span class="s2">&quot;
 
 <p>And yeah, with <code>catalog-info.yaml</code> located inside Skeleton folder, it will not make any senses for GitOps. But this article I just want to show some basic of Backstage and what's capable of!</p>
 <p>Here is the Demo after we implement Backstage Scaffolder</p>
-<p><img alt="alt text" src="images/2025/12/07.png"></p>
+<p><img alt="alt text" src="images/2025/12/07.png" /></p>
 <p>We will choose <code>NodeJS Express Service</code> from backstage-catalog repo, enter some required field</p>
-<p><img alt="alt text" src="images/2025/12/08.png"></p>
-<p><img alt="alt text" src="images/2025/12/09.png"></p>
-<p><img alt="alt text" src="images/2025/12/10.png"></p>
+<p><img alt="alt text" src="images/2025/12/08.png" /></p>
+<p><img alt="alt text" src="images/2025/12/09.png" /></p>
+<p><img alt="alt text" src="images/2025/12/10.png" /></p>
 <p>And here is the result after we create</p>
-<p><img alt="alt text" src="images/2025/12/11.png"></p>
+<p><img alt="alt text" src="images/2025/12/11.png" /></p>
 <p>It already imported to Software Catalog page</p>
-<p><img alt="alt text" src="images/2025/12/12.png"></p>
+<p><img alt="alt text" src="images/2025/12/12.png" /></p>
 <p>And public demo repo: <a href="https://gitlab.com/kienlt-backstage/blackmetalz.github.io">https://gitlab.com/kienlt-backstage/blackmetalz.github.io</a></p>
 <p>Sound great right?</p>
-<hr>
-<h1>Prepare for Certified Backstage Associate Exam</h1>
+<hr />
+<h1 id="prepare-for-certified-backstage-associate-exam">Prepare for Certified Backstage Associate Exam</h1>
 <p>A lot of things I haven't introduced in this Section was:</p>
 <ul>
 <li>Techdocs: How document as code working.</li>
@@ -310,8 +310,8 @@ packages/backend/package.json:<span class="w">    </span><span class="s2">&quot;
 </ul>
 <p><a href="https://www.udemy.com/course/certified-backstage-associate-exam-practice-questions">https://www.udemy.com/course/certified-backstage-associate-exam-practice-questions</a></p>
 <p>I used that to prepare for the exam and scored <strong>83/100</strong> in real test!</p>
-<hr>
-<h1>Conclusion</h1>
+<hr />
+<h1 id="conclusion">Conclusion</h1>
 <ul>
 <li>Backstage is not easy.</li>
 <li>Don't use it if you don't have issue like Spotify or your infrastructure is not big enough because it will consume very very big human resource to implement!</li>

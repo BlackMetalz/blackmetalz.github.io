@@ -78,56 +78,56 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p><img alt="alt text" src="images/2025/12/16.png"></p>
+            <p><img alt="alt text" src="images/2025/12/16.png" /></p>
 <p>Hey everyone!</p>
 <p>I'm happy to share that I've passed the <strong>Prometheus Certified Associate (PCA)</strong> exam. This was a really interesting deep dive into observability. Even though I had some experience with Prometheus, this exam forced me to really understand the internal mechanics—like how Service Discovery <em>actually</em> works, the nuances of <code>rate</code> vs <code>irate</code>, and how to construct complex PromQL queries without exploding the database.</p>
 <p>I documented my entire learning process in the notes below. I hope they help you as much as they helped me!</p>
-<h2>My Secret Weapon for Passing</h2>
+<h2 id="my-secret-weapon-for-passing">My Secret Weapon for Passing</h2>
 <p>While official documentation is great, nothing beats practicing with realistic scenarios. I used this specific Udemy course to validate my knowledge before the real exam. It covered every edge case I encountered:</p>
 <p><a href="https://www.udemy.com/course/ultimate-prometheus-certified-associate-pca-practice-tests/">https://www.udemy.com/course/ultimate-prometheus-certified-associate-pca-practice-tests/</a></p>
 <p>If you can score well on these practice tests, you are ready for the real thing.</p>
-<h2>Prerequisite Notes &amp; "Gotchas"</h2>
+<h2 id="prerequisite-notes-gotchas">Prerequisite Notes &amp; "Gotchas"</h2>
 <p>I only talk about some sections that will show up in the PCA exam here, because some of them you and I may never use or know about otherwise xD.</p>
 <ul>
 <li>You have basic knowledge about Prometheus.</li>
 <li>How it works, how to install it, how it scrapes metrics, and how to query metrics via PromQL (Prometheus Query Language).</li>
 </ul>
-<h1>Some sections need to be understood</h1>
-<h3>Push Gateway</h3>
+<h1 id="some-sections-need-to-be-understood">Some sections need to be understood</h1>
+<h3 id="push-gateway">Push Gateway</h3>
 <ul>
 <li>It is used for Short-lived jobs (Ephemeral jobs). Example Cronjob/Job that will die after 15-30 seconds.</li>
 <li>You know that prometheus scrape metric within interval, so push gateway help to keep metric from Cronjob/Job then it will let Prometheus scrape metric from Push Gateway.</li>
 <li>Trap in PCA exam: If they asked to be use Push Gateway for long-running service, mark them false!</li>
 </ul>
-<h3>Operator used for Regex matching?</h3>
+<h3 id="operator-used-for-regex-matching">Operator used for Regex matching?</h3>
 <ul>
 <li>Answer: <code>=~</code>, remember it xD</li>
 </ul>
-<h3>In context of Metric, what is Label?</h3>
+<h3 id="in-context-of-metric-what-is-label">In context of Metric, what is Label?</h3>
 <ul>
 <li>Key-value pair attached to a metric (e.g., <code>method="POST"</code>) to add context and allow filtering</li>
 </ul>
-<h3>What is Gauge metric?</h3>
+<h3 id="what-is-gauge-metric">What is Gauge metric?</h3>
 <ul>
 <li>A metric that represents a single numerical value that can arbitrarily go up and down</li>
 <li>Example: <code>memory_usage_bytes</code>, <code>cpu_temp_celsius</code></li>
 <li>PCA Exam rule: Never use <code>rate()</code> or <code>increase()</code> function for Gauge. Commonly used with <code>min()</code>, <code>max()</code>, <code>avg()</code>, <code>sum()</code> functions. Reason: Gauge can reduce, so <code>rate()</code> will give negative result or not have any meaning.</li>
 </ul>
-<h3>How to monitor request of each customer without explode Prometheus?</h3>
+<h3 id="how-to-monitor-request-of-each-customer-without-explode-prometheus">How to monitor request of each customer without explode Prometheus?</h3>
 <ul>
 <li>No, Prometheus can only count how many requests have 5xx status.</li>
 <li>For specific request, you have to use Log/trace (Elastic/Loki/VictoriaLogs), I won't talk much detail about it since we are in PCA exam preparation.</li>
 <li>But there is secret weapon "<a href="https://prometheus.io/docs/prometheus/latest/feature_flags/#exemplars-storage">Exemplars</a>". Issue: see line of CPU usage surge. Solution: Use Exemplars, it allows to attach a little metadata like trace_id but need app instrument code to inject trace_id into metric (commonly achieved by using SDK of Prometheus or Opentelemetry)</li>
 <li>PCA note for Exemplar: used to link metric into Log/Trace, used most with Histograms, doesn't increase Cardinality.</li>
 </ul>
-<h3>Instant Vector vs Range Vector</h3>
+<h3 id="instant-vector-vs-range-vector">Instant Vector vs Range Vector</h3>
 <p>I have no idea about Instant/Range Vector before, so this is a chance for me xD. So <code>Instant Vector</code> can be understanding simply as snapshot for data at a unique time.</p>
 <ul>
 <li>Function <code>rate()</code>, <code>increase()</code>, <code>delta()</code> need input as <code>Range Vector</code>, but output is <code>Instant Vector</code></li>
 <li>So: <code>metric_name</code> is <code>Instant Vector</code>, <code>metric_name[5m]</code> is <code>Range Vector</code></li>
 <li>Example: <code>http_requests[5m]</code> is data set (Range Vector), <code>rate(...)</code> is function that calculate avg value of those data set, so result for example will be <code>2 req/s</code> which is <code>Instant Vector</code></li>
 </ul>
-<h3>Different between rate and irate</h3>
+<h3 id="different-between-rate-and-irate">Different between rate and irate</h3>
 <p><code>rate</code> uses all data points in the range (smooth) <code>irate</code> uses only the last two data points (spiky/instant) but good to remember it ignores the rest of the range provided in <code>[]</code>.</p>
 <ul>
 <li><code>rate()</code>: avg sum rate, Smooth line, should be use for alerting, bad for debug.</li>
@@ -135,13 +135,13 @@
 <li><code>rate()</code> = (Last - First) / Time (Average over range)</li>
 <li><code>irate()</code> with data set in 5 minutes (10,20,30,40,50) and scrape interval is 15s =&gt; (50-40)/15 = 0.66s (Instant look)</li>
 </ul>
-<h3>What is counter metric?</h3>
+<h3 id="what-is-counter-metric">What is counter metric?</h3>
 <ul>
 <li>A metric that only increase, not going down.</li>
 <li>Document detail here: <a href="https://prometheus.io/docs/concepts/metric_types/#counter">https://prometheus.io/docs/concepts/metric_types/#counter</a></li>
 <li>It used to count <code>http_requests_total</code> or <code>errors_total</code> which never can be 0, right? For example metric <code>http_requests_total</code> at 9:00 AM counter: 1000 requests, next 9:10 AM <code>http_requests_total</code> counter: 1200 requests. But in reality, we don't care about raw number 1200 requests, we only care about how many queries from 9:00 to 9:10. In this scenario it can be achieved by using <code>increase(http_requests_total[10m])</code>.</li>
 </ul>
-<h3>Black-box Monitoring / Blackbox Exporter</h3>
+<h3 id="black-box-monitoring-blackbox-exporter">Black-box Monitoring / Blackbox Exporter</h3>
 <ul>
 <li>Link: <a href="https://github.com/prometheus/blackbox_exporter">https://github.com/prometheus/blackbox_exporter</a></li>
 <li>I think I heard this for the first time, but after read document, it works same logic like plugin monitor http/tcp in Nagios/CheckMK. </li>
@@ -153,7 +153,7 @@ probe_duration_seconds{...} 0.123
 probe_ssl_earliest_cert_expiry{...} 1234567890
 </code></pre></div>
 
-<h3>What is a Recording Rule?</h3>
+<h3 id="what-is-a-recording-rule">What is a Recording Rule?</h3>
 <ul>
 <li>Purposes: Performance, No Backfilling, Evaluation Interval. </li>
 <li>Little explain in Performance: Recording rule was born to increase performance for Prometheus, instead of query when user refresh, it already calculated in background.</li>
@@ -161,12 +161,12 @@ probe_ssl_earliest_cert_expiry{...} 1234567890
 <li>Some best practices <a href="https://prometheus.io/docs/practices/rules/">https://prometheus.io/docs/practices/rules/</a></li>
 <li>Naming Convention: <code>level:metric:operations</code>. Example: <code>job:http_inprogress_requests:sum</code></li>
 </ul>
-<h3>What is the suffix for the total count of observations in a Histogram?</h3>
+<h3 id="what-is-the-suffix-for-the-total-count-of-observations-in-a-histogram">What is the suffix for the total count of observations in a Histogram?</h3>
 <ul>
 <li>Answer: <code>_count</code></li>
 <li>Document: <a href="https://prometheus.io/docs/concepts/metric_types/#histogram">the count of events that have been observed, exposed as <basename>_count (identical to <basename>_bucket{le="+Inf"} above)</a></li>
 </ul>
-<h3>Service Discovery</h3>
+<h3 id="service-discovery">Service Discovery</h3>
 <p>Wow, I never really understood this before, until I started preparing for the PCA exam. So, what have I learned from this section?</p>
 <p>First, <a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config">read the document first</a></p>
 <p>To scrape metrics from a K8s cluster using <code>Service Discovery</code>, Prometheus requires a <code>Service Account</code> bound to a <code>ClusterRole</code>. This grants permissions to fetch <code>targets/metadata</code> (not metrics) directly from the K8s API. It uses the <code>WATCH</code> mechanism, so the K8s API actively notifies Prometheus of changes (New Pod Added, Pod Deleted...) instead of polling constantly.</p>
@@ -210,7 +210,7 @@ You will see section related to <code>cAdvisor</code> like:</p>
 
 <p>Haha, even though I passed the CKA exam, I never knew about this deep dive! What great information to finally understand!</p>
 <p>So with this, you can answer the question: How does <code>kube-state-metrics</code> differ from <code>node-exporter</code>?</p>
-<h3>Bonus complete flow</h3>
+<h3 id="bonus-complete-flow">Bonus complete flow</h3>
 <div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
 │ STEP 1: Prometheus ServiceAccount (SA)                      │
 │ - SA has permission to list/watch nodes from API Server     │
@@ -249,22 +249,22 @@ You will see section related to <code>cAdvisor</code> like:</p>
 └─────────────────────────────────────────────────────────────┘
 </code></pre></div>
 
-<h3>Prometheus metric core type?</h3>
+<h3 id="prometheus-metric-core-type">Prometheus metric core type?</h3>
 <p>Prometheus has 4 core types: Counter, Gauge, Histogram, Summary.</p>
-<h3>Histogram</h3>
+<h3 id="histogram">Histogram</h3>
 <p>Samples observations (like request durations or response sizes) and counts them in configurable buckets. It also provides a sum of all observed values. You can calculate quantiles from the server side using these buckets. Great for aggregating data across multiple instances.</p>
-<h3>Summary</h3>
+<h3 id="summary">Summary</h3>
 <p>Also samples observations but calculates quantiles (like p50, p95, p99) directly on the client side. It provides pre-calculated quantiles, count, and sum. Can't aggregate quantiles across multiple instances though - the quantiles are calculated per instance.</p>
-<h3>Different between Summary and Histogram</h3>
+<h3 id="different-between-summary-and-histogram">Different between Summary and Histogram</h3>
 <ul>
 <li>Histogram does server-side quantile calculation (more flexible for aggregation)</li>
 <li>Summary does client-side quantile calculation (more accurate but can't aggregate).</li>
 </ul>
-<h3>What is RED Method stand for in Prometheus?</h3>
+<h3 id="what-is-red-method-stand-for-in-prometheus">What is RED Method stand for in Prometheus?</h3>
 <p>The 'RED Method' in monitoring, especially for microservices with tools like Prometheus, stands for three key request-focused metrics: Rate (requests per second), Errors (count of failed requests), and Duration (time taken for requests), providing a streamlined view of service health and performance from the user's perspective. (Copy from Google AI xD)</p>
-<h3>What does the 'USE Method' stand for?</h3>
+<h3 id="what-does-the-use-method-stand-for">What does the 'USE Method' stand for?</h3>
 <p>The Utilization Saturation and Errors (USE) Method is a methodology for analyzing the performance of any system.</p>
-<h3>Some basic operator for query you need to remember</h3>
+<h3 id="some-basic-operator-for-query-you-need-to-remember">Some basic operator for query you need to remember</h3>
 <p>Document: <a href="https://prometheus.io/docs/prometheus/latest/querying/basics/">https://prometheus.io/docs/prometheus/latest/querying/basics/</a></p>
 <ul>
 <li><code>=</code> : Equal</li>
@@ -277,17 +277,17 @@ You will see section related to <code>cAdvisor</code> like:</p>
 <li><code>{...}</code> : use <code>!=</code> to remove labels</li>
 <li>If you find/compare value, use <code>==</code>, <code>&gt;</code>, ... outside <code>{....}</code></li>
 </ul>
-<h3>What does the <code>offset</code> modifier do?</h3>
+<h3 id="what-does-the-offset-modifier-do">What does the <code>offset</code> modifier do?</h3>
 <p>Shifts the time of the query evaluation (e.g., <code>http_requests_total offset 1w</code> returns values from 1 week ago)</p>
-<h3>What is 'White-box Monitoring'?</h3>
+<h3 id="what-is-white-box-monitoring">What is 'White-box Monitoring'?</h3>
 <p>Monitoring based on metrics exposed by the internals of the system (e.g., HTTP handler, JVM memory)</p>
-<h3>clamp_max() function?</h3>
+<h3 id="clamp_max-function">clamp_max() function?</h3>
 <ul>
 <li>Used to set capping for value of metric.</li>
 <li>Example: <code>clamp_max(metric_here, 100)</code>. If <code>metric_here</code> is 120, it will set to 100 and if <code>metric_here</code> is 80, it still is 80, get the idea?</li>
 <li>What it used for? Fix display in graph, sometime or somehow CPU usage reached more than 100%, so set capping at 100 will make display better! Or Remove some outliers/spikes metric values like 99999 that make graph nonsense xD</li>
 </ul>
-<h3>Vector matching</h3>
+<h3 id="vector-matching">Vector matching</h3>
 <p>Another knowledge that I never know before! <a href="https://prometheus.io/docs/prometheus/latest/querying/operators/#vector-matching">Document here!</a></p>
 <p>Enrichment - Most used case</p>
 <ul>
@@ -340,30 +340,30 @@ container_cpu * on(pod, namespace) group_left(image, created_by_name, host_ip) k
 <ul>
 <li><code>metric1 * ignoring(instance, job) metric2</code> : it will ignore those label when matching, it doesn't mean metric2 doesn't have those label. Both metric can be have <code>instance</code> and <code>job</code>, but when match Prometheus will ignore those label.</li>
 </ul>
-<h3>What does <code>absent(metric_name)</code> return?</h3>
+<h3 id="what-does-absentmetric_name-return">What does <code>absent(metric_name)</code> return?</h3>
 <ul>
 <li>it will return <code>1</code> if the metric does not exist, empty if it does</li>
 <li>Use case: alert if a service died or not gonna to send metric!</li>
 </ul>
-<h3>What is <code>evaluation_interval</code>?</h3>
+<h3 id="what-is-evaluation_interval">What is <code>evaluation_interval</code>?</h3>
 <p><code>evaluation_interval</code>determines how frequently Prometheus evaluates recording rules and alerting rules. 
 Or <a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/#configuration-file">How frequently to evaluate rules</a>.</p>
-<h3>Why is 'Sampling' (in instrumentation) bad for metrics?</h3>
+<h3 id="why-is-sampling-in-instrumentation-bad-for-metrics">Why is 'Sampling' (in instrumentation) bad for metrics?</h3>
 <p>Metrics should account for 100% of events (e.g., total request count); sampling loses accuracy and Traces (too heavy to keep all).</p>
-<h3>Which function predicts the value of a gauge in 4 hours based on recent trend?</h3>
+<h3 id="which-function-predicts-the-value-of-a-gauge-in-4-hours-based-on-recent-trend">Which function predicts the value of a gauge in 4 hours based on recent trend?</h3>
 <ul>
 <li><code>predict_linear(metric[range], 4*3600)</code></li>
 <li>Linear regression prediction. Great for 'Disk Full in X hours' alerts.</li>
 </ul>
-<h3>What is the difference between <code>sum</code> and <code>sum_over_time</code>?</h3>
+<h3 id="what-is-the-difference-between-sum-and-sum_over_time">What is the difference between <code>sum</code> and <code>sum_over_time</code>?</h3>
 <p><code>sum()</code> input: Instant Vector. 
 Example: <code>sum(node_cpu_seconds_total)</code> --&gt; Adds up CPU usage of all nodes right now.</p>
 <p><code>sum_over_time()</code> input: Range Vector
 Example: <code>sum_over_time(http_requests_total[5m])</code> --&gt; Adds up all scrape values of one specific metric over the last 5 minutes. 
 More clarify: <code>sum_over_time</code> will add all data points in range for each time series, if have multiple series (multiple instances), it will return more results, each result is sum of 1 series.</p>
-<h3>What is <code>relabel_configs</code> used for?</h3>
+<h3 id="what-is-relabel_configs-used-for">What is <code>relabel_configs</code> used for?</h3>
 <p>Modifying labels <code>before</code> the scrape (e.g., filtering targets, changing addresses)</p>
-<h3>How do you drop a target during discovery if a certain label is present?</h3>
+<h3 id="how-do-you-drop-a-target-during-discovery-if-a-certain-label-is-present">How do you drop a target during discovery if a certain label is present?</h3>
 <p>To drop a target during discovery, you use <code>relabel_configs</code> with the <code>action: drop</code>.</p>
 <ul>
 <li>Example 1:</li>
@@ -408,7 +408,7 @@ More clarify: <code>sum_over_time</code> will add all data points in range for e
 <span class="w">    </span><span class="nl">regex</span><span class="p">:</span><span class="w"> </span><span class="k">backup</span>
 </code></pre></div>
 
-<h3>Which operator has the highest precedence in Prometheus?</h3>
+<h3 id="which-operator-has-the-highest-precedence-in-prometheus">Which operator has the highest precedence in Prometheus?</h3>
 <p>Remember this for exam!</p>
 <ol>
 <li><code>^</code> (Powers)</li>
@@ -418,7 +418,7 @@ More clarify: <code>sum_over_time</code> will add all data points in range for e
 <li><code>and, unless</code></li>
 <li><code>or</code></li>
 </ol>
-<h3>If you want to attach a constant label <code>env=prod</code> to all metrics in a job, where do you put it?</h3>
+<h3 id="if-you-want-to-attach-a-constant-label-envprod-to-all-metrics-in-a-job-where-do-you-put-it">If you want to attach a constant label <code>env=prod</code> to all metrics in a job, where do you put it?</h3>
 <p>Example</p>
 <div class="highlight"><pre><span></span><code><span class="nv">scrape_configs</span><span class="err">:</span>
 <span class="w">  </span><span class="c1"># Job 1: Scrape env PROD</span>
@@ -438,7 +438,7 @@ More clarify: <code>sum_over_time</code> will add all data points in range for e
 <span class="w">          </span><span class="nv">region</span><span class="err">:</span><span class="w"> </span><span class="nv">us</span><span class="o">-</span><span class="nv">east</span>
 </code></pre></div>
 
-<h3>What is Federation in Prometheus?</h3>
+<h3 id="what-is-federation-in-prometheus">What is Federation in Prometheus?</h3>
 <p>Short answer for exam: </p>
 <p><code>A mechanism for a Prometheus server to scrape metrics from another Prometheus server</code></p>
 <p>Document: <a href="https://prometheus.io/docs/prometheus/latest/federation/#use-cases">https://prometheus.io/docs/prometheus/latest/federation/#use-cases</a></p>
@@ -446,7 +446,7 @@ More clarify: <code>sum_over_time</code> will add all data points in range for e
 <span class="nv">Prometheus</span><span class="w"> </span><span class="nv">monitoring</span><span class="w"> </span><span class="nv">setups</span><span class="w"> </span><span class="nv">or</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">pull</span><span class="w"> </span><span class="nv">related</span><span class="w"> </span><span class="nv">metrics</span><span class="w"> </span><span class="nv">from</span><span class="w"> </span><span class="nv">one</span><span class="w"> </span><span class="nv">service</span><span class="err">&#39;s Prometheus into another.</span>
 </code></pre></div>
 
-<h3>What is the <code>external_labels</code> config in Prometheus used for?</h3>
+<h3 id="what-is-the-external_labels-config-in-prometheus-used-for">What is the <code>external_labels</code> config in Prometheus used for?</h3>
 <p>Seem like same as <code>labels</code> under <code>static_config</code>? No, it's not!</p>
 <p>Instead of set label for specific job, <code>external_labels</code> will set for whole Prometheus instance!</p>
 <p>It was born to identify Prometheus instance.</p>
@@ -466,7 +466,7 @@ to <a href="https://www.cloudraft.io/blog/scaling-prometheus-with-thanos"><code>
 <span class="w">  </span><span class="c1"># The `$` character can be escaped by using `$$`.</span>
 </code></pre></div>
 
-<h3>What is Subquery?</h3>
+<h3 id="what-is-subquery">What is Subquery?</h3>
 <p><code>Subquery</code> allow you run query that return <code>Range Vector</code></p>
 <p>Syntax: <code>query[&lt;range&gt;:&lt;resolution&gt;]</code></p>
 <p>Example: <code>rate(http_requests[5m])[30m:1m]</code> or <code>max_over_time( rate(http_requests_total[5m])[1h:1m] )</code></p>
@@ -510,7 +510,7 @@ to <a href="https://www.cloudraft.io/blog/scaling-prometheus-with-thanos"><code>
 </tbody>
 </table>
 <p>Document: <a href="https://prometheus.io/docs/prometheus/latest/querying/basics/#subquery">https://prometheus.io/docs/prometheus/latest/querying/basics/#subquery</a></p>
-<h3>You want to scrape a target via HTTPS with a custom CA. Which config param?</h3>
+<h3 id="you-want-to-scrape-a-target-via-https-with-a-custom-ca-which-config-param">You want to scrape a target via HTTPS with a custom CA. Which config param?</h3>
 <div class="highlight"><pre><span></span><code>scrape_configs:
   <span class="k">-</span> job_name: &#39;scrape-secure-app&#39;
     # 1. must be https
@@ -532,7 +532,7 @@ to <a href="https://www.cloudraft.io/blog/scaling-prometheus-with-thanos"><code>
       # insecure_skip_verify: true
 </code></pre></div>
 
-<h3>What is the danger of count(http_requests_total) without a by() clause?</h3>
+<h3 id="what-is-the-danger-of-counthttp_requests_total-without-a-by-clause">What is the danger of count(http_requests_total) without a by() clause?</h3>
 <p>Using count(http_requests_total) without a by() clause is dangerous because it aggregates everything into a single scalar value and strips away all labels, effectively destroying context.</p>
 <ul>
 <li>
@@ -565,7 +565,7 @@ http_requests_total{status=&quot;500&quot;} = 2
 {status=&quot;500&quot;} : 1
 </code></pre></div>
 
-<h3>What is scalar() function used for?</h3>
+<h3 id="what-is-scalar-function-used-for">What is scalar() function used for?</h3>
 <p>Let me deep dive into this since I did often see it before but really never understood how it works!</p>
 <p>From Prometheus document:</p>
 <div class="highlight"><pre><span></span><code>Given an input vector that contains only one element with a float sample, scalar(v instant-vector) returns the sample value of that float sample as a scalar...
@@ -581,7 +581,7 @@ scalar<span class="w"> </span><span class="m">1662763800</span>
 </code></pre></div>
 
 <p>Note: It's worth mentioning that scalar() returns NaN (Not a Number) if the input vector does not have exactly one element. If there are 0 or &gt;1 elements, it fails/returns NaN. This is a common exam "gotcha"</p>
-<h3>What does histogram_quantile output unit match?</h3>
+<h3 id="what-does-histogram_quantile-output-unit-match">What does histogram_quantile output unit match?</h3>
 <ul>
 <li>Document: <a href="https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile">https://prometheus.io/docs/prometheus/latest/querying/functions/#histogram_quantile</a></li>
 <li>The output unit of histogram_quantile perfectly matches the unit of the original metric (specifically, the value defined in label <code>le</code>).</li>
@@ -594,12 +594,12 @@ http_request_duration_seconds_bucket{le=&quot;0.1&quot;,  method=&quot;POST&quot
 http_request_duration_seconds_bucket{le=&quot;0.2&quot;,  method=&quot;POST&quot;} 100392
 </code></pre></div>
 
-<h3>How do you select metrics from yesterday?</h3>
+<h3 id="how-do-you-select-metrics-from-yesterday">How do you select metrics from yesterday?</h3>
 <p>Simple answer: <code>offset</code></p>
 <p>Example: <code>http_requests_total offset 1d</code> or rate of current hour yesterday </p>
 <p><code>rate(http_requests_total[5m] offset 1d)</code></p>
 <p>Note: <code>offset</code> appear inside <code>rate</code> function, it means: get the 5 minutes data of yesterday, then calculate rate</p>
-<h3>without - block/remove label</h3>
+<h3 id="without-blockremove-label">without - block/remove label</h3>
 <p>Syntax: <code>&lt;aggr-op&gt; without (list-label-want-to-remove) (metric_name)</code></p>
 <p>Example: we have metric <code>http_requests_total</code> with 4 labels:</p>
 <p><code>{instance="10.0.0.1", method="POST", status="200", app="backend"}</code>.</p>
@@ -608,7 +608,7 @@ http_request_duration_seconds_bucket{le=&quot;0.2&quot;,  method=&quot;POST&quot
 <li>Different with <code>by</code>: <code>sum by (method, status, app) (http_requests_total)</code></li>
 <li>Same result but with <code>without</code>: <code>sum without (instance) (http_requests_total)</code></li>
 </ul>
-<h3>What is purpose of function delta()?</h3>
+<h3 id="what-is-purpose-of-function-delta">What is purpose of function delta()?</h3>
 <p>Definition: Calculates the difference between the last value and the first value in a specified time range.</p>
 <p>Important:</p>
 <ul>
@@ -617,7 +617,7 @@ http_request_duration_seconds_bucket{le=&quot;0.2&quot;,  method=&quot;POST&quot
 <li>This was appeared in exam xD</li>
 </ul>
 <p>Example: delta(node_filesystem_free_bytes[1h]) (Calculates how many bytes of disk space changed over the last hour).</p>
-<h1>Note to the exam</h1>
+<h1 id="note-to-the-exam">Note to the exam</h1>
 <ul>
 <li>Be sure to understand concept of four core metric types. It will give you at least 5 questions in exam!</li>
 <li>Be understand how alert routing works in AlertManager, in exam will have some questions like which team will receive alert.</li>
@@ -625,7 +625,7 @@ http_request_duration_seconds_bucket{le=&quot;0.2&quot;,  method=&quot;POST&quot
 <li>Exam duration: 90 minutes</li>
 <li>Exam questions: 60 questions</li>
 </ul>
-<h1>That's a Wrap!</h1>
+<h1 id="thats-a-wrap">That's a Wrap!</h1>
 <p>Hope these notes save you some time. If you spot any mistakes or have questions, feel free to reach out.</p>
 <p>Now go pass that exam!!!</p>
 

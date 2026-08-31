@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Introduction</h1>
+            <h1 id="introduction">Introduction</h1>
 <ul>
 <li>Comparison from me who was always biased towards Jenkins before xD</li>
 <li>Basic example with GitLab CI (Linting + Testing + Build + SAST)</li>
@@ -86,7 +86,7 @@
 <li>Extra examples</li>
 <li>Conclusion</li>
 </ul>
-<h3>Target Audience:</h3>
+<h3 id="target-audience">Target Audience:</h3>
 <ul>
 <li>DevOps engineers who are familiar with Jenkins and want to explore GitLab CI</li>
 <li>Developers who want to understand CI/CD pipeline basics with GitLab</li>
@@ -95,11 +95,11 @@
 </ul>
 <p>All lab repo will come from my public GitLab repo, so I can see them again in future xD, and you guy can understand what is going on.</p>
 <p>In this series I will use GitLab account free. 400 Minutes per month (I will use runner that has Cost factor = 1, that is why I said I have 400 minutes xD). Read more about it in here: <a href="https://docs.gitlab.com/ci/pipelines/compute_minutes/">Compute Minutes</a>.</p>
-<hr>
-<h1>Comparison between GitLab CI and Jenkins</h1>
+<hr />
+<h1 id="comparison-between-gitlab-ci-and-jenkins">Comparison between GitLab CI and Jenkins</h1>
 <p>The fact my previous company used Jenkins to manage about 500++ jobs and I never tried anything different from Jenkins, if I did lab it was basic of GitLab CI with shell executor and GitHub Actions with some echo script xD. So at that time I always bias with Jenkins, everything deployment from basic to complicated, Jenkins always go first no matter!</p>
 <p>In 2025, I have switched from Jenkins to GitLab CI due to work changes, my mindset is expanded, no longer biased towards Jenkins, here is my opinion in comparison between GitLab CI and Jenkins</p>
-<h3>GitLab CI</h3>
+<h3 id="gitlab-ci">GitLab CI</h3>
 <ul>
 <li>Easy to begin, friendly with developer.</li>
 <li>Want to set up fast, less complicated. You only need to maintain Runner if you use GitLab cloud</li>
@@ -107,7 +107,7 @@
 <li>You can not hide pipeline config file <code>.gitlab-ci.yml</code> from Developers.</li>
 <li>Conclusion: <em>Easy and Effective in some condition!</em></li>
 </ul>
-<h3>Jenkins</h3>
+<h3 id="jenkins">Jenkins</h3>
 <ul>
 <li>Complicated, Plugin Hell but ready to use.</li>
 <li>Harder to maintain than GitLab, need to manage both Jenkins master and slave instances.</li>
@@ -116,12 +116,12 @@
 <li>Conclusion: <em>Complicated but flexible, can be customized with whatever you want!</em></li>
 </ul>
 <p>Hmm, above are pretty much like too much theory, no real example. Lets me go with more detail comparison.</p>
-<h3>Dynamic Parameters Dropdown</h3>
+<h3 id="dynamic-parameters-dropdown">Dynamic Parameters Dropdown</h3>
 <ul>
 <li>Jenkins: Active Choices Plugin allow dropdown automatically populate tags/branches from Git.</li>
 <li>GitLab CI: NO dynamic dropdown parameters.</li>
 </ul>
-<h3>ArgoCD Create/Update Logic</h3>
+<h3 id="argocd-createupdate-logic">ArgoCD Create/Update Logic</h3>
 <ul>
 <li>Jenkins: Groovy code elegant with if/else check app exists</li>
 </ul>
@@ -155,25 +155,25 @@
 </code></pre></div>
 
 <p>For scenario that I have multiple K8S cluster (13 for example, based real story), I can choose which K8S cluster to deploy with Jenkins, but with GitLab I think it is not flexible like that.</p>
-<h3>Rollback with Tag Selection</h3>
+<h3 id="rollback-with-tag-selection">Rollback with Tag Selection</h3>
 <p>Scenario if ArgoCD project set manual sync:</p>
 <ul>
 <li>Jenkins: UI can be customized with action select tag and action for DEPLOY/ROLLBACK/RESTART/STOP (Defined in Jenkins.)</li>
 <li>GitLab CI: no dropdown, action like stop k8s pod, restart k8s need manually update Gitops repo. </li>
 </ul>
-<h3>Super important things to remember</h3>
+<h3 id="super-important-things-to-remember">Super important things to remember</h3>
 <ul>
 <li>After write to this line, I think it is depends on workflow, environment and conditions of team, central in company then we can decide to use which technology!</li>
 <li>That is enough thing to compare, Let's begin with GitLab CI introduction!</li>
 </ul>
-<hr>
-<h1>Basic example with GitLab CI (Linting + Testing + Build + SAST)</h1>
+<hr />
+<h1 id="basic-example-with-gitlab-ci-linting-testing-build-sast">Basic example with GitLab CI (Linting + Testing + Build + SAST)</h1>
 <ul>
 <li>I used Copilot to generate this example. Here is the link to public repo: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project">https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project</a></li>
 <li>GitLab CI Pipeline: I made it simple as I could, I believe simple is better than complex example in this section xD</li>
 <li>I don't think that I need to explain details here since this is just basic and well documented in GitLab Documents!</li>
 </ul>
-<h3>GitLab Pipeline Config:</h3>
+<h3 id="gitlab-pipeline-config">GitLab Pipeline Config:</h3>
 <div class="highlight"><pre><span></span><code><span class="nt">stages</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build</span>
@@ -238,13 +238,13 @@
 <ul>
 <li>And here is the link to the pipeline in case of you are new to GitLab CI: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/pipelines/2147473044">kienlt-gitlab-ci-demo/sample-python-project</a></li>
 </ul>
-<h3>Test Stage</h3>
+<h3 id="test-stage">Test Stage</h3>
 <ul>
 <li>So this stage has 2 jobs run in order which defined first and run in parallel to save time!</li>
 <li>Artifact store report in XML format, here is demo screenshot</li>
 </ul>
-<p><img alt="Artifact store report in XML format" src="images/2025/11/02.png"></p>
-<h3>Build Stage</h3>
+<p><img alt="Artifact store report in XML format" src="images/2025/11/02.png" /></p>
+<h3 id="build-stage">Build Stage</h3>
 <ul>
 <li>So for the quick demo, I include Image Scanner which is Trivy in build stage.</li>
 <li>The severity was set to MEDIUM, HIGH, CRITICAL when scan that should give Developers awareness about Medium vulnerability.</li>
@@ -252,7 +252,7 @@
 <li>If it fails, don't push to the registry.</li>
 <li>Here is example when it failed with HIGH vulnerabilities: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/jobs/12020989478">gitlab.com/kienlt-gitlab-ci-demo/sample-python-project</a>. Lets me show you a screenshot for quick view</li>
 </ul>
-<p><img alt="quick view" src="images/2025/11/03.png"> </p>
+<p><img alt="quick view" src="images/2025/11/03.png" /> </p>
 <ul>
 <li>Here is the simple fix that do as Trivy instruct, haha: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/commit/d77cd77a4eaef634b1d04c6dec61d6a04375c553">https://gitlab.com/kienlt-gitlab-ci-demo/sample-python-project/-/commit/d77cd77a4eaef634b1d04c6dec61d6a04375c553</a></li>
 </ul>
@@ -265,17 +265,17 @@ flake8==6.1.0
 
 <ul>
 <li>Then pipeline was fixed and image is able to push to the registry
-<img alt="image is able to push to the registry" src="images/2025/11/04.png"></li>
+<img alt="image is able to push to the registry" src="images/2025/11/04.png" /></li>
 </ul>
-<hr>
-<h1>Template Repository</h1>
-<h3>Introduction</h3>
+<hr />
+<h1 id="template-repository">Template Repository</h1>
+<h3 id="introduction_1">Introduction</h3>
 <p>This is my favorite section in GitLab CI when I'm writing this article. Centralization for GitLab pipeline configuration. Here is the information for repositories:</p>
 <ul>
 <li>Template repository: https://gitlab.com/kienlt-gitlab-ci-demo/gitlab-ci-templates</li>
 <li>Repository used template: https://gitlab.com/kienlt-gitlab-ci-demo/demo-use-templates</li>
 </ul>
-<h3>Examples</h3>
+<h3 id="examples">Examples</h3>
 <p>Notice:</p>
 <ul>
 <li>I used Copilot to generate those examples.</li>
@@ -291,15 +291,15 @@ flake8==6.1.0
 <ul>
 <li>Pipeline displays:</li>
 </ul>
-<p><img alt="Pipeline displays" src="images/2025/11/05.png"></p>
+<p><img alt="Pipeline displays" src="images/2025/11/05.png" /></p>
 <ul>
 <li>Clean GitLab pipeline configurations xD</li>
 </ul>
-<p><img alt="Clean GitLab pipeline configurations" src="images/2025/11/06.png">
-<img alt="Clean GitLab pipeline configurations" src="images/2025/11/07.png"></p>
-<h3>Information</h3>
+<p><img alt="Clean GitLab pipeline configurations" src="images/2025/11/06.png" />
+<img alt="Clean GitLab pipeline configurations" src="images/2025/11/07.png" /></p>
+<h3 id="information">Information</h3>
 <p>First, I don't know this could work at all, I was just thinking if with Jenkins I can do it, how about do the same for GitLab CI? Then I finally know basic about template repository which is <a href="https://docs.gitlab.com/ci/yaml/includes/">included file</a></p>
-<h3>Benefit</h3>
+<h3 id="benefit">Benefit</h3>
 <p>Lets me explain real quick benefits of Template Repository:</p>
 <ul>
 <li>Centralized Pipeline Management.</li>
@@ -307,10 +307,10 @@ flake8==6.1.0
 <li>Standardize CI/CD pipelines across multiple projects.</li>
 </ul>
 <p>I hope you will understand what I tried to explain!</p>
-<hr>
-<h1>Extra examples</h1>
+<hr />
+<h1 id="extra-examples">Extra examples</h1>
 <p>I just show some basic example about GitLab CI and it's capabilities but it still lacks of some scenario, this section I will try to fit some more.</p>
-<h3>Workflow</h3>
+<h3 id="workflow">Workflow</h3>
 <ul>
 <li>Always run Lint + Testing</li>
 <li>Only run build if commit get tagged</li>
@@ -337,7 +337,7 @@ flake8==6.1.0
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">when</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">never</span>
 </code></pre></div>
 
-<h3>SonarQube</h3>
+<h3 id="sonarqube">SonarQube</h3>
 <p>I only want to introduce the pipeline script that run SonarQube in runner that is running under proxy and able to get Quality Gateway after pushed, it doesn't include how many issue with level Critical, High and Medium yet.</p>
 <p>The example below was well tested xD</p>
 <div class="highlight"><pre><span></span><code><span class="c1">#=== SONARQUBE STAGE ===#</span>
@@ -421,8 +421,8 @@ flake8==6.1.0
 <span class="w">      </span><span class="no">echo &quot;Quality gate passed!!!&quot;</span>
 </code></pre></div>
 
-<p><img alt="sonarqube" src="images/2025/11/08.png"></p>
-<h3>Access an image from a private container registry</h3>
+<p><img alt="sonarqube" src="images/2025/11/08.png" /></p>
+<h3 id="access-an-image-from-a-private-container-registry">Access an image from a private container registry</h3>
 <ul>
 <li>
 <p>Document: <a href="https://docs.gitlab.com/ci/docker/using_docker_images/#access-an-image-from-a-private-container-registry">Access an image from a private container registry</a></p>
@@ -449,7 +449,7 @@ flake8==6.1.0
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="nt">&quot;auths&quot;</span><span class="p">:{</span><span class="nt">&quot;docker.io&quot;</span><span class="p">:{</span><span class="nt">&quot;auth&quot;</span><span class="p">:</span><span class="s2">&quot;base64(username:password)&quot;</span><span class="p">}}}</span>
 </code></pre></div>
 
-<h3>Another template example that i'm using</h3>
+<h3 id="another-template-example-that-im-using">Another template example that i'm using</h3>
 <ul>
 <li>Link to repo: <a href="https://gitlab.com/kienlt-gitlab-ci-demo/demo-real-template">https://gitlab.com/kienlt-gitlab-ci-demo/demo-real-template</a></li>
 <li>Example for clean GitLab pipline configuration with template repo:</li>
@@ -483,7 +483,7 @@ flake8==6.1.0
 <span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="k">if</span><span class="p">:</span><span class="w"> </span><span class="o">$</span><span class="n">CI_COMMIT_TAG</span>
 </code></pre></div>
 
-<h3>Build App for Window in GitLab CI that not using Window runner</h3>
+<h3 id="build-app-for-window-in-gitlab-ci-that-not-using-window-runner">Build App for Window in GitLab CI that not using Window runner</h3>
 <p>Challenge: Build application for Multiple OS then upload binary to S3, then notify tester! It should not a problem with Ubuntu Jammy and Noble, but I don't want extra window runner that only run for single job</p>
 <p>Sound weird right? But in fact it is possible with Linux Runner. Here is how I do it with Pywine</p>
 <p><strong>Dockerfile.windows-builder</strong>: Build this image and used this as base for pipeline</p>
@@ -653,9 +653,9 @@ flake8==6.1.0
 </code></pre></div>
 
 <p>And screenshot for output of notification stage that I don't include in this.</p>
-<p><img alt="alt text" src="images/2025/11/09.png"></p>
-<hr>
-<h1>Conclusion</h1>
+<p><img alt="alt text" src="images/2025/11/09.png" /></p>
+<hr />
+<h1 id="conclusion">Conclusion</h1>
 <ul>
 <li>Before write this article, the resource I used to learn very quick was <a href="https://www.udemy.com/course/gitlab-ci-pipelines-ci-cd-and-devops-for-beginners/">this course from Udemy</a></li>
 <li>There are many areas that I didn't mention in here, for complete please learn from the course I linked above or simple read all <a href="https://docs.gitlab.com/user/get_started/">GitLab Document</a> which included everything and well structure!</li>

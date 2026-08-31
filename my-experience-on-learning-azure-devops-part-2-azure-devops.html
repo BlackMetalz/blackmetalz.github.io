@@ -78,18 +78,18 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Introduction</h1>
+            <h1 id="introduction">Introduction</h1>
 <p>This article is part 2, part 1 you can find it here: <a href="https://blackmetalz.github.io/my-experience-on-learning-azure-devops-part-1-acr-aks.html">My experience on learning Azure Devops - Part 1: ACR + AKS</a></p>
 <p>In this article, I will show you some little knowledge about Azure DevOps that I learned and try to implement in my lab.</p>
-<hr>
-<h1>Overview</h1>
+<hr />
+<h1 id="overview">Overview</h1>
 <p>So I'm gonna use Azure DevOps for this lab. <strong>My idea is: Push code → trigger pipeline in Azure DevOps → pipeline will build image -&gt; push ACR -&gt; update gitops repo -&gt; ArgoCD auto sync.</strong></p>
 <p>So in this setup ArgoCD is only external component, the rest is managed by Azure!</p>
-<p><img alt="Flow chart" src="./images/2026/05/04.png"></p>
+<p><img alt="Flow chart" src="./images/2026/05/04.png" /></p>
 <p>I think this is better diagram xD</p>
-<p><img alt="Flow chart" src="./images/2026/05/devops/29.png"></p>
-<hr>
-<h1>Step 1: Install ArgoCD</h1>
+<p><img alt="Flow chart" src="./images/2026/05/devops/29.png" /></p>
+<hr />
+<h1 id="step-1-install-argocd">Step 1: Install ArgoCD</h1>
 <p>For this fucking lab, no HA — just standalone install.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Create namespace</span>
 kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>argocd
@@ -132,20 +132,20 @@ kubectl<span class="w"> </span>apply<span class="w"> </span>-n<span class="w"> <
 </code></pre></div>
 
 <p>Apply manifest for argocd ingress: <code>k apply -f argocd-ingress.yaml</code></p>
-<hr>
-<h1>Step 2: Azure Repos + Helm chart + ArgoCD Application</h1>
-<h3>Create Azure DevOps org + project</h3>
+<hr />
+<h1 id="step-2-azure-repos-helm-chart-argocd-application">Step 2: Azure Repos + Helm chart + ArgoCD Application</h1>
+<h3 id="create-azure-devops-org-project">Create Azure DevOps org + project</h3>
 <p>Create a new Org with your current subscription</p>
-<p><img alt="New Org" src="./images/2026/05/devops/01.png"></p>
+<p><img alt="New Org" src="./images/2026/05/devops/01.png" /></p>
 <p>New project <code>aks-lab</code></p>
-<p><img alt="Create ORG" src="./images/2026/05/devops/02.png"></p>
-<p><img alt="Overview Org" src="./images/2026/05/devops/03.png"></p>
+<p><img alt="Create ORG" src="./images/2026/05/devops/02.png" /></p>
+<p><img alt="Overview Org" src="./images/2026/05/devops/03.png" /></p>
 <p>Create new Repos for app + gitops:</p>
-<p><img alt="Create new repos" src="./images/2026/05/devops/04.png"></p>
+<p><img alt="Create new repos" src="./images/2026/05/devops/04.png" /></p>
 <p>Oke, we have 2 new ones plus 1 default xD</p>
-<p><img alt="All repos" src="./images/2026/05/devops/05.png"></p>
+<p><img alt="All repos" src="./images/2026/05/devops/05.png" /></p>
 <p>Next, we need to setup ssh key for cloning without credentials xD. Local dev = git clone via SSH. But the pipeline needs PAT because the self-hosted agent / ArgoCD needs HTTPS auth!</p>
-<p><img alt="Add sshkey" src="./images/2026/05/devops/06.png"></p>
+<p><img alt="Add sshkey" src="./images/2026/05/devops/06.png" /></p>
 <p>Then clone it, pretty much the same as other git providers xD</p>
 <div class="highlight"><pre><span></span><code>kienlt@Luongs-MacBook-Pro<span class="w"> </span>dev.azure.com<span class="w"> </span>%<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>git@ssh.dev.azure.com:v3/kienltqn/aks-lab/aks-lab-app
 Cloning<span class="w"> </span>into<span class="w"> </span><span class="s1">&#39;aks-lab-app&#39;</span>...
@@ -174,7 +174,7 @@ drwxr-xr-x@<span class="w"> </span><span class="m">8</span><span class="w"> </sp
 -rw-r--r--@<span class="w"> </span><span class="m">1</span><span class="w"> </span>kienlt<span class="w">  </span>staff<span class="w">  </span><span class="m">516</span><span class="w">  </span><span class="m">3</span><span class="w"> </span>May<span class="w"> </span><span class="m">10</span>:03<span class="w"> </span><span class="m">02</span>.ingress.yaml
 </code></pre></div>
 
-<h3>Helm chart and GitOps</h3>
+<h3 id="helm-chart-and-gitops">Helm chart and GitOps</h3>
 <p>Next, clone GitOps repo: </p>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>git@ssh.dev.azure.com:v3/kienltqn/aks-lab/aks-lab-gitops
 Cloning<span class="w"> </span>into<span class="w"> </span><span class="s1">&#39;aks-lab-gitops&#39;</span>...
@@ -263,11 +263,11 @@ kienlt@Luongs-MacBook-Pro<span class="w"> </span><span class="m">10</span>-ecr-a
 ingress.networking.k8s.io<span class="w"> </span><span class="s2">&quot;hello-aks&quot;</span><span class="w"> </span>deleted<span class="w"> </span>from<span class="w"> </span>default<span class="w"> </span>namespace
 </code></pre></div>
 
-<h3>ArgoCD</h3>
+<h3 id="argocd">ArgoCD</h3>
 <p>We need to create a PAT (Personal Access Token) to give Argocd permission to sync…</p>
-<p><img alt="Create PAT" src="./images/2026/05/devops/07.png"></p>
+<p><img alt="Create PAT" src="./images/2026/05/devops/07.png" /></p>
 <p>Yeah, full access for this fucking demo xD or serious with Scopes: Custom defined → tick Code → Read</p>
-<p><img alt="Full access PAT" src="./images/2026/05/devops/08.png"></p>
+<p><img alt="Full access PAT" src="./images/2026/05/devops/08.png" /></p>
 <p>Test token time:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">PAT</span><span class="o">=</span><span class="s2">&quot;&lt;your-pat&gt;&quot;</span>
 curl<span class="w"> </span>-sI<span class="w"> </span>-u<span class="w"> </span><span class="s2">&quot;kienltqn:</span><span class="nv">$PAT</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
@@ -282,11 +282,11 @@ curl<span class="w"> </span>-sI<span class="w"> </span>-u<span class="w"> </span
 </code></pre></div>
 
 <p>Connect Repo in ArgoCD: remember, no fucking username (@username) in repo URL.</p>
-<p><img alt="Connect repo" src="./images/2026/05/devops/09.png"></p>
+<p><img alt="Connect repo" src="./images/2026/05/devops/09.png" /></p>
 <p>Expected result</p>
-<p><img alt="Connect result" src="./images/2026/05/devops/10.png"></p>
+<p><img alt="Connect result" src="./images/2026/05/devops/10.png" /></p>
 <p>Expected output in applications</p>
-<p><img alt="Connect result" src="./images/2026/05/devops/11.png"></p>
+<p><img alt="Connect result" src="./images/2026/05/devops/11.png" /></p>
 <p>My manifest for that application:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Application</span>
@@ -310,12 +310,12 @@ curl<span class="w"> </span>-sI<span class="w"> </span>-u<span class="w"> </span
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CreateNamespace=true</span>
 </code></pre></div>
 
-<hr>
-<h1>Step 3: Azure Pipeline build -&gt; push ACR -&gt; bump tag GitOps</h1>
-<h3>Create Service Connection for ACR</h3>
+<hr />
+<h1 id="step-3-azure-pipeline-build-push-acr-bump-tag-gitops">Step 3: Azure Pipeline build -&gt; push ACR -&gt; bump tag GitOps</h1>
+<h3 id="create-service-connection-for-acr">Create Service Connection for ACR</h3>
 <p>Pipeline needs to authenticate into ACR to push the image. The recommended way is Service connection using Service Principal</p>
 <p>Project Settings --&gt; Service Connections --&gt; New Service Connections --&gt; Docker Registry</p>
-<p><img alt="Create service connection" src="./images/2026/05/devops/12.png"></p>
+<p><img alt="Create service connection" src="./images/2026/05/devops/12.png" /></p>
 <p>After that: </p>
 <ul>
 <li>Registry type: Azure Container Registry</li>
@@ -325,16 +325,16 @@ curl<span class="w"> </span>-sI<span class="w"> </span>-u<span class="w"> </span
 <li>Service connection name: acr-aks-lab</li>
 <li>Grant access permission to all pipelines</li>
 </ul>
-<p><img alt="Grant Service Connection" src="./images/2026/05/devops/13.png"></p>
+<p><img alt="Grant Service Connection" src="./images/2026/05/devops/13.png" /></p>
 <p>Output:</p>
-<p><img alt="Output" src="./images/2026/05/devops/14.png"></p>
-<h3>Grant access for the Build Service push into the GitOps repo</h3>
+<p><img alt="Output" src="./images/2026/05/devops/14.png" /></p>
+<h3 id="grant-access-for-the-build-service-push-into-the-gitops-repo">Grant access for the Build Service push into the GitOps repo</h3>
 <p>Project Settings -&gt; Repositories -&gt; aks-lab-gitops -&gt; tab Security -&gt; find user like: aks-lab Build Service (kienltqn). Then set the following permission to "Allow"
 - Contribute
 - Create branch</p>
-<p><img alt="Output" src="./images/2026/05/devops/15.png"></p>
-<h3>Create azure-pipelines.yml (like .gitlab-ci.yml xD)</h3>
-<p><img alt="pipeline" src="./images/2026/05/devops/16.png"></p>
+<p><img alt="Output" src="./images/2026/05/devops/15.png" /></p>
+<h3 id="create-azure-pipelinesyml-like-gitlab-ciyml-xd">Create azure-pipelines.yml (like .gitlab-ci.yml xD)</h3>
+<p><img alt="pipeline" src="./images/2026/05/devops/16.png" /></p>
 <div class="highlight"><pre><span></span><code><span class="nt">trigger</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">branches</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">main</span><span class="p p-Indicator">]</span>
@@ -433,14 +433,14 @@ curl<span class="w"> </span>-sI<span class="w"> </span>-u<span class="w"> </span
 </code></pre></div>
 
 <p>Note: This pipeline is designed for self-hosted Mac agent. We'll see why below.</p>
-<h3>Create Pipeline definition in Azure DevOps UI</h3>
+<h3 id="create-pipeline-definition-in-azure-devops-ui">Create Pipeline definition in Azure DevOps UI</h3>
 <p>Pipelines -&gt; Pipelines -&gt; Create Pipeline -&gt; Azure Repos Git -&gt; chọn aks-lab-app -&gt; Existing Azure Pipelines YAML file -&gt; Branch main, Path /azure-pipelines.yml -&gt; Continue -&gt; Run.</p>
 <p>LOL, Holy fucking shit</p>
-<p><img alt="holy fuck" src="./images/2026/05/devops/17.png"></p>
-<h3>Time to create new agent-pool self-host</h3>
-<p><img alt="agent pool" src="./images/2026/05/devops/18.png"></p>
+<p><img alt="holy fuck" src="./images/2026/05/devops/17.png" /></p>
+<h3 id="time-to-create-new-agent-pool-self-host">Time to create new agent-pool self-host</h3>
+<p><img alt="agent pool" src="./images/2026/05/devops/18.png" /></p>
 <p>Create new PAT for <code>agent-local-mac</code></p>
-<p><img alt="create PAT" src="./images/2026/05/devops/19.png"></p>
+<p><img alt="create PAT" src="./images/2026/05/devops/19.png" /></p>
 <p>User Settings (avatar) → Personal access tokens → New Token:</p>
 <ul>
 <li>Name: agent-local-mac</li>
@@ -448,8 +448,8 @@ curl<span class="w"> </span>-sI<span class="w"> </span>-u<span class="w"> </span
 <li>Expiration: 90 days</li>
 <li>Scopes: Custom defined → Agent Pools → tick Read &amp; manage</li>
 </ul>
-<h3>Install and configure the agent on a local Mac</h3>
-<p><img alt="Install and config agent" src="./images/2026/05/devops/20.png"></p>
+<h3 id="install-and-configure-the-agent-on-a-local-mac">Install and configure the agent on a local Mac</h3>
+<p><img alt="Install and config agent" src="./images/2026/05/devops/20.png" /></p>
 <p>Need to run: <code>brew install docker-buildx</code> for Mac Local and symlink</p>
 <div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>~/.docker/cli-plugins
 ln<span class="w"> </span>-sfn<span class="w"> </span><span class="k">$(</span>brew<span class="w"> </span>--prefix<span class="k">)</span>/opt/docker-buildx/bin/docker-buildx<span class="w"> </span><span class="se">\</span>
@@ -505,7 +505,7 @@ Connecting<span class="w"> </span>to<span class="w"> </span>the<span class="w"> 
 </code></pre></div>
 
 <p>Verify agent online:</p>
-<p><img alt="verify" src="./images/2026/05/devops/21.png"></p>
+<p><img alt="verify" src="./images/2026/05/devops/21.png" /></p>
 <p>Change from <code>azure-pipelines.yml</code> from</p>
 <div class="highlight"><pre><span></span><code><span class="nt">pool</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">vmImage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
@@ -517,17 +517,17 @@ Connecting<span class="w"> </span>to<span class="w"> </span>the<span class="w"> 
 </code></pre></div>
 
 <p>Delete existing pipeline, run new pipeline and here is output, failed but it run xD</p>
-<p><img alt="verify pipeline" src="./images/2026/05/devops/22.png"></p>
+<p><img alt="verify pipeline" src="./images/2026/05/devops/22.png" /></p>
 <p>Hmm, it still fucked up in part clone gitops repo. Time to create a new PAT for it — or just skip and reuse that fucking FULL ACCESS PAT!!!</p>
 <p>Add PAT for secret variable of pipeline, it is simple, create environment variable, like this!</p>
-<p><img alt="new env" src="./images/2026/05/devops/23.png"></p>
+<p><img alt="new env" src="./images/2026/05/devops/23.png" /></p>
 <p>At least we got build image works</p>
-<p><img alt="container registry" src="./images/2026/05/devops/24.png"></p>
+<p><img alt="container registry" src="./images/2026/05/devops/24.png" /></p>
 <p>Hmmm, seem like I already fucked up, I create env, not pipeline variable?</p>
 <p>In Azure DevOps:
 - Pipeline variable = key-value injected as env var in pipeline run (can mark as secret)
 - Environment = deployment target (k8s/VM/etc.) used for approval gates, not variable scope</p>
-<p><img alt="create pipeline variable" src="./images/2026/05/devops/25.png"></p>
+<p><img alt="create pipeline variable" src="./images/2026/05/devops/25.png" /></p>
 <p>Yeah, god damn it!!!</p>
 <div class="highlight"><pre><span></span><code><span class="nl">Starting</span><span class="p">:</span><span class="w"> </span><span class="k">Update</span><span class="w"> </span><span class="k">values</span><span class="p">.</span><span class="n">yaml</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">push</span>
 <span class="o">==============================================================================</span>
@@ -550,15 +550,15 @@ Connecting<span class="w"> </span>to<span class="w"> </span>the<span class="w"> 
 
 <p>Time to install yq in my local Mac brew install yq. Remember to delete the environment we created in the previous step!</p>
 <p>Yayyy, finally</p>
-<p><img alt="yooooooo" src="./images/2026/05/devops/26.png"></p>
+<p><img alt="yooooooo" src="./images/2026/05/devops/26.png" /></p>
 <p>Verify in Gitops Repo</p>
-<p><img alt="yooooooo" src="./images/2026/05/devops/27.png"></p>
+<p><img alt="yooooooo" src="./images/2026/05/devops/27.png" /></p>
 <p>View via domain</p>
-<p><img alt="view domain" src="./images/2026/05/devops/28.png"></p>
-<h1>Conclusion</h1>
+<p><img alt="view domain" src="./images/2026/05/devops/28.png" /></p>
+<h1 id="conclusion">Conclusion</h1>
 <p>If possible, I'd recommend GitHub Actions or GitLab Runners over Azure DevOps. It feels unnecessarily complex to me!</p>
 <p>But good to know how it works when you have to use it, especially for Azure's ecosystem!</p>
-<h1>Cleanup</h1>
+<h1 id="cleanup">Cleanup</h1>
 <ul>
 <li>Delete resource group:</li>
 </ul>

@@ -78,21 +78,21 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>What is Argo Rollout, is it related to ArgoCD?</h1>
+            <h1 id="what-is-argo-rollout-is-it-related-to-argocd">What is Argo Rollout, is it related to ArgoCD?</h1>
 <ul>
 <li>Argo Rollouts is a progressive delivery controller for K8S which provides advanced deployment capabilities such as blue-green, canary.....</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/09th_1.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_1.png" /></p>
 <ul>
 <li>It doesn't relate to ArgoCD. Argo Rollouts is often used in conjunction with Argo CD, the Argo project’s continuous delivery (CD) tool. Argo CD implements declarative GitOps-driven CD for Kubernetes, while Rollouts offers a controller and CRDs that let you robustly manage blue-green and canary deployments</li>
 </ul>
-<hr>
-<h1>What is Canary/Blue-Green deployment?</h1>
+<hr />
+<h1 id="what-is-canaryblue-green-deployment">What is Canary/Blue-Green deployment?</h1>
 <p>Umm, if i explain complete for this, this article will be long to read so i will not include it here, only focus on the main objective.</p>
 <p>In case you don't know about it, google is your friend xD</p>
-<hr>
-<h1>Installation</h1>
-<h3>Install Argo Rollouts</h3>
+<hr />
+<h1 id="installation">Installation</h1>
+<h3 id="install-argo-rollouts">Install Argo Rollouts</h3>
 <ul>
 <li>I will use the default install, assume you have Argocd installed</li>
 </ul>
@@ -131,7 +131,7 @@ argo-rollouts-5498f9bc4b-8xt26   1/1     Running   0          69s
 <ul>
 <li>Extra note: If you have multiple k8s clusters like mine, you have to install Argo Rollout to each cluster you want to use feature rollouts for canary/blue-green deployment.</li>
 </ul>
-<h3>Install kubectl plugin for Argo Rollouts</h3>
+<h3 id="install-kubectl-plugin-for-argo-rollouts">Install kubectl plugin for Argo Rollouts</h3>
 <ul>
 <li>Download and install</li>
 </ul>
@@ -152,9 +152,9 @@ argo-rollouts-5498f9bc4b-8xt26   1/1     Running   0          69s
   Platform: linux/amd64
 </code></pre></div>
 
-<hr>
-<h1>Testing canary rollout</h1>
-<h3>Change from deployment to canary rollout</h3>
+<hr />
+<h1 id="testing-canary-rollout">Testing canary rollout</h1>
+<h3 id="change-from-deployment-to-canary-rollout">Change from deployment to canary rollout</h3>
 <ul>
 <li>I already have argocd deployment with helm running, now i want to migrate it to Argo rollouts. How i can achieve this?
 First, remove <code>deployment.yaml</code> and add <a href="https://github.com/BlackMetalz/k8s-manifest/blob/main/golang-webapp-testing/templates/rollout.yaml">rollout.yaml</a>.
@@ -172,7 +172,7 @@ You will notice little change in <code>apiVersion</code> and <code>kind</code>. 
 <ul>
 <li>Example picture after switch from deployment to rollout</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/09th_2.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_2.png" /></p>
 <ul>
 <li>Check the current version before rollout with canary:</li>
 </ul>
@@ -230,7 +230,7 @@ docker push kienlt992/golang-webapp-testing:v3.0.0
 <div class="highlight"><pre><span></span><code>kubectl argo rollouts get rollout -n golang-app golang-webapp-testing-production --watch
 </code></pre></div>
 
-<p><img alt="alt text" src="images/2025/03/09th_3.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_3.png" /></p>
 <ul>
 <li>Output for check version, you can see there are some requests that have version 3.0.0 already!</li>
 </ul>
@@ -252,7 +252,7 @@ docker push kienlt992/golang-webapp-testing:v3.0.0
 <ul>
 <li>After 5 minutes, the rollout for the canary will increase to 50% as we defined in the rollout</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/09th_4.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_4.png" /></p>
 <ul>
 <li>We assume our application is good and ready to promote 50% left for complete rollout.</li>
 </ul>
@@ -263,7 +263,7 @@ rollout &#39;golang-webapp-testing-production&#39; promoted
 <ul>
 <li>Check again rollout status again for the final</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/09th_5.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_5.png" /></p>
 <ul>
 <li>Check request again, you can see it is 100% switched to version 3.0.0 right now!</li>
 </ul>
@@ -281,7 +281,7 @@ rollout &#39;golang-webapp-testing-production&#39; promoted
 <span class="o">.......</span>
 </code></pre></div>
 
-<h3>How could we monitor and rollback canary deployment if new version has the issue?</h3>
+<h3 id="how-could-we-monitor-and-rollback-canary-deployment-if-new-version-has-the-issue">How could we monitor and rollback canary deployment if new version has the issue?</h3>
 <ul>
 <li>This is a good question to improve this article. Let's create canary deployment first:</li>
 </ul>
@@ -344,16 +344,16 @@ Status<span class="w"> </span>code:<span class="w"> </span><span class="m">504</
 <ul>
 <li>Query in Prometheus:</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/09th_12.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_12.png" /></p>
 <ul>
 <li>Wait for a little time and see the alert:</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/09th_11.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_11.png" /></p>
 <ul>
 <li>Hmm? Wait a minute? 100%? This is not correct. Let me fix this by correcting Prometheus rule xD</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/09th_16.png"></p>
-<p><img alt="alt text" src="images/2025/03/09th_15.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_16.png" /></p>
+<p><img alt="alt text" src="images/2025/03/09th_15.png" /></p>
 <ul>
 <li>Now we need to rollback the canary rollout. And the request will be 200 again</li>
 </ul>
@@ -396,8 +396,8 @@ NAME<span class="w">                                                          </
 <ul>
 <li>After sometimes....</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/09th_13.png"></p>
-<p><img alt="alt text" src="images/2025/03/09th_14.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_13.png" /></p>
+<p><img alt="alt text" src="images/2025/03/09th_14.png" /></p>
 <ul>
 <li>Let's make status Healthy again by (Don't focus on correct revision, i was test abort and promote multiple times And it won't affect at all i guess xD)</li>
 </ul>
@@ -436,9 +436,9 @@ NAME<span class="w">                                                          </
 <span class="w">   </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-6f5b799cf7<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>47h<span class="w">    </span>
 </code></pre></div>
 
-<hr>
-<h1>Trying blue-green deployment</h1>
-<h3>Config rollout for blue-green</h3>
+<hr />
+<h1 id="trying-blue-green-deployment">Trying blue-green deployment</h1>
+<h3 id="config-rollout-for-blue-green">Config rollout for blue-green</h3>
 <ul>
 <li>Just change <code>strategy</code> section from previous rollout:</li>
 </ul>
@@ -517,7 +517,7 @@ NAME<span class="w">                                                          </
 <ul>
 <li>After that, push the changes to manifest repo and get synced with Argocd.</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/09th_6.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_6.png" /></p>
 <ul>
 <li>Check rollout status after Argocd is healthy. You can see Strategy changed to <strong>BlueGreen</strong></li>
 </ul>
@@ -563,9 +563,9 @@ Version:<span class="w"> </span><span class="m">3</span>.0.0
 </code></pre></div>
 
 <p>Second check status via Argocd UI</p>
-<p><img alt="alt text" src="images/2025/03/09th_7.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_7.png" /></p>
 <p>And Rollout status via CLI</p>
-<p><img alt="alt text" src="images/2025/03/09th_8.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_8.png" /></p>
 <ul>
 <li>I will promote and see what happens, i like to use CLI instead of UI sometimes xD</li>
 </ul>
@@ -574,9 +574,9 @@ rollout<span class="w"> </span><span class="s1">&#39;golang-webapp-testing-produ
 </code></pre></div>
 
 <p>Rollout status</p>
-<p><img alt="alt text" src="images/2025/03/09th_9.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_9.png" /></p>
 <p>Argocd UI</p>
-<p><img alt="alt text" src="images/2025/03/09th_10.png"></p>
+<p><img alt="alt text" src="images/2025/03/09th_10.png" /></p>
 <p>Check version again:</p>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span><span class="s2">&quot;http://golang-webapp-testing.rke2-cluster.kienlt.local/version&quot;</span>
 Version:<span class="w"> </span><span class="m">4</span>.0.0
@@ -586,7 +586,7 @@ Version:<span class="w"> </span><span class="m">4</span>.0.0
 <li>Complete manifest for blue-green here: 
 <a href="https://github.com/BlackMetalz/k8s-manifest/tree/main/golang-webapp-testing-bluegreen">golang-webapp-testing-bluegreen</a></li>
 </ul>
-<h3>How about rollback, not promote for blue-green deployment?</h3>
+<h3 id="how-about-rollback-not-promote-for-blue-green-deployment">How about rollback, not promote for blue-green deployment?</h3>
 <ul>
 <li>I will go for real quick! Here is status:</li>
 </ul>
@@ -701,7 +701,7 @@ NAME<span class="w">                                                          </
 <span class="w">   </span>└──⧉<span class="w"> </span>golang-webapp-testing-production-6f5b799cf7<span class="w">           </span>ReplicaSet<span class="w">  </span>•<span class="w"> </span>ScaledDown<span class="w">  </span>45h<span class="w">  </span>
 </code></pre></div>
 
-<h3>Next scenario, undo the promoted in blue-green deployment</h3>
+<h3 id="next-scenario-undo-the-promoted-in-blue-green-deployment">Next scenario, undo the promoted in blue-green deployment</h3>
 <ul>
 <li>I will not post full detail since they are just the same with little different.</li>
 </ul>
@@ -819,12 +819,12 @@ NAME<span class="w">                                                          </
 Version:<span class="w"> </span><span class="m">4</span>.0.0
 </code></pre></div>
 
-<h1>Conclusion</h1>
+<h1 id="conclusion">Conclusion</h1>
 <ul>
 <li>This is just a basic canary/blue-green deployment with Argo Rollout. But good step for a beginner like me.</li>
 <li>Knowing concepts is important more than knowing steps.</li>
 </ul>
-<h1>Ref:</h1>
+<h1 id="ref">Ref:</h1>
 <ul>
 <li><a href="https://argo-rollouts.readthedocs.io/en/stable/">Argo Rollouts - Kubernetes Progressive Delivery Controller</a></li>
 <li><a href="https://www.youtube.com/watch?v=hIL0E2gLkf8">Argo Rollouts Demo</a></li>

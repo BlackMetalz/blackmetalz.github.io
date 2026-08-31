@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h3>Purpose: Learned it once, write it again to remember longer? xD</h3>
+            <h3 id="purpose-learned-it-once-write-it-again-to-remember-longer-xd">Purpose: Learned it once, write it again to remember longer? xD</h3>
 <ul>
 <li>The content comes from: <a href="https://killercoda.com/killer-shell-cks">https://killercoda.com/killer-shell-cks</a> .When I get too bored, I need to do something useful rather than play games all day...</li>
 <li>Question: Ok, don't tell shit, what is NodeRestriction?</li>
@@ -89,11 +89,11 @@
 <li>Answer: Just a little knowledge that i want to save for myself in case i forget in the near future &gt;.&gt;</li>
 </ul>
 <p>Ok, no more tasteless jokes... I was trying to close the gap in my knowledge of K8s</p>
-<h3>What is NodeRestriction?</h3>
+<h3 id="what-is-noderestriction">What is NodeRestriction?</h3>
 <p>NodeRestriction is a Kubernetes admission controller that limits what Node and Pod objects a kubelet can modify, preventing privilege escalation attacks.</p>
-<h3>Security Problem</h3>
+<h3 id="security-problem">Security Problem</h3>
 <p>In Kubernetes 1.33, NodeRestriction is NOT enabled by default, creating a security gap where...</p>
-<h3>How it works</h3>
+<h3 id="how-it-works">How it works</h3>
 <ul>
 <li>Ref: <a href="https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction">https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#noderestriction</a></li>
 <li>Prevents kubelets from adding/removing/updating labels with a node-restriction.kubernetes.io/ prefix. This label prefix is reserved for administrators to label their Node objects for workload isolation purposes, and kubelets will not be allowed to modify labels with that prefix. That is the important point, more info will go to kubernetes document.</li>
@@ -118,11 +118,11 @@ kubectl label node worker01 node-restriction.kubernetes.io/sensitive=true
 kubectl label node worker01 kubernetes.io/hostname=custom-name
 </code></pre></div>
 
-<h3>What am I missing?</h3>
+<h3 id="what-am-i-missing">What am I missing?</h3>
 <ul>
 <li>Probably something with Kubelet's <code>system:node</code> group and <code>system:node:&lt;nodeName&gt;</code> username, but at this time i don't understand it enough to write down here.</li>
 </ul>
-<h3>How to practice?</h3>
+<h3 id="how-to-practice">How to practice?</h3>
 <ul>
 <li>Go to: KillerCoda --&gt; Killer Shell CKS --&gt; Apiserver NodeRestriction</li>
 <li>Perfect place to learn from real scenarios without installing anything, just from your browser!</li>

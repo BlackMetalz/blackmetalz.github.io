@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>My little experience to prepare for the CKS exam in 2025</h1>
+            <h1 id="my-little-experience-to-prepare-for-the-cks-exam-in-2025">My little experience to prepare for the CKS exam in 2025</h1>
 <ul>
 <li>Some sharing why you should attempt the exam</li>
 <li>Which course should you pick in order to prepare</li>
@@ -88,35 +88,35 @@
 <li>Voucher in general (to reduce exam costs xD)</li>
 <li>Other resources I used to write this article</li>
 </ul>
-<hr>
-<h1>1. Why you should attempt the exam</h1>
+<hr />
+<h1 id="1-why-you-should-attempt-the-exam">1. Why you should attempt the exam</h1>
 <p>My opinions:</p>
 <ul>
 <li>First, I think almost every person who has attempted the exam will agree that when you prepare for the exam, you know more than you can be expected to know. For a small example, I never knew about the strace command in Linux until I prepared for the CKS exam via learn a course xD</li>
 <li>Second, I was wondering if this will not be really useful for my current job, a colleague who gave me a recommendation, just take the exam to increase my mindset, which I'm lacking currently.</li>
 <li>Third, not really important, but certification collection is something fun to do, like Achievement in a game, if you have ever played an online game like World of Warcraft, you will understand it xD. It is not about skill; it is all about having something called achievement, and this is a little achievement you can achieve by spending time and money(of course).</li>
 </ul>
-<hr>
-<h1>2. Which course should you pick</h1>
+<hr />
+<h1 id="2-which-course-should-you-pick">2. Which course should you pick</h1>
 <p>There are 2 courses: I do recommend taking both, of course xD, each course has a different advantage.</p>
 <ul>
 <li>From <a href="https://learn.kodekloud.com/user/courses/certified-kubernetes-security-specialist-cks">Kodekloud</a>, they do have a lab environment set up for each Lesson. For example, you just finished watching a lesson (What are CIS Benchmarks 05:52), then the next lesson is Lab - Run CIS Benchmark Assessment tool on Ubuntu. It is really amazing and gave the speed of preparation for the exam.</li>
 <li>From <a href="https://www.udemy.com/course/certified-kubernetes-security-specialist-certification/">Udemy</a> by Zeal Vora, his explanation is very good for me. If you don't understand enough, simply watch again. He also gives some focus points on the exam in his course.</li>
 </ul>
-<hr>
-<h1>3. Where to practice without building a cluster</h1>
+<hr />
+<h1 id="3-where-to-practice-without-building-a-cluster">3. Where to practice without building a cluster</h1>
 <ul>
 <li><a href="https://minikube.sigs.k8s.io/docs/start/">Minikube</a> for Sure, build your own lab in your laptop/pc, it begins to consume only with 2Gb memory.</li>
 <li><a href="https://killercoda.com/killer-shell-cks/">KillerCoda</a>, a great place that covers almost every topic in the exam (except Istio xD). And yes, it is free!</li>
 <li><a href="https://learn.kodekloud.com/courses/cks-challenges">Kodekloud CKS Challenge</a>, they give good lab-focused on exam scenario, and it's also free!</li>
 </ul>
 <p>For the KillerCoda and Kodekloud CKS Challenge, finish all of them, even repeated daily, with a real understanding instead of memorization.</p>
-<hr>
-<h1>4. Some experience you should focus on and not for the exam</h1>
+<hr />
+<h1 id="4-some-experience-you-should-focus-on-and-not-for-the-exam">4. Some experience you should focus on and not for the exam</h1>
 <p>Because writing the whole content for the CKS exam again here is just wasted time for me and for those who are reading this, so I decided to write only something I feel is needed (at least for me xD)</p>
 <p>If you do not have certification CKA, you should finish it first before taking the CKS exam, unless you are going to renew your CKS cert in 2025 xD.</p>
 <p>LDR: I realized that everything I mentioned below they are all described well in course xD, so if you believe you watched the course and remember everything, you can skip this section.</p>
-<h3>[Yes] Audit Logging</h3>
+<h3 id="yes-audit-logging">[Yes] Audit Logging</h3>
 <ul>
 <li>Link: https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/</li>
 <li>Audit Policy: Be sure to understand, for example, you could be asked to log level <code>Metadata</code> for resource <code>configmaps, secrets</code> in a specific namespace and so on...</li>
@@ -127,11 +127,11 @@
 </ul>
 </li>
 </ul>
-<h3>[Should] Falco</h3>
+<h3 id="should-falco">[Should] Falco</h3>
 <ul>
 <li>Well, this is tough in the exam because practice was all about modifying output to display as the question or enable it. But in an exam, you may need to write a new policy to handle specific events. So, for my personal experience, skip this because it would eat up a lot of time.</li>
 </ul>
-<h3>[Should] Immutability Readonly Filesystem</h3>
+<h3 id="should-immutability-readonly-filesystem">[Should] Immutability Readonly Filesystem</h3>
 <ul>
 <li>This is all about adding securityContext, which prevents unauthorized modifications. For example, you can not edit a running file in a container if this setting is enabled.</li>
 </ul>
@@ -147,47 +147,47 @@
 <span class="w">      </span><span class="nt">readOnlyRootFilesystem</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 
-<h3>[Yes] CIS Benchmarks</h3>
+<h3 id="yes-cis-benchmarks">[Yes] CIS Benchmarks</h3>
 <ul>
 <li>Yes, fucking yes!</li>
 </ul>
-<h3>[Not] Rego/OPA</h3>
+<h3 id="not-regoopa">[Not] Rego/OPA</h3>
 <ul>
 <li>It is all good if you have time to learn it if, and you can use it in your work. But for a common person (like me), it could be overwhelming.</li>
 </ul>
-<h3>[Yes] TLS Ingress</h3>
+<h3 id="yes-tls-ingress">[Yes] TLS Ingress</h3>
 <ul>
 <li>This could be a free point, just set up a secret with type TLS, be sure to remember to create it from the command xD. Then use that secret in ingress. <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/#tls">Document here</a></li>
 </ul>
-<h3>[Should] Network Policy / Cilium Network Policy (CNP)</h3>
+<h3 id="should-network-policy-cilium-network-policy-cnp">[Should] Network Policy / Cilium Network Policy (CNP)</h3>
 <ul>
 <li>I assumed you are well known for Network Policy, so I focused only on CNP. And yeah, it takes time to master CNP because it could happen in the CKS exam xD</li>
 </ul>
-<h3>[Yes] Static File Analysis</h3>
+<h3 id="yes-static-file-analysis">[Yes] Static File Analysis</h3>
 <ul>
 <li>Dockerfile: Mostly it is all about changing the user from Root to the user that is added in Dockerfile, removing unnecessary lines like exposing port 22 (Example: why would we expose port 22 in a Flask application, right?)</li>
 <li>Manifest: again, it will ask you to modify lines only, not add a new line. For example, there is a line with: <code>readOnlyRootFilesystem: true</code>, simply change it to false xD. </li>
 </ul>
-<h3>[Should] Docker and Linux</h3>
+<h3 id="should-docker-and-linux">[Should] Docker and Linux</h3>
 <ul>
 <li>You should be familiar with basic Linux commands like add/remove user to/from group, chmod, chown, Systemd (Practice tests are all Ubuntu), and so on... </li>
 </ul>
-<h3>[Should] Istio</h3>
+<h3 id="should-istio">[Should] Istio</h3>
 <ul>
 <li>Recently, it has been added to the CKS exam. You can set up for the lab by using Minikube. I will not write details for it because it is pretty simple, just read the document, and you will get it!</li>
 <li><a href="https://istio.io/latest/docs/setup/additional-setup/sidecar-injection/#deploying-an-app">Enable istio-proxy injection in a namespace</a></li>
 <li><a href="https://istio.io/latest/docs/tasks/security/authentication/mtls-migration/#lock-down-to-mutual-tls-by-namespace">Enforce strict mTLS in the namespace</a></li>
 <li>This is considered a free point in the exam, in my personal opinion. Also, you will be able to use the Istio document during the exam, so don't worry.</li>
 </ul>
-<h3>[Should] ImagePolicyWebhook setup</h3>
+<h3 id="should-imagepolicywebhook-setup">[Should] ImagePolicyWebhook setup</h3>
 <ul>
 <li>You will need to correct the setup webhook, not the backend, which is used to verify, so make sure you know how to do it. There is a scenario to practice this in <a href="https://killercoda.com/killer-shell-cks/">KillerCoda</a></li>
 </ul>
-<h3>[Yes] CLI</h3>
+<h3 id="yes-cli">[Yes] CLI</h3>
 <ul>
 <li>crictl, podman are required commands to know besides kubectl...</li>
 </ul>
-<h3>Hmm, while writing this article, I feel like I'm writing too much useless information.?</h3>
+<h3 id="hmm-while-writing-this-article-i-feel-like-im-writing-too-much-useless-information">Hmm, while writing this article, I feel like I'm writing too much useless information.?</h3>
 <ul>
 <li>
 <p>So I repeat: <strong>practice, practice, practice</strong> in KillerCoda + Kodekloud CKS Challenge (<strong>Important things are repeated 3 times</strong>.). So this is the end for the 4th section, let's move to the next section!</p>
@@ -196,12 +196,12 @@
 <p>I personally agree with this meme (from <a href="https://www.cncf.io/blog/">cncf.io</a> blog)</p>
 </li>
 </ul>
-<p><img alt="Feeling lost" src="images/2025/08/01.png"></p>
+<p><img alt="Feeling lost" src="images/2025/08/01.png" /></p>
 <ul>
 <li>Considering reading this post, this is a <a href="https://www.cncf.io/blog/2024/11/25/how-to-enter-the-kubestronaut-orbit-and-beyond-%F0%9F%9A%80/"><strong>great article</strong></a> if you are not sure you should take exam or not</li>
 </ul>
-<hr>
-<h1>5. Extra Notes</h1>
+<hr />
+<h1 id="5-extra-notes">5. Extra Notes</h1>
 <ul>
 <li>Flag the question and return later if you are not comfortable with it, like needing to research in a document.</li>
 <li>Time is the real issue if it has been passed 60 minutes, and you have 70% questions resolved. (Real Stress)</li>
@@ -211,17 +211,17 @@
 <li>Manage your time during the exam; each question should be around 6-10 minutes max! Verify your solution when you have time after you finish everything!</li>
 <li>After preparing for the exam for a long time, the last step is to take a trial in KillerShell, which you had 2. If you failed the first time like me, you are not alone...</li>
 </ul>
-<p><img alt="Failed" src="images/2025/08/03.png"></p>
-<hr>
-<h1>6. Voucher/discount for the exam</h1>
+<p><img alt="Failed" src="images/2025/08/03.png" /></p>
+<hr />
+<h1 id="6-voucherdiscount-for-the-exam">6. Voucher/discount for the exam</h1>
 <ul>
 <li>Follow the Linux Foundation for voucher (LinkedIn, Facebook, and Email). For example, this is 50% off, which is the best i have ever seen between 12 months... But your time matters more; 40% is totally acceptable. When i rush for an exam, i even take a 35% discount.</li>
 </ul>
-<p><img alt="Linux foundation vouchers" src="images/2025/08/02.png"></p>
+<p><img alt="Linux foundation vouchers" src="images/2025/08/02.png" /></p>
 <ul>
 <li>Use <strong>TUX REWARDS</strong>, for every 500$ you spend 😢 😢 😢, you get a single coupon that can be used to reduce 50% cost of the exam. Check it out in <a href="https://openprofile.dev/myrewards/coupons">Your Linux Foundation profile</a></li>
 </ul>
-<h1>7. Other resources I used to write this article</h1>
+<h1 id="7-other-resources-i-used-to-write-this-article">7. Other resources I used to write this article</h1>
 <ul>
 <li><a href="https://medium.com/@mauricioqdevops/the-ultimate-cks-guide-2025-28918e5245ea">The Ultimate CKS Guide 2025</a></li>
 <li><a href="https://devopscube.com/cks-exam-guide-tips/">CKS Exam Study Guide: Resources to Pass Certified Kubernetes Security Specialist</a></li>

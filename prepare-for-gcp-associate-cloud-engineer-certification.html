@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>1.Intro</h1>
+            <h1 id="1intro">1.Intro</h1>
 <p>Ah shit, here we go again xD. This time is Google Cloud, my first time. Please prepare new trial account with <strong>300$</strong>, we will use it for 3 months in a row. Not sure I can do what I'm aiming for (Cloud Engineer Associate + DevOps Pro). In this article, I'm mainly using resource from <a href="https://www.udemy.com/course/gcp-associate-cloud-engineer-certification/">Udemy course</a> and visit <a href="https://cloud.google.com/learn/certification/cloud-engineer/">Associate Cloud Engineer</a> link for me information!</p>
 <p>Useful links:</p>
 <ul>
@@ -93,47 +93,47 @@
 <li>Section 4: Ensuring successful operation of a cloud solution (~30% of the exam)</li>
 <li>Section 5: Configuring access and security (~10% of the exam)</li>
 </ul>
-<hr>
-<h1>2.Resource Hierarchy</h1>
-<h3>Concept of project in GCP</h3>
+<hr />
+<h1 id="2resource-hierarchy">2.Resource Hierarchy</h1>
+<h3 id="concept-of-project-in-gcp">Concept of project in GCP</h3>
 <p>A project is the main container for all your resources. (Ref: ResourceGroup at Azure)</p>
-<h3>Resource Hierarchy</h3>
+<h3 id="resource-hierarchy">Resource Hierarchy</h3>
 <p>Same like Azure, pretty familiar xD. Permissions management in GCP work with mechanism inheritance. GCP Resource Hierarchy has 4 levels: Organization, Folders, Projects and Resources.</p>
-<p><img alt="GCP Resource Hierarchy" src="https://docs.cloud.google.com/static/resource-manager/img/cloud-hierarchy.svg"></p>
-<h3>Manage Projects</h3>
+<p><img alt="GCP Resource Hierarchy" src="https://docs.cloud.google.com/static/resource-manager/img/cloud-hierarchy.svg" /></p>
+<h3 id="manage-projects">Manage Projects</h3>
 <p>We can use this for tracking costs of specific project like this</p>
-<p><img alt="Tracking resource" src="../images/2026/07/20.png"></p>
-<h3>Organization Policies VS IAM</h3>
+<p><img alt="Tracking resource" src="../images/2026/07/20.png" /></p>
+<h3 id="organization-policies-vs-iam">Organization Policies VS IAM</h3>
 <p>Nothing new for me, no need to explain detailed: </p>
 <ul>
 <li>Org Policies: WHAT can be done (Example: Edit/Create a policy for resource location lock, only allow to create instance in specific location like es-east1/europe-west1.)</li>
 <li>IAM: WHO can do something.</li>
 </ul>
-<h3>API</h3>
+<h3 id="api">API</h3>
 <p>For some services, we need to enable before use it!</p>
-<p><img alt="Tracking resource" src="../images/2026/07/21.png"></p>
-<h3>Cloud Identity</h3>
+<p><img alt="Tracking resource" src="../images/2026/07/21.png" /></p>
+<h3 id="cloud-identity">Cloud Identity</h3>
 <p><strong>WHO</strong> is the people that allow to do <strong>WHAT</strong></p>
 <ul>
 <li>Cloud Identity: Manages the "WHO"</li>
 <li>IAM: Manages the "WHAT"</li>
 </ul>
 <p>Best practice is manage people with group for sure, not only in GCP. For example in Elasticsearch, we create a role called data-reader that has permission to read indices <code>kienlt-data-*</code>, then we add right user to that role, so we don't need to create multiple role for each user or remove user from that role when they are no longer needed, pretty common practice I believe!</p>
-<h3>Asset Inventory</h3>
+<h3 id="asset-inventory">Asset Inventory</h3>
 <p>Inventory of everything in your GCP. Is the central catalog for every single resource in yuor GCP Org.</p>
 <p>I remember when my boss ask me to create inventory of whole system on-premises, it would take shit load of time... But in GCP, there are already service for this shit!</p>
-<h3>Cloud Billing Account</h3>
+<h3 id="cloud-billing-account">Cloud Billing Account</h3>
 <p>A single billing account can pay for thoudsands of projects, centralizing financial control. And need to remember that billing accounts are "Separate" from projects in GCP (to use paid service, a project must be linked to an active cloud billing account so Google know where to send the fuckin' bill!)</p>
 <p>Ofc, like other public cloud providers, you are able to view the cost with labels...</p>
-<h3>Other shit</h3>
+<h3 id="other-shit">Other shit</h3>
 <ul>
 <li>We can setting billing exports to BigQuery to analyze the costs!</li>
 <li><a href="https://docs.cloud.google.com/bigquery/docs/running-queries"><strong>A BigQuery dry run</strong></a> allows you to estimate the number of bytes a query will scan, validate its syntax, and check object existence for free, without using query slots or processing data</li>
 </ul>
-<hr>
-<h1>3. IAM</h1>
+<hr />
+<h1 id="3-iam">3. IAM</h1>
 <p>Just little more detail of Cloud Identity I told above!</p>
-<h3>Impersonate</h3>
+<h3 id="impersonate">Impersonate</h3>
 <p>GCP IAM Impersonation example, impersonate GCP Service Account to test permission read storage. So you don't need to use serviceAccount Key Json (More fuckin' secure!)</p>
 <div class="highlight"><pre><span></span><code>gcloud<span class="w"> </span>storage<span class="w"> </span>ls<span class="w"> </span>gs://my-company-bucket<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--impersonate-service-account<span class="o">=</span>app-reader@my-project.iam.gserviceaccount.com
@@ -143,20 +143,20 @@
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>dev<span class="w"> </span>--as<span class="o">=</span>system:serviceaccount:dev:developer-sa
 </code></pre></div>
 
-<h3>Fine-grained accounts</h3>
+<h3 id="fine-grained-accounts">Fine-grained accounts</h3>
 <p>Format: </p>
 <div class="highlight"><pre><span></span><code><span class="o">[</span><span class="n">app-name</span><span class="o">]-[</span><span class="n">env</span><span class="o">]-[</span><span class="n">purpose</span><span class="o">]-</span><span class="n">sa</span>
 </code></pre></div>
 
 <p>And yes, fuckin' <strong>Least privileges</strong> please!</p>
-<h3>Workload vs Workforce Identity Federation</h3>
+<h3 id="workload-vs-workforce-identity-federation">Workload vs Workforce Identity Federation</h3>
 <ul>
 <li>Workforce: for human</li>
 <li>Workload: for machine</li>
 </ul>
-<hr>
-<h1>4. Compute &amp; Scaling</h1>
-<h3>VM Access</h3>
+<hr />
+<h1 id="4-compute-scaling">4. Compute &amp; Scaling</h1>
+<h3 id="vm-access">VM Access</h3>
 <p>We can login with IAM instead of SSH or User/Password. Actually behind the scene, GCP did many many thing it in:</p>
 <ul>
 <li><a href="https://docs.cloud.google.com/compute/docs/oslogin?authuser=1">OS Login</a></li>
@@ -170,30 +170,30 @@
 <li>NSS Modules</li>
 <li>PAM(Pluggable Authentication Modules) Modules: You will like me feel like the last word "Modules" is little duplicate, but actually they are widely used. For example: ATM machine -&gt; Automated Teller Machine machine, PDF format -&gt; Portable Document Format format, SQL language -&gt; Structured Query Language language. That is how we talk in common of software engineering I guess xD</li>
 </ul>
-<h3>Managed Instance Group (MIG)</h3>
+<h3 id="managed-instance-group-mig">Managed Instance Group (MIG)</h3>
 <p>Nothing to write here, they are almost exactly fuckin' same like Auto Scaling Group in AWS. LOL</p>
-<h3>Other shit</h3>
+<h3 id="other-shit_1">Other shit</h3>
 <ul>
 <li>Create Patch Deployment for patch management of fleet of computer engine, that will generate patch jobs</li>
 </ul>
-<hr>
-<h1>5. Google Kubernetes Engine (GKE)</h1>
+<hr />
+<h1 id="5-google-kubernetes-engine-gke">5. Google Kubernetes Engine (GKE)</h1>
 <p>This one worth to mention since this is new for me.</p>
-<p><img alt="GKE Standard vs Pilot" src="../images/2026/07/22.png"></p>
+<p><img alt="GKE Standard vs Pilot" src="../images/2026/07/22.png" /></p>
 <p>And yes, we have same thing in Azure + AWS:</p>
 <ul>
 <li>Azure: Azure Container Apps or AKS Automatic</li>
 <li>AWS: AWS Fargate (cho EKS / ECS)</li>
 </ul>
-<h3>K8S</h3>
+<h3 id="k8s">K8S</h3>
 <p>This courses include some basic K8S knowledge, great for newbie I believe!</p>
-<h3>Cluster Autoscaling</h3>
+<h3 id="cluster-autoscaling">Cluster Autoscaling</h3>
 <p>Reference: <a href="https://docs.cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler?authuser=1">About GKE cluster autoscaling</a></p>
 <div class="highlight"><pre><span></span><code>Cluster autoscaler makes these scaling decisions based on the resource requests (rather than actual resource utilization) of Pods running on that node pool&#39;s nodes. It periodically checks the status of Pods and nodes, and takes action
 </code></pre></div>
 
 <p>That is little different in GKE, so it will only add new nodes based pending (Unschedulable) pods, not CPU Utilization of Node. This works both for standard and autopilot cluster.</p>
-<h3>Workload Identity</h3>
+<h3 id="workload-identity">Workload Identity</h3>
 <p>It is the recommended, secure way for GKE pods to access GCP services. And we have same business logic in public cloud providers:</p>
 <ul>
 <li>AWS: IAM Roles for Service Accounts (IRSA)</li>
@@ -203,32 +203,32 @@
 <div class="highlight"><pre><span></span><code><span class="n">Workload</span><span class="w"> </span><span class="n">Identity</span><span class="w"> </span><span class="n">Federation</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">GKE</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">Google</span><span class="s1">&#39;s recommended and most secure method for GKE workloads to access Google Cloud APIs. You enable Workload Identity on the cluster, create a Kubernetes service account (KSA) in your namespace, create a Google Cloud IAM service account (GSA) with appropriate Cloud Storage permissions, then bind the KSA to the GSA using IAM policy bindings. When pods run using the annotated KSA, the GKE metadata server automatically exchanges the Kubernetes token for short-lived Google Cloud credentials, allowing the pod to authenticate to Cloud Storage APIs without any keys. This eliminates key management, follows least privilege (each workload gets distinct identity), provides full audit trails, and is explicitly recommended in CIS GKE Benchmarks.</span>
 </code></pre></div>
 
-<hr>
-<h1>6. Serverless with Cloud Run</h1>
-<h3>Cloud run services (Serverless containers)</h3>
+<hr />
+<h1 id="6-serverless-with-cloud-run">6. Serverless with Cloud Run</h1>
+<h3 id="cloud-run-services-serverless-containers">Cloud run services (Serverless containers)</h3>
 <ul>
 <li>GCP: Cloud Run</li>
 <li>AWS: Fargate or App Runner</li>
 <li>Azure: Azure Container Apps / App Service Container</li>
 </ul>
-<h3>Cloud run function (Serverless functions)</h3>
+<h3 id="cloud-run-function-serverless-functions">Cloud run function (Serverless functions)</h3>
 <ul>
 <li>GCP: Cloud Run Functions</li>
 <li>AWS: Lambda</li>
 <li>Azure: Azure Functions</li>
 </ul>
-<h3>Event Trigger for function</h3>
+<h3 id="event-trigger-for-function">Event Trigger for function</h3>
 <ul>
 <li>GCP: Eventarc or Pub/Sub</li>
 <li>AWS: EventBridge</li>
 <li>Azure: Azure Event Grid</li>
 </ul>
-<h3>Example with Eventarc</h3>
+<h3 id="example-with-eventarc">Example with Eventarc</h3>
 <p>This is fuckin' popular example that would appear in every tutorial, LOL. When user upload an image to Cloud Storage Bucket (S3), Eventarc will catch this event and trigger Cloud Run Function to handle (resize image, extract metadata of image and write to somewhere?)</p>
 <p>Another example would to mention: Pub/Sub will related to decoupling services (using Eventarc). Also remember, there is no fuckin' persistant data in Cloud Run Service (But mount NFS or publish data to Cloud Storage are fine xD)</p>
-<hr>
-<h1>7. Cloud Storage</h1>
-<h3>Storage Classes</h3>
+<hr />
+<h1 id="7-cloud-storage">7. Cloud Storage</h1>
+<h3 id="storage-classes">Storage Classes</h3>
 <p>Bucket name must be globally unique. We have some storage classes like others but almost just name different, LOL:</p>
 <ul>
 <li>Standard (Hot)</li>
@@ -237,13 +237,13 @@
 <li>Archive (Cold)</li>
 </ul>
 <p>And for early deletion fee. The author explained pretty well and easy to understand in this picture:</p>
-<p><img alt="Cloud storage plan" src="../images/2026/07/23.png"></p>
+<p><img alt="Cloud storage plan" src="../images/2026/07/23.png" /></p>
 <p>And there is little different in retrieval time of GCP vs AWS/Azure:</p>
 <ul>
 <li>Archive in GCP allow you able to read data from archive class</li>
 <li>AWS (S3 Glacier) / Azure (Archive Tier): ask you to wait 3 to 12 hours to retrieve data after "request restore".</li>
 </ul>
-<h3>Policies &amp; Permissions</h3>
+<h3 id="policies-permissions">Policies &amp; Permissions</h3>
 <ul>
 <li>Signed URL in GCP (GCS) = SAS Token in Azure (Blob Storage) = Presigned URL in AWS (S3)</li>
 <li>Delete encryption key = permanent data loss, because there is no way to decrypt files storage in bucket without key (But we have Pending deletion for key and soft delete for files in bucket. So don't worry if accident happens xD).</li>
@@ -253,20 +253,20 @@
 <li>And even with Automation, remember minimum durations: Nearline(30 days), Coldline(90 days), Archive (365 days)</li>
 <li>Uniform Bucket-Level access is the standard, no need legacy ACL and required to use feature like Managed Folders. And enabling Uniform bucket-level access will disable existing object-level ACLs.</li>
 </ul>
-<h3>Storage Transfer Service (STS)</h3>
+<h3 id="storage-transfer-service-sts">Storage Transfer Service (STS)</h3>
 <ul>
 <li>Use when needed for large transfers into GCS: support Cloud to Cloud or On-premises to Cloud</li>
 <li>Able to run directly or via scheduling, run synchronization and have data integrity for validation.</li>
 </ul>
-<hr>
-<h1>8. Managed Databases in GCP</h1>
-<h3>Relational (SQL) options</h3>
+<hr />
+<h1 id="8-managed-databases-in-gcp">8. Managed Databases in GCP</h1>
+<h3 id="relational-sql-options">Relational (SQL) options</h3>
 <ul>
 <li>Cloud SQL: Mysql, PostgreSQL, SQL Server...</li>
 <li>AlloyDB: PostgreSQL by GCP, not fuckin' open source xD, like Aurora in AWS.</li>
 <li>Cloud Spanner: horizontally scalable Relational (SQL) database (AWS doesn't have a direct equivalent, but think of it as managed CockroachDB/YugabyteDB). Offers a signature SLA of 99.999% for multi-region (and 99.99% for single-region).</li>
 </ul>
-<h3>NoSQL options</h3>
+<h3 id="nosql-options">NoSQL options</h3>
 <ul>
 <li>Firestore: Document database, like MongoDB. Perfect for mobile/web apps</li>
 <li>Bigtable: Wide-column NoSQL database, same as Apache HBase or Apache Cassandra. (Clickhouse/TiFlash are OLAP column stores, their actual GCP equivalent is BigQuery, not Bigtable).</li>
@@ -281,47 +281,47 @@
 </li>
 <li>MemoryStore: Redis/Memcached</li>
 </ul>
-<h3>Backup &amp; Recovery</h3>
+<h3 id="backup-recovery">Backup &amp; Recovery</h3>
 <p>Point-in-Time Recovery (PITR): A new database instance is created with a new IP address; the original instance remains untouched.</p>
-<h3>High availability and read replicas</h3>
+<h3 id="high-availability-and-read-replicas">High availability and read replicas</h3>
 <p>It is just like AWS, nothing specials...</p>
-<h3>Other shit</h3>
+<h3 id="other-shit_2">Other shit</h3>
 <ul>
 <li>Want a centralized view -&gt; go for Database Center</li>
 <li><a href="https://cloud.google.com/products/alloydb?hl=en">AlloyDB</a> is a fully managed PostgreSQL-compatible database service for your most demanding enterprise database workloads </li>
 </ul>
-<h3>Cloud Managed Services vs. Open-Source Equivalents</h3>
+<h3 id="cloud-managed-services-vs-open-source-equivalents">Cloud Managed Services vs. Open-Source Equivalents</h3>
 <p>Not related but I want to put here, everytime I see services in AWS/GCP/Azure, I often search if there is same solution but <strong>open-source</strong>. So here is my little research:</p>
 <ul>
 <li>GCP Cloud Spanner = CockroachDB/YugabyteDB (Distributed SQL).</li>
 <li>AWS DynamoDB = ScyllaDB (Distributed NoSQL, Key-Value/Documents.</li>
 <li>Cloud-Native RDBMS: Aurora (AWS) &amp; AlloyDB (GCP). Not multi-write, still using single master (primary node for write).</li>
 </ul>
-<hr>
-<h1>9. Big Data &amp; Analytics Platforms</h1>
+<hr />
+<h1 id="9-big-data-analytics-platforms">9. Big Data &amp; Analytics Platforms</h1>
 <p>OLAP workloads. We are able to upload dataset with .csv example and query based column in csv file. They are split by ","</p>
 <p>Dataflow is Google Cloud's fully managed, serverless service for processing large amounts of data. For example Raw Data (CSV,logs...) --&gt; Dataflow (Transform, filter, aggregate) --&gt; Clean Data (Ready for BigQuery)</p>
-<hr>
-<h1>10. Managed file storage</h1>
+<hr />
+<h1 id="10-managed-file-storage">10. Managed file storage</h1>
 <p>Filestore = managed NFS, for Linux. NetApp (NFS or SMB file services, for Window mostly!)</p>
-<hr>
-<h1>11. Virtual Private Cloud (VPC) Networking</h1>
+<hr />
+<h1 id="11-virtual-private-cloud-vpc-networking">11. Virtual Private Cloud (VPC) Networking</h1>
 <p>Unlike AWS or Azure, a Google VPC is <strong>Global</strong> by default, remember this!</p>
-<h3>Subnet</h3>
+<h3 id="subnet">Subnet</h3>
 <ul>
 <li>Subnets are regional resources. THey are Cross-zone (meaning a single subnet spans all zones within its region!)</li>
 <li>When IPs in subnet run out of IP, zero downtime expansion, I meaning it is able to change the subnet mask (ex: from /24 to /20) without fuckin' downtime! And yeah expand is easy but not able to shrink xD, like volumes.</li>
 </ul>
-<h3>Cloud NGFW</h3>
+<h3 id="cloud-ngfw">Cloud NGFW</h3>
 <p>It is fuckin' stateful, meaning you only need to allow ingress and it will allow egress for you! No need a seprate egress rule.</p>
-<h3>Shared VPC</h3>
+<h3 id="shared-vpc">Shared VPC</h3>
 <p>No need to talk about VPC Peering but shared VPC, one network, many projects:</p>
 <ul>
 <li>Multiple projects share the same VPC</li>
 <li>Centralized control by networking team</li>
 <li>One set of firewall rules for all</li>
 </ul>
-<h3>Private access to google services private</h3>
+<h3 id="private-access-to-google-services-private">Private access to google services private</h3>
 <p>How to enable:</p>
 <ul>
 <li>Per subnet setting (you can turn it on in subnet setting)</li>
@@ -343,31 +343,31 @@
 <li>Auto scals to handle traffic from thousands of VMs.</li>
 <li>Outbound only.</li>
 </ul>
-<hr>
-<h1>12. Load Balancer</h1>
+<hr />
+<h1 id="12-load-balancer">12. Load Balancer</h1>
 <p>Nothing to talk much about this section, remember the different between 2 tiers: Standard vs Premium Tier:</p>
 <ul>
 <li>Standard Tier: cheaper, more hops, can not use global LB.</li>
 <li>Premium Tier: cost more, less hops (which mean faster, low latency).</li>
 </ul>
-<h3>Other shit</h3>
+<h3 id="other-shit_3">Other shit</h3>
 <ul>
 <li>When autoscaling based on Load Balancing capacity, you must first define the capacity (Maximum RPS) in the Backend Service. Once defined, configure the autoscaler to maintain a target utilization percentage (commonly 80%) of that capacity.</li>
 </ul>
-<hr>
-<h1>13. Infrastructure as Code (IaC)</h1>
+<hr />
+<h1 id="13-infrastructure-as-code-iac">13. Infrastructure as Code (IaC)</h1>
 <p>LOL, first time I heard about <strong>Config Connector</strong>, you have k8s cluster running in GCP, manifest with kind Storage Bucket, kubectl apply that fuckin' file, config connector calls GCP APIs.</p>
 <p>And <strong>Fabric FAST</strong>, ready-made landing zone for new org with pre-built terraform modules, GCP best practices, secure by default, production-ready.</p>
-<h3>AI Tooling</h3>
+<h3 id="ai-tooling">AI Tooling</h3>
 <ul>
 <li>Application Design Center: is a console tool that converts plain language descriptions into visual architecture diagrams and deployable Terraform code, using pre-approved, best-practice templates.</li>
 <li>Cloud Hub: is your unified operational dashboard, giving a single view of application health, alerts, costs, security findings, and quota usage across all your deployed applications.</li>
 </ul>
-<hr>
-<h1>14.Monitoring</h1>
+<hr />
+<h1 id="14monitoring">14.Monitoring</h1>
 <p>Nothing much worht to mention here, except Gemini Cloud, since we sent logs, metrics to GCP and simply we only need ask Gemini what is the fuckin' wrong, it's accuracy about 70-80%. Pretty sure we need to validate it before apply xD</p>
-<hr>
-<h1>15. Logging</h1>
+<hr />
+<h1 id="15-logging">15. Logging</h1>
 <p>GCP Cloud logging = AWS CloudWatch Logs.</p>
 <ul>
 <li>Log Buckets are container within cloud logging. <strong>_Required</strong> bucket stores for 400 days and can not be disabled. <strong>_Default</strong> bucket stores for 30 days by default,retention can be optimized.</li>
@@ -380,10 +380,10 @@
 <li>Cloud Profiler is for code performance: Finding cpu/memory leaks in specific functions.</li>
 <li>Query Insight helps you identify slow SQL queries in Cloud SQL based on CPU and latency.</li>
 </ul>
-<h3>Log Router Sink</h3>
+<h3 id="log-router-sink">Log Router Sink</h3>
 <p>Log Router sinks are the standard method for exporting GCP logs to supported destinations for long-term storage and analysis.</p>
-<hr>
-<h1>16. Other shit</h1>
+<hr />
+<h1 id="16-other-shit">16. Other shit</h1>
 <ul>
 <li><strong>Gemini Enterprise Agent Platform Workbench</strong> instances are Jupyter notebook-based development environments on Google Cloud. No need to manage infrastructure.</li>
 <li>Google Cloud's <strong>Cloud Hub</strong> is a free central dashboard that unifies operations data, health metrics, maintenance events, and cost optimization insights for your cloud applications and projects. It lets you monitor resources across different projects in one single place.</li>

@@ -78,8 +78,8 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p><img alt="alt text" src="images/2025/12/13.png"></p>
-<h1>Sections</h1>
+            <p><img alt="alt text" src="images/2025/12/13.png" /></p>
+<h1 id="sections">Sections</h1>
 <ul>
 <li>Introduction</li>
 <li>What is CGOA?</li>
@@ -90,21 +90,21 @@
 <li>Exam Day Strategy</li>
 <li>Conclusion</li>
 </ul>
-<hr>
-<h1>Introduction</h1>
+<hr />
+<h1 id="introduction">Introduction</h1>
 <ul>
 <li>GitOps is not something new, we have been talking or using them in most of our daily works. It can be considered for common pattern for CD (Continuous Delivery).</li>
 <li>We gonna go through concepts of GitOps and prepare for the Certified GitOps Associate (CGOA) with mock exams.</li>
 </ul>
-<hr>
-<h1>What is CGOA?</h1>
+<hr />
+<h1 id="what-is-cgoa">What is CGOA?</h1>
 <ul>
 <li>Who is it for: The ideal minimally qualified candidate has been in a supporting role within a Platform Engineering team working with Cloud Native technologies for approx 6-12 months. You can take <a href="https://trainingportal.linuxfoundation.org/courses/cloud-native-platform-associate-cnpa">more detail here</a> xD</li>
 <li>Key features: Quiz Exam, Vendor-Neutral (You don't need to stick with vendor). Cost $250 (Discount could up to 50%) and 90 minutes exam.</li>
 <li>Highlight: It is mindset for run and maintain modern system, not only using tool in a blind way.</li>
 </ul>
-<hr>
-<h1>The 4 GitOps Principles</h1>
+<hr />
+<h1 id="the-4-gitops-principles">The 4 GitOps Principles</h1>
 <p>This section carries a very high score and forms the basis for reasoning in all other questions:</p>
 <ul>
 <li>First, Declarative - The entire desired state of your system is expressed declarative (what you want, not how to get there). You define infrastructure and applications as code using declarative formats like YAML/JSON, describing the end state rather than the steps to achieve it.</li>
@@ -112,14 +112,14 @@
 <li>Third, Pulled Automatically - Software agents automatically pull the desired state declarations from Git and apply them to your system. This pull-based model is more secure than traditional push-based deployments since your cluster credentials never leave your environment.</li>
 <li>Continuously Reconciled - Agents continuously observe the actual system state and compare it with the desired state in Git. When drift is detected (manual changes, failures, etc.), the system automatically reconciles by bringing the actual state back in line with what's declared in Git, ensuring self-healing capabilities.</li>
 </ul>
-<hr>
-<h1>Understanding the Architecture</h1>
+<hr />
+<h1 id="understanding-the-architecture">Understanding the Architecture</h1>
 <ul>
 <li>Pull vs Push Model: This is not hard, you only need to understand pull is pull from git repo and push is something like kubectl apply, it is easy, isn't it? xD</li>
 <li>The Reconciliation Loop: Let's take an example from ArgoCD, you update manifest in git repo, ArgoCD watch and detects changes auto (with auto-sync mode) then pull the changes and apply to K8s cluster. This is heart of GitOps!</li>
 </ul>
-<hr>
-<h1>Key Topics to Master</h1>
+<hr />
+<h1 id="key-topics-to-master">Key Topics to Master</h1>
 <p>Git Strategies: Mono-repo vs Multi-repo, manage environment (branch vs directory)</p>
 <ul>
 <li>Mono-repo keeps all applications and environments in a single repository, making it easier to manage shared configurations and enforce consistency.</li>
@@ -141,8 +141,8 @@
 <li>How It Works? Lets me provide a simple keyword: Argo Rollout (ArgoCD) or Flagger (FluxCD). I do recommend you to read <a href="https://medium.com/@kienlt.qn/canary-blue-green-deployment-with-argo-rollouts-fc9b34535f18">this article</a> xD</li>
 <li>Clarification - GitOps doesn't inherently "automate" progressive delivery - it provides the foundation (declarative state, automation, reconciliation) that progressive delivery tools build upon.</li>
 </ul>
-<hr>
-<h1>My Secret Weapon: The Mock Exams</h1>
+<hr />
+<h1 id="my-secret-weapon-the-mock-exams">My Secret Weapon: The Mock Exams</h1>
 <p>Okay, real talk—want to know how I actually passed the CGOA? It wasn't just reading docs or watching videos. It was grinding through practice questions until the concepts clicked.</p>
 <p>Why They Work?:</p>
 <ul>
@@ -152,14 +152,14 @@
 <li>I took these exams multiple times, reviewed every explanation (even for questions I got right), and by exam day, I walked in feeling like I'd already seen every curveball they could throw.</li>
 </ul>
 <p>Check out the full mock exam course here: <a href="https://www.udemy.com/course/crushing-the-certified-gitops-associate-cgoa-exam/">Crushing the Certified GitOps Associate (CGOA) Exam</a></p>
-<hr>
-<h1>Exam Day Strategy</h1>
+<hr />
+<h1 id="exam-day-strategy">Exam Day Strategy</h1>
 <ul>
 <li>Read questions, eliminate wrong options.</li>
 <li>Think with principle: "Single Source of Truth" (git is truth xD)</li>
 </ul>
-<hr>
-<h1>Conclusion</h1>
+<hr />
+<h1 id="conclusion">Conclusion</h1>
 <ul>
 <li>This is not hard, it is all about mindset and understanding GitOps principle!</li>
 <li>Please try the mock exam to increase your confidence before exam!</li>

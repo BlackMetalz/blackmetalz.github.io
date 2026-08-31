@@ -88,8 +88,8 @@
 <p>In the previous two posts, we performed a deep dive into Docker's <a href="https://blackmetalz.github.io/demystifying-docker-networking-a-deep-dive-into-bridge-veth.html">Ingress Flow</a> and <a href="https://blackmetalz.github.io/demystifying-docker-networking-outbound-traffic-the-masquerade-magic.html">Egress Flow</a> by manually tinkering with <code>veth</code>, <code>iptables</code>, and <code>nsenter</code>.</p>
 <p>But in Kubernetes (K8s), thousands of Pods are created and destroyed continuously. Kubelet can't afford the manual labor of typing those commands for every single Pod. It needs an "assistant" to do the heavy lifting. That assistant is the <strong>CNI (Container Network Interface)</strong>.</p>
 <p>Today, we will learn about CNI by running it manually (by hand), without using any sophisticated CNI suites like Calico or Cilium.</p>
-<hr>
-<h2>1. Prerequisites (Setup)</h2>
+<hr />
+<h2 id="1-prerequisites-setup">1. Prerequisites (Setup)</h2>
 <p>To follow this lab on <strong>Ubuntu 24.04</strong>, you will need:</p>
 <ol>
 <li><strong>Docker:</strong> The foundational engine to run Kind.</li>
@@ -109,11 +109,11 @@ kind<span class="w"> </span>version<span class="w"> </span>
 sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>jq<span class="w"> </span>-y
 </code></pre></div>
 
-<hr>
-<h2>2. Decoding the "Core" Concepts</h2>
-<h3>What exactly is CNI?</h3>
+<hr />
+<h2 id="2-decoding-the-core-concepts">2. Decoding the "Core" Concepts</h2>
+<h3 id="what-exactly-is-cni">What exactly is CNI?</h3>
 <p>It's not a background service. CNI is actually just a <strong>Specification</strong> that defines how the Container Runtime (like containerd) calls <strong>binaries</strong> located in <code>/opt/cni/bin/</code>. The runtime feeds it JSON, the Binary executes the task and returns the result.</p>
-<h3>IPAM (IP Address Management)</h3>
+<h3 id="ipam-ip-address-management">IPAM (IP Address Management)</h3>
 <p>If the main CNI Plugin (like <code>bridge</code> or <code>ptp</code>) handles "plugging the wires," then <strong>IPAM</strong> handles the "ledgering" and decides <em>which</em> IP to use.</p>
 <ul>
 <li>It manages IP ranges (Subnets), tracking which IPs are assigned and which are free.</li>
@@ -121,11 +121,11 @@ sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </
 <li>The IPAM plugin returns an available IP back to the main plugin, and the main plugin then applies that IP to the container's network interface.</li>
 <li>In this lab, <code>host-local</code> stores its IP database simply as text files on the Node's disk (in <code>/var/lib/cni/networks/</code>).</li>
 </ul>
-<h3>crictl - When Docker is no longer "The Boss"</h3>
+<h3 id="crictl-when-docker-is-no-longer-the-boss">crictl - When Docker is no longer "The Boss"</h3>
 <p>Modern K8s uses the <strong>CRI (Container Runtime Interface - API between Kubelet and Container Runtime)</strong> — usually <code>containerd</code>. <code>crictl</code> is the tool to interact with the CRI. We use it here because Kind runs K8s nodes using containerd inside Docker.</p>
-<hr>
-<h2>3. Lab: Running CNI by Hand (Manual Execution)</h2>
-<h3>Step 1: Spin up a "Naked" Cluster</h3>
+<hr />
+<h2 id="3-lab-running-cni-by-hand-manual-execution">3. Lab: Running CNI by Hand (Manual Execution)</h2>
+<h3 id="step-1-spin-up-a-naked-cluster">Step 1: Spin up a "Naked" Cluster</h3>
 <p>Delete the old cluster (if any), since I have only 1 kind cluster for testing purpose. </p>
 <div class="highlight"><pre><span></span><code>root@kienlt-lab-utilities:~#<span class="w"> </span>kind<span class="w"> </span>get<span class="w"> </span>clusters
 kind
@@ -169,7 +169,7 @@ CONTAINER<span class="w"> </span>ID<span class="w">   </span>IMAGE<span class="w
 e174ac300eb9<span class="w">   </span>kindest/node:v1.35.0<span class="w">   </span><span class="s2">&quot;/usr/local/bin/entr…&quot;</span><span class="w">   </span><span class="m">4</span><span class="w"> </span>minutes<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">4</span><span class="w"> </span>minutes<span class="w">   </span><span class="m">127</span>.0.0.1:43013-&gt;6443/tcp<span class="w">   </span>kind-control-plane
 </code></pre></div>
 
-<h3>Step 2: Create a Pod — Witness the Scheduler's "Helplessness"</h3>
+<h3 id="step-2-create-a-pod-witness-the-schedulers-helplessness">Step 2: Create a Pod — Witness the Scheduler's "Helplessness"</h3>
 <p>Try to create a Pod <strong>WITHOUT</strong> any CNI config:</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>run<span class="w"> </span>nginx-test<span class="w"> </span>--image<span class="o">=</span>nginx
 </code></pre></div>
@@ -196,9 +196,9 @@ kind-control-plane<span class="w">   </span>NotReady<span class="w">   </span>co
 </code></pre></div>
 
 <p><strong>Why?</strong> No CNI config → The <a href="https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#installation">Container Runtime is responsible for loading CNI plugins</a>. In this setup, containerd finds no valid config in its CNI conf directory and reports <code>NetworkReady=false</code> via the CRI Status API → Kubelet polls this status and marks the Node as <code>NotReady</code> → The Node is tainted with <code>node.kubernetes.io/not-ready:NoSchedule</code> → The Scheduler cannot place the Pod on any Node → The Pod stays in <code>Pending</code> indefinitely.</p>
-<h3>Step 3: Call the CNI Binary Manually — Exposing the Truth</h3>
+<h3 id="step-3-call-the-cni-binary-manually-exposing-the-truth">Step 3: Call the CNI Binary Manually — Exposing the Truth</h3>
 <p>Now, we will prove that CNI is just: <strong>a binary + environment variables + JSON via stdin</strong>. No magic involved. But let's me show you complete flows first (made with Mermaid)</p>
-<p><img alt="cni flow" src="./images/2026/03/07.png"></p>
+<p><img alt="cni flow" src="./images/2026/03/07.png" /></p>
 <p>Enter the Kind node:</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>kind-control-plane<span class="w"> </span>bash
 </code></pre></div>
@@ -347,7 +347,7 @@ root@kind-control-plane:/#<span class="w"> </span>cat<span class="w"> </span>/va
 <span class="m">10</span>.249.0.2
 </code></pre></div>
 
-<h3>Step 4: "Rescuing" the Pod — Letting CRI Execute CNI</h3>
+<h3 id="step-4-rescuing-the-pod-letting-cri-execute-cni">Step 4: "Rescuing" the Pod — Letting CRI Execute CNI</h3>
 <p>Now, let's create a CNI config file so the Container Runtime (CRI) knows which plugin to load:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Still inside the Kind node</span>
 mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/cni/net.d/
@@ -395,7 +395,7 @@ local-path-storage<span class="w">   </span>local-path-provisioner-67b8995b4b-qx
 
 <p>So, we know where the IP is assigned from!</p>
 <p><strong>The Pod lives! Here is what just happened:</strong></p>
-<p><img alt="cni flow" src="./images/2026/03/08.png"></p>
+<p><img alt="cni flow" src="./images/2026/03/08.png" /></p>
 <ol>
 <li>The Container Runtime (containerd) successfully loads a valid CNI config and reports <code>NetworkReady</code> to Kubelet.</li>
 <li>Kubelet updates the Node's status to <strong><code>Ready</code></strong> (removing the <code>NotReady</code> taint).</li>
@@ -424,8 +424,8 @@ nsenter<span class="w"> </span>-t<span class="w"> </span><span class="nv">$PID</
 </code></pre></div>
 
 <p>The Container Runtime (containerd) did <strong>exactly</strong> what we did manually in Step 3: set env vars → piped JSON into the binary → received the IP.</p>
-<hr>
-<h2>4. Summary &amp; The "Gotcha"</h2>
+<hr />
+<h2 id="4-summary-the-gotcha">4. Summary &amp; The "Gotcha"</h2>
 <table>
 <thead>
 <tr>
@@ -448,13 +448,13 @@ nsenter<span class="w"> </span>-t<span class="w"> </span><span class="nv">$PID</
 </tr>
 </tbody>
 </table>
-<h3>The Truth about the Flow</h3>
+<h3 id="the-truth-about-the-flow">The Truth about the Flow</h3>
 <ul>
 <li><strong>CNI</strong> isn't magic; it's a coordination between a <strong>Binary</strong> (execution) and <strong>JSON</strong> (declaration).</li>
 <li><strong>IPAM</strong> (<code>host-local</code>) manages IP addresses — stored directly on disk at <code>/var/lib/cni/networks/</code> to prevent conflicts.</li>
 <li><strong>Kubelet vs Container Runtime:</strong> It's important to note that <strong>Kubelet does NOT call the CNI binary itself</strong>. Kubelet tells the CRI (Container Runtime, like containerd) to create the Pod sandbox. It is the <strong>CRI</strong> that reads <code>/etc/cni/net.d/</code>, sets the environment variables, and executes the CNI binary.</li>
 </ul>
-<h3>The Big Disclaimer</h3>
+<h3 id="the-big-disclaimer">The Big Disclaimer</h3>
 <p>Does this setup mean our cluster network is fully functional? <strong>Absolutely not!</strong></p>
 <p>Look closely at the output from earlier: at that moment, <code>coredns</code> is <code>0/1 Running</code>, and <code>local-path-provisioner</code> is in <code>Error</code>.</p>
 <p>By using the bare <code>ptp</code> plugin, we only proved that the CRI can call a CNI plugin and assign an IP to a Pod locally on this node. That does <strong>not</strong> prove the full Kubernetes networking stack is healthy.</p>
@@ -462,8 +462,8 @@ nsenter<span class="w"> </span>-t<span class="w"> </span><span class="nv">$PID</
 <p>On top of that, if we had multiple nodes, <strong>Pods on different nodes still cannot communicate with each other</strong> because there is no cross-node routing or overlay network configured.</p>
 <p>To get a fully functional K8s network where system components thrive and cross-node traffic succeeds, we need a more complete networking stack: a CNI implementation that satisfies the Kubernetes network model plus the components responsible for Service handling and cross-node traffic.</p>
 <p>Understanding how CNI operates "by hand" will take the fear out of networking errors. In the next post, we'll see how a real-world CNI like <strong>Cilium</strong> levels up this game using <strong>eBPF</strong>.</p>
-<hr>
-<h2>5. Simple flow for creating a pod</h2>
+<hr />
+<h2 id="5-simple-flow-for-creating-a-pod">5. Simple flow for creating a pod</h2>
 <p>When we submit a request to create a pod to the API Server:</p>
 <ul>
 <li>Kubelet watch API Server via watch mechanism, see the fucking pod has been scheduled to Kubelet's node, then pull the pod spec to handle pod creation.</li>
@@ -472,8 +472,8 @@ nsenter<span class="w"> </span>-t<span class="w"> </span><span class="nv">$PID</
 <li>The runtime passes config (JSON) via stdin + network info via env vars.</li>
 <li>CNI binary processes the config, sets up networking, and returns the result via stdout (JSON).</li>
 </ul>
-<hr>
-<h2>References:</h2>
+<hr />
+<h2 id="references">References:</h2>
 <ul>
 <li><a href="https://www.cni.dev/docs/spec/#cni-operations">CNI Operations Spec</a></li>
 <li><a href="https://kind.sigs.k8s.io/docs/user/quick-start/">Kind Quick Start Guide</a></li>

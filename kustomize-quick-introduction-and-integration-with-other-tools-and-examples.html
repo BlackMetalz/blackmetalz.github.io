@@ -79,11 +79,11 @@
         <div class="span8 offset2 article-content">
             
             <p>Kustomize introduces a template-free way to customize application configuration that simplifies the use of off-the-shelf applications. Now, built into <code>kubectl</code> as <code>apply -k</code>.</p>
-<h1>The feature of Kustomize you may want to hear most: Environment-specific Customization</h1>
+<h1 id="the-feature-of-kustomize-you-may-want-to-hear-most-environment-specific-customization">The feature of Kustomize you may want to hear most: Environment-specific Customization</h1>
 <ul>
 <li>It allows you to overlay configuration changes for different environments (e.g., dev, staging, production) without duplicating YAML files. Other features i don't mention in this post xD</li>
 </ul>
-<h3>Example Kustomize Directory Structure</h3>
+<h3 id="example-kustomize-directory-structure">Example Kustomize Directory Structure</h3>
 <div class="highlight"><pre><span></span><code>app/
 │── base/
 │   ├── deployment.yaml
@@ -103,11 +103,11 @@
         ├── deployment-patch.yaml
 </code></pre></div>
 
-<h3>Example Kustomize Configurations</h3>
+<h3 id="example-kustomize-configurations">Example Kustomize Configurations</h3>
 <ul>
 <li>I will use Strategic Merge Patch for this example! For more examples you can take a look at refs or here: https://github.com/kubernetes-sigs/kustomize/tree/master/examples</li>
 </ul>
-<h5><strong>Base data:</strong></h5>
+<h5 id="base-data"><strong>Base data:</strong></h5>
 <ul>
 <li><code>app/base/kustomization.yaml</code></li>
 </ul>
@@ -139,7 +139,7 @@
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
 </code></pre></div>
 
-<h5><strong>Dev Overlays:</strong></h5>
+<h5 id="dev-overlays"><strong>Dev Overlays:</strong></h5>
 <ul>
 <li><code>app/overlays/dev/kustomization.yaml</code></li>
 </ul>
@@ -161,7 +161,7 @@
 <span class="w">  </span><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w">  </span><span class="c1"># Override the base replica count for dev</span>
 </code></pre></div>
 
-<h5><strong>Output example:</strong></h5>
+<h5 id="output-example"><strong>Output example:</strong></h5>
 <div class="highlight"><pre><span></span><code><span class="c1"># kustomize build app/overlays/dev/</span>
 <span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps/v1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Deployment</span>
@@ -184,7 +184,7 @@
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">containerPort</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080</span>
 </code></pre></div>
 
-<h5><strong>Rest for Prod / Staging</strong></h5>
+<h5 id="rest-for-prod-staging"><strong>Rest for Prod / Staging</strong></h5>
 <ul>
 <li>You just need to make a new file and directory in the correct folders:</li>
 </ul>
@@ -200,7 +200,7 @@ app/overlays/staging/kustomization.yaml
 <li>So you don't need to duplicate your manifest.</li>
 <li>The configuration is easier to modify for each environment.</li>
 </ul>
-<h1>It seems clean but is it useable, any examples?</h1>
+<h1 id="it-seems-clean-but-is-it-useable-any-examples">It seems clean but is it useable, any examples?</h1>
 <p>Yes, Deploy with ArgoCD. Here is an example</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argoproj.io/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Application</span>
@@ -222,8 +222,8 @@ app/overlays/staging/kustomization.yaml
 <span class="w">      </span><span class="nt">selfHeal</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </code></pre></div>
 
-<h1>Oh, I see, but how do you generate those manifests in kustomize format? Don't tell me that you are doing them manually.</h1>
-<h3>Here are some ways to generate them:</h3>
+<h1 id="oh-i-see-but-how-do-you-generate-those-manifests-in-kustomize-format-dont-tell-me-that-you-are-doing-them-manually">Oh, I see, but how do you generate those manifests in kustomize format? Don't tell me that you are doing them manually.</h1>
+<h3 id="here-are-some-ways-to-generate-them">Here are some ways to generate them:</h3>
 <ul>
 <li>Using kubectl Commands:</li>
 </ul>
@@ -261,7 +261,7 @@ kubectl create service clusterip my-app --tcp=80:80 --dry-run=client -o yaml &gt
 <ul>
 <li>To be honest, they are only visible for simple applications, for complex applications you may want to use <a href="https://github.com/google/jsonnet">jsonnet</a>. I will write a post for the <code>jsonnet</code> tutorial later if i have enough time and knowledge.</li>
 </ul>
-<h1>Validator</h1>
+<h1 id="validator">Validator</h1>
 <ul>
 <li>Some good uses of kustomize are to validate yaml and make sure they are in a good format before applying them into the k8s cluster (although there are too many ways to do this xD)</li>
 <li>Example manifest error:</li>
@@ -281,14 +281,14 @@ szdas
 Error: invalid Kustomization: yaml: line 7: could not find expected &#39;:&#39;
 </code></pre></div>
 
-<h1>Conclusion:</h1>
+<h1 id="conclusion">Conclusion:</h1>
 <ul>
 <li>For more details and a completed tutorial, please visit those links in <code>Ref</code>.</li>
 <li>Kustomize is a great to to avoid duplicates in the yaml manifest.</li>
 <li>It can be combined with other tools like Helm and ArgoCD to make GitOps deployment.</li>
 <li>This post is a place i saved my learning progress to not forget easily.</li>
 </ul>
-<h1>Ref</h1>
+<h1 id="ref">Ref</h1>
 <ul>
 <li><a href="https://kustomize.io/">https://kustomize.io/</a></li>
 <li><a href="https://github.com/kubernetes-sigs/kustomize/tree/master">https://github.com/kubernetes-sigs/kustomize/tree/master</a></li>

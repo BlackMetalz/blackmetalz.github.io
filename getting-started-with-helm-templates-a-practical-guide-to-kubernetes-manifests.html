@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Introduction to Helm Templates</h1>
+            <h1 id="introduction-to-helm-templates">Introduction to Helm Templates</h1>
 <p>Helm Templates generate manifest files, which are YAML-formatted resource descriptions that Kubernetes can understand.</p>
 <p>Helm benefits:</p>
 <ul>
@@ -86,9 +86,9 @@
 <li>GitOps Friendly – Enables storing fully rendered Kubernetes manifests in Git for version control and auditing.</li>
 <li>Troubleshooting – Assists in debugging templates before deploying to detect syntax or logic errors.</li>
 </ul>
-<hr>
-<h1>Basic Helm Template Structure</h1>
-<h3><strong>1. Describe the structure of a Helm chart</strong></h3>
+<hr />
+<h1 id="basic-helm-template-structure">Basic Helm Template Structure</h1>
+<h3 id="1-describe-the-structure-of-a-helm-chart"><strong>1. Describe the structure of a Helm chart</strong></h3>
 <p>A Helm chart is a collection of files that describe a Kubernetes application. The structure of a Helm chart typically looks like this:</p>
 <div class="highlight"><pre><span></span><code><span class="k">my</span><span class="o">-</span><span class="n">chart</span><span class="o">/</span>
 <span class="err">│──</span><span class="w"> </span><span class="n">charts</span><span class="o">/</span><span class="w">               </span><span class="c1"># Subcharts (dependencies) can be placed here</span>
@@ -107,9 +107,9 @@
 <span class="err">│──</span><span class="w"> </span><span class="o">.</span><span class="n">helmignore</span><span class="w">           </span><span class="c1"># Files to ignore when packaging the chart</span>
 </code></pre></div>
 
-<h3><strong>2. Purpose of the templates/ Directory</strong></h3>
+<h3 id="2-purpose-of-the-templates-directory"><strong>2. Purpose of the templates/ Directory</strong></h3>
 <p>The templates/ directory contains the Kubernetes resource templates that Helm will process before deploying. These files are written in YAML but use Go templating (<code>{{ ... }}</code>) to inject dynamic values</p>
-<h3><strong>3. Common Template Files</strong></h3>
+<h3 id="3-common-template-files"><strong>3. Common Template Files</strong></h3>
 <p><code>deployment.yaml</code>:</p>
 <ul>
 <li>Defines the Deployment resource, which manages the application pods.</li>
@@ -241,10 +241,10 @@ helm status app-demo
 <span class="o">.....</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">rest</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">notes</span><span class="o">.</span><span class="n">txt</span><span class="w"> </span><span class="o">....</span>
 </code></pre></div>
 
-<hr>
-<h1><strong>Go Templating in Helm: Basic Syntax, Variables, and Common Functions</strong></h1>
+<hr />
+<h1 id="go-templating-in-helm-basic-syntax-variables-and-common-functions"><strong>Go Templating in Helm: Basic Syntax, Variables, and Common Functions</strong></h1>
 <p>Helm templates use <strong>Go templating language</strong>, which provides powerful features like <strong>variables, functions, loops, and conditionals</strong> to dynamically generate Kubernetes manifests.</p>
-<h3><strong>1. Basic Syntax</strong></h3>
+<h3 id="1-basic-syntax"><strong>1. Basic Syntax</strong></h3>
 <p>Helm templates use <strong><code>{{ ... }}</code></strong> to enclose Go template expressions.</p>
 <p>A template file can include:</p>
 <ul>
@@ -266,8 +266,8 @@ helm status app-demo
 <li><code>.Release.Name</code> = Helm release name.</li>
 <li><code>.Values.replicaCount | default 1</code> = Use <code>.Values.replicaCount</code>, or default to <code>1</code>.</li>
 </ul>
-<hr>
-<h3><strong>2. Variables</strong></h3>
+<hr />
+<h3 id="2-variables"><strong>2. Variables</strong></h3>
 <p><strong>Defining Variables</strong></p>
 <ul>
 <li>Use <code>{{ $var := value }}</code> to define a variable.</li>
@@ -317,8 +317,8 @@ helm status app-demo
 </tr>
 </tbody>
 </table>
-<hr>
-<h3><strong>3. Common Functions</strong></h3>
+<hr />
+<h3 id="3-common-functions"><strong>3. Common Functions</strong></h3>
 <p>Helm provides several built-in functions.</p>
 <p><strong>(A) <code>default</code> – Provide a Default Value</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">.Values.replicaCount | default 2</span><span class="w"> </span><span class="p p-Indicator">}}</span>
@@ -327,7 +327,7 @@ helm status app-demo
 <ul>
 <li>If <code>replicaCount</code> is <strong>not set</strong>, it defaults to <code>2</code>.</li>
 </ul>
-<hr>
+<hr />
 <p><strong>(B) <code>include</code> – Reuse Other Templates</strong>
 The <code>include</code> function allows you to reuse defined templates from <code>_helpers.tpl</code>.</p>
 <ul>
@@ -351,7 +351,7 @@ The <code>include</code> function allows you to reuse defined templates from <co
 <li><code>include "common.labels" .</code> injects the labels from <code>_helpers.tpl</code>.</li>
 <li><code>nindent 4</code> ensures proper YAML indentation.</li>
 </ul>
-<hr>
+<hr />
 <p><strong>(C) <code>tpl</code> – Render Strings as Templates</strong>
 The <code>tpl</code> function processes dynamic content inside values.</p>
 <ul>
@@ -370,7 +370,7 @@ The <code>tpl</code> function processes dynamic content inside values.</p>
 <ul>
 <li><code>tpl</code> evaluates <code>{{ .Release.Name }}</code> <strong>inside</strong> the string from <code>values.yaml</code>.</li>
 </ul>
-<hr>
+<hr />
 <p><strong>(D) <code>toYaml</code> – Convert Objects to YAML</strong>
 Use <code>toYaml</code> when dealing with structured values.</p>
 <ul>
@@ -393,7 +393,7 @@ Use <code>toYaml</code> when dealing with structured values.</p>
 <ul>
 <li><code>toYaml</code> converts the YAML list into properly formatted output.</li>
 </ul>
-<hr>
+<hr />
 <p><strong>(E) <code>quote</code> and <code>nquote</code> – Handle Strings Properly</strong>
 - <code>quote</code> wraps values in <strong>double quotes</strong>.
 - <code>nquote</code> removes surrounding quotes.</p>
@@ -411,7 +411,7 @@ Use <code>toYaml</code> when dealing with structured values.</p>
 <span class="w">  </span><span class="nt">API_URL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;http://example.com&quot;</span>
 </code></pre></div>
 
-<hr>
+<hr />
 <p><strong>(F) <code>required</code> – Ensure a Value is Set</strong>
 If a value is missing, <code>required</code> returns an error.</p>
 <p>Example:</p>
@@ -422,8 +422,8 @@ If a value is missing, <code>required</code> returns an error.</p>
 <div class="highlight"><pre><span></span><code><span class="n">Error</span><span class="o">:</span><span class="w"> </span><span class="n">template</span><span class="o">:</span><span class="w"> </span><span class="n">missing</span><span class="w"> </span><span class="n">required</span><span class="w"> </span><span class="n">value</span><span class="o">:</span><span class="w"> </span><span class="n">An</span><span class="w"> </span><span class="n">image</span><span class="w"> </span><span class="n">repository</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">required</span><span class="o">!</span>
 </code></pre></div>
 
-<hr>
-<h3><strong>4. Conditionals (<code>if</code>, <code>else</code>, <code>with</code>)</strong></h3>
+<hr />
+<h3 id="4-conditionals-if-else-with"><strong>4. Conditionals (<code>if</code>, <code>else</code>, <code>with</code>)</strong></h3>
 <p><strong>(A) <code>if</code> Statement</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">{{</span><span class="nv">- if .Values.ingress.enabled</span><span class="w"> </span><span class="p p-Indicator">}}</span>
 <span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">networking.k8s.io/v1</span>
@@ -436,7 +436,7 @@ If a value is missing, <code>required</code> returns an error.</p>
 <ul>
 <li>If <code>ingress.enabled</code> is <code>true</code>, this block is included.</li>
 </ul>
-<hr>
+<hr />
 <p><strong>(B) <code>else</code> Statement</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">replicas</span><span class="p">:</span><span class="w"> </span>
 <span class="p p-Indicator">{{</span><span class="nv">- if .Values.replicaCount</span><span class="w"> </span><span class="p p-Indicator">}}</span>
@@ -449,7 +449,7 @@ If a value is missing, <code>required</code> returns an error.</p>
 <ul>
 <li>If <code>replicaCount</code> exists, it uses the value; otherwise, it defaults to <code>1</code>.</li>
 </ul>
-<hr>
+<hr />
 <p><strong>(C) <code>with</code> Statement (Scoped Variables)</strong>
 <code>with</code> changes the scope to a nested value.</p>
 <div class="highlight"><pre><span></span><code><span class="p p-Indicator">{{</span><span class="nv">- with .Values.service</span><span class="w"> </span><span class="p p-Indicator">}}</span>
@@ -463,8 +463,8 @@ If a value is missing, <code>required</code> returns an error.</p>
 </code></pre></div>
 
 <p>Instead of writing <code>.Values.service.name</code> and <code>.Values.service.port</code>, we <strong>scope</strong> it under <code>with</code>.</p>
-<hr>
-<h3><strong>5. Loops (<code>range</code>)</strong></h3>
+<hr />
+<h3 id="5-loops-range"><strong>5. Loops (<code>range</code>)</strong></h3>
 <p><strong>(A) Loop Over a List</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">containers</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">{{</span><span class="nv">- range .Values.containers</span><span class="w"> </span><span class="p p-Indicator">}}</span>
@@ -489,7 +489,7 @@ If a value is missing, <code>required</code> returns an error.</p>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;redis&quot;</span>
 </code></pre></div>
 
-<hr>
+<hr />
 <p><strong>(B) Loop Over a Dictionary</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">{{</span><span class="nv">- range $key</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">$value</span><span class="w"> </span><span class="p p-Indicator">:</span><span class="nv">= .Values.config</span><span class="w"> </span><span class="p p-Indicator">}}</span>
@@ -512,8 +512,8 @@ If a value is missing, <code>required</code> returns an error.</p>
 <ul>
 <li>In this case <code>toYaml</code> works well also xD</li>
 </ul>
-<hr>
-<h1>Useful commands for developing templates</h1>
+<hr />
+<h1 id="useful-commands-for-developing-templates">Useful commands for developing templates</h1>
 <ul>
 <li>Show the template of the specific file only:</li>
 </ul>
@@ -526,13 +526,13 @@ If a value is missing, <code>required</code> returns an error.</p>
 <div class="highlight"><pre><span></span><code>helm lint
 </code></pre></div>
 
-<h1>Helm template repo:</h1>
+<h1 id="helm-template-repo">Helm template repo:</h1>
 <ul>
 <li><a href="https://github.com/BlackMetalz/k8s-manifest/tree/main/helm-templates/templates">https://github.com/BlackMetalz/k8s-manifest/tree/main/helm-templates/templates</a></li>
 <li>Include some examples with configMap, namespace, secret...</li>
 <li>Examples can be found in <a href="https://github.com/BlackMetalz/k8s-manifest/blob/main/helm-templates/values.yaml">values.yaml</a></li>
 </ul>
-<h1>Use case with helm templates</h1>
+<h1 id="use-case-with-helm-templates">Use case with helm templates</h1>
 <p>Well, we can do a lot of things with helm templates.</p>
 <p>Use scenarios: Become a  general template of all helm applications - Each values file is an application in an environment
 - Each values file is a application in an environment</p>
@@ -578,7 +578,7 @@ If a value is missing, <code>required</code> returns an error.</p>
 <ul>
 <li>With this, we can do a lot of custom modifications to the manifest without manually changing too much. That is why i think helm templates rock and are easier to begin with than jsonnet xD</li>
 </ul>
-<h1>Ref</h1>
+<h1 id="ref">Ref</h1>
 <ul>
 <li>https://helm.sh/docs/chart_template_guide/</li>
 <li>https://www.xenonstack.com/blog/helm-kubernetes/</li>

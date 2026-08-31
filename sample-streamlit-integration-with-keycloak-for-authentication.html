@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Introduction</h1>
+            <h1 id="introduction">Introduction</h1>
 <p>In a scenario you have to write report for your boss, you imagine that your boss needs a dashboard, and you are not Data Engineer or Developer. You would be going to vibe code and you have streamlit as keyword. After that you need to show your report to your boss, but your boss is a security guy, he/she ask you to add authentication to your report. So you need to add authentication to your report. Basic auth is not enough even if it is only for internal users. Then you have an existing Keycloak cluster in your company. So you just need to create new realm in Keycloak for your application then make your application integrate with Keycloak. This article will show you how to do it and for me to remember xD</p>
 <p>We will use <strong>Keycloak</strong> as the identity provider and <strong>Streamlit</strong> as the application. We will use <strong>OIDC</strong> (OpenID Connect) protocol to integrate them.</p>
 <p>Step lists:</p>
@@ -89,16 +89,16 @@
 <li>Create sample streamlit application</li>
 <li>Integrate them</li>
 </ul>
-<hr>
-<h1>Prerequisites</h1>
+<hr />
+<h1 id="prerequisites">Prerequisites</h1>
 <ul>
 <li>Docker &amp; Docker Compose</li>
 <li>Python 3.12 (verified with this demo)</li>
 </ul>
-<h1>Sample Streamlit Application</h1>
+<h1 id="sample-streamlit-application">Sample Streamlit Application</h1>
 <p>Just clone this ready to run repo and follow the README.md to run it: <a href="https://github.com/BlackMetalz/streamlit-authentication-with-keycloak-sample">https://github.com/BlackMetalz/streamlit-authentication-with-keycloak-sample</a></p>
 <p>Hmm, last step <code>streamlit run</code> will fail because we haven't set up Keycloak yet. So we need to set up Keycloak first xD</p>
-<h1>Keycloak Setup</h1>
+<h1 id="keycloak-setup">Keycloak Setup</h1>
 <p>For a god damn easy way, you will want to use docker compose to run Keycloak. Source here: <a href="https://github.com/BlackMetalz/docker-compose/blob/main/keycloak/docker-compose.yml">Keycloak26+Postgres18</a></p>
 <div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">postgres</span><span class="p">:</span>
@@ -141,20 +141,20 @@
 </code></pre></div>
 
 <p>You can simply use it by running command: <code>docker compose up</code>. Then you will have a ready Keycloak instance at <code>http://localhost:8080</code>.</p>
-<hr>
-<h3>Create new realm for testing purpose</h3>
+<hr />
+<h3 id="create-new-realm-for-testing-purpose">Create new realm for testing purpose</h3>
 <p>Who test at <code>master</code> realm? No one, not even me xD</p>
 <p>URL to create new realm: http://localhost:8080/admin/master/console/#/master/add-realm</p>
-<p><img alt="Add new realm" src="images/2026/02/keycloak-streamlit/01.png"></p>
-<h3>Create new client</h3>
+<p><img alt="Add new realm" src="images/2026/02/keycloak-streamlit/01.png" /></p>
+<h3 id="create-new-client">Create new client</h3>
 <p>URL: http://localhost:8080/admin/master/console/#/kienlt-demo/clients/add-client</p>
 <p>Image for easy to follow:</p>
-<p><img alt="Add new client" src="images/2026/02/keycloak-streamlit/02.png"></p>
-<p><img alt="Add new client" src="images/2026/02/keycloak-streamlit/03.png"></p>
-<p><img alt="Add new client" src="images/2026/02/keycloak-streamlit/04.png"></p>
+<p><img alt="Add new client" src="images/2026/02/keycloak-streamlit/02.png" /></p>
+<p><img alt="Add new client" src="images/2026/02/keycloak-streamlit/03.png" /></p>
+<p><img alt="Add new client" src="images/2026/02/keycloak-streamlit/04.png" /></p>
 <p><strong>Note</strong>: In the screenshot, the Valid redirect URI is incorrect. Please set it to <code>http://localhost:8501/*</code></p>
-<h3>Copy client secret and paste to .env file</h3>
-<p><img alt="Copy client secret" src="images/2026/02/keycloak-streamlit/05.png"></p>
+<h3 id="copy-client-secret-and-paste-to-env-file">Copy client secret and paste to .env file</h3>
+<p><img alt="Copy client secret" src="images/2026/02/keycloak-streamlit/05.png" /></p>
 <div class="highlight"><pre><span></span><code><span class="gh">#</span> Set to &quot;false&quot; to disable Keycloak authentication (guest mode)
 AUTH_ENABLED=false
 
@@ -166,15 +166,15 @@ KEYCLOAK_CLIENT_SECRET=your-streamlit-app-secret
 REDIRECT_URI=http://localhost:8501
 </code></pre></div>
 
-<h3>Test login directly</h3>
+<h3 id="test-login-directly">Test login directly</h3>
 <p>Holy shiet, create a test account first!</p>
-<p><img alt="Create test account" src="images/2026/02/keycloak-streamlit/07.png"></p>
-<p><img alt="Create test account" src="images/2026/02/keycloak-streamlit/08.png"></p>
+<p><img alt="Create test account" src="images/2026/02/keycloak-streamlit/07.png" /></p>
+<p><img alt="Create test account" src="images/2026/02/keycloak-streamlit/08.png" /></p>
 <p>Ok, time to log in. It will pop up the default Keycloak login page. And here is the result after logging in:</p>
-<p><img alt="Logged" src="images/2026/02/keycloak-streamlit/10.png"></p>
+<p><img alt="Logged" src="images/2026/02/keycloak-streamlit/10.png" /></p>
 <p>Success! Welcome to my dashboard xD</p>
-<hr>
-<h1>Conclusion</h1>
+<hr />
+<h1 id="conclusion">Conclusion</h1>
 <p>This is just a solution that fits a specific scenario, that is I don't want to manage any external database, the purpose is just for internal users, not for public. Simple and easy to implement since it needed to ship this dashboard fast with requirements changing daily....</p>
 
 
@@ -200,7 +200,7 @@ REDIRECT_URI=http://localhost:8501
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article">
                 <li><a href="https://blackmetalz.github.io/tags.html#code-ref">code
-                    <span class="superscript">4</span>
+                    <span class="superscript">5</span>
 </a></li>
             </ul>
 <h4>Contact</h4>

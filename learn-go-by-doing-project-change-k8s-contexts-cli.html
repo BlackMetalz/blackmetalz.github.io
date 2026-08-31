@@ -78,31 +78,31 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <hr>
-<h1>Learn Go from trash/pet project xD</h1>
-<h3>Purpose</h3>
+            <hr />
+<h1 id="learn-go-from-trashpet-project-xd">Learn Go from trash/pet project xD</h1>
+<h3 id="purpose">Purpose</h3>
 <p>Learn by building some project, use AI as less as I can with purpose to learn, not to cheat. This is not Python where I already have little experience and Go is zero!</p>
 <p>Not really trying to focus on syntax but trying a lot to understand its logic!</p>
-<h3>The knowledge I write in this article is pretty basic. Are you out of your mind, or do you have no self-respect to share this?</h3>
+<h3 id="the-knowledge-i-write-in-this-article-is-pretty-basic-are-you-out-of-your-mind-or-do-you-have-no-self-respect-to-share-this">The knowledge I write in this article is pretty basic. Are you out of your mind, or do you have no self-respect to share this?</h3>
 <p>Haaaa, who cares? I write this for myself, for my memory, for my future self to look back and laugh at how stupid I was!</p>
-<h3>Repo to throw the bricks/criticize xD</h3>
+<h3 id="repo-to-throw-the-brickscriticize-xd">Repo to throw the bricks/criticize xD</h3>
 <p><a href="https://github.com/BlackMetalz/ChgK8sCtx/">https://github.com/BlackMetalz/ChgK8sCtx/</a></p>
-<hr>
-<h1>Some screenshots</h1>
+<hr />
+<h1 id="some-screenshots">Some screenshots</h1>
 <p>List Context with KUBECONFIG env:</p>
-<p><img alt="alt text" src="images/2026/02/04.png"></p>
+<p><img alt="alt text" src="images/2026/02/04.png" /></p>
 <p>Help flag:</p>
-<p><img alt="alt text" src="images/2026/02/01.png"></p>
+<p><img alt="alt text" src="images/2026/02/01.png" /></p>
 <p>Interaction:</p>
-<p><img alt="alt text" src="images/2026/02/02.png"></p>
+<p><img alt="alt text" src="images/2026/02/02.png" /></p>
 <p>Switch direct + check current context:</p>
-<p><img alt="alt text" src="images/2026/02/06.png"></p>
+<p><img alt="alt text" src="images/2026/02/06.png" /></p>
 <p>Switch direct with non exist context:</p>
-<p><img alt="alt text" src="images/2026/02/05.png"></p>
+<p><img alt="alt text" src="images/2026/02/05.png" /></p>
 <p>Fuzzy Search:</p>
-<p><img alt="alt text" src="images/2026/02/03.png"></p>
-<h1>Day 1</h1>
-<h3>Go function return</h3>
+<p><img alt="alt text" src="images/2026/02/03.png" /></p>
+<h1 id="day-1">Day 1</h1>
+<h3 id="go-function-return">Go function return</h3>
 <p>TLDR copied from: <a href="https://www.w3schools.com/go/go_function_returns.php">https://www.w3schools.com/go/go_function_returns.php</a></p>
 <div class="highlight"><pre><span></span><code><span class="nx">If</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">want</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">function</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">value</span><span class="p">,</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">need</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">define</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="k">type</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">value</span><span class="w"> </span><span class="p">(</span><span class="nx">such</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nx">int</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">etc</span><span class="p">),</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">also</span><span class="w"> </span><span class="nx">use</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">keyword</span><span class="w"> </span><span class="nx">inside</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">function</span><span class="p">:</span>
 </code></pre></div>
@@ -113,9 +113,9 @@
 <div class="highlight"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">ReadFile</span><span class="p">(</span><span class="nx">fsys</span><span class="w"> </span><span class="nx">FS</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 </code></pre></div>
 
-<h3>Blank Identifier</h3>
+<h3 id="blank-identifier">Blank Identifier</h3>
 <p>It's a bit like writing to the Unix /dev/null file. Read more details here: <a href="https://go.dev/doc/effective_go#blank">https://go.dev/doc/effective_go#blank</a></p>
-<h3>PromptUI</h3>
+<h3 id="promptui">PromptUI</h3>
 <p>Someone will tell you that why you don't build a lib, but I'm noob AF, know how to use lib correctly already is a success for me. So for the need that list context and select I will use it. </p>
 <p>Example is pretty clear to understand how it works by just look at syntax!</p>
 <p><a href="https://github.com/manifoldco/promptui/blob/master/_examples/select/main.go">https://github.com/manifoldco/promptui/blob/master/_examples/select/main.go</a></p>
@@ -145,13 +145,13 @@ Use<span class="w"> </span>the<span class="w"> </span>arrow<span class="w"> </sp
 Your<span class="w"> </span>selection:<span class="w">  </span>staging-cluster
 </code></pre></div>
 
-<hr>
-<h1>Day 2</h1>
+<hr />
+<h1 id="day-2">Day 2</h1>
 <p>Nothing much for day 2</p>
-<h3>Go run command</h3>
+<h3 id="go-run-command">Go run command</h3>
 <p>For the common scenario we have seen, we would use command to execute the Go program: <code>go run main.go</code>, but if there is multiple go files, we would use <code>go run .</code> (it means build and run package in current folder, not all go files, it will skip file like <code>_test.go</code>)</p>
-<h1>Day 3</h1>
-<h3>Join path</h3>
+<h1 id="day-3">Day 3</h1>
+<h3 id="join-path">Join path</h3>
 <p>I remember my first approach, it was just hardcoded string combined with <code>/</code>. But it worked only in my machine xD, not cross-platform if in the future I want to implement it for windows!. </p>
 <p>It is the best for handle <code>/</code> or <code>\</code> (windows).
 Example implement:</p>
@@ -168,13 +168,13 @@ Example implement:</p>
 <span class="p">}</span>
 </code></pre></div>
 
-<h3>Wrap errors</h3>
+<h3 id="wrap-errors">Wrap errors</h3>
 <ul>
 <li>In Day 3, I clearly did not understand how error should be wrapped, it took me about 3 hours to figure it out!</li>
 <li>So I would pick consistent error wrapping style. Error should be wrapped with <strong>fmt.Errorf("context: %w", err)</strong> and it will be returned inside function. </li>
 </ul>
 <p>Example: </p>
-<p><img alt="alt text" src="images/2026/02/07.png"></p>
+<p><img alt="alt text" src="images/2026/02/07.png" /></p>
 <ul>
 <li>And if we know that type is error, we can do something more like how we would handle if an error appears!
 Example:</li>
@@ -217,7 +217,7 @@ Example:</li>
 <span class="p">}</span>
 </code></pre></div>
 
-<h3>Pointer</h3>
+<h3 id="pointer">Pointer</h3>
 <p>This shit even took me several days to figure it out! I'm able to live coding this small example without any help xD.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
 
@@ -253,18 +253,18 @@ Example:</li>
 <span class="cm">*/</span>
 </code></pre></div>
 
-<hr>
-<h1>Day 4</h1>
-<h3>Interaction with K8S API to list namespaces</h3>
+<hr />
+<h1 id="day-4">Day 4</h1>
+<h3 id="interaction-with-k8s-api-to-list-namespaces">Interaction with K8S API to list namespaces</h3>
 <ul>
 <li>use <a href="https://github.com/kubernetes/client-go">client-go</a>, k8s client lib to interact with K8s API</li>
 <li>create client from kubeconfig file</li>
 <li>get all namespace with <code>clientset.CoreV1().Namespaces().List()</code></li>
 </ul>
 <p>It is pretty basic for me since I already done it in the past with this trash project xD <a href="https://github.com/BlackMetalz/KubeNotifyPlus">https://github.com/BlackMetalz/KubeNotifyPlus</a></p>
-<hr>
-<h1>Day 5</h1>
-<h3>Using Cobra CLI</h3>
+<hr />
+<h1 id="day-5">Day 5</h1>
+<h3 id="using-cobra-cli">Using Cobra CLI</h3>
 <p><a href="https://github.com/spf13/cobra">cobra-cli</a>, I remember everytime I'm working on CLI with Go, I always chose cobra no matter how. LOL</p>
 <p>Pretty useful, a lot of built-in feature. No need to write from scratch, great lib! Like this example below, we just need to define command flags then helper will auto generated</p>
 <div class="highlight"><pre><span></span><code>go<span class="w"> </span>run<span class="w"> </span>.<span class="w"> </span>ns<span class="w"> </span>--help
@@ -289,18 +289,18 @@ Flags:
 </code></pre></div>
 
 <p>And remember Cobra CLI doesn't support multiple character shorthand, I mean shorthand <code>-</code> only available to <code>single character</code>, it is convention of POSIX/GNU, not limitation of Cobra, Cobra just follow that convention (Thanks Claude xD). So we need to use <code>--</code> instead of <code>-</code> for those flags xD</p>
-<hr>
-<h1>Day 6</h1>
-<h3>Fuzzy search</h3>
+<hr />
+<h1 id="day-6">Day 6</h1>
+<h3 id="fuzzy-search">Fuzzy search</h3>
 <p>I used <code>sahilm/fuzzy</code> library for fuzzy search in context lists</p>
-<h3>Switch to previous context</h3>
+<h3 id="switch-to-previous-context">Switch to previous context</h3>
 <p>Implement this feature is not hard for me, I just needed to write down a flag to store previous context, and then use it to switch back to previous context. Not a big deal since in the past I have worked with this!</p>
-<hr>
-<h1>Day 7</h1>
+<hr />
+<h1 id="day-7">Day 7</h1>
 <p>No idea what I learned</p>
-<hr>
-<h1>Day 8</h1>
-<h3>Higher-order function</h3>
+<hr />
+<h1 id="day-8">Day 8</h1>
+<h3 id="higher-order-function">Higher-order function</h3>
 <p>Little hard to understand, this is harder than pointer at this time for me xD</p>
 <p>So higher-order function is function that take function as param or return function.</p>
 <p>Hmm, so they called higher-order function because it is higher than normal function? LOL.... No, from what I copied, it works in higher layer, instead of working with data, it works with function!</p>
@@ -343,7 +343,7 @@ Flags:
 <span class="p">}</span>
 </code></pre></div>
 
-<h3>Generics</h3>
+<h3 id="generics">Generics</h3>
 <p>Reducing code duplication is what I understand!</p>
 <p>Without generics you have to write a lot of code for each type</p>
 <div class="highlight"><pre><span></span><code><span class="kd">func</span><span class="w"> </span><span class="nx">removeUserByName</span><span class="p">(</span><span class="nx">items</span><span class="w"> </span><span class="p">[]</span><span class="nx">User</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="nx">User</span><span class="w"> </span><span class="p">{</span>
@@ -380,8 +380,8 @@ Flags:
 </code></pre></div>
 
 <p>The main disadvantages of generics are complicated syntax, harder to debug. And only use when you have to handle multiple types. If you write generic for single type, it is just over-engineering!</p>
-<hr>
-<h1>Special section for Higher-order function and Generics (update Feb 21,2026)</h1>
+<hr />
+<h1 id="special-section-for-higher-order-function-and-generics-update-feb-212026">Special section for Higher-order function and Generics (update Feb 21,2026)</h1>
 <p>As you can see in Day 8 I already described them, but I want to write more about it! So let me bring an example</p>
 <div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
 
@@ -441,8 +441,8 @@ Flags:
 </ul>
 <p>Does it always requires struct to have field <strong>Name</strong>? No, it is just need that param function must be <strong>return string</strong>, field in struct doesn't matter!</p>
 <p>Conclusion: Compiler only care about <strong>getStr func(Type) string</strong> must return <strong>string</strong></p>
-<hr>
-<h1>Conclusion</h1>
+<hr />
+<h1 id="conclusion">Conclusion</h1>
 <ul>
 <li>Approach by <code>KISS</code>: Keep it simple, stupid!</li>
 <li>Finished feature matter, finish first, make it work first before starting to do any over-engineering like refactor/rewrite/make code cleaner/beautiful.</li>
@@ -471,7 +471,7 @@ Flags:
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article">
                 <li><a href="https://blackmetalz.github.io/tags.html#code-ref">code
-                    <span class="superscript">4</span>
+                    <span class="superscript">5</span>
 </a></li>
             </ul>
 <h4>Contact</h4>

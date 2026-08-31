@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>What is VictoriaMetrics(VM)?</h1>
+            <h1 id="what-is-victoriametricsvm">What is VictoriaMetrics(VM)?</h1>
 <ul>
 <li>VictoriaMetrics is a free open-source time series database (TSDB) and monitoring solution, designed to collect, store and process real-time metrics</li>
 <li>My company used VM to replace Prometheus for high availability and better performance.</li>
@@ -88,9 +88,9 @@
 </ul>
 </li>
 </ul>
-<hr>
-<h1>Small business with VictoriaMetrics single-mode</h1>
-<h3>Docker compose</h3>
+<hr />
+<h1 id="small-business-with-victoriametrics-single-mode">Small business with VictoriaMetrics single-mode</h1>
+<h3 id="docker-compose">Docker compose</h3>
 <ul>
 <li>Yes, using docker compose for fast deployment and easy to control.</li>
 <li>Docker compose file:</li>
@@ -218,7 +218,7 @@ templates:
 <ul>
 <li>I guess i don't need to write how to start this container!</li>
 </ul>
-<h3>Insert and test query</h3>
+<h3 id="insert-and-test-query">Insert and test query</h3>
 <ul>
 <li>Insert script, run this, and wait like 2-3 minutes to fill up some metrics</li>
 </ul>
@@ -238,14 +238,14 @@ templates:
 <ul>
 <li>Query with VM ui at <code>http://localhost:8428/vmui</code></li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/23th_1.png"></p>
-<h3>Scrape Target</h3>
+<p><img alt="alt text" src="images/2025/03/23th_1.png" /></p>
+<h3 id="scrape-target">Scrape Target</h3>
 <ul>
 <li>We have defined our target need to scrape metrics in the file <code>prometheus.yml</code></li>
 <li>Let's check the target at the endpoint: http://localhost:8428/api/v1/targets</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/23th_2.png"></p>
-<h3>Rule and Notify</h3>
+<p><img alt="alt text" src="images/2025/03/23th_2.png" /></p>
+<h3 id="rule-and-notify">Rule and Notify</h3>
 <ul>
 <li>Let's make a sample test to trigger our rules:</li>
 </ul>
@@ -255,20 +255,20 @@ templates:
 <ul>
 <li>After a little time, it will appear in vmalert UI and will be forwarded to Alertmanager</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/23th_3.png"></p>
-<p><img alt="alt text" src="images/2025/03/23th_4.png"></p>
+<p><img alt="alt text" src="images/2025/03/23th_3.png" /></p>
+<p><img alt="alt text" src="images/2025/03/23th_4.png" /></p>
 <ul>
 <li>How is it displayed in Telegram? (I know the format is ugly, but it is a demo xD)</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/23th_5.png"></p>
-<h3>Conclusion single mode</h3>
+<p><img alt="alt text" src="images/2025/03/23th_5.png" /></p>
+<h3 id="conclusion-single-mode">Conclusion single mode</h3>
 <ul>
 <li>There are many features of VM but i want to keep this simple and short for single-node since we still have Cluster VM to go.</li>
 <li>I included vmalert and alertmanager for the complete stack!</li>
 </ul>
-<hr>
-<h1>Large business with VictoriaMetrics cluster mode</h1>
-<h3>Introduction</h3>
+<hr />
+<h1 id="large-business-with-victoriametrics-cluster-mode">Large business with VictoriaMetrics cluster mode</h1>
+<h3 id="introduction">Introduction</h3>
 <ul>
 <li><strong>vmstorage</strong>: Save time-series data</li>
 <li><strong>vminsert</strong>: receive metrics from client and write to <strong>vmstorage</strong></li>
@@ -277,7 +277,7 @@ templates:
 <li><strong>vmalert</strong>: evaluate alerting rules and send notifications to <strong>alertmanager</strong></li>
 <li><strong>alertmanager</strong>: handle alerts sent by <strong>vmalert</strong> and manage notifications</li>
 </ul>
-<h3>Installation</h3>
+<h3 id="installation">Installation</h3>
 <p>For this mode, i prefer to use a dedicated host/ virtual machine to install VictoriaMetrics. I will use 3 nodes to setup this cluster.</p>
 <ul>
 <li>
@@ -307,7 +307,7 @@ tcp6<span class="w">       </span><span class="m">0</span><span class="w">      
 udp6<span class="w">       </span><span class="m">0</span><span class="w">      </span><span class="m">0</span><span class="w"> </span>:::9094<span class="w">                 </span>:::*<span class="w">                                </span><span class="m">491238</span>/alertmanager<span class="w"> </span>
 </code></pre></div>
 
-<h3>Port access and information</h3>
+<h3 id="port-access-and-information">Port access and information</h3>
 <ul>
 <li>
 <p><strong>vmstorage</strong>: This has 3 ports</p>
@@ -336,11 +336,11 @@ Here is an example write into <strong>vmstorage</strong> via <strong>vminsert</s
 <div class="highlight"><pre><span></span><code>http://vm-node1:8481/select/0/prometheus/vmui
 </code></pre></div>
 
-<p><img alt="alt text" src="images/2025/03/23th_6.png"></p>
+<p><img alt="alt text" src="images/2025/03/23th_6.png" /></p>
 <ul>
 <li><strong>vmagent</strong>: This will show all active targets and another useful api like showing all targets in json format. The endpoint will be: <code>http://vm-node1:8429/targets</code></li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/23th_7.png"></p>
+<p><img alt="alt text" src="images/2025/03/23th_7.png" /></p>
 <ul>
 <li>
 <p><strong>vmalert</strong>: Endpoint will be: <code>http://vm-node1:8880/vmalert/alerts</code> . Same as vmalert in single mode</p>
@@ -349,7 +349,7 @@ Here is an example write into <strong>vmstorage</strong> via <strong>vminsert</s
 <p><strong>alertmanager</strong>: <code>http://vm-node1:9093</code>. Same as single-node but in cluster mode xD</p>
 </li>
 </ul>
-<h3>Conclusion cluster mode</h3>
+<h3 id="conclusion-cluster-mode">Conclusion cluster mode</h3>
 <ul>
 <li>This is a simple article for VictoriaMetrics like how it works in single mode and cluster mode</li>
 <li>I'm so lazy at this time and so this article still lacks of things below:<ul>
@@ -361,8 +361,8 @@ Here is an example write into <strong>vmstorage</strong> via <strong>vminsert</s
 </li>
 <li>There are many features i still don't know about VictoriaMetrics, i will write more articles in case i need to learn to use xD</li>
 </ul>
-<hr>
-<h1>Ref</h1>
+<hr />
+<h1 id="ref">Ref</h1>
 <ul>
 <li><a href="https://victoriametrics.com/">https://victoriametrics.com/</a></li>
 </ul>

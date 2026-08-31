@@ -79,11 +79,11 @@
         <div class="span8 offset2 article-content">
             
             <p>In the first part, I will talk about Kubernetes Service, Ingress, and Service Discovery</p>
-<h1>Kubernetes Services!</h1>
+<h1 id="kubernetes-services">Kubernetes Services!</h1>
 <p>In Kubernetes, a Service is a method for exposing a network application that is running as one or more Pods in your cluster.
 So how many types of Services? There are 4 types:</p>
-<p><img alt="2025-01-17" src="images/2025/01/17th_1.png"></p>
-<h3>Service type, there are 4 types of service:</h3>
+<p><img alt="2025-01-17" src="images/2025/01/17th_1.png" /></p>
+<h3 id="service-type-there-are-4-types-of-service">Service type, there are 4 types of service:</h3>
 <ol>
 <li>
 <p><strong>ClusterIP</strong>: Exposes the Service on a cluster-internal IP. Choosing this value makes the Service only reachable from within the cluster. This is the default ServiceType ( if you don't define the type, it will be ClusterIP)</p>
@@ -102,8 +102,8 @@ So how many types of Services? There are 4 types:</p>
 <p><strong>ExternalName</strong>: Maps the Service to the contents of the externalName field (e.g. <code>my.database.example.com</code>), by returning a CNAME record with its value.</p>
 </li>
 </ol>
-<h3>Let's dive deep into each section with the use case and example with the manifest so you can imagine it easily!</h3>
-<h4>1. <strong>ClusterIP</strong>:</h4>
+<h3 id="lets-dive-deep-into-each-section-with-the-use-case-and-example-with-the-manifest-so-you-can-imagine-it-easily">Let's dive deep into each section with the use case and example with the manifest so you can imagine it easily!</h3>
+<h4 id="1-clusterip">1. <strong>ClusterIP</strong>:</h4>
 <p>I assume you have Redis pod already and you want to access it from the backend server, The backend server is in the same k8s cluster.</p>
 <ul>
 <li>Manifest demo: </li>
@@ -133,7 +133,7 @@ So how many types of Services? There are 4 types:</p>
 </li>
 <li>The DNS service in Kubernetes (like CoreDNS or kube-dns) is responsible for resolving this FQDN to the appropriate Service. When you create a Service, Kubernetes automatically creates a corresponding DNS record. This allows Pods in the cluster to access the Service using the FQDN.</li>
 </ul>
-<h4>2. <strong>NodePort</strong>:</h4>
+<h4 id="2-nodeport">2. <strong>NodePort</strong>:</h4>
 <p>From my experience, this is the most i used when i began with k8s service expose ( that's a time i had no idea about ingress xD), so how i used it.<br></p>
 <p>Service can be accessed from any node directly with <code>&lt;node-ip&gt;:&lt;port&gt;</code>. This is mostly used for quick access without running port-forward or any other action and ofc you have to allow access port from the server to your IP address, i mean the firewall!</p>
 <ul>
@@ -149,11 +149,11 @@ So how many types of Services? There are 4 types:</p>
 
 <ul>
 <li>Used it as a target for Upstream in Kong - API Gateway <br>
-<img alt="alt text" src="images/2025/01/17th_2.png"></li>
+<img alt="alt text" src="images/2025/01/17th_2.png" /></li>
 </ul>
-<h4>3. LoadBalancer:</h4>
+<h4 id="3-loadbalancer">3. LoadBalancer:</h4>
 <p>At this time, i don't use K8s in the cloud yet. I will update you when i finish my lab with EKS/GKE later.</p>
-<h4>4. ExternalName</h4>
+<h4 id="4-externalname">4. ExternalName</h4>
 <p>When i learned this for the first time or second time, i didn't really know why it gonna being used, but after several times i got this.</p>
 <ul>
 <li>
@@ -190,9 +190,9 @@ So how many types of Services? There are 4 types:</p>
 <span class="w">  </span><span class="nt">externalName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my.database.example.com</span>
 </code></pre></div>
 
-<h1>Ingress!</h1>
+<h1 id="ingress">Ingress!</h1>
 <p>Mostly i will talk only about Nginx ingress!</p>
-<h4>Quick start</h4>
+<h4 id="quick-start">Quick start</h4>
 <p>It will be a little hard to summarize ingress in some words, but i will try my best to explain.</p>
 <p>Kubernetes Ingress is a resource that allows you to manage external access to your services, typically HTTP ( It does support TLS/SSL). It acts as a reverse proxy, routing traffic from a DNS name to the appropriate services within your cluster.</p>
 <ul>
@@ -250,7 +250,7 @@ Because i installed nginx ingress as Daemonset, in default it used hostPort in t
 </code></pre></div>
 
 <p>And why do i use 80 not 443?, for not double encrypt, because in Haproxy it redirected requests to HTTPS, so extra SSL is not necessary and may <strong>increase extra CPU load</strong>.</p>
-<h4>Ingress workflows:</h4>
+<h4 id="ingress-workflows">Ingress workflows:</h4>
 <ul>
 <li>Ingress has routing rules to service</li>
 <li>Ingress flows:</li>
@@ -263,7 +263,7 @@ Because i installed nginx ingress as Daemonset, in default it used hostPort in t
 <span class="mf">6.</span><span class="w"> </span><span class="n">Pod</span><span class="p">:</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">routed</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">selected</span><span class="w"> </span><span class="n">Pod</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">application</span><span class="o">.</span>
 </code></pre></div>
 
-<h4>Some common error scenarios of nginx ingress</h4>
+<h4 id="some-common-error-scenarios-of-nginx-ingress">Some common error scenarios of nginx ingress</h4>
 <p><strong>1. Missing annotation rewrite-target</strong> </br>
 - I'm assuming the ingress controller and backend service still running. This will return 404 errors. </br></p>
 <ul>
@@ -344,7 +344,7 @@ Because i installed nginx ingress as Daemonset, in default it used hostPort in t
 <p><strong>3. Other possible errors 400,502,503...</strong></p>
 <p>It will be way too long to include, but pretty useful in case you have to debug: 
 <a href="https://gist.github.com/BlackMetalz/dab403875c8433a800c7b61a57df2a3e">Github Gist</a></p>
-<h1>Service Discovery and DNS</h1>
+<h1 id="service-discovery-and-dns">Service Discovery and DNS</h1>
 <p>Here's a concise and clear explanation of <strong>Service Discovery in Kubernetes</strong>:</p>
 <ol>
 <li>
@@ -420,14 +420,14 @@ error-503             ClusterIP      10.43.196.86    &lt;none&gt;          80/TC
 error-504             ClusterIP      10.43.6.79      &lt;none&gt;          80/TCP                          2d21h
 </code></pre></div>
 
-<h4>Summary:</br></h4>
+<h4 id="summary">Summary:</br></h4>
 <ul>
 <li><strong>Endpoint</strong> links Services to Pod IPs and dynamically updates with Pod changes.</br></li>
 <li>Pods can discover Services using <strong>DNS names</strong> or <strong>environment variables</strong>.</br></li>
 <li>Kubernetes automatically handles traffic routing and load balancing for Services.</br>
 This ensures seamless communication and discovery between applications running in your cluster!</li>
 </ul>
-<h4>How DNS Resolv addresses</h4>
+<h4 id="how-dns-resolv-addresses">How DNS Resolv addresses</h4>
 <p>how DNS resolution works in Kubernetes based on <code>resolv.conf</code> the behavior for resolving <code>my-app</code>:</p>
 <p><strong>Key Points:</strong></p>
 <ol>
@@ -468,26 +468,26 @@ options ndots:5
 
 <p><strong>Key Takeaway</strong>:
 if the Service is named <code>my-app</code> and in the same namespace (<code>default</code>), typing <code>my-app</code> will resolve to <code>my-app.default.svc.cluster.local</code>. This is thanks to the search domain and Kubernetes DNS configuration.</p>
-<h4>CoreDNS:</h4>
+<h4 id="coredns">CoreDNS:</h4>
 <ul>
 <li>It watches K8S Api for new services, it will creates a DNS record</li>
 </ul>
-<h4>More notes about the Service:</h4>
+<h4 id="more-notes-about-the-service">More notes about the Service:</h4>
 <ul>
 <li>When a Service is created with a selector, Kubernetes automatically creates an Endpoints object and populates it with the IPs and ports of Pods that match the selector. Whenever the set of Pods matching the selector changes, the Endpoints object is automatically updated.</li>
 </ul>
-<h1>Conclusion:</h1>
+<h1 id="conclusion">Conclusion:</h1>
 <ul>
 <li>with the help of chatGPT, some explanations are much better</li>
 <li>re-memorized for my knowledge about k8s networking</li>
 </ul>
-<h1>What's next in part 2?</h1>
+<h1 id="whats-next-in-part-2">What's next in part 2?</h1>
 <ul>
 <li>CNI</li>
 <li>Cilium</li>
 <li>And more...</li>
 </ul>
-<h1>Reference:</h1>
+<h1 id="reference">Reference:</h1>
 <ul>
 <li><a href="https://kubernetes.io/docs/concepts/services-networking/service/">https://kubernetes.io</a></li>
 <li><a href="https://bytebytego.com">https://bytebytego.com</a></li>

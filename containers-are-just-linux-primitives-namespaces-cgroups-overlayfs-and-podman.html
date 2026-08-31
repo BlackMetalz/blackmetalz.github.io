@@ -86,19 +86,19 @@
 <li><strong>A layered root filesystem</strong> for the container's file view, often implemented with <strong>OverlayFS</strong> (for a simple reflection)</li>
 </ol>
 <p>This article uses <strong>Podman</strong> for the demos, because Podman is close enough to Docker to feel familiar, but transparent enough that we can still see the Linux primitives.</p>
-<hr>
-<h2>0. What is OCI?</h2>
+<hr />
+<h2 id="0-what-is-oci">0. What is OCI?</h2>
 <p>It has 2 parts: OCI and OCI Runtime</p>
-<h3>OCI</h3>
+<h3 id="oci">OCI</h3>
 <p>From what I understand, <a href="https://opencontainers.org/">Open Container Initiative (OCI)</a> is a <strong>standard</strong> for container. With this standard, an image built with Docker can be run pretty well in Podman or Kubernetes and vice versa.</p>
 <p>Content copy from homepage of OCI:</p>
 <div class="highlight"><pre><span></span><code>The OCI currently contains three specifications: the Runtime Specification (runtime-spec), the Image Specification (image-spec) and the Distribution Specification (distribution-spec). The Runtime Specification outlines how to run a “filesystem bundle” that is unpacked on disk. At a high-level an OCI implementation would download an OCI Image then unpack that image into an OCI Runtime filesystem bundle. At this point the OCI Runtime Bundle would be run by an OCI Runtime.
 </code></pre></div>
 
-<h3>OCI Runtime</h3>
+<h3 id="oci-runtime">OCI Runtime</h3>
 <p>The OCI Runtime is the implementation that communicates with the kernel to expand the image into a container xD</p>
-<hr>
-<h2>1. What exactly is Podman?</h2>
+<hr />
+<h2 id="1-what-exactly-is-podman">1. What exactly is Podman?</h2>
 <p>If you are coming from Docker, you can think of Podman as:</p>
 <ul>
 <li><strong>A daemonless container engine</strong></li>
@@ -124,9 +124,9 @@
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">podman build -t image-name .</span>
 </code></pre></div>
 
-<hr>
-<h2>2. The 3 Common Linux Primitives Behind Containers</h2>
-<h3>Primitive 1: Namespaces</h3>
+<hr />
+<h2 id="2-the-3-common-linux-primitives-behind-containers">2. The 3 Common Linux Primitives Behind Containers</h2>
+<h3 id="primitive-1-namespaces">Primitive 1: Namespaces</h3>
 <p>Isolation is what I understand about namespaces in Linux. It gives a process its <strong>own view</strong> of specific system resources.</p>
 <p>Common namespace types you will meet in containers, detail in <a href="https://www.redhat.com/en/blog/7-linux-namespaces">Redhat blog</a></p>
 <ul>
@@ -139,7 +139,7 @@
 </ul>
 <p>There are also <strong>cgroup</strong> and <strong>time</strong> namespaces, but the ones above are the types you will encounter most often in container discussions.</p>
 <p>This is why process <code>12345</code> on the host can look like <strong>PID 1</strong> inside the container. It is the same underlying kernel, but the process is looking through a different namespace view.</p>
-<h3>Primitive 2: Cgroups</h3>
+<h3 id="primitive-2-cgroups">Primitive 2: Cgroups</h3>
 <p>While namespaces isolate what a process can <strong>see</strong>. Cgroups control how much of the machine a process can <strong>consume</strong>.</p>
 <p>That includes things like:</p>
 <ul>
@@ -149,7 +149,7 @@
 <li>I/O accounting and limits</li>
 </ul>
 <p>Without cgroups, a "container" could still exist as an isolated process, but it would be terrible for multi-tenant systems because one noisy workload could fucked up everything else. That is why resource limit is the fucking important!</p>
-<h3>Primitive 3: A Layered Root Filesystem</h3>
+<h3 id="primitive-3-a-layered-root-filesystem">Primitive 3: A Layered Root Filesystem</h3>
 <p>Every container needs a filesystem view:</p>
 <ul>
 <li><code>/bin/sh</code></li>
@@ -163,8 +163,8 @@
 <div class="highlight"><pre><span></span><code>lower layers (image) + upper layer (container writes) -&gt; merged view
 </code></pre></div>
 
-<hr>
-<h2>3. Lab Setup</h2>
+<hr />
+<h2 id="3-lab-setup">3. Lab Setup</h2>
 <p>To follow this lab on <strong>Ubuntu 24.04</strong>, install:</p>
 <ol>
 <li><strong>Podman</strong></li>
@@ -198,8 +198,8 @@ OS/Arch:<span class="w">      </span>linux/amd64
 </code></pre></div>
 
 <p>For this article, I will use <strong>rootful Podman</strong> in the low-level inspection steps because it makes namespace and filesystem introspection simpler. Podman supports rootless mode too, but we will not talk about it in this article xD</p>
-<hr>
-<h2>4. Step 1: Run One Real Container</h2>
+<hr />
+<h2 id="4-step-1-run-one-real-container">4. Step 1: Run One Real Container</h2>
 <p>Let us create a tiny container with very visible limits, it will has fully explained in the next steps:</p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>kienlt-lab<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--hostname<span class="w"> </span>kienlt-lab<span class="w"> </span><span class="se">\</span>
@@ -253,8 +253,8 @@ systemd,1<span class="w"> </span>--system<span class="w"> </span>--deserialize<s
 </code></pre></div>
 
 <p>Yes, <code>/usr/bin/runc</code>... the OCI runtime</p>
-<hr>
-<h2>5. Step 2: Prove the Namespace Story</h2>
+<hr />
+<h2 id="5-step-2-prove-the-namespace-story">5. Step 2: Prove the Namespace Story</h2>
 <p>List the namespaces associated with that process:</p>
 <div class="highlight"><pre><span></span><code>lsns<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PID</span><span class="s2">&quot;</span>
 </code></pre></div>
@@ -333,8 +333,8 @@ podman0:<span class="w"> </span><span class="nv">flags</span><span class="o">=</
 <li>the mount table is not the same as the host mount table</li>
 </ul>
 <p>That is namespaces which is able to explain in one line: The process is still on the same kernel, but it sees a different world.</p>
-<hr>
-<h2>6. Step 3: Prove the Cgroup Story</h2>
+<hr />
+<h2 id="6-step-3-prove-the-cgroup-story">6. Step 3: Prove the Cgroup Story</h2>
 <p>We started the container with:</p>
 <ul>
 <li><code>--memory 128m</code></li>
@@ -394,8 +394,8 @@ ID<span class="w">            </span>NAME<span class="w">        </span>CPU<span
 </code></pre></div>
 
 <p>Again, the container is not that fucking special. It is just a process tree attached to a cgroup subtree.</p>
-<hr>
-<h2>7. Step 4: Prove the Layered Filesystem Story</h2>
+<hr />
+<h2 id="7-step-4-prove-the-layered-filesystem-story">7. Step 4: Prove the Layered Filesystem Story</h2>
 <p>This section is fucking great for me, I see overlayfs for a lot of fucking time, but I never really understand what the fuck are they!</p>
 <p>Now let us inspect the container filesystem driver:</p>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>inspect<span class="w"> </span>kienlt-lab<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.[0].GraphDriver&#39;</span>
@@ -464,9 +464,9 @@ ls:<span class="w"> </span>cannot<span class="w"> </span>access<span class="w"> 
 <p>That file was not baked into the image. It landed in the <strong>writable upper layer</strong> of this specific container.</p>
 <p>A container image is not one giant mutable disk. It is usually a stack of read-only layers plus one writable layer on top.</p>
 <p>A picture for easier imagination from <a href="https://blogs.cisco.com/developer/373-containerimages-03">blogs of cisco</a>:</p>
-<p><img alt="overlayFS" src="./images/2026/03/10.png"></p>
-<hr>
-<h2>8. Put the 3 Pieces Together</h2>
+<p><img alt="overlayFS" src="./images/2026/03/10.png" /></p>
+<hr />
+<h2 id="8-put-the-3-pieces-together">8. Put the 3 Pieces Together</h2>
 <p>The fucking flow:</p>
 <div class="highlight"><pre><span></span><code>Podman CLI
   -&gt; asks an OCI runtime to start a process
@@ -483,8 +483,8 @@ ls:<span class="w"> </span>cannot<span class="w"> </span>access<span class="w"> 
 <li>no emulated machine</li>
 <li>just a process with isolation, limits, and a filesystem view</li>
 </ul>
-<hr>
-<h2>9. Summary</h2>
+<hr />
+<h2 id="9-summary">9. Summary</h2>
 <p>If you want one sentence to remember, make it this: A container is just a Linux process built from namespaces, cgroups, and a container-specific root filesystem.</p>
 <p>So yes, "namespaces + cgroups + OverlayFS" is a useful teaching shortcut or telling your friend xD</p>
 <p>But the most precise version is:</p>
@@ -493,12 +493,12 @@ ls:<span class="w"> </span>cannot<span class="w"> </span>access<span class="w"> 
 <li><strong>Cgroups</strong> provide resource control</li>
 <li><strong>A layered root filesystem</strong> provides the file view</li>
 </ul>
-<hr>
-<h2>12. Cleanup</h2>
+<hr />
+<h2 id="12-cleanup">12. Cleanup</h2>
 <div class="highlight"><pre><span></span><code>podman<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>kienlt-lab
 </code></pre></div>
 
-<hr>
+<hr />
 <p><strong>References:</strong></p>
 <ul>
 <li><a href="https://www.redhat.com/en/blog/containers-are-linux">Containers are Linux</a></li>

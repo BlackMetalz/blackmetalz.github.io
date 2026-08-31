@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>VictoriaLogs: A Brief Introduction</h1>
+            <h1 id="victorialogs-a-brief-introduction">VictoriaLogs: A Brief Introduction</h1>
 <p>VictoriaLogs is a high-performance log management solution from the VictoriaMetrics team. It offers significant advantages over traditional solutions like Elasticsearch:</p>
 <ul>
 <li>Storage Efficiency: Uses up to 10x less disk space</li>
@@ -88,8 +88,8 @@
 <li>Integration: Works seamlessly with Grafana and other monitoring tools</li>
 </ul>
 <p>Designed for organizations seeking cost-effective log management without sacrificing functionality, VictoriaLogs combines performance and simplicity for modern observability needs.</p>
-<h1>Data preparation for Elasticsearch and Victoria Logs</h1>
-<h3>Setup</h3>
+<h1 id="data-preparation-for-elasticsearch-and-victoria-logs">Data preparation for Elasticsearch and Victoria Logs</h1>
+<h3 id="setup">Setup</h3>
 <ul>
 <li>Elasticsearch: Assume you already have a cluster with 3 nodes!</li>
 <li>VictoriaLogs: docker compose for the best xD</li>
@@ -112,7 +112,7 @@
 <span class="w">  </span><span class="n">vlogs</span><span class="o">-</span><span class="n">data</span><span class="o">:</span>
 </code></pre></div>
 
-<h3>Elasticsearch</h3>
+<h3 id="elasticsearch">Elasticsearch</h3>
 <ul>
 <li>Generate nginx access logs with 3Gb size for an example via Python script</li>
 </ul>
@@ -209,7 +209,7 @@
 <ul>
 <li>Run script: <code>python nginx_to_elasticsearch.py</code></li>
 </ul>
-<h3>Victoria Logs</h3>
+<h3 id="victoria-logs">Victoria Logs</h3>
 <ul>
 <li>Script to send: <code>nginx_to_victoria_logs_with_batch_size.py</code></li>
 </ul>
@@ -298,8 +298,8 @@
     <span class="n">main</span><span class="p">()</span>
 </code></pre></div>
 
-<h1>Comparison</h1>
-<h3>Elasticsearch disk Usage:</h3>
+<h1 id="comparison">Comparison</h1>
+<h3 id="elasticsearch-disk-usage">Elasticsearch disk Usage:</h3>
 <ul>
 <li>Query: <code>GET _cat/indices/nginx_access_log?s=index&amp;v</code></li>
 <li>Output:</li>
@@ -308,16 +308,16 @@
 nginx_access_log  34147211      1.7gb        887mb
 </code></pre></div>
 
-<h3>VictoriaLogs disk Usage:</h3>
+<h3 id="victorialogs-disk-usage">VictoriaLogs disk Usage:</h3>
 <ul>
 <li>Count total documents: <code>* | stats count() as logs_total</code></li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/30th_2.png"></p>
+<p><img alt="alt text" src="images/2025/03/30th_2.png" /></p>
 <ul>
 <li>I used the exporter built-in and displayed it with <a href="https://grafana.com/grafana/dashboards/22084-victorialogs-single-node">this dashboard</a></li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/30th_1.png"></p>
-<h3>Compare</h3>
+<p><img alt="alt text" src="images/2025/03/30th_1.png" /></p>
+<h3 id="compare">Compare</h3>
 <p>I see my test is not optimized, it can be optimized more to save more space for logging, i guess?</p>
 <ul>
 <li>Elasticsearch: 887Mb</li>
@@ -362,7 +362,7 @@ nginx_access_log  34147211      1.7gb        887mb
 </tbody>
 </table>
 <p>After this test, you can see how much resource we save from replacing Elasticsearch with VictoriaLogs!</p>
-<h1>Cluster Mode</h1>
+<h1 id="cluster-mode">Cluster Mode</h1>
 <p>To be honest, VictoriaLogs did great work for a single node, which can handle everything we need. But you can think like me, where is the cluster mode, how can we failover if the single node is dead? So to answer that question. Simply, we will use: 2x VictoriaLogs + vmauth.</p>
 <ul>
 <li>So what is vmauth? It is a tool of VictoriaMetrics, used as a proxy and to manage connection to instance backends like VictoriaLogs, it added basic auth, routes the request based on URL, and supports load balancing, is easy to run and configure. Below is an example with Docker Compose:</li>
@@ -400,16 +400,16 @@ nginx_access_log  34147211      1.7gb        887mb
 <ul>
 <li>Then we can use that to configure as an endpoint of the VictoriaLogs datasource in Grafana</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/30th_3.png"></p>
+<p><img alt="alt text" src="images/2025/03/30th_3.png" /></p>
 <ul>
 <li>Then query logs in Grafana datasource explorer(This is a demo), although we still have to add a dashboard <a href="https://grafana.com/grafana/dashboards/22759-victorialogs-explorer/">like this</a> and make a few modifications to query and filter for search log in production</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/30th_4.png"></p>
+<p><img alt="alt text" src="images/2025/03/30th_4.png" /></p>
 <ul>
 <li>How about scale? Simply add more disk to VictoriaLogs. I assumed you used LVM for the beginning (You should calculate how much log VictoriaLogs will store).</li>
 <li>An example: you can use 3 disks that combined with LVM and resize or add more disks to increase the storage of VictoriaLogs.</li>
 </ul>
-<h3>My opinions</h3>
+<h3 id="my-opinions">My opinions</h3>
 <ul>
 <li>VictoriaLogs used less disk space than Elasticsearch, which could be up to 10x in some specific scenarios.</li>
 <li>VictoriaLogs inserts data faster and uses less CPU than Elasticsearch.</li>
@@ -419,7 +419,7 @@ nginx_access_log  34147211      1.7gb        887mb
 <li>Good for logging solution where user need a place to check logs of their container in K8S environment with multiple clusters.</li>
 <li>Right now, VictoriaLogs doesn't have the cluster mode, but there is a solution for it is add 1 one more instance and distribute them with the vmauth utility.</li>
 </ul>
-<h1>Ref:</h1>
+<h1 id="ref">Ref:</h1>
 <ul>
 <li><a href="https://docs.victoriametrics.com/victorialogs/">https://docs.victoriametrics.com/victorialogs/</a></li>
 <li><a href="https://news.ycombinator.com/item?id=42859016">https://news.ycombinator.com/item?id=42859016</a></li>

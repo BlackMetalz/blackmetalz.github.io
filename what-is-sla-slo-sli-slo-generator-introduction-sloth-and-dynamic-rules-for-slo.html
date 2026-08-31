@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <h1>Concept, meaning, and example for SLA-SLO-SLI</h1>
+            <h1 id="concept-meaning-and-example-for-sla-slo-sli">Concept, meaning, and example for SLA-SLO-SLI</h1>
 <p>I will try to explain with my ability and knowledge!</p>
 <p><strong>1.SLA</strong>:</p>
 <ul>
@@ -106,8 +106,8 @@
 <li>If your app responds status code that does not contain 499 and 5xx for 99.7% of the time in a month, that is your SLI value.</li>
 <li>It tells you precisely how the service is performing and see if you are on track!</li>
 </ul>
-<hr>
-<h1>SLO Generator - Sloth</h1>
+<hr />
+<h1 id="slo-generator-sloth">SLO Generator - Sloth</h1>
 <p>As the title, SLO Generator. Sloth is a tool designed to simplify the management and creation of Service Level Object (SLO) for your service. Imagine your goal is to track request rate success in total requests. You probably have a query like this:</p>
 <div class="highlight"><pre><span></span><code>rate(http_requests_success[5m]) / rate(http_requests_total[5m])
 </code></pre></div>
@@ -128,7 +128,7 @@
 </ul>
 </li>
 </ol>
-<h3>Sloth in action</h3>
+<h3 id="sloth-in-action">Sloth in action</h3>
 <ul>
 <li>Probably detailed here: <a href="https://sloth.dev/introduction/">https://sloth.dev/introduction/</a>. This will generate rules for ya 1 service for 1 rule file which contains multiple rules.</li>
 <li>
@@ -221,32 +221,32 @@
 <li>Now we have rules for it, but none of service metrics are available? For common, you will have to wait 30 days to get enough metrics for your SLOs. But don't worry, Victoria Metrics have feature that backfilling data for our SLO rules. Link for it in <strong>Ref</strong> section. P/S: I have no idea how it works in Prometheus since i'm not using it, only for <code>remoteWrite</code> xD.</li>
 <li>And we still have 1 more important thing to make it complete which is to modify the Dashboard to fit with dynamic service.</li>
 </ul>
-<h3>Grafana dashboard modify:</h3>
+<h3 id="grafana-dashboard-modify">Grafana dashboard modify:</h3>
 <ul>
 <li>Sloth will use 2 dashboards from here: <a href="https://sloth.dev/introduction/dashboards/">https://sloth.dev/introduction/dashboards/</a></li>
 <li>Let's begin with dashboard: <code>SLO / Detail</code></li>
 <li>We have to modify some variables</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/08th_1.png"></p>
+<p><img alt="alt text" src="images/2025/03/08th_1.png" /></p>
 <ul>
 <li>Next, modify query to filter by service: <strong>slo:current_burn_rate:ratio{service="${service}"} &gt; ${min_burning_rate}</strong>. And do the same for the rest!</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/08th_2.png"></p>
+<p><img alt="alt text" src="images/2025/03/08th_2.png" /></p>
 <ul>
 <li>This is demo of service have none error budget left</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/08th_3.png"></p>
+<p><img alt="alt text" src="images/2025/03/08th_3.png" /></p>
 <ul>
 <li>This is demo of service have no issue with error budget</li>
 </ul>
-<p><img alt="alt text" src="images/2025/03/08th_4.png"></p>
-<h1>Conclusion</h1>
+<p><img alt="alt text" src="images/2025/03/08th_4.png" /></p>
+<h1 id="conclusion">Conclusion</h1>
 <ul>
 <li>This is a great way to improve service quality</li>
 <li>With correct SLOs, you can make promises, agreement with your customer/end user</li>
 <li>This consumed about 4 days of mine, the most issue was part after setup dashboard and dynamic/static service. I have no data. But with little recommend that recording metadata need to run calculate with vmalert rules-replay. I'm able to finish the task that setup SLO for Kong - APIGATEWAY</li>
 </ul>
-<h1>Ref:</h1>
+<h1 id="ref">Ref:</h1>
 <ul>
 <li><a href="https://www.youtube.com/watch?v=zMqo4NXDr3g&amp;lc=UgzsXWLBPB-t0LmNyUl4AaABAg">Reliability and Resilience: The Dynamic Duo of SRE</a></li>
 <li><a href="https://victoriametrics.com/blog/rules-replay/">Rules backfilling via vmalert</a></li>

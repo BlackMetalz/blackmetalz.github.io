@@ -79,15 +79,15 @@
         <div class="span8 offset2 article-content">
             
             <p>As a System Admin, I want to understand ACID principles in MySQL, mainly for learning purposes.</p>
-<h2>ACID: It is not only definition, it is mechanism!</h2>
+<h2 id="acid-it-is-not-only-definition-it-is-mechanism">ACID: It is not only definition, it is mechanism!</h2>
 <ul>
 <li><code>A</code> stands for <code>Atomicity</code></li>
 <li><code>C</code> stands for <code>Consistency</code></li>
 <li><code>I</code> stands for <code>Isolation</code></li>
 <li><code>D</code> stands for <code>Durability</code></li>
 </ul>
-<h3>Atomicity</h3>
-<p><img alt="Picture take from scaler.com" src="./images/2026/03/05.png"></p>
+<h3 id="atomicity">Atomicity</h3>
+<p><img alt="Picture take from scaler.com" src="./images/2026/03/05.png" /></p>
 <p>Let's talk about <code>Atomicity</code>: from what I understand, it means all transactions will be executed completely or not at all (All or nothing). </p>
 <p>Here is an example for ecommerce:</p>
 <div class="highlight"><pre><span></span><code><span class="k">START</span><span class="w"> </span><span class="k">TRANSACTION</span><span class="p">;</span><span class="w"> </span><span class="c1">-- We can use BEGIN | BEGIN WORK as well?</span>
@@ -111,7 +111,7 @@
 <p>Because we wrapped these 4 queries inside a <code>START TRANSACTION;</code> ... <code>COMMIT;</code> block, MySQL will treat them as a single Unit of Work.</p>
 <p>If step 3 fails (e.g., due to a trigger error, constraint violation, or server crash), the application or MySQL will execute a <code>ROLLBACK;</code> command. At that point, the data inserted in step 2 will be undone (removed). The database will return to the exact same state it was in before running <code>START TRANSACTION</code>. That is atomicity!</p>
 <p>So for <code>ROLLBACK</code>, it will used data in <a href="https://dev.mysql.com/doc/refman/8.4/en/innodb-undo-logs.html">Undo Log</a> to restore the data to the previous state.</p>
-<h3>Consistency</h3>
+<h3 id="consistency">Consistency</h3>
 <p>Database never lies! If Atomicity ensures "all or nothing", <code>Consistency</code> ensures that after a transaction is done, the data will be in a valid state. So, how does it work?</p>
 <p><a href="https://www.w3schools.com/sql/sql_constraints.asp">Database Constraints</a> are used to ensure data integrity. </p>
 <p>I copied from <code>w3schools</code>, SQL Constraint Types:</p>
@@ -127,7 +127,7 @@
 </code></pre></div>
 
 <p>Consistency is not only about DB avoid wrong data, it is also state of data when change from current valid state to another valid state after transaction finished succesfully!</p>
-<h3>Isolation</h3>
+<h3 id="isolation">Isolation</h3>
 <p>This might be a little advanced for me, but I will try my best to explain. The target is Isolation, and MVCC (Multi-Version Concurrency Control) is the mechanism that achieves it without making our database slow as hell!</p>
 <p>Okay, why do we need Isolation?</p>
 <ul>
@@ -143,7 +143,7 @@
 <p>And I want to put keyword <a href="https://dev.mysql.com/doc/refman/9.6/en/innodb-locking.html">Next-Key Lock</a>, it is unique machanism of InnoDB to avoid phantom read! Read more here: https://dev.mysql.com/doc/refman/8.4/en/innodb-next-key-locking.html </p>
 <p>For a good example: with MVCC, we can backup database using mysqldump without lock the database! (<code>mysqldump --single-transaction</code>)</p>
 <p>So again, it's a tradeoff between performance and safety! Choose carefully!</p>
-<h3>Durability</h3>
+<h3 id="durability">Durability</h3>
 <p>This is the easiest part of the ACID principles. After you <code>COMMIT</code>, it will persist on disk!</p>
 <p>When we <code>COMMIT</code>, changes will be written into a log file sequentially called the <code>Redo Log</code> (file <code>ib_logfile</code>), often known as Write-Ahead Logging (WAL). Here is the documentation for the <a href="https://dev.mysql.com/doc/refman/8.4/en/innodb-redo-log.html">Redo log</a>. </p>
 <p>Again, there is a tradeoff between performance and safety! </p>
@@ -157,14 +157,14 @@ So for System/DB Admin: </p>
 <li>Value = 1 (default), the most safety, but slowest!</li>
 <li>Value = 0/2, faster, but less safety!</li>
 </ul>
-<hr>
-<h2>The SRE Takeaway</h2>
+<hr />
+<h2 id="the-sre-takeaway">The SRE Takeaway</h2>
 <ul>
 <li>Want complete safety?: set <code>innodb_flush_log_at_trx_commit = 1</code></li>
 <li>Want to backup without downtime? Use <code>--single-transaction</code></li>
 </ul>
-<hr>
-<h2>Conclusion</h2>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
 <p>ACID is a set of properties that ensure transactions in a database are processed reliably. It is a fundamental concept in database management systems, and it is essential for ensuring data integrity and consistency.</p>
 
 

@@ -78,17 +78,17 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p><img alt="alt text" src="images/2025/12/21.png"></p>
-<hr>
-<h1>Cilium Certified Associate (CCA) Overview</h1>
-<h3>1. eBPF Fundamentals</h3>
+            <p><img alt="alt text" src="images/2025/12/21.png" /></p>
+<hr />
+<h1 id="cilium-certified-associate-cca-overview">Cilium Certified Associate (CCA) Overview</h1>
+<h3 id="1-ebpf-fundamentals">1. eBPF Fundamentals</h3>
 <p>Understanding the "Why" before the "How."</p>
 <ul>
 <li><strong>What is eBPF:</strong> Extended Berkeley Packet Filter — a revolutionary technology that allows running sandboxed programs in the Linux kernel without changing kernel source code.</li>
 <li><strong>Why eBPF Matters:</strong> Enables high-performance networking, security, and observability without the overhead of traditional approaches (iptables, kernel modules).</li>
 <li><strong>eBPF vs iptables:</strong> eBPF operates at lower levels with better performance, while iptables uses sequential rule matching that doesn't scale well.</li>
 </ul>
-<h3>2. Cilium Architecture (20%)</h3>
+<h3 id="2-cilium-architecture-20">2. Cilium Architecture (20%)</h3>
 <p>The backbone of cloud-native networking.</p>
 <ul>
 <li><strong>What is Cilium:</strong> An open-source, eBPF-based networking, security, and observability solution for Kubernetes and other container orchestration platforms.</li>
@@ -96,8 +96,8 @@
 <li><strong>CNCF Project:</strong> Cilium is a CNCF graduated project, widely adopted in production environments.</li>
 </ul>
 <p>Example of <strong>Cilium Data Flow</strong>:</p>
-<p><img alt="alt text" src="images/2025/12/23.png"></p>
-<h3>3. Network Policy (18%)</h3>
+<p><img alt="alt text" src="images/2025/12/23.png" /></p>
+<h3 id="3-network-policy-18">3. Network Policy (18%)</h3>
 <p>Securing workloads with identity-based policies.</p>
 <ul>
 <li><strong>CiliumNetworkPolicy:</strong> Extended network policies with L3/L4/L7 filtering capabilities.</li>
@@ -105,7 +105,7 @@
 <li><strong>Policy Enforcement Modes:</strong> Default, Always, and Never modes for controlling policy behavior.</li>
 <li><strong>K8s NetworkPolicy vs CiliumNetworkPolicy:</strong> Understanding compatibility and extended features.</li>
 </ul>
-<h3>4. Service Mesh (16%)</h3>
+<h3 id="4-service-mesh-16">4. Service Mesh (16%)</h3>
 <p>Modern traffic management without sidecars.</p>
 <ul>
 <li><strong>Sidecarless Architecture:</strong> Cilium provides service mesh capabilities using eBPF without sidecar proxies.</li>
@@ -113,7 +113,7 @@
 <li><strong>Ingress Controller:</strong> Cilium can act as an Ingress controller for external traffic.</li>
 <li><strong>mTLS Encryption:</strong> Transparent encryption of traffic between services.</li>
 </ul>
-<h3>5. Network Observability (10%)</h3>
+<h3 id="5-network-observability-10">5. Network Observability (10%)</h3>
 <p>Visibility into network flows with Hubble.</p>
 <ul>
 <li><strong>Hubble:</strong> Cilium's observability layer built on top of eBPF.</li>
@@ -121,7 +121,7 @@
 <li><strong>Hubble CLI &amp; UI:</strong> Command-line and graphical interfaces for observing traffic.</li>
 <li><strong>Integration:</strong> Export to Prometheus, Grafana, and other monitoring systems.</li>
 </ul>
-<h3>6. Installation &amp; Configuration (10%)</h3>
+<h3 id="6-installation-configuration-10">6. Installation &amp; Configuration (10%)</h3>
 <p>Getting Cilium up and running.</p>
 <ul>
 <li><strong>Cilium CLI:</strong> The primary tool for installing and managing Cilium.</li>
@@ -129,7 +129,7 @@
 <li><strong>Connectivity Tests:</strong> Built-in tests to validate Cilium installation.</li>
 <li><strong>Configuration Options:</strong> Datapath modes, IPAM, encryption, and more.</li>
 </ul>
-<h3>7. Cluster Mesh (10%)</h3>
+<h3 id="7-cluster-mesh-10">7. Cluster Mesh (10%)</h3>
 <p>Multi-cluster connectivity.</p>
 <ul>
 <li><strong>What is Cluster Mesh:</strong> Connects multiple Kubernetes clusters into a unified network.</li>
@@ -137,7 +137,7 @@
 <li><strong>Global Load Balancing:</strong> Distribute traffic across clusters for high availability.</li>
 <li><strong>Requirements:</strong> Unique Pod CIDRs, cluster IDs, and shared CA.</li>
 </ul>
-<h3>8. BGP &amp; External Networking (6%)</h3>
+<h3 id="8-bgp-external-networking-6">8. BGP &amp; External Networking (6%)</h3>
 <p>Connecting to the outside world.</p>
 <ul>
 <li><strong>BGP Integration:</strong> Cilium can peer with external routers using BGP.</li>
@@ -145,15 +145,15 @@
 <li><strong>Egress Gateway:</strong> Control and monitor egress traffic from the cluster.</li>
 <li><strong>External Workloads:</strong> Connect non-Kubernetes workloads to the Cilium network.</li>
 </ul>
-<hr>
-<h1>Sections That Need to Be Understood</h1>
-<h3>1. eBPF vs iptables — Why eBPF Matters</h3>
+<hr />
+<h1 id="sections-that-need-to-be-understood">Sections That Need to Be Understood</h1>
+<h3 id="1-ebpf-vs-iptables-why-ebpf-matters">1. eBPF vs iptables — Why eBPF Matters</h3>
 <p><em>Domain: eBPF (10%)</em></p>
 <p>Understanding why Cilium chose eBPF over traditional approaches is fundamental.</p>
 <p><strong>iptables Limitations:</strong></p>
-<p><img alt="alt text" src="images/2025/12/24.png"></p>
+<p><img alt="alt text" src="images/2025/12/24.png" /></p>
 <p><strong>eBPF Advantages:</strong></p>
-<p><img alt="alt text" src="images/2025/12/25.png"></p>
+<p><img alt="alt text" src="images/2025/12/25.png" /></p>
 <p><strong>Comparison Table:</strong></p>
 <table>
 <thead>
@@ -225,12 +225,12 @@
 <li><a href="https://docs.cilium.io/en/stable/bpf/">Cilium eBPF Documentation</a></li>
 </ul>
 </blockquote>
-<hr>
-<h3>2. Cilium Architecture &amp; Components</h3>
+<hr />
+<h3 id="2-cilium-architecture-components">2. Cilium Architecture &amp; Components</h3>
 <p><em>Domain: Architecture (20%)</em></p>
 <p>Understanding each component's role is essential.</p>
 <p><strong>Architecture Overview:</strong></p>
-<p><img alt="alt text" src="images/2025/12/26.png"></p>
+<p><img alt="alt text" src="images/2025/12/26.png" /></p>
 <p><strong>Component Details:</strong></p>
 <table>
 <thead>
@@ -304,18 +304,18 @@
 <li><a href="https://docs.cilium.io/en/stable/cmdref/cilium-agent/">Cilium Agent Reference</a></li>
 </ul>
 </blockquote>
-<hr>
-<h3>3. Datapath Models</h3>
+<hr />
+<h3 id="3-datapath-models">3. Datapath Models</h3>
 <p><em>Domain: Architecture (20%)</em></p>
 <p>Cilium supports multiple datapath modes for different environments.</p>
 <p><strong>Encapsulation Mode (VXLAN/Geneve):</strong></p>
-<p><img alt="alt text" src="images/2025/12/27.png"></p>
+<p><img alt="alt text" src="images/2025/12/27.png" /></p>
 <ul>
 <li>Pros: Works anywhere (any network)</li>
 <li>Cons: MTU overhead (~50 bytes), slight latency</li>
 </ul>
 <p><strong>Native Routing (Direct Routing):</strong></p>
-<p><img alt="alt text" src="images/2025/12/28.png"></p>
+<p><img alt="alt text" src="images/2025/12/28.png" /></p>
 <ul>
 <li>Pros: Better performance, no MTU overhead</li>
 <li>Cons: Requires network support (BGP, cloud VPC)</li>
@@ -386,8 +386,8 @@
 <li><a href="https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/">kube-proxy Replacement</a></li>
 </ul>
 </blockquote>
-<hr>
-<h3>4. IPAM Modes</h3>
+<hr />
+<h3 id="4-ipam-modes">4. IPAM Modes</h3>
 <p><em>Domain: Architecture (20%)</em></p>
 <p>Cilium supports multiple IP Address Management modes.</p>
 <table>
@@ -469,8 +469,8 @@
 <li><a href="https://docs.cilium.io/en/stable/network/concepts/ipam/">Cilium IPAM</a></li>
 </ul>
 </blockquote>
-<hr>
-<h3>5. CiliumNetworkPolicy vs Kubernetes NetworkPolicy</h3>
+<hr />
+<h3 id="5-ciliumnetworkpolicy-vs-kubernetes-networkpolicy">5. CiliumNetworkPolicy vs Kubernetes NetworkPolicy</h3>
 <p><em>Domain: Network Policy (18%)</em></p>
 <p>Cilium supports both standard Kubernetes NetworkPolicy and its extended CiliumNetworkPolicy.</p>
 <p><strong>Kubernetes NetworkPolicy (Standard):</strong></p>
@@ -523,7 +523,7 @@
 
 <p><strong>Feature Comparison:</strong></p>
 <p>Credit: <a href="https://isovalent.com/blog/post/intro-to-cilium-network-policies/">Isovalent</a></p>
-<p><img alt="alt text" src="images/2025/12/22.png"></p>
+<p><img alt="alt text" src="images/2025/12/22.png" /></p>
 <p><strong>CiliumNetworkPolicy Unique Features:</strong></p>
 <p><strong>L7 HTTP Rules:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nt">spec</span><span class="p">:</span>
@@ -566,12 +566,12 @@
 <li><a href="https://docs.cilium.io/en/stable/security/policy/language/">Policy Examples</a></li>
 </ul>
 </blockquote>
-<hr>
-<h3>6. Identity-based Security Model</h3>
+<hr />
+<h3 id="6-identity-based-security-model">6. Identity-based Security Model</h3>
 <p><em>Domain: Network Policy (18%)</em></p>
 <p>Cilium's security model is fundamentally different from IP-based approaches.</p>
 <p><strong>Traditional IP-based Security:</strong></p>
-<p><img alt="alt text" src="images/2025/12/29.png"></p>
+<p><img alt="alt text" src="images/2025/12/29.png" /></p>
 <p>Problems:</p>
 <ul>
 <li>Pod IPs are ephemeral (change on restart)</li>
@@ -579,7 +579,7 @@
 <li>Doesn't scale with dynamic workloads</li>
 </ul>
 <p><strong>Cilium Identity-based Security:</strong></p>
-<p><img alt="alt text" src="images/2025/12/30.png"></p>
+<p><img alt="alt text" src="images/2025/12/30.png" /></p>
 <p>Benefits:</p>
 <ul>
 <li>Identity based on labels, not IPs</li>
@@ -588,7 +588,7 @@
 </ul>
 <p><strong>How Cilium Identity Works:</strong></p>
 <p>With this picture should be enough explained xD</p>
-<p><img alt="alt text" src="images/2025/12/35.png"></p>
+<p><img alt="alt text" src="images/2025/12/35.png" /></p>
 <p><strong>View Identities:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># List all identities</span>
 cilium<span class="w"> </span>identity<span class="w"> </span>list
@@ -609,8 +609,8 @@ cilium<span class="w"> </span>identity<span class="w"> </span>list
 <li><a href="https://docs.cilium.io/en/stable/security/network/identity/">Identity-based Security</a></li>
 </ul>
 </blockquote>
-<hr>
-<h3>7. Policy Enforcement Modes</h3>
+<hr />
+<h3 id="7-policy-enforcement-modes">7. Policy Enforcement Modes</h3>
 <p><em>Domain: Network Policy (18%)</em></p>
 <p>Cilium supports different enforcement modes for policies.</p>
 <p><strong>Enforcement Modes:</strong></p>
@@ -695,8 +695,8 @@ cilium<span class="w"> </span>endpoint<span class="w"> </span>list
 <li><a href="https://docs.cilium.io/en/stable/security/policy/intro/#policy-enforcement-modes">Policy Enforcement</a></li>
 </ul>
 </blockquote>
-<hr>
-<h3>8. Gateway API vs Ingress</h3>
+<hr />
+<h3 id="8-gateway-api-vs-ingress">8. Gateway API vs Ingress</h3>
 <p><em>Domain: Service Mesh (16%)</em></p>
 <p>Cilium supports both traditional Ingress and the newer Gateway API.
 Yeah, I don't think Cilium will ask for Gateway API, but it did. So you have to understand Gateway API also!</p>
@@ -852,15 +852,15 @@ Yeah, I don't think Cilium will ask for Gateway API, but it did. So you have to 
 <li><a href="https://gateway-api.sigs.k8s.io/">Gateway API Specification</a></li>
 </ul>
 </blockquote>
-<hr>
-<h3>9. Cilium Service Mesh</h3>
+<hr />
+<h3 id="9-cilium-service-mesh">9. Cilium Service Mesh</h3>
 <p><em>Domain: Service Mesh (16%)</em></p>
 <p>Cilium provides service mesh capabilities without sidecar proxies.</p>
 <p><strong>Sidecar vs Sidecarless Architecture:</strong></p>
 <p>Traditional Sidecar Service Mesh Cons: Resource overhead, latency, operational complexity</p>
-<p><img alt="alt text" src="images/2025/12/31.png"></p>
+<p><img alt="alt text" src="images/2025/12/31.png" /></p>
 <p>Cilium Sidecarless Service Mesh Pros: Lower resource usage, better performance</p>
-<p><img alt="alt text" src="images/2025/12/32.png"></p>
+<p><img alt="alt text" src="images/2025/12/32.png" /></p>
 <p><strong>Enabling Cilium Service Mesh:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Helm values</span>
 <span class="nt">ingressController</span><span class="p">:</span>
@@ -897,12 +897,12 @@ cilium<span class="w"> </span>encrypt<span class="w"> </span>status
 <li><a href="https://docs.cilium.io/en/stable/security/network/encryption/">Encryption</a></li>
 </ul>
 </blockquote>
-<hr>
-<h3>10. Hubble Observability</h3>
+<hr />
+<h3 id="10-hubble-observability">10. Hubble Observability</h3>
 <p><em>Domain: Network Observability (10%)</em></p>
 <p>Hubble provides deep network visibility powered by eBPF.</p>
 <p><strong>Hubble Architecture:</strong></p>
-<p><img alt="alt text" src="images/2025/12/33.png"></p>
+<p><img alt="alt text" src="images/2025/12/33.png" /></p>
 <p><strong>Enable Hubble:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Helm values</span>
 <span class="nt">hubble</span><span class="p">:</span>
@@ -1015,12 +1015,12 @@ hubble<span class="w"> </span>observe<span class="w"> </span>--protocol<span cla
 <li><a href="https://docs.cilium.io/en/stable/observability/hubble/hubble-cli/">Hubble CLI Reference</a></li>
 </ul>
 </blockquote>
-<hr>
-<h3>11. Cluster Mesh</h3>
+<hr />
+<h3 id="11-cluster-mesh">11. Cluster Mesh</h3>
 <p><em>Domain: Cluster Mesh (10%)</em></p>
 <p>Connect multiple Kubernetes clusters into a unified network.</p>
 <p><strong>Cluster Mesh Architecture:</strong></p>
-<p><img alt="alt text" src="images/2025/12/34.png"></p>
+<p><img alt="alt text" src="images/2025/12/34.png" /></p>
 <p><strong>Requirements:</strong></p>
 <table>
 <thead>
@@ -1114,8 +1114,8 @@ cilium<span class="w"> </span>clustermesh<span class="w"> </span>status
 <li><a href="https://docs.cilium.io/en/stable/network/clustermesh/">Cluster Mesh</a></li>
 </ul>
 </blockquote>
-<hr>
-<h3>12. Cilium CLI Commands Cheat Sheet</h3>
+<hr />
+<h3 id="12-cilium-cli-commands-cheat-sheet">12. Cilium CLI Commands Cheat Sheet</h3>
 <p><em>Domain: Installation and Configuration (10%)</em></p>
 <p>Essential <code>cilium</code> CLI commands for the exam.</p>
 <p><strong>Installation &amp; Status:</strong></p>
@@ -1276,8 +1276,8 @@ kubectl<span class="w"> </span>logs<span class="w"> </span>-n<span class="w"> </
 cilium<span class="w"> </span>bpf<span class="w"> </span>fs<span class="w"> </span>show
 </code></pre></div>
 
-<hr>
-<h1>Not related to exam but I want to put here anyway</h1>
+<hr />
+<h1 id="not-related-to-exam-but-i-want-to-put-here-anyway">Not related to exam but I want to put here anyway</h1>
 <p>While <strike>searching content</strike> copying content, I found this xD</p>
 <p><a href="https://www.reddit.com/r/kubernetes/comments/1pg2dfh/migration_from_ingressnginx_to_cilium_ingress/">https://www.reddit.com/r/kubernetes/comments/1pg2dfh/migration_from_ingressnginx_to_cilium_ingress/</a></p>
 <p>TLDR: </p>
@@ -1285,8 +1285,8 @@ cilium<span class="w"> </span>bpf<span class="w"> </span>fs<span class="w"> </sp
 <li>Cilium can not replace the ingress nginx yet, and we should not migrate from ingress nginx to Cilium.</li>
 <li>It could be replaced with a specific scenario only, not widely.</li>
 </ul>
-<hr>
-<h1>Key Resources</h1>
+<hr />
+<h1 id="key-resources">Key Resources</h1>
 <ul>
 <li><a href="https://docs.cilium.io/">Cilium Official Documentation</a></li>
 <li><a href="https://training.linuxfoundation.org/certification/cilium-certified-associate-cca/">CCA Exam Curriculum</a></li>
@@ -1295,11 +1295,11 @@ cilium<span class="w"> </span>bpf<span class="w"> </span>fs<span class="w"> </sp
 <li><a href="https://isovalent.com/labs/">Isovalent Labs (Free Tutorials)</a></li>
 <li><a href="https://blackmetalz.github.io/sharing-what-ive-learned-about-kubernetes-networking-part-2.html">My resource xD</a></li>
 </ul>
-<hr>
-<h1>My Secret Weapon: Mock Exam</h1>
+<hr />
+<h1 id="my-secret-weapon-mock-exam">My Secret Weapon: Mock Exam</h1>
 <p><a href="https://www.udemy.com/course/complete-cilium-certified-associate-cca-exam-prep"><strong>https://www.udemy.com/course/complete-cilium-certified-associate-cca-exam-prep</strong></a></p>
-<hr>
-<h1>Exam Notes</h1>
+<hr />
+<h1 id="exam-notes">Exam Notes</h1>
 <ul>
 <li>It is fucking hard.</li>
 <li>Questions are tricky, really, really! You need to read it really carefully.</li>
@@ -1310,8 +1310,8 @@ cilium<span class="w"> </span>bpf<span class="w"> </span>fs<span class="w"> </sp
 <li>I failed the first time with a score of 73/100 (pass score is 75), because I don't think it is that hard, and I lack preparation, only 1 day, like 5-6 hours for the exam??? I would say WTF, why don't I spend more time???</li>
 <li>Why is it hard? The retake I scored 80/100, and the questions are not the same as the last exam xDDDD</li>
 </ul>
-<hr>
-<h1>Conclusion</h1>
+<hr />
+<h1 id="conclusion">Conclusion</h1>
 <p>I don't think the article should be long like this long, over 1000 lines. But in fact, it is needed!</p>
 <p>Good luck with the exam, never underestimate it like me, who need 2nd try to pass xD</p>
 
