@@ -44,3 +44,13 @@ PAGINATED_TEMPLATES = {
     'category': None,
     'author': None,
 }
+
+# Markdown!
+MARKDOWN = {
+    'extension_configs': {
+        'markdown.extensions.extra': {},
+        'markdown.extensions.codehilite': {'css_class': 'highlight'},
+        'markdown.extensions.toc': {},
+        'pymdownx.tilde': {},   # <-- This handle ~~strikethrough~~
+    },
+}
