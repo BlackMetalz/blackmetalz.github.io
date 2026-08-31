@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="hpc, slurm, Knowledge Base, " />
+
+<meta property="og:title" content="[WIP] Slurm 101 "/>
+<meta property="og:url" content="https://blackmetalz.github.io/wip-slurm-101.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2026-09-07T00:00:00+07:00" />
+<meta name="twitter:title" content="[WIP] Slurm 101 ">
+<meta name="twitter:description" content="">
+
+        <title>[WIP] Slurm 101  · Kienlt&#39;s notebook
+</title>
+        <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://blackmetalz.github.io/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://blackmetalz.github.io
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://blackmetalz.github.io/categories.html">Categories</a></li>
+                                <li ><a href="https://blackmetalz.github.io/tags.html">Tags</a></li>
+                                <li ><a href="https://blackmetalz.github.io/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://blackmetalz.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://blackmetalz.github.io/wip-slurm-101.html">
+                [WIP] Slurm 101
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>TLDR: <strong>Slurm</strong> is an open source, fault-tolerant, and highly scalable cluster management and job scheduling system for large and small Linux clusters.</p>
+<h1 id="phase-1-understanding-the-core-concepts-of-slurm-most-important">Phase 1: Understanding the Core Concepts of Slurm (Most Important)</h1>
+<h3 id="first-understand-the-basic-topology">First, understand the basic topology:</h3>
+<div class="highlight"><pre><span></span><code>User
+  |
+Login Node
+  |
+slurmctld (controller)
+  |
++------------+------------+
+|            |            |
+slurmd      slurmd      slurmd
+Node01      Node02      Node03
+</code></pre></div>
+
+<p><img alt="Slurm Architecture Overview" src="../images/2026/09/01.png" /></p>
+<h3 id="key-components">Key Components:</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://slurm.schedmd.com/slurmctld.html"><code>slurmctld</code></a></td>
+<td>Scheduler + Central Controller</td>
+</tr>
+<tr>
+<td><a href="https://slurm.schedmd.com/slurmd.html"><code>slurmd</code></a></td>
+<td>Agent daemon running on compute nodes</td>
+</tr>
+<tr>
+<td><a href="https://slurm.schedmd.com/slurmdbd.html"><code>slurmdbd</code></a></td>
+<td>Accounting daemon (<a href="https://slurm.schedmd.com/accounting.html">Slurm Database Daemon</a>)</td>
+</tr>
+<tr>
+<td><a href="https://dun.github.io/munge/"><code>munge</code></a></td>
+<td>Authentication service</td>
+</tr>
+<tr>
+<td><code>login node</code></td>
+<td>Gateway node where users SSH in to submit jobs</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mapping-concepts-slurm-vs-kubernetes">Mapping Concepts: Slurm vs Kubernetes</h3>
+<div class="highlight"><pre><span></span><code>K8s                    Slurm
+
+kube-apiserver   ~=    slurmctld
+kubelet          ~=    slurmd
+Node             ~=    Compute Node
+Pod              ~=    Job/Task
+Scheduler        ~=    Slurm Scheduler
+</code></pre></div>
+
+<p>Key fundamental differences:</p>
+<ul>
+<li><strong>Kubernetes</strong> is optimized for long-running services (Deployments, APIs, web apps).</li>
+<li><a href="https://slurm.schedmd.com/"><strong>Slurm</strong></a> is optimized for batch workloads (AI training, simulations, HPC jobs).</li>
+</ul>
+<p>For example:</p>
+<ul>
+<li><strong>K8s:</strong> <em>"I want to run an Nginx service indefinitely."</em></li>
+<li><strong>Slurm:</strong> <em>"I want to run a 48-hour model training job and exit when done."</em></li>
+</ul>
+<h3 id="why-not-just-use-k8s-jobs-for-distributed-ai-training">Why not just use K8s Jobs for Distributed AI Training?</h3>
+<p>While Kubernetes has <code>Job</code> objects, Slurm remains the gold standard for large-scale GPU training because of three core HPC capabilities built into its DNA:</p>
+<p><strong>Atomic Multi-Node Allocation (Native Co-Allocation):</strong></p>
+<ul>
+<li>Multi-node distributed training (<a href="https://pytorch.org/docs/stable/notes/ddp.html">PyTorch DDP</a> / <a href="https://pytorch.org/docs/stable/fsdp.html">FSDP</a> / <a href="https://github.com/NVIDIA/Megatron-LM">Megatron-LM</a>) requires all $N$ GPUs across multiple nodes to start simultaneously to establish rendezvous and synchronize gradients.</li>
+<li>In vanilla Kubernetes, the default scheduler binds pods incrementally. If 60 GPUs are free and 4 are busy, it might schedule 60 pods and leave them idling—wasting expensive GPU hours unless using external batch co-scheduling add-ons like <a href="https://kueue.sigs.k8s.io/">Kueue</a> or <a href="https://volcano.sh/">Volcano</a>.</li>
+<li>Slurm natively guarantees <strong>atomic allocation</strong>: a job is only launched when 100% of the requested nodes and resources are simultaneously available, remaining in <code>PENDING</code> state without holding or fragmenting resources. <em>(Note: In Slurm documentation, "<a href="https://slurm.schedmd.com/gang_scheduling.html">Gang Scheduling</a>" specifically refers to time-slicing oversubscribed resources between jobs, rather than co-allocation).</em></li>
+</ul>
+<p><strong>Network Topology Awareness (InfiniBand / RoCE Tree):</strong></p>
+<ul>
+<li>The biggest bottleneck in AI training is inter-GPU communication (<a href="https://developer.nvidia.com/nccl">NCCL</a> AllReduce latency).</li>
+<li>Slurm understands network switch hierarchy via <a href="https://slurm.schedmd.com/topology.html">Topology Plugins</a> (Spine-Leaf / Fat-Tree). It prioritizes packing jobs within the same Top-of-Rack (ToR) switch to maximize throughput and minimize latency.</li>
+</ul>
+<p><img alt="Network Topology &amp; GPU Communication" src="../images/2026/09/03.png" /></p>
+<p><strong>Bare-Metal Performance &amp; Direct POSIX Storage:</strong></p>
+<ul>
+<li>Slurm executes processes directly on the host OS with <a href="https://docs.kernel.org/admin-guide/cgroup-v2.html">Linux cgroups</a> locking specific CPU cores, NUMA nodes, and GPU PCI buses.</li>
+<li>Zero container overlay network (CNI) overhead and direct POSIX access to high-performance parallel file systems (<a href="https://www.lustre.org/">Lustre</a>, <a href="https://www.beegfs.io/">BeeGFS</a>, <a href="https://www.ibm.com/products/storage-scale">GPFS / IBM Storage Scale</a>).</li>
+</ul>
+<h3 id="essential-cli-commands">Essential CLI Commands:</h3>
+<p><a href="https://slurm.schedmd.com/sbatch.html"><strong><code>sbatch</code></strong></a>: Submits a batch job script. Slurm accepts the job and initially places it in a <code>PENDING</code> state:</p>
+<div class="highlight"><pre><span></span><code><span class="n">JobID</span><span class="o">=</span><span class="mi">123</span>
+<span class="n">State</span><span class="o">=</span><span class="n">PENDING</span>
+</code></pre></div>
+
+<p>It then waits for the scheduler to allocate resources and execute it. In Kubernetes terms, it feels like:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>job.yaml
+</code></pre></div>
+
+<p><a href="https://slurm.schedmd.com/srun.html"><strong><code>srun</code></strong></a>: Executes jobs immediately in interactive mode or runs parallel tasks within an allocation. For example:</p>
+<div class="highlight"><pre><span></span><code>srun<span class="w"> </span>hostname
+</code></pre></div>
+
+<p>Slurm allocates a node and executes the command on <code>node01</code>. A quick way to distinguish them:</p>
+<div class="highlight"><pre><span></span><code>sbatch = Submit a job script (asynchronous)
+
+srun   = Run a command / step (synchronous / interactive)
+</code></pre></div>
+
+<p><a href="https://slurm.schedmd.com/squeue.html"><strong><code>squeue</code></strong></a>: Views the cluster's job queue. Running <strong><code>squeue</code></strong>:</p>
+<div class="highlight"><pre><span></span><code>JOBID PARTITION USER ST
+123   gpu       kien PD
+124   gpu       kien R
+</code></pre></div>
+
+<p>State meanings:</p>
+<div class="highlight"><pre><span></span><code>PD = Pending
+R  = Running
+CG = Completing
+</code></pre></div>
+
+<p>Conceptually similar to: <strong><code>kubectl get pods</code></strong></p>
+<p><a href="https://slurm.schedmd.com/sinfo.html"><strong><code>sinfo</code></strong></a>: Views the status of nodes and partitions. Running <strong><code>sinfo</code></strong>:</p>
+<div class="highlight"><pre><span></span><code>PARTITION AVAIL NODES STATE
+cpu       up      4   idle
+gpu       up      2   alloc
+</code></pre></div>
+
+<p>Think of it like:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+</code></pre></div>
+
+<p><a href="https://slurm.schedmd.com/scancel.html"><strong><code>scancel</code></strong></a>: Cancels/kills a job. For example: <strong><code>scancel 123</code></strong>. Similar to: <strong><code>kubectl delete pod xxx</code></strong>.</p>
+<p><a href="https://slurm.schedmd.com/sacct.html"><strong><code>sacct</code></strong></a>: Accounting tool. Displays historical job accounting records.</p>
+<h3 id="core-resource-scheduling-concepts">Core Resource &amp; Scheduling Concepts</h3>
+<ul>
+<li><a href="https://slurm.schedmd.com/qos.html"><strong>QoS (Quality of Service)</strong></a>: Priority, limits, and preemption rules.</li>
+<li><a href="https://slurm.schedmd.com/slurm.conf.html#OPT_PartitionName"><strong>Partition</strong></a>: Logical grouping of nodes (like queues or namespaces with specific node pools).</li>
+<li><a href="https://slurm.schedmd.com/gres.html"><strong>GRES (Generic Resources)</strong></a>: Generic resource management (e.g. GPUs).</li>
+<li><a href="https://slurm.schedmd.com/cgroups.html"><strong>cgroup</strong></a>: Resource isolation (CPU cores, memory, devices) enforced on compute nodes.</li>
+</ul>
+<p><img alt="Slurm Entities, Partitions, and Jobs" src="../images/2026/09/02.png" /></p>
+<hr />
+<h1 id="phase-2-localhost-lab-with-docker">Phase 2: Localhost Lab with Docker</h1>
+<h3 id="building-a-mini-cluster">Building a Mini Cluster</h3>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>network<span class="w"> </span>create<span class="w"> </span>slurm-net
+
+controller
+compute01
+compute02
+</code></pre></div>
+
+<p>Each container acts as a specific role:</p>
+<div class="highlight"><pre><span></span><code>slurm-controller
+slurm-node1
+slurm-node2
+</code></pre></div>
+
+<p>Architecture:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">+------------------+</span>
+<span class="c">|    slurmctld     |</span>
+<span class="nb">+------------------+</span>
+<span class="c">         |</span>
+<span class="c">    </span><span class="nb">+----+----+</span>
+<span class="c">    |         |</span>
+<span class="nb">+--------+</span><span class="c"> </span><span class="nb">+--------+</span>
+<span class="c">| slurmd | | slurmd |</span>
+<span class="c">| node01 | | node02 |</span>
+<span class="nb">+--------+</span><span class="c"> </span><span class="nb">+--------+</span>
+</code></pre></div>
+
+<h3 id="hands-on-testing">Hands-on Testing</h3>
+<p>This is the most valuable part to practice:</p>
+<ul>
+<li><code>sbatch job.sh</code></li>
+<li><code>srun hostname</code></li>
+<li><code>sinfo</code></li>
+<li><code>squeue</code></li>
+</ul>
+<hr />
+<h1 id="phase-3-simulating-a-production-cluster">Phase 3: Simulating a Production Cluster</h1>
+<p>Once the basic Docker cluster is up and running:</p>
+<h3 id="adding-a-login-node">Adding a Login Node:</h3>
+<div class="highlight"><pre><span></span><code>login
+controller
+compute01
+compute02
+</code></pre></div>
+
+<p>The login node doesn't run computation workloads:</p>
+<p>User workflow:</p>
+<div class="highlight"><pre><span></span><code>ssh<span class="w"> </span>login
+sbatch<span class="w"> </span>train.sh
+</code></pre></div>
+
+<p>This mirrors real-world production environments much closer.</p>
+<h3 id="adding-slurmdbd-accounting">Adding <code>slurmdbd</code> (Accounting)</h3>
+<p>Learn accounting — this is one of the most frequently used subsystems by HPC admins.</p>
+<div class="highlight"><pre><span></span><code>MariaDB
+  |
+slurmdbd
+  |
+slurmctld
+</code></pre></div>
+
+<p>Then explore these commands:</p>
+<ul>
+<li><a href="https://slurm.schedmd.com/sacct.html"><code>sacct</code></a></li>
+<li><a href="https://slurm.schedmd.com/sreport.html"><code>sreport</code></a></li>
+</ul>
+<hr />
+<h1 id="phase-4-gpu-scheduling">Phase 4: GPU Scheduling</h1>
+<p>Note: GPU scheduling (GRES) can be skipped initially if you don't have local GPUs.</p>
+<ul>
+<li>Slurm manages GPU via <a href="https://slurm.schedmd.com/gres.html">GRES (Generic Resources)</a> combined with <a href="https://slurm.schedmd.com/cgroups.html">Linux cgroups</a> to map device files (<code>/dev/nvidia*</code>).</li>
+<li>Tip for learners without a local GPU like me, we still can define dummy GRES in <a href="https://slurm.schedmd.com/slurm.conf.html"><code>slurm.conf</code></a> and <a href="https://slurm.schedmd.com/gres.conf.html"><code>gres.conf</code></a> to completely understand the resource request flow of <strong><code>--gres=gpu:1</code></strong> in Slurm without any physical GPU!</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># slurm.conf</span>
+<span class="na">GresTypes</span><span class="o">=</span><span class="s">gpu</span>
+<span class="na">NodeName</span><span class="o">=</span><span class="s">node[1-2] Gres=gpu:fake:2</span>
+
+<span class="c1"># gres.conf</span>
+<span class="na">NodeName</span><span class="o">=</span><span class="s">node[1-2] Name=gpu Type=fake File=/dev/null</span>
+</code></pre></div>
+
+<hr />
+<h1 id="phase-5-high-availability-ha-production-setup">Phase 5: High Availability (HA) &amp; Production Setup</h1>
+<p>When scaling up to a larger lab:</p>
+<h3 id="controller-ha">Controller HA</h3>
+<p>Learn <a href="https://slurm.schedmd.com/quickstart_admin.html#HA">Slurm High Availability (HA)</a>:</p>
+<div class="highlight"><pre><span></span><code>Primary slurmctld
+Backup slurmctld
+</code></pre></div>
+
+<p>Configuration concepts in <a href="https://slurm.schedmd.com/slurm.conf.html"><code>slurm.conf</code></a>:</p>
+<div class="highlight"><pre><span></span><code><span class="na">SlurmctldHost</span><span class="o">=</span><span class="s">ctrl1</span>
+<span class="na">SlurmctldHost</span><span class="o">=</span><span class="s">ctrl2</span>
+</code></pre></div>
+
+<h3 id="shared-storage-strategy">Shared Storage Strategy</h3>
+<p>While not a hardcoded Slurm specification, the standard industry convention in HPC/AI clusters is to tier shared storage into 3 distinct mount paths based on I/O performance and lifecycle:</p>
+<ul>
+<li><strong><code>/home</code> (User Environment):</strong></li>
+<li>Holds dotfiles, Python virtualenvs, and job submission scripts.</li>
+<li>Backed by standard NFS / CephFS with daily backups and strict quotas (e.g., 20GB/user).</li>
+<li><strong><code>/scratch</code> (High-Speed Ephemeral Workspace):</strong></li>
+<li>Dedicated for active job I/O, temporary checkpoints (<code>.pt</code>), and staging datasets.</li>
+<li>Backed by high-throughput Parallel File Systems (<a href="https://www.lustre.org/">Lustre</a>, <a href="https://www.beegfs.io/">BeeGFS</a>). <strong>No backups</strong> and subject to auto-purging policies (e.g., automatically deleted if unaccessed for 30 days).</li>
+<li><strong><code>/project</code> or <code>/data</code> (Team Shared Assets):</strong></li>
+<li>Shared storage for base datasets (e.g., ImageNet, HuggingFace caches) and long-term project artifacts with team-based POSIX permissions (<code>setgid</code>).</li>
+</ul>
+<hr />
+<h1 id="phase-6-slurm-containers">Phase 6: Slurm + Containers</h1>
+<p>This is where the real fun begins:</p>
+<h3 id="why-dont-we-just-use-docker-run-in-slurm">Why don't we just use docker run in Slurm?</h3>
+<ul>
+<li>The essence: Docker requires a daemon running with root access. In multi-tenant HPC clusters, giving docker access to users is practically equivalent to giving them root access xD.</li>
+<li>Solution for HPC: <a href="https://apptainer.org/"><strong>Apptainer (Singularity)</strong></a> or <a href="https://github.com/NVIDIA/enroot"><strong>NVIDIA Enroot</strong></a> / <a href="https://github.com/NVIDIA/pyxis"><strong>Pyxis</strong></a> that turn container images into flat files (<code>.sif</code>), run completely under the user's UID/GID within a user namespace, and mount <code>/scratch</code> and host NVIDIA drivers directly without a root daemon.</li>
+</ul>
+<p><img alt="Apptainer SIF vs Docker Architecture" src="../images/2026/09/06.png" /></p>
+<h3 id="apptainer-singularity">Apptainer (Singularity)</h3>
+<p>Extremely popular in HPC environments. <a href="https://apptainer.org/">Apptainer</a> is well worth learning before Docker-on-Slurm, as almost every HPC cluster uses it for rootless container execution.</p>
+<div class="highlight"><pre><span></span><code>srun<span class="w"> </span>apptainer<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>pytorch.sif<span class="w"> </span>python<span class="w"> </span>train.py
+</code></pre></div>
+
+<hr />
+<h1 id="phase-7-slurm-kubernetes">Phase 7: Slurm + Kubernetes</h1>
+<p>This is the most sensible model in modern AI/ML infrastructure today. For example:</p>
+<h3 id="k8s-layer-cloud-native-control-plane">K8S Layer (Cloud-native control plane)</h3>
+<p>Serving developer experience:
+- <a href="https://jupyter.org/hub">JupyterHub</a>
+- <a href="https://mlflow.org/">MLflow</a>
+- <a href="https://www.ray.io/">Ray</a> / Ray Dashboard
+- Model Registry
+- Serving APIs / Inference Servers (<a href="https://github.com/vllm-project/vllm">vLLM</a> / <a href="https://developer.nvidia.com/triton-inference-server">Triton Inference Server</a>)</p>
+<h3 id="slurm-layer-bare-metal-execution-engine">Slurm Layer (Bare-metal Execution Engine)</h3>
+<p>Serving heavy distributed training &amp; fine-tuning where thousands of GPUs connect to each other via <a href="https://www.infinibandta.org/">InfiniBand</a> or <a href="https://en.wikipedia.org/wiki/RDMA_over_Converged_Ethernet">RoCEv2</a>.</p>
+<hr />
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2026-09-07T00:00:00+07:00">Mon 07 September 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://blackmetalz.github.io/tags.html#hpc-ref">hpc
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#slurm-ref">slurm
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://blackmetalz.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>

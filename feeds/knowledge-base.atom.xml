@@ -1,5 +1,279 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-08-31T00:00:00+07:00</updated><entry><title>Python standard json vs orjson</title><link href="https://blackmetalz.github.io/python-standard-json-vs-orjson.html" rel="alternate"/><published>2026-08-31T00:00:00+07:00</published><updated>2026-08-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-08-31:/python-standard-json-vs-orjson.html</id><summary type="html"/><content type="html">&lt;p&gt;TLDR: use &lt;strong&gt;orjson&lt;/strong&gt; when you need performance when dump(Serialize) json data, where every millisecond counts.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Kienlt's notebook - Knowledge Base</title><link href="https://blackmetalz.github.io/" rel="alternate"/><link href="https://blackmetalz.github.io/feeds/knowledge-base.atom.xml" rel="self"/><id>https://blackmetalz.github.io/</id><updated>2026-09-07T00:00:00+07:00</updated><entry><title>[WIP] Slurm 101</title><link href="https://blackmetalz.github.io/wip-slurm-101.html" rel="alternate"/><published>2026-09-07T00:00:00+07:00</published><updated>2026-09-07T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-09-07:/wip-slurm-101.html</id><summary type="html"/><content type="html">&lt;p&gt;TLDR: &lt;strong&gt;Slurm&lt;/strong&gt; is an open source, fault-tolerant, and highly scalable cluster management and job scheduling system for large and small Linux clusters.&lt;/p&gt;
+&lt;h1 id="phase-1-understanding-the-core-concepts-of-slurm-most-important"&gt;Phase 1: Understanding the Core Concepts of Slurm (Most Important)&lt;/h1&gt;
+&lt;h3 id="first-understand-the-basic-topology"&gt;First, understand the basic topology:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;User
+  |
+Login Node
+  |
+slurmctld (controller)
+  |
++------------+------------+
+|            |            |
+slurmd      slurmd      slurmd
+Node01      Node02      Node03
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img alt="Slurm Architecture Overview" src="../images/2026/09/01.png" /&gt;&lt;/p&gt;
+&lt;h3 id="key-components"&gt;Key Components:&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Component&lt;/th&gt;
+&lt;th&gt;Role&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://slurm.schedmd.com/slurmctld.html"&gt;&lt;code&gt;slurmctld&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Scheduler + Central Controller&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://slurm.schedmd.com/slurmd.html"&gt;&lt;code&gt;slurmd&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Agent daemon running on compute nodes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://slurm.schedmd.com/slurmdbd.html"&gt;&lt;code&gt;slurmdbd&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Accounting daemon (&lt;a href="https://slurm.schedmd.com/accounting.html"&gt;Slurm Database Daemon&lt;/a&gt;)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://dun.github.io/munge/"&gt;&lt;code&gt;munge&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Authentication service&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;login node&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Gateway node where users SSH in to submit jobs&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="mapping-concepts-slurm-vs-kubernetes"&gt;Mapping Concepts: Slurm vs Kubernetes&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;K8s                    Slurm
+
+kube-apiserver   ~=    slurmctld
+kubelet          ~=    slurmd
+Node             ~=    Compute Node
+Pod              ~=    Job/Task
+Scheduler        ~=    Slurm Scheduler
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Key fundamental differences:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Kubernetes&lt;/strong&gt; is optimized for long-running services (Deployments, APIs, web apps).&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://slurm.schedmd.com/"&gt;&lt;strong&gt;Slurm&lt;/strong&gt;&lt;/a&gt; is optimized for batch workloads (AI training, simulations, HPC jobs).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;K8s:&lt;/strong&gt; &lt;em&gt;"I want to run an Nginx service indefinitely."&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Slurm:&lt;/strong&gt; &lt;em&gt;"I want to run a 48-hour model training job and exit when done."&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="why-not-just-use-k8s-jobs-for-distributed-ai-training"&gt;Why not just use K8s Jobs for Distributed AI Training?&lt;/h3&gt;
+&lt;p&gt;While Kubernetes has &lt;code&gt;Job&lt;/code&gt; objects, Slurm remains the gold standard for large-scale GPU training because of three core HPC capabilities built into its DNA:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Atomic Multi-Node Allocation (Native Co-Allocation):&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Multi-node distributed training (&lt;a href="https://pytorch.org/docs/stable/notes/ddp.html"&gt;PyTorch DDP&lt;/a&gt; / &lt;a href="https://pytorch.org/docs/stable/fsdp.html"&gt;FSDP&lt;/a&gt; / &lt;a href="https://github.com/NVIDIA/Megatron-LM"&gt;Megatron-LM&lt;/a&gt;) requires all $N$ GPUs across multiple nodes to start simultaneously to establish rendezvous and synchronize gradients.&lt;/li&gt;
+&lt;li&gt;In vanilla Kubernetes, the default scheduler binds pods incrementally. If 60 GPUs are free and 4 are busy, it might schedule 60 pods and leave them idling—wasting expensive GPU hours unless using external batch co-scheduling add-ons like &lt;a href="https://kueue.sigs.k8s.io/"&gt;Kueue&lt;/a&gt; or &lt;a href="https://volcano.sh/"&gt;Volcano&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Slurm natively guarantees &lt;strong&gt;atomic allocation&lt;/strong&gt;: a job is only launched when 100% of the requested nodes and resources are simultaneously available, remaining in &lt;code&gt;PENDING&lt;/code&gt; state without holding or fragmenting resources. &lt;em&gt;(Note: In Slurm documentation, "&lt;a href="https://slurm.schedmd.com/gang_scheduling.html"&gt;Gang Scheduling&lt;/a&gt;" specifically refers to time-slicing oversubscribed resources between jobs, rather than co-allocation).&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Network Topology Awareness (InfiniBand / RoCE Tree):&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The biggest bottleneck in AI training is inter-GPU communication (&lt;a href="https://developer.nvidia.com/nccl"&gt;NCCL&lt;/a&gt; AllReduce latency).&lt;/li&gt;
+&lt;li&gt;Slurm understands network switch hierarchy via &lt;a href="https://slurm.schedmd.com/topology.html"&gt;Topology Plugins&lt;/a&gt; (Spine-Leaf / Fat-Tree). It prioritizes packing jobs within the same Top-of-Rack (ToR) switch to maximize throughput and minimize latency.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="Network Topology &amp;amp; GPU Communication" src="../images/2026/09/03.png" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Bare-Metal Performance &amp;amp; Direct POSIX Storage:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Slurm executes processes directly on the host OS with &lt;a href="https://docs.kernel.org/admin-guide/cgroup-v2.html"&gt;Linux cgroups&lt;/a&gt; locking specific CPU cores, NUMA nodes, and GPU PCI buses.&lt;/li&gt;
+&lt;li&gt;Zero container overlay network (CNI) overhead and direct POSIX access to high-performance parallel file systems (&lt;a href="https://www.lustre.org/"&gt;Lustre&lt;/a&gt;, &lt;a href="https://www.beegfs.io/"&gt;BeeGFS&lt;/a&gt;, &lt;a href="https://www.ibm.com/products/storage-scale"&gt;GPFS / IBM Storage Scale&lt;/a&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="essential-cli-commands"&gt;Essential CLI Commands:&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://slurm.schedmd.com/sbatch.html"&gt;&lt;strong&gt;&lt;code&gt;sbatch&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;: Submits a batch job script. Slurm accepts the job and initially places it in a &lt;code&gt;PENDING&lt;/code&gt; state:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;JobID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;123&lt;/span&gt;
+&lt;span class="n"&gt;State&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;PENDING&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;It then waits for the scheduler to allocate resources and execute it. In Kubernetes terms, it feels like:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;apply&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;job.yaml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a href="https://slurm.schedmd.com/srun.html"&gt;&lt;strong&gt;&lt;code&gt;srun&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;: Executes jobs immediately in interactive mode or runs parallel tasks within an allocation. For example:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;srun&lt;span class="w"&gt; &lt;/span&gt;hostname
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Slurm allocates a node and executes the command on &lt;code&gt;node01&lt;/code&gt;. A quick way to distinguish them:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sbatch = Submit a job script (asynchronous)
+
+srun   = Run a command / step (synchronous / interactive)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a href="https://slurm.schedmd.com/squeue.html"&gt;&lt;strong&gt;&lt;code&gt;squeue&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;: Views the cluster's job queue. Running &lt;strong&gt;&lt;code&gt;squeue&lt;/code&gt;&lt;/strong&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;JOBID PARTITION USER ST
+123   gpu       kien PD
+124   gpu       kien R
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;State meanings:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;PD = Pending
+R  = Running
+CG = Completing
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Conceptually similar to: &lt;strong&gt;&lt;code&gt;kubectl get pods&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://slurm.schedmd.com/sinfo.html"&gt;&lt;strong&gt;&lt;code&gt;sinfo&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;: Views the status of nodes and partitions. Running &lt;strong&gt;&lt;code&gt;sinfo&lt;/code&gt;&lt;/strong&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;PARTITION AVAIL NODES STATE
+cpu       up      4   idle
+gpu       up      2   alloc
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Think of it like:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;nodes
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a href="https://slurm.schedmd.com/scancel.html"&gt;&lt;strong&gt;&lt;code&gt;scancel&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;: Cancels/kills a job. For example: &lt;strong&gt;&lt;code&gt;scancel 123&lt;/code&gt;&lt;/strong&gt;. Similar to: &lt;strong&gt;&lt;code&gt;kubectl delete pod xxx&lt;/code&gt;&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://slurm.schedmd.com/sacct.html"&gt;&lt;strong&gt;&lt;code&gt;sacct&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;: Accounting tool. Displays historical job accounting records.&lt;/p&gt;
+&lt;h3 id="core-resource-scheduling-concepts"&gt;Core Resource &amp;amp; Scheduling Concepts&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://slurm.schedmd.com/qos.html"&gt;&lt;strong&gt;QoS (Quality of Service)&lt;/strong&gt;&lt;/a&gt;: Priority, limits, and preemption rules.&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://slurm.schedmd.com/slurm.conf.html#OPT_PartitionName"&gt;&lt;strong&gt;Partition&lt;/strong&gt;&lt;/a&gt;: Logical grouping of nodes (like queues or namespaces with specific node pools).&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://slurm.schedmd.com/gres.html"&gt;&lt;strong&gt;GRES (Generic Resources)&lt;/strong&gt;&lt;/a&gt;: Generic resource management (e.g. GPUs).&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://slurm.schedmd.com/cgroups.html"&gt;&lt;strong&gt;cgroup&lt;/strong&gt;&lt;/a&gt;: Resource isolation (CPU cores, memory, devices) enforced on compute nodes.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="Slurm Entities, Partitions, and Jobs" src="../images/2026/09/02.png" /&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1 id="phase-2-localhost-lab-with-docker"&gt;Phase 2: Localhost Lab with Docker&lt;/h1&gt;
+&lt;h3 id="building-a-mini-cluster"&gt;Building a Mini Cluster&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;docker&lt;span class="w"&gt; &lt;/span&gt;network&lt;span class="w"&gt; &lt;/span&gt;create&lt;span class="w"&gt; &lt;/span&gt;slurm-net
+
+controller
+compute01
+compute02
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Each container acts as a specific role:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;slurm-controller
+slurm-node1
+slurm-node2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Architecture:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;+------------------+&lt;/span&gt;
+&lt;span class="c"&gt;|    slurmctld     |&lt;/span&gt;
+&lt;span class="nb"&gt;+------------------+&lt;/span&gt;
+&lt;span class="c"&gt;         |&lt;/span&gt;
+&lt;span class="c"&gt;    &lt;/span&gt;&lt;span class="nb"&gt;+----+----+&lt;/span&gt;
+&lt;span class="c"&gt;    |         |&lt;/span&gt;
+&lt;span class="nb"&gt;+--------+&lt;/span&gt;&lt;span class="c"&gt; &lt;/span&gt;&lt;span class="nb"&gt;+--------+&lt;/span&gt;
+&lt;span class="c"&gt;| slurmd | | slurmd |&lt;/span&gt;
+&lt;span class="c"&gt;| node01 | | node02 |&lt;/span&gt;
+&lt;span class="nb"&gt;+--------+&lt;/span&gt;&lt;span class="c"&gt; &lt;/span&gt;&lt;span class="nb"&gt;+--------+&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id="hands-on-testing"&gt;Hands-on Testing&lt;/h3&gt;
+&lt;p&gt;This is the most valuable part to practice:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;sbatch job.sh&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;srun hostname&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sinfo&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;squeue&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;h1 id="phase-3-simulating-a-production-cluster"&gt;Phase 3: Simulating a Production Cluster&lt;/h1&gt;
+&lt;p&gt;Once the basic Docker cluster is up and running:&lt;/p&gt;
+&lt;h3 id="adding-a-login-node"&gt;Adding a Login Node:&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;login
+controller
+compute01
+compute02
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;The login node doesn't run computation workloads:&lt;/p&gt;
+&lt;p&gt;User workflow:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ssh&lt;span class="w"&gt; &lt;/span&gt;login
+sbatch&lt;span class="w"&gt; &lt;/span&gt;train.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;This mirrors real-world production environments much closer.&lt;/p&gt;
+&lt;h3 id="adding-slurmdbd-accounting"&gt;Adding &lt;code&gt;slurmdbd&lt;/code&gt; (Accounting)&lt;/h3&gt;
+&lt;p&gt;Learn accounting — this is one of the most frequently used subsystems by HPC admins.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;MariaDB
+  |
+slurmdbd
+  |
+slurmctld
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Then explore these commands:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://slurm.schedmd.com/sacct.html"&gt;&lt;code&gt;sacct&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://slurm.schedmd.com/sreport.html"&gt;&lt;code&gt;sreport&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;h1 id="phase-4-gpu-scheduling"&gt;Phase 4: GPU Scheduling&lt;/h1&gt;
+&lt;p&gt;Note: GPU scheduling (GRES) can be skipped initially if you don't have local GPUs.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Slurm manages GPU via &lt;a href="https://slurm.schedmd.com/gres.html"&gt;GRES (Generic Resources)&lt;/a&gt; combined with &lt;a href="https://slurm.schedmd.com/cgroups.html"&gt;Linux cgroups&lt;/a&gt; to map device files (&lt;code&gt;/dev/nvidia*&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;Tip for learners without a local GPU like me, we still can define dummy GRES in &lt;a href="https://slurm.schedmd.com/slurm.conf.html"&gt;&lt;code&gt;slurm.conf&lt;/code&gt;&lt;/a&gt; and &lt;a href="https://slurm.schedmd.com/gres.conf.html"&gt;&lt;code&gt;gres.conf&lt;/code&gt;&lt;/a&gt; to completely understand the resource request flow of &lt;strong&gt;&lt;code&gt;--gres=gpu:1&lt;/code&gt;&lt;/strong&gt; in Slurm without any physical GPU!&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# slurm.conf&lt;/span&gt;
+&lt;span class="na"&gt;GresTypes&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;gpu&lt;/span&gt;
+&lt;span class="na"&gt;NodeName&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;node[1-2] Gres=gpu:fake:2&lt;/span&gt;
+
+&lt;span class="c1"&gt;# gres.conf&lt;/span&gt;
+&lt;span class="na"&gt;NodeName&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;node[1-2] Name=gpu Type=fake File=/dev/null&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;hr /&gt;
+&lt;h1 id="phase-5-high-availability-ha-production-setup"&gt;Phase 5: High Availability (HA) &amp;amp; Production Setup&lt;/h1&gt;
+&lt;p&gt;When scaling up to a larger lab:&lt;/p&gt;
+&lt;h3 id="controller-ha"&gt;Controller HA&lt;/h3&gt;
+&lt;p&gt;Learn &lt;a href="https://slurm.schedmd.com/quickstart_admin.html#HA"&gt;Slurm High Availability (HA)&lt;/a&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Primary slurmctld
+Backup slurmctld
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Configuration concepts in &lt;a href="https://slurm.schedmd.com/slurm.conf.html"&gt;&lt;code&gt;slurm.conf&lt;/code&gt;&lt;/a&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="na"&gt;SlurmctldHost&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;ctrl1&lt;/span&gt;
+&lt;span class="na"&gt;SlurmctldHost&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;ctrl2&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id="shared-storage-strategy"&gt;Shared Storage Strategy&lt;/h3&gt;
+&lt;p&gt;While not a hardcoded Slurm specification, the standard industry convention in HPC/AI clusters is to tier shared storage into 3 distinct mount paths based on I/O performance and lifecycle:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;/home&lt;/code&gt; (User Environment):&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Holds dotfiles, Python virtualenvs, and job submission scripts.&lt;/li&gt;
+&lt;li&gt;Backed by standard NFS / CephFS with daily backups and strict quotas (e.g., 20GB/user).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;/scratch&lt;/code&gt; (High-Speed Ephemeral Workspace):&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Dedicated for active job I/O, temporary checkpoints (&lt;code&gt;.pt&lt;/code&gt;), and staging datasets.&lt;/li&gt;
+&lt;li&gt;Backed by high-throughput Parallel File Systems (&lt;a href="https://www.lustre.org/"&gt;Lustre&lt;/a&gt;, &lt;a href="https://www.beegfs.io/"&gt;BeeGFS&lt;/a&gt;). &lt;strong&gt;No backups&lt;/strong&gt; and subject to auto-purging policies (e.g., automatically deleted if unaccessed for 30 days).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;/project&lt;/code&gt; or &lt;code&gt;/data&lt;/code&gt; (Team Shared Assets):&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Shared storage for base datasets (e.g., ImageNet, HuggingFace caches) and long-term project artifacts with team-based POSIX permissions (&lt;code&gt;setgid&lt;/code&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;h1 id="phase-6-slurm-containers"&gt;Phase 6: Slurm + Containers&lt;/h1&gt;
+&lt;p&gt;This is where the real fun begins:&lt;/p&gt;
+&lt;h3 id="why-dont-we-just-use-docker-run-in-slurm"&gt;Why don't we just use docker run in Slurm?&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;The essence: Docker requires a daemon running with root access. In multi-tenant HPC clusters, giving docker access to users is practically equivalent to giving them root access xD.&lt;/li&gt;
+&lt;li&gt;Solution for HPC: &lt;a href="https://apptainer.org/"&gt;&lt;strong&gt;Apptainer (Singularity)&lt;/strong&gt;&lt;/a&gt; or &lt;a href="https://github.com/NVIDIA/enroot"&gt;&lt;strong&gt;NVIDIA Enroot&lt;/strong&gt;&lt;/a&gt; / &lt;a href="https://github.com/NVIDIA/pyxis"&gt;&lt;strong&gt;Pyxis&lt;/strong&gt;&lt;/a&gt; that turn container images into flat files (&lt;code&gt;.sif&lt;/code&gt;), run completely under the user's UID/GID within a user namespace, and mount &lt;code&gt;/scratch&lt;/code&gt; and host NVIDIA drivers directly without a root daemon.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="Apptainer SIF vs Docker Architecture" src="../images/2026/09/06.png" /&gt;&lt;/p&gt;
+&lt;h3 id="apptainer-singularity"&gt;Apptainer (Singularity)&lt;/h3&gt;
+&lt;p&gt;Extremely popular in HPC environments. &lt;a href="https://apptainer.org/"&gt;Apptainer&lt;/a&gt; is well worth learning before Docker-on-Slurm, as almost every HPC cluster uses it for rootless container execution.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;srun&lt;span class="w"&gt; &lt;/span&gt;apptainer&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;pytorch.sif&lt;span class="w"&gt; &lt;/span&gt;python&lt;span class="w"&gt; &lt;/span&gt;train.py
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;hr /&gt;
+&lt;h1 id="phase-7-slurm-kubernetes"&gt;Phase 7: Slurm + Kubernetes&lt;/h1&gt;
+&lt;p&gt;This is the most sensible model in modern AI/ML infrastructure today. For example:&lt;/p&gt;
+&lt;h3 id="k8s-layer-cloud-native-control-plane"&gt;K8S Layer (Cloud-native control plane)&lt;/h3&gt;
+&lt;p&gt;Serving developer experience:
+- &lt;a href="https://jupyter.org/hub"&gt;JupyterHub&lt;/a&gt;
+- &lt;a href="https://mlflow.org/"&gt;MLflow&lt;/a&gt;
+- &lt;a href="https://www.ray.io/"&gt;Ray&lt;/a&gt; / Ray Dashboard
+- Model Registry
+- Serving APIs / Inference Servers (&lt;a href="https://github.com/vllm-project/vllm"&gt;vLLM&lt;/a&gt; / &lt;a href="https://developer.nvidia.com/triton-inference-server"&gt;Triton Inference Server&lt;/a&gt;)&lt;/p&gt;
+&lt;h3 id="slurm-layer-bare-metal-execution-engine"&gt;Slurm Layer (Bare-metal Execution Engine)&lt;/h3&gt;
+&lt;p&gt;Serving heavy distributed training &amp;amp; fine-tuning where thousands of GPUs connect to each other via &lt;a href="https://www.infinibandta.org/"&gt;InfiniBand&lt;/a&gt; or &lt;a href="https://en.wikipedia.org/wiki/RDMA_over_Converged_Ethernet"&gt;RoCEv2&lt;/a&gt;.&lt;/p&gt;
+&lt;hr /&gt;</content><category term="Knowledge Base"/><category term="hpc"/><category term="slurm"/></entry><entry><title>Python standard json vs orjson</title><link href="https://blackmetalz.github.io/python-standard-json-vs-orjson.html" rel="alternate"/><published>2026-08-31T00:00:00+07:00</published><updated>2026-08-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-08-31:/python-standard-json-vs-orjson.html</id><summary type="html"/><content type="html">&lt;p&gt;TLDR: use &lt;strong&gt;orjson&lt;/strong&gt; when you need performance when dump(Serialize) json data, where every millisecond counts.&lt;/p&gt;
 &lt;h1 id="introduction"&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;In our current project at work, I noticed that my team uses &lt;code&gt;orjson&lt;/code&gt; instead of Python's standard &lt;code&gt;json&lt;/code&gt; module. At first, I was like: &lt;em&gt;"Why do we need to &lt;code&gt;pip install&lt;/code&gt; an external library when Python already has built-in &lt;code&gt;json&lt;/code&gt; support?"&lt;/em&gt;. I'm a simple guy who likes to keep things simple xD&lt;/p&gt;
 &lt;p&gt;My boss told me that &lt;strong&gt;orjson&lt;/strong&gt; is much faster than standard &lt;strong&gt;json&lt;/strong&gt;, and I was like: "Ohh, this shit is definitely something worth digging into!"&lt;/p&gt;
@@ -46,10 +320,12 @@
 &lt;li&gt;&lt;strong&gt;bench_stdlib_json.py&lt;/strong&gt; : &lt;strong&gt;Standard &lt;code&gt;json&lt;/code&gt;&lt;/strong&gt;, pre-wrapped &lt;code&gt;str()&lt;/code&gt; during data creation.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;h3 id="the-numbers"&gt;The Numbers&lt;/h3&gt;
-&lt;p&gt;Environment:
-- Python: 3.10
-- orjson: 3.10.0
-- CPU: AMD Ryzen 5900X&lt;/p&gt;
+&lt;p&gt;Environment:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Python: 3.10&lt;/li&gt;
+&lt;li&gt;orjson: 3.10.0&lt;/li&gt;
+&lt;li&gt;CPU: AMD Ryzen 5900X&lt;/li&gt;
+&lt;/ul&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="o"&gt;((&lt;/span&gt;venv&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kienlt@kienlt-pc:/data/work$&lt;span class="w"&gt; &lt;/span&gt;python&lt;span class="w"&gt; &lt;/span&gt;bench_orjson.py&lt;span class="w"&gt; &lt;/span&gt;
 Generating&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;500&lt;/span&gt;,000&lt;span class="w"&gt; &lt;/span&gt;records&lt;span class="w"&gt; &lt;/span&gt;with&lt;span class="w"&gt; &lt;/span&gt;raw&lt;span class="w"&gt; &lt;/span&gt;datetime&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;UUID...
 &lt;span class="o"&gt;[&lt;/span&gt;ORJSON&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Dumps&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;time&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.1439&lt;span class="w"&gt; &lt;/span&gt;seconds
