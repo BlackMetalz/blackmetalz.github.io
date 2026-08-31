@@ -84,7 +84,7 @@
 <p>My boss told me that <strong>orjson</strong> is much faster than standard <strong>json</strong>, and I was like: "Ohh, this shit is definitely something worth digging into!"</p>
 <p>To satisfy my curiosity, I <del>wrote</del> use AI to generate a small benchmark to test both on 500,000 records. And the result is good as I expected for: <code>orjson</code> <strong>is faster (about ~9.3x) on serialization (dumps)!!!</strong></p>
 <hr />
-<h1 id="section-1-comparison-table">Section 1: Comparison Table</h1>
+<h1 id="section-1-quick-comparison">Section 1: Quick Comparison</h1>
 <table>
 <thead>
 <tr>
@@ -125,6 +125,10 @@
 <li><strong>bench_stdlib_json.py</strong> : <strong>Standard <code>json</code></strong>, pre-wrapped <code>str()</code> during data creation.</li>
 </ol>
 <h3 id="the-numbers">The Numbers</h3>
+<p>Environment:
+- Python: 3.10
+- orjson: 3.10.0
+- CPU: AMD Ryzen 5900X</p>
 <div class="highlight"><pre><span></span><code><span class="o">((</span>venv<span class="o">)</span><span class="w"> </span><span class="o">)</span><span class="w"> </span>kienlt@kienlt-pc:/data/work$<span class="w"> </span>python<span class="w"> </span>bench_orjson.py<span class="w"> </span>
 Generating<span class="w"> </span><span class="m">500</span>,000<span class="w"> </span>records<span class="w"> </span>with<span class="w"> </span>raw<span class="w"> </span>datetime<span class="w"> </span><span class="p">&amp;</span><span class="w"> </span>UUID...
 <span class="o">[</span>ORJSON<span class="o">]</span><span class="w"> </span>Dumps<span class="w"> </span><span class="nb">time</span><span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.1439<span class="w"> </span>seconds
@@ -210,7 +214,7 @@ Generating<span class="w"> </span><span class="m">500</span>,000<span class="w">
 b&#39;{&quot;username&quot;:&quot;kienlt&quot;,&quot;role&quot;:&quot;admin&quot;}&#39;
 </code></pre></div>
 
-<h3 id="why-is-the-payload-488-mb-smaller">Why is the payload ~4.88 MB smaller</h3>
+<h3 id="why-is-the-payload-477-mb-smaller">Why is the payload ~4.77 MB smaller</h3>
 <ul>
 <li><a href="https://docs.python.org/3/library/json.html#basic-usage">Standard <strong>json</strong></a>: Uses <strong>separators=(', ', ': ')</strong>, adding a space after every comma and colon.</li>
 </ul>
@@ -236,6 +240,12 @@ b&#39;{&quot;username&quot;:&quot;kienlt&quot;,&quot;role&quot;:&quot;admin&quot
 <ul>
 <li>Building high-throughput Web APIs where performance is a must (e.g. FastAPI handling thousands of requests or IoT devices!!!)</li>
 <li>Processing large JSON files or stream data (Kafka consumers, log pipelines).</li>
+</ul>
+<h3 id="trade-offs-of-orjson-things-to-know-before-switching">Trade-offs of orjson (things to know before switching)</h3>
+<ul>
+<li><strong>Indent is limited to 2 spaces</strong> — <code>option=orjson.OPT_INDENT_2</code> is the only indentation level supported, unlike stdlib's <code>indent=N</code> which accepts any integer. (<a href="https://github.com/ijl/orjson#opt_indent_2">orjson README</a>) Since <strong>orjson</strong> is designed with performance as the top priority, hardcoding the indent logic lets the Rust compiler optimize it better at compile time, instead of handling an arbitrary <code>N</code> at runtime.</li>
+<li><strong><code>sort_keys</code> isn't a kwarg</strong> — it's replaced by <code>option=orjson.OPT_SORT_KEYS</code>, so any code doing <code>json.dumps(data, sort_keys=True)</code> needs a small rewrite. (<a href="https://github.com/ijl/orjson#opt_sort_keys">orjson README</a>) Standard <code>json</code> parses <code>sort_keys</code> as a keyword argument and checks it on every call. orjson replaces this with a single bitwise flag, so the check becomes one cheap bit operation instead of parsing/validating a Python kwarg each time — saving a bit of CPU overhead.</li>
+<li>And more, but I don't fully understand them yet, so I'll leave them out of this article xD</li>
 </ul>
 <hr />
 <h1 id="references">References</h1>

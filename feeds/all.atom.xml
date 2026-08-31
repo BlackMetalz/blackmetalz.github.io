@@ -5,7 +5,7 @@
 &lt;p&gt;My boss told me that &lt;strong&gt;orjson&lt;/strong&gt; is much faster than standard &lt;strong&gt;json&lt;/strong&gt;, and I was like: "Ohh, this shit is definitely something worth digging into!"&lt;/p&gt;
 &lt;p&gt;To satisfy my curiosity, I &lt;del&gt;wrote&lt;/del&gt; use AI to generate a small benchmark to test both on 500,000 records. And the result is good as I expected for: &lt;code&gt;orjson&lt;/code&gt; &lt;strong&gt;is faster (about ~9.3x) on serialization (dumps)!!!&lt;/strong&gt;&lt;/p&gt;
 &lt;hr /&gt;
-&lt;h1 id="section-1-comparison-table"&gt;Section 1: Comparison Table&lt;/h1&gt;
+&lt;h1 id="section-1-quick-comparison"&gt;Section 1: Quick Comparison&lt;/h1&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -46,6 +46,10 @@
 &lt;li&gt;&lt;strong&gt;bench_stdlib_json.py&lt;/strong&gt; : &lt;strong&gt;Standard &lt;code&gt;json&lt;/code&gt;&lt;/strong&gt;, pre-wrapped &lt;code&gt;str()&lt;/code&gt; during data creation.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;h3 id="the-numbers"&gt;The Numbers&lt;/h3&gt;
+&lt;p&gt;Environment:
+- Python: 3.10
+- orjson: 3.10.0
+- CPU: AMD Ryzen 5900X&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="o"&gt;((&lt;/span&gt;venv&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;kienlt@kienlt-pc:/data/work$&lt;span class="w"&gt; &lt;/span&gt;python&lt;span class="w"&gt; &lt;/span&gt;bench_orjson.py&lt;span class="w"&gt; &lt;/span&gt;
 Generating&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;500&lt;/span&gt;,000&lt;span class="w"&gt; &lt;/span&gt;records&lt;span class="w"&gt; &lt;/span&gt;with&lt;span class="w"&gt; &lt;/span&gt;raw&lt;span class="w"&gt; &lt;/span&gt;datetime&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;UUID...
 &lt;span class="o"&gt;[&lt;/span&gt;ORJSON&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Dumps&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;time&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.1439&lt;span class="w"&gt; &lt;/span&gt;seconds
@@ -131,7 +135,7 @@ Generating&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;500&lt;/span
 b&amp;#39;{&amp;quot;username&amp;quot;:&amp;quot;kienlt&amp;quot;,&amp;quot;role&amp;quot;:&amp;quot;admin&amp;quot;}&amp;#39;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;h3 id="why-is-the-payload-488-mb-smaller"&gt;Why is the payload ~4.88 MB smaller&lt;/h3&gt;
+&lt;h3 id="why-is-the-payload-477-mb-smaller"&gt;Why is the payload ~4.77 MB smaller&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://docs.python.org/3/library/json.html#basic-usage"&gt;Standard &lt;strong&gt;json&lt;/strong&gt;&lt;/a&gt;: Uses &lt;strong&gt;separators=(', ', ': ')&lt;/strong&gt;, adding a space after every comma and colon.&lt;/li&gt;
 &lt;/ul&gt;
@@ -157,6 +161,12 @@ b&amp;#39;{&amp;quot;username&amp;quot;:&amp;quot;kienlt&amp;quot;,&amp;quot;rol
 &lt;ul&gt;
 &lt;li&gt;Building high-throughput Web APIs where performance is a must (e.g. FastAPI handling thousands of requests or IoT devices!!!)&lt;/li&gt;
 &lt;li&gt;Processing large JSON files or stream data (Kafka consumers, log pipelines).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="trade-offs-of-orjson-things-to-know-before-switching"&gt;Trade-offs of orjson (things to know before switching)&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Indent is limited to 2 spaces&lt;/strong&gt; — &lt;code&gt;option=orjson.OPT_INDENT_2&lt;/code&gt; is the only indentation level supported, unlike stdlib's &lt;code&gt;indent=N&lt;/code&gt; which accepts any integer. (&lt;a href="https://github.com/ijl/orjson#opt_indent_2"&gt;orjson README&lt;/a&gt;) Since &lt;strong&gt;orjson&lt;/strong&gt; is designed with performance as the top priority, hardcoding the indent logic lets the Rust compiler optimize it better at compile time, instead of handling an arbitrary &lt;code&gt;N&lt;/code&gt; at runtime.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;sort_keys&lt;/code&gt; isn't a kwarg&lt;/strong&gt; — it's replaced by &lt;code&gt;option=orjson.OPT_SORT_KEYS&lt;/code&gt;, so any code doing &lt;code&gt;json.dumps(data, sort_keys=True)&lt;/code&gt; needs a small rewrite. (&lt;a href="https://github.com/ijl/orjson#opt_sort_keys"&gt;orjson README&lt;/a&gt;) Standard &lt;code&gt;json&lt;/code&gt; parses &lt;code&gt;sort_keys&lt;/code&gt; as a keyword argument and checks it on every call. orjson replaces this with a single bitwise flag, so the check becomes one cheap bit operation instead of parsing/validating a Python kwarg each time — saving a bit of CPU overhead.&lt;/li&gt;
+&lt;li&gt;And more, but I don't fully understand them yet, so I'll leave them out of this article xD&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr /&gt;
 &lt;h1 id="references"&gt;References&lt;/h1&gt;
