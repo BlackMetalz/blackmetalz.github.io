@@ -82,81 +82,27 @@
 <hr />
 <h1 id="1-introduction-motivation">1. Introduction &amp; Motivation</h1>
 <p>After getting our hands dirty with high-performance computing in <a href="https://blackmetalz.github.io/wip-slurm-101.html"><strong>Slurm 101</strong></a> and building a 5-node cluster in <a href="https://blackmetalz.github.io/slurm-202-hands-on-multi-node-cluster-with-docker-cli-mastery.html"><strong>Slurm 202</strong></a>, the next logical step in the AI infrastructure journey is validating this knowledge with an industry-recognized credential: the <strong>NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO)</strong>.</p>
-<p>NVIDIA is the dominant hardware and platform provider for modern artificial intelligence. While traditional cloud certifications (AWS, Azure, GCP) focus on general virtual machines and managed services, this certification zeroes in on <strong>AI data center hardware, accelerated computing architectures, ultra-low latency networking (InfiniBand/RoCE), and cluster operations</strong>.</p>
+<p>Since I'm going to have a chance to works with <strong>NVIDIA GPU</strong> and I will take exam, aiming for certification if I'm serious.</p>
 <hr />
 <h1 id="2-exam-details-certification-overview">2. Exam Details &amp; Certification Overview</h1>
-<p>The exam is delivered online and remotely proctored via the Certiverse platform:</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Parameter</th>
-<th style="text-align: left;">Specification</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><strong>Exam Code</strong></td>
-<td style="text-align: left;">NCA-AIIO</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Exam Title</strong></td>
-<td style="text-align: left;">NVIDIA-Certified Associate: AI Infrastructure and Operations</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Duration</strong></td>
-<td style="text-align: left;">60 minutes (1 hour)</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Number of Questions</strong></td>
-<td style="text-align: left;">50 multiple-choice questions</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Exam Fee</strong></td>
-<td style="text-align: left;">$125 USD</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Prerequisites</strong></td>
-<td style="text-align: left;">Foundational understanding of data center infrastructure, compute, and networking</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Validity</strong></td>
-<td style="text-align: left;">2 years</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Official Portal</strong></td>
-<td style="text-align: left;"><a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/">NVIDIA AI Infrastructure &amp; Operations Certification</a></td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Registration Link</strong></td>
-<td style="text-align: left;"><a href="https://www.certiverse.com/#/checkout/nvidia/store-exam/NCA-AIIO">Certiverse Exam Registration</a></td>
-</tr>
-</tbody>
-</table>
+<p>Please visit <a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/"><strong>here</strong></a> for full detail xD</p>
+<p><img alt="exam detail" src="../images/2026/09/07.png" /></p>
 <hr />
 <h1 id="3-recommended-learning-resources-courses">3. Recommended Learning Resources &amp; Courses</h1>
-<p>NVIDIA provides an official self-paced curriculum designed specifically around the exam syllabus:</p>
+<p>Here are the key learning resources and study materials recommended for preparing for the exam:</p>
 <h3 id="core-training-courses">Core Training Courses:</h3>
 <ul>
-<li><strong>Coursera Course:</strong> <a href="https://www.coursera.org/learn/ai-infrastructure-operations-fundamentals"><strong>AI Infrastructure and Operations Fundamentals</strong> by NVIDIA Training</a>. This is the official foundational course on Coursera covering AI computing paradigms, GPU architecture, networking fabrics, and cluster software.</li>
-<li><strong>NVIDIA Deep Learning Institute (DLI):</strong> <a href="https://www.nvidia.com/en-us/training/">AI Infrastructure and Operations Learning Path</a>. Self-paced labs on DGX systems, networking, and software stacks.</li>
-<li><strong>Official Exam Study Guide:</strong> Available through the NVIDIA Certification Portal after registration.</li>
+<li><a href="https://www.coursera.org/learn/ai-infrastructure-operations-fundamentals"><strong>Coursera Course (Paid):</strong></a>. This is the official foundational course on Coursera covering AI computing paradigms, GPU architecture, networking fabrics, and cluster software. <em>Note: Requires a paid Coursera subscription/enrollment fee — recommended for those with budget or company sponsorship.</em></li>
+<li><a href="https://www.youtube.com/watch?v=0WjfKQdfeMU"><strong>YouTube Video Course:</strong></a>. A comprehensive free video alternative covering the essential topics. While it does not include timestamped chapters/sections, it is 100% free to access.</li>
 </ul>
 <hr />
 <h1 id="4-official-exam-blueprint-domain-weights">4. Official Exam Blueprint &amp; Domain Weights</h1>
 <p>According to NVIDIA's official exam specifications, the certification is divided into <strong>3 core weighted domains</strong>:</p>
-<div class="highlight"><pre><span></span><code>                  NVIDIA NCA-AIIO OFFICIAL EXAM BLUEPRINT
-                                     │
-      ┌──────────────────────────────┼──────────────────────────────┐
-      ▼                              ▼                              ▼
-[ Domain 1: Essential AI ]    [ Domain 2: AI ]               [ Domain 3: AI ]
-    Knowledge (38%)          Infrastructure (40%)            Operations (22%)
-• Accelerated Computing       • GPU Architectures            • Cluster Orchestration
-• AI/ML/DL Workloads            (Ampere, Hopper, Blackwell)    (Slurm vs K8s Operator)
-• Software Stack (CUDA,       • NVLink &amp; NVSwitch            • Base Command Manager
-  TensorRT, Triton, NeMo)     • InfiniBand &amp; RoCE Fabrics    • Telemetry &amp; Monitoring
-• NVIDIA AI Enterprise        • GPUDirect Storage (GDS)        (DCGM, Prometheus)
-</code></pre></div>
-
+<ul>
+<li>Essential AI Knowledge</li>
+<li>AI Infrastructure</li>
+<li>AI Operations</li>
+</ul>
 <hr />
 <h1 id="domain-1-essential-ai-knowledge-38-of-exam">Domain 1: Essential AI Knowledge (38% of Exam)</h1>
 <p>This domain validates foundational understanding of accelerated computing concepts, AI workload lifecycles, and the NVIDIA software ecosystem.</p>
@@ -303,7 +249,7 @@ Storage/NIC ─────────────────(Direct PCIe / RD
 <p>The <strong>NVIDIA Certified Associate: AI Infrastructure and Operations</strong> credential is an excellent validation for systems engineers, DevOps practitioners, and platform architects looking to specialize in AI and HPC infrastructure.</p>
 <h3 id="preparation-checklist">Preparation Checklist:</h3>
 <ol>
-<li>Complete the <a href="https://www.coursera.org/learn/ai-infrastructure-operations-fundamentals"><strong>AI Infrastructure and Operations Fundamentals</strong> course on Coursera</a>.</li>
+<li>Complete the <a href="https://www.coursera.org/learn/ai-infrastructure-operations-fundamentals"><strong>AI Infrastructure and Operations Fundamentals</strong> course on Coursera</a> (paid) or watch the <a href="https://www.youtube.com/watch?v=0WjfKQdfeMU"><strong>YouTube Full Video Course</strong></a> (free alternative).</li>
 <li>Review the core concepts in our <a href="https://blackmetalz.github.io/wip-slurm-101.html"><strong>Slurm 101</strong></a> and <a href="https://blackmetalz.github.io/slurm-202-hands-on-multi-node-cluster-with-docker-cli-mastery.html"><strong>Slurm 202</strong></a> articles.</li>
 <li>Review the exam blueprint on the <a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/">official NVIDIA Certification page</a>.</li>
 <li>Schedule your exam on <a href="https://www.certiverse.com/#/checkout/nvidia/store-exam/NCA-AIIO">Certiverse</a>.</li>
