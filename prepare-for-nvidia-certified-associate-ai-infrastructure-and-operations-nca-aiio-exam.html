@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="nvidia, hpc, ai, certification, devops, Knowledge Base, " />
+
+<meta property="og:title" content="Prepare for NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO) Exam "/>
+<meta property="og:url" content="https://blackmetalz.github.io/prepare-for-nvidia-certified-associate-ai-infrastructure-and-operations-nca-aiio-exam.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2026-09-08T00:00:00+07:00" />
+<meta name="twitter:title" content="Prepare for NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO) Exam ">
+<meta name="twitter:description" content="">
+
+        <title>Prepare for NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO) Exam  · Kienlt&#39;s notebook
+</title>
+        <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://blackmetalz.github.io/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://blackmetalz.github.io
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://blackmetalz.github.io/categories.html">Categories</a></li>
+                                <li ><a href="https://blackmetalz.github.io/tags.html">Tags</a></li>
+                                <li ><a href="https://blackmetalz.github.io/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://blackmetalz.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://blackmetalz.github.io/prepare-for-nvidia-certified-associate-ai-infrastructure-and-operations-nca-aiio-exam.html">
+                Prepare for NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO) Exam
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>TLDR: A comprehensive preparation guide and study blueprint for the <strong>NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO)</strong> certification exam. Covering the 3 official exam domains: Essential AI Knowledge (38%), AI Infrastructure (40%), and AI Operations (22%), including GPU architectures (Hopper, Blackwell), high-speed interconnects (NVLink, InfiniBand), GPUDirect Storage, the NVIDIA AI Enterprise software stack, and cluster orchestration (Slurm, BCM, Kubernetes GPU Operator).</p>
+<hr />
+<h1 id="1-introduction-motivation">1. Introduction &amp; Motivation</h1>
+<p>After getting our hands dirty with high-performance computing in <a href="https://blackmetalz.github.io/wip-slurm-101.html"><strong>Slurm 101</strong></a> and building a 5-node cluster in <a href="https://blackmetalz.github.io/slurm-202-hands-on-multi-node-cluster-with-docker-cli-mastery.html"><strong>Slurm 202</strong></a>, the next logical step in the AI infrastructure journey is validating this knowledge with an industry-recognized credential: the <strong>NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO)</strong>.</p>
+<p>NVIDIA is the dominant hardware and platform provider for modern artificial intelligence. While traditional cloud certifications (AWS, Azure, GCP) focus on general virtual machines and managed services, this certification zeroes in on <strong>AI data center hardware, accelerated computing architectures, ultra-low latency networking (InfiniBand/RoCE), and cluster operations</strong>.</p>
+<hr />
+<h1 id="2-exam-details-certification-overview">2. Exam Details &amp; Certification Overview</h1>
+<p>The exam is delivered online and remotely proctored via the Certiverse platform:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Exam Code</strong></td>
+<td style="text-align: left;">NCA-AIIO</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Exam Title</strong></td>
+<td style="text-align: left;">NVIDIA-Certified Associate: AI Infrastructure and Operations</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Duration</strong></td>
+<td style="text-align: left;">60 minutes (1 hour)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Number of Questions</strong></td>
+<td style="text-align: left;">50 multiple-choice questions</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Exam Fee</strong></td>
+<td style="text-align: left;">$125 USD</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Prerequisites</strong></td>
+<td style="text-align: left;">Foundational understanding of data center infrastructure, compute, and networking</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Validity</strong></td>
+<td style="text-align: left;">2 years</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Official Portal</strong></td>
+<td style="text-align: left;"><a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/">NVIDIA AI Infrastructure &amp; Operations Certification</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Registration Link</strong></td>
+<td style="text-align: left;"><a href="https://www.certiverse.com/#/checkout/nvidia/store-exam/NCA-AIIO">Certiverse Exam Registration</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="3-recommended-learning-resources-courses">3. Recommended Learning Resources &amp; Courses</h1>
+<p>NVIDIA provides an official self-paced curriculum designed specifically around the exam syllabus:</p>
+<h3 id="core-training-courses">Core Training Courses:</h3>
+<ul>
+<li><strong>Coursera Course:</strong> <a href="https://www.coursera.org/learn/ai-infrastructure-operations-fundamentals"><strong>AI Infrastructure and Operations Fundamentals</strong> by NVIDIA Training</a>. This is the official foundational course on Coursera covering AI computing paradigms, GPU architecture, networking fabrics, and cluster software.</li>
+<li><strong>NVIDIA Deep Learning Institute (DLI):</strong> <a href="https://www.nvidia.com/en-us/training/">AI Infrastructure and Operations Learning Path</a>. Self-paced labs on DGX systems, networking, and software stacks.</li>
+<li><strong>Official Exam Study Guide:</strong> Available through the NVIDIA Certification Portal after registration.</li>
+</ul>
+<hr />
+<h1 id="4-official-exam-blueprint-domain-weights">4. Official Exam Blueprint &amp; Domain Weights</h1>
+<p>According to NVIDIA's official exam specifications, the certification is divided into <strong>3 core weighted domains</strong>:</p>
+<div class="highlight"><pre><span></span><code>                  NVIDIA NCA-AIIO OFFICIAL EXAM BLUEPRINT
+                                     │
+      ┌──────────────────────────────┼──────────────────────────────┐
+      ▼                              ▼                              ▼
+[ Domain 1: Essential AI ]    [ Domain 2: AI ]               [ Domain 3: AI ]
+    Knowledge (38%)          Infrastructure (40%)            Operations (22%)
+• Accelerated Computing       • GPU Architectures            • Cluster Orchestration
+• AI/ML/DL Workloads            (Ampere, Hopper, Blackwell)    (Slurm vs K8s Operator)
+• Software Stack (CUDA,       • NVLink &amp; NVSwitch            • Base Command Manager
+  TensorRT, Triton, NeMo)     • InfiniBand &amp; RoCE Fabrics    • Telemetry &amp; Monitoring
+• NVIDIA AI Enterprise        • GPUDirect Storage (GDS)        (DCGM, Prometheus)
+</code></pre></div>
+
+<hr />
+<h1 id="domain-1-essential-ai-knowledge-38-of-exam">Domain 1: Essential AI Knowledge (38% of Exam)</h1>
+<p>This domain validates foundational understanding of accelerated computing concepts, AI workload lifecycles, and the NVIDIA software ecosystem.</p>
+<h3 id="11-cpu-vs-gpu-vs-dpu-architecture">1.1 CPU vs. GPU vs. DPU Architecture:</h3>
+<ul>
+<li><strong>CPU (Latency-Optimized):</strong> Few powerful cores with large caches designed for sequential processing and branch prediction.</li>
+<li><strong>GPU (Throughput-Optimized):</strong> Thousands of smaller, energy-efficient cores designed for massive parallel matrix operations (SIMD/SIMT).</li>
+<li><strong>DPU (Data Processing Unit - BlueField):</strong> Offloads, accelerates, and isolates data center infrastructure workloads (networking, security, telemetry, storage virtualization) away from host CPUs/GPUs.</li>
+</ul>
+<h3 id="12-ai-workflow-lifecycle">1.2 AI Workflow Lifecycle:</h3>
+<ul>
+<li><strong>Data Ingestion &amp; Preprocessing:</strong> High I/O throughput, CPU/RAM intensive.</li>
+<li><strong>Model Training:</strong> Compute and inter-GPU bandwidth intensive. Utilizes mixed precision (FP32, TF32, FP16, BF16, FP8).</li>
+<li><strong>Model Fine-Tuning:</strong> LoRA, QLoRA, full parameter fine-tuning.</li>
+<li><strong>Inference &amp; Serving:</strong> Low-latency, high-throughput token generation. Optimized with quantization (INT8, FP4) and KV-caching.</li>
+</ul>
+<h3 id="13-nvidia-full-stack-ai-ecosystem-software">1.3 NVIDIA Full-Stack AI Ecosystem &amp; Software:</h3>
+<div class="highlight"><pre><span></span><code>                     NVIDIA FULL-STACK AI ECOSYSTEM
+                                   │
+[ Applications &amp; Models ] ──► NeMo (LLMs), BioNeMo, Clara, Omniverse, Riva
+                                   │
+[ Microservices &amp; Runtimes] ──► NVIDIA NIM (Inference Microservices), Triton, TensorRT
+                                   │
+[ Platforms &amp; Frameworks ] ──► PyTorch, JAX, TensorFlow, RAPIDS
+                                   │
+[ Core Accelerated SDKs ] ──► CUDA, cuDNN, NCCL (Multi-GPU), TensorRT-LLM
+                                   │
+[ System Layer ]          ──► NVIDIA GPU Driver, NVIDIA Container Toolkit, DCGM
+</code></pre></div>
+
+<ul>
+<li><strong>CUDA (Compute Unified Device Architecture):</strong> Parallel computing platform and programming model for NVIDIA GPUs.</li>
+<li><strong>cuDNN:</strong> Highly tuned primitives for deep neural networks (convolutions, pooling, normalization, activation).</li>
+<li><strong>NCCL (NVIDIA Collective Communications Library):</strong> Multi-GPU and multi-node collective communication primitives (<code>AllReduce</code>, <code>AllGather</code>, <code>Broadcast</code>, <code>ReduceScatter</code>) optimized for NVLink and InfiniBand.</li>
+<li><strong>TensorRT:</strong> High-performance deep learning inference optimizer and runtime (layer fusion, kernel auto-tuning, quantization).</li>
+<li><strong>Triton Inference Server:</strong> Multi-framework open-source model serving software (PyTorch, ONNX, TensorRT, vLLM, Python backend) supporting concurrent model execution, dynamic batching, and model pipelining.</li>
+<li><strong>NVIDIA NeMo:</strong> End-to-end cloud-native framework for building, customizing, and training generative AI models.</li>
+<li><strong>NVIDIA AI Enterprise (NVAIE):</strong> Enterprise platform providing production support, validated container images, security patches, and microservices (NVIDIA NIM).</li>
+<li><strong>NGC (NVIDIA GPU Cloud) Registry:</strong> Curated catalog of GPU-optimized containers, pre-trained model weights, Helm charts, and SDKs.</li>
+</ul>
+<hr />
+<h1 id="domain-2-ai-infrastructure-40-of-exam">Domain 2: AI Infrastructure (40% of Exam)</h1>
+<p>The largest domain in the exam covers GPU hardware architectures, interconnects, high-speed networking fabrics, and storage pipelines.</p>
+<h3 id="21-gpu-architectural-generations">2.1 GPU Architectural Generations:</h3>
+<ul>
+<li><strong>Ampere (A100):</strong> Introduced 3rd Gen Tensor Cores, TF32 precision, and Multi-Instance GPU (MIG).</li>
+<li><strong>Hopper (H100 / H200):</strong> Introduced Transformer Engine (FP8 precision), DPX instructions for dynamic programming, 4th Gen Tensor Cores, and NVLink 4 (900 GB/s bidirectional).</li>
+<li><strong>Blackwell (B200 / GB200):</strong> 2nd Gen Transformer Engine (FP4 precision), dual-die packaging (208 billion transistors), NVLink 5 (1.8 TB/s bidirectional), NVLink Switch Chip.</li>
+</ul>
+<h3 id="22-tensor-cores-precision-formats">2.2 Tensor Cores &amp; Precision Formats:</h3>
+<ul>
+<li>
+<p>Tensor Cores perform fused matrix multiply-accumulate operations in a single clock cycle: $D = A \times B + C$.</p>
+</li>
+<li>
+<p><strong>Precision Formats:</strong></p>
+</li>
+<li><strong>FP32:</strong> Single precision (standard scientific computing).</li>
+<li><strong>TF32 (TensorFloat-32):</strong> Same range as FP32, same precision as FP16, native on Tensor Cores without code changes.</li>
+<li><strong>BF16 / FP16:</strong> Half precision, standard for LLM pre-training.</li>
+<li><strong>FP8 (E4M3 / E5M2):</strong> Standard on Hopper/Blackwell for 2x faster transformer training.</li>
+<li><strong>INT8 / FP4:</strong> Ultra-fast inference with minimal loss in model perplexity.</li>
+</ul>
+<h3 id="23-high-speed-interconnects-nvlink-nvswitch">2.3 High-Speed Interconnects: NVLink &amp; NVSwitch:</h3>
+<ul>
+<li><strong>PCIe Limitation:</strong> Standard PCIe Gen5 x16 provides ~64 GB/s unidirectional bandwidth, creating a major communication bottleneck for multi-GPU training.</li>
+<li><strong>NVLink:</strong> Direct point-to-point interconnect between GPUs bypassing the PCIe bus.</li>
+<li><strong>NVSwitch:</strong> Crossbar switch chip enabling any-to-any full bidirectional line-rate GPU communication within a node (e.g., all 8 GPUs in a DGX H100 talk to each other simultaneously at full NVLink speed).</li>
+</ul>
+<h3 id="24-multi-instance-gpu-mig">2.4 Multi-Instance GPU (MIG):</h3>
+<ul>
+<li>Partitions a single physical GPU (A100/H100) into up to <strong>7 isolated GPU instances</strong>.</li>
+<li>Each instance has dedicated hardware resources: compute cores, memory controllers, cache, and memory bandwidth (true hardware QoS and fault isolation).</li>
+</ul>
+<h3 id="25-ai-data-center-networking-fabrics">2.5 AI Data Center Networking &amp; Fabrics:</h3>
+<div class="highlight"><pre><span></span><code>                    THE 4 DATA CENTER NETWORK FABRICS
+                                   │
+  ┌─────────────────┬──────────────┴──────────────┬─────────────────┐
+  ▼                 ▼                             ▼                 ▼
+[ Compute Fabric ] [ Storage Fabric ]       [ In-Band Mgmt ]  [ Out-of-Band (OOB) ]
+• InfiniBand /     • RoCE / NVMe-oF         • Node telemetry  • IPMI, BMC
+  Spectrum-X       • Parallel storage access• SSH, cluster API• Dedicated 1GbE
+• Inter-node NCCL    (Weka, Lustre, VAST)
+</code></pre></div>
+
+<ol>
+<li><strong>Compute (East-West) Fabric:</strong> Connects GPUs across different server nodes for distributed training (AllReduce collective operations). Uses InfiniBand (Quantum-2 400Gb/s, Quantum-X800 800Gb/s) or Spectrum-X Ethernet.</li>
+<li><strong>Storage Fabric:</strong> Connects compute nodes to high-speed shared parallel storage systems (Lustre, Weka, VAST Data).</li>
+<li><strong>In-Band Management Fabric:</strong> Cluster communication, job scheduling, API requests, and user traffic.</li>
+<li>
+<p><strong>Out-of-Band (OOB) Management Fabric:</strong> Dedicated physical network connecting server BMC/IPMI controllers for power control and bare-metal provisioning.</p>
+</li>
+<li>
+<p><strong>RDMA (Remote Direct Memory Access):</strong> Bypasses the operating system kernel and CPU, allowing a network adapter to read/write GPU memory directly across the network.</p>
+</li>
+<li><strong>InfiniBand:</strong> Native hardware-based credit-flow control, sub-microsecond latency, zero packet loss, adaptive routing, and In-Network Computing (<strong>SHARP - Scalable Hierarchical Aggregation and Reduction Protocol</strong>).</li>
+<li><strong>RoCE (RDMA over Converged Ethernet):</strong> Encapsulates InfiniBand packets inside standard Ethernet UDP headers (RoCEv2). Requires lossless Ethernet configuration (PFC - Priority Flow Control, ECN - Explicit Congestion Notification).</li>
+<li><strong>NVIDIA Spectrum-X:</strong> Ethernet platform designed specifically for generative AI clouds, delivering near-InfiniBand performance over Ethernet.</li>
+</ol>
+<h3 id="26-ai-storage-architecture-gpudirect-storage-gds">2.6 AI Storage Architecture &amp; GPUDirect Storage (GDS):</h3>
+<ul>
+<li>Traditional I/O copies data from NVMe disk -&gt; CPU Memory (RAM) -&gt; Bounce Buffer -&gt; GPU Memory (VRAM), consuming CPU cycles and PCIe bandwidth.</li>
+<li><strong>GPUDirect Storage (GDS):</strong> Enables direct DMA transfers between local NVMe drives or remote storage NICs directly into GPU VRAM using RDMA, cutting latency by 10x and freeing CPU cores.</li>
+</ul>
+<div class="highlight"><pre><span></span><code>Traditional Path:
+Storage/NIC ──► Host RAM (CPU Buffer) ──► Host RAM (Bounce) ──► GPU Memory
+
+GPUDirect Storage (GDS) Path:
+Storage/NIC ─────────────────(Direct PCIe / RDMA)───────────────► GPU Memory
+</code></pre></div>
+
+<ul>
+<li><strong>Parallel File Systems:</strong> AI architectures utilize parallel file systems (<strong>Lustre, Weka.io, VAST Data, IBM Spectrum Scale, BeeGFS</strong>) to sustain millions of concurrent file reads without metadata bottlenecks.</li>
+</ul>
+<hr />
+<h1 id="domain-3-ai-operations-22-of-exam">Domain 3: AI Operations (22% of Exam)</h1>
+<p>This domain covers workload scheduling, cluster orchestration, provisioning, and health telemetry.</p>
+<h3 id="31-workload-schedulers-slurm-vs-kubernetes">3.1 Workload Schedulers: Slurm vs. Kubernetes:</h3>
+<ul>
+<li><strong>Slurm:</strong> The standard for large-scale distributed AI pre-training. Native support for multi-node MPI, InfiniBand topology awareness, atomic gang-scheduling, and tight consumable resource tracking (<code>cons_tres</code>).</li>
+<li><strong>Kubernetes + NVIDIA GPU Operator:</strong> The standard for microservices, inference serving, and enterprise pipelines. The GPU Operator automates the deployment of the NVIDIA driver, Container Toolkit, device plugin, and DCGM monitoring on K8s nodes.</li>
+</ul>
+<h3 id="32-nvidia-base-command-manager-bcm">3.2 NVIDIA Base Command Manager (BCM):</h3>
+<ul>
+<li>Cluster management and provisioning software for DGX systems. Automates bare-metal OS provisioning, InfiniBand fabric health checks, monitoring, and workload scheduler integration.</li>
+</ul>
+<h3 id="33-monitoring-telemetry-dcgm">3.3 Monitoring &amp; Telemetry (DCGM):</h3>
+<ul>
+<li><strong>NVIDIA DCGM (Data Center GPU Manager):</strong> Low-overhead daemon that collects GPU telemetry metrics (temperature, power draw, GPU utilization, memory utilization, PCIe bandwidth, NVLink bandwidth, ECC memory errors).</li>
+<li>Exposes metrics via Prometheus DCGM Exporter for Grafana dashboards and automated alerting.</li>
+</ul>
+<hr />
+<h1 id="5-study-plan-quick-review-checklist">5. Study Plan &amp; Quick Review Checklist</h1>
+<p>Before sitting for the exam, ensure you can confidently answer the following checklist:</p>
+<ul>
+<li>Explain why GPUs are faster than CPUs for matrix operations.</li>
+<li>Differentiate between InfiniBand and Ethernet, and explain what RDMA achieves.</li>
+<li>Explain the role of NVLink and NVSwitch inside an 8-GPU node.</li>
+<li>Describe how Multi-Instance GPU (MIG) provides hardware-level QoS.</li>
+<li>Explain how GPUDirect Storage (GDS) eliminates CPU memory bounce buffers.</li>
+<li>List the 4 network fabrics in an AI data center and identify their functions.</li>
+<li>Explain the purpose of NCCL in distributed multi-GPU training.</li>
+<li>Identify the differences between Triton Inference Server and TensorRT.</li>
+<li>Explain what the NVIDIA GPU Operator deploys on a Kubernetes cluster.</li>
+<li>Describe what DCGM monitors and how it integrates with Prometheus.</li>
+</ul>
+<hr />
+<h1 id="summary-next-steps">Summary &amp; Next Steps</h1>
+<p>The <strong>NVIDIA Certified Associate: AI Infrastructure and Operations</strong> credential is an excellent validation for systems engineers, DevOps practitioners, and platform architects looking to specialize in AI and HPC infrastructure.</p>
+<h3 id="preparation-checklist">Preparation Checklist:</h3>
+<ol>
+<li>Complete the <a href="https://www.coursera.org/learn/ai-infrastructure-operations-fundamentals"><strong>AI Infrastructure and Operations Fundamentals</strong> course on Coursera</a>.</li>
+<li>Review the core concepts in our <a href="https://blackmetalz.github.io/wip-slurm-101.html"><strong>Slurm 101</strong></a> and <a href="https://blackmetalz.github.io/slurm-202-hands-on-multi-node-cluster-with-docker-cli-mastery.html"><strong>Slurm 202</strong></a> articles.</li>
+<li>Review the exam blueprint on the <a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/">official NVIDIA Certification page</a>.</li>
+<li>Schedule your exam on <a href="https://www.certiverse.com/#/checkout/nvidia/store-exam/NCA-AIIO">Certiverse</a>.</li>
+</ol>
+<p>Good luck with your certification journey!</p>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2026-09-08T00:00:00+07:00">Tue 08 September 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://blackmetalz.github.io/tags.html#ai-ref">ai
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#certification-ref">certification
+                    <span class="superscript">15</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#devops-ref">devops
+                    <span class="superscript">9</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#hpc-ref">hpc
+                    <span class="superscript">3</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#nvidia-ref">nvidia
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://blackmetalz.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
