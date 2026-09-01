@@ -78,7 +78,7 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
             
-            <p>TLDR: A comprehensive preparation guide and study blueprint for the <strong>NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO)</strong> certification exam. Covering the 3 official exam domains: Essential AI Knowledge (38%), AI Infrastructure (40%), and AI Operations (22%), including GPU architectures (Hopper, Blackwell), high-speed interconnects (NVLink, InfiniBand), GPUDirect Storage, the NVIDIA AI Enterprise software stack, and cluster orchestration (Slurm, BCM, Kubernetes GPU Operator).</p>
+            <p>TLDR: Study guide and core blueprint for the <strong>NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO)</strong> exam.</p>
 <hr />
 <h1 id="1-introduction-motivation">1. Introduction &amp; Motivation</h1>
 <p>After getting our hands dirty with high-performance computing in <a href="https://blackmetalz.github.io/wip-slurm-101.html"><strong>Slurm 101</strong></a> and building a 5-node cluster in <a href="https://blackmetalz.github.io/slurm-202-hands-on-multi-node-cluster-with-docker-cli-mastery.html"><strong>Slurm 202</strong></a>, the next logical step in the AI infrastructure journey is validating this knowledge with an industry-recognized credential: the <strong>NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO)</strong>.</p>
@@ -208,12 +208,7 @@
 </ul>
 <h3 id="22-tensor-cores-precision-formats">2.2 Tensor Cores &amp; Precision Formats:</h3>
 <ul>
-<li>
-<p>Tensor Cores perform fused matrix multiply-accumulate operations in a single clock cycle: $D = A \times B + C$.</p>
-</li>
-<li>
-<p><strong>Precision Formats:</strong></p>
-</li>
+<li><strong>Matrix Acceleration:</strong> Tensor Cores perform fused matrix multiply-accumulate operations in a single clock cycle: $D = A \times B + C$.</li>
 <li><strong>FP32:</strong> Single precision (standard scientific computing).</li>
 <li><strong>TF32 (TensorFloat-32):</strong> Same range as FP32, same precision as FP16, native on Tensor Cores without code changes.</li>
 <li><strong>BF16 / FP16:</strong> Half precision, standard for LLM pre-training.</li>
