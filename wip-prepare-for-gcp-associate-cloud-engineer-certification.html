@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="gcp, certification, Knowledge Base, " />
+
+<meta property="og:title" content="[WIP] Prepare for GCP - Associate Cloud Engineer Certification "/>
+<meta property="og:url" content="https://blackmetalz.github.io/wip-prepare-for-gcp-associate-cloud-engineer-certification.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2026-07-27T00:00:00+07:00" />
+<meta name="twitter:title" content="[WIP] Prepare for GCP - Associate Cloud Engineer Certification ">
+<meta name="twitter:description" content="">
+
+        <title>[WIP] Prepare for GCP - Associate Cloud Engineer Certification  · Kienlt&#39;s notebook
+</title>
+        <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://blackmetalz.github.io/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://blackmetalz.github.io
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://blackmetalz.github.io/categories.html">Categories</a></li>
+                                <li ><a href="https://blackmetalz.github.io/tags.html">Tags</a></li>
+                                <li ><a href="https://blackmetalz.github.io/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://blackmetalz.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://blackmetalz.github.io/wip-prepare-for-gcp-associate-cloud-engineer-certification.html">
+                [WIP] Prepare for GCP - Associate Cloud Engineer Certification
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <h1 id="1intro">1.Intro</h1>
+<p>Ah shit, here we go again xD. This time is Google Cloud, my first time. Please prepare new trial account with <strong>300$</strong>, we will use it for 3 months in a row. Not sure I can do what I'm aiming for (Cloud Engineer Associate + DevOps Pro). In this article, I'm mainly using resource from <a href="https://www.udemy.com/course/gcp-associate-cloud-engineer-certification/">Udemy course</a> and visit <a href="https://cloud.google.com/learn/certification/cloud-engineer/">Associate Cloud Engineer</a> link for me information!</p>
+<p>Useful links:</p>
+<ul>
+<li><a href="https://www.skills.google/paths/11">Train for the exam</a></li>
+<li><a href="https://services.google.com/fh/files/misc/associate_cloud_engineer_exam_guide_english.pdf">Exam Guide</a></li>
+</ul>
+<p>Section of the exam:</p>
+<ul>
+<li>Section 1: Setting up a cloud solution environment (~20% of the exam)</li>
+<li>Section 2: Planning and configuring a cloud solution (~10% of the exam)</li>
+<li>Section 3: Deploying and implementing a cloud solution (~30% of the exam)</li>
+<li>Section 4: Ensuring successful operation of a cloud solution (~30% of the exam)</li>
+<li>Section 5: Configuring access and security (~10% of the exam)</li>
+</ul>
+<hr />
+<h1 id="2resource-hierarchy">2.Resource Hierarchy</h1>
+<h3 id="concept-of-project-in-gcp">Concept of project in GCP</h3>
+<p>A project is the main container for all your resources. (Ref: <strong>ResourceGroup</strong> at Azure)</p>
+<p>Key project identifiers (Classic ACE exam traps!):</p>
+<ul>
+<li><strong>Project Name</strong>: User-friendly, mutable (change anytime), doesn't need to be globally unique.</li>
+<li><strong>Project ID</strong>: User-chosen (or auto-gen), globally unique, <strong>IMMUTABLE</strong> (can NEVER be changed once created). Used heavily in <code>gcloud</code> and APIs.</li>
+<li><strong>Project Number</strong>: Google-assigned digits, immutable, globally unique. You will often see it prefixing default service accounts (e.g. <code>[project-number]-compute@developer.gserviceaccount.com</code>).</li>
+</ul>
+<p>Accidental deletion protection:</p>
+<ul>
+<li>Deleting a project enters a <strong>30-day pending deletion</strong> window (soft delete). Can be restored within 30 days via <code>gcloud projects undelete &lt;PROJECT_ID&gt;</code>.</li>
+<li>To completely prevent accidental deletion (even from project owners), place a <strong>Project Lien</strong> on it (<code>resourcemanager.projects.updateLiens</code>). You must remove the lien before anyone can delete the project.</li>
+</ul>
+<h3 id="resource-hierarchy">Resource Hierarchy</h3>
+<p>Same like Azure, pretty familiar xD. Permissions management in GCP work with mechanism inheritance. GCP Resource Hierarchy has 4 levels: Organization, Folders, Projects and Resources.</p>
+<p><img alt="GCP Resource Hierarchy" src="https://docs.cloud.google.com/static/resource-manager/img/cloud-hierarchy.svg" /></p>
+<p>Important rules for the exam:</p>
+<ul>
+<li><strong>Inheritance is additive (Union, NOT intersection)</strong>: Flow goes downward (Org -&gt; Folder -&gt; Project -&gt; Resource). If a user has <code>Viewer</code> at Folder level, you <strong>CANNOT</strong> restrict or revoke that permission at the Project level. Child nodes can only grant additional permissions, never restrict inherited ones.</li>
+<li><strong>Folders require an Organization node</strong>: You cannot create folders without an Org (e.g. personal trial accounts without Cloud Identity / Google Workspace cannot use folders).</li>
+</ul>
+<h3 id="manage-projects">Manage Projects</h3>
+<p>We can use this for tracking costs of specific project like this</p>
+<p><img alt="Tracking resource" src="../images/2026/07/20.png" /></p>
+<h3 id="organization-policies-vs-iam">Organization Policies VS IAM</h3>
+<p>Nothing new for me, no need to explain detailed: </p>
+<ul>
+<li>Org Policies: WHAT can be done (Example: Edit/Create a policy for resource location lock, only allow to create instance in specific location like es-east1/europe-west1.)</li>
+<li>IAM: WHO can do something.</li>
+</ul>
+<h3 id="api">API</h3>
+<p>For some services, we need to enable before use it!</p>
+<p><img alt="Tracking resource" src="../images/2026/07/21.png" /></p>
+<p>Enable via CLI: <code>gcloud services enable compute.googleapis.com</code></p>
+<h3 id="cloud-identity">Cloud Identity</h3>
+<p><strong>WHO</strong> is the people that allow to do <strong>WHAT</strong></p>
+<ul>
+<li>Cloud Identity: Manages the "WHO"</li>
+<li>IAM: Manages the "WHAT"</li>
+</ul>
+<p>Best practice is manage people with group for sure, not only in GCP. For example in Elasticsearch, we create a role called data-reader that has permission to read indices <code>kienlt-data-*</code>, then we add right user to that role, so we don't need to create multiple role for each user or remove user from that role when they are no longer needed, pretty common practice I believe!</p>
+<h3 id="asset-inventory">Asset Inventory</h3>
+<p>Inventory of everything in your GCP. Is the central catalog for every single resource in your GCP Org.</p>
+<p>I remember when my boss ask me to create inventory of whole system on-premises, it would take shit load of time... But in GCP, there are already service for this shit!</p>
+<h3 id="cloud-billing-account">Cloud Billing Account</h3>
+<p>A single billing account can pay for thoudsands of projects, centralizing financial control. And need to remember that billing accounts are "Separate" from projects in GCP (to use paid service, a project must be linked to an active cloud billing account so Google know where to send the fuckin' bill!)</p>
+<p>Exam traps to remember:</p>
+<ul>
+<li><strong>Roles to link Billing to a Project</strong>: Requires <strong><code>Billing Account User</code></strong> on the billing account + <strong><code>Project Creator</code></strong> (or Project Owner) on the project/folder/org.</li>
+<li><strong>Budget alerts DO NOT stop resources</strong>: Setting a budget with 50%/90%/100% alerts only sends notifications (Email or Pub/Sub). It will <strong>never</strong> automatically shut down VMs or stop spending by itself. If you want automated cost capping, export budget alerts to a Pub/Sub topic and trigger a Cloud Function/Run to disable billing or delete resources.</li>
+</ul>
+<p>Ofc, like other public cloud providers, you are able to view the cost with labels...</p>
+<h3 id="other-shit">Other shit</h3>
+<ul>
+<li>We can setting billing exports to BigQuery to analyze the costs!</li>
+<li>Managing multiple <code>gcloud</code> environments / projects:<ul>
+<li><code>gcloud config set project &lt;PROJECT_ID&gt;</code></li>
+<li><code>gcloud config configurations create &lt;NAME&gt;</code> &amp; <code>gcloud config configurations activate &lt;NAME&gt;</code> (favorite exam topic for switching between dev, staging, and prod profiles without re-authenticating each time).</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h1 id="3-iam">3. IAM</h1>
+<p>Just little more detail of Cloud Identity I told above!</p>
+<h3 id="role-types-classic-exam-topic">Role Types (Classic Exam Topic)</h3>
+<ul>
+<li><strong><a href="https://docs.cloud.google.com/iam/docs/roles-overview#role-types">Primitive / Basic Roles</a></strong>: <code>Viewer</code>, <code>Editor</code>, <code>Owner</code>. Broad and legacy. Never use in production!<ul>
+<li><code>Owner</code>: Full control + billing + project deletion + member management.</li>
+<li><code>Editor</code>: Deploy/modify resources, but cannot manage members or billing.</li>
+<li><code>Viewer</code>: Read-only.</li>
+</ul>
+</li>
+<li><strong>Predefined Roles</strong>: Fine-grained, managed and maintained by Google (e.g. <code>roles/compute.instanceAdmin.v1</code>, <code>roles/storage.objectViewer</code>). Recommended default!</li>
+<li><strong>Custom Roles</strong>: User-tailored set of granular permissions when predefined roles are too broad.<ul>
+<li><strong>Exam Trap</strong>: Custom roles can ONLY be created at <strong>Organization</strong> or <strong>Project</strong> levels (CANNOT create custom   roles at Folder or Resource level!).
+ They do NOT auto-update when Google introduces new service permissions.</li>
+</ul>
+</li>
+</ul>
+<h3 id="service-accounts-both-identity-and-resource">Service Accounts (Both Identity and Resource!)</h3>
+<p>A Service Account (SA) has a dual nature:</p>
+<ol>
+<li><strong>As an Identity</strong>: You grant the SA permissions to talk to other GCP resources (e.g. read GCS bucket).</li>
+<li><strong>As a Resource</strong>: You grant human users permissions <em>on the SA itself</em>!</li>
+</ol>
+<p><strong>The <code>serviceAccountUser</code> Trap (Exam favorite)</strong>:</p>
+<ul>
+<li>If a developer needs to deploy a Compute Engine VM that runs under a custom Service Account, they need two permissions:<ol>
+<li>Permission to create the VM (e.g. <code>roles/compute.instanceAdmin.v1</code>).</li>
+<li>Permission to "act as" or attach that SA: <strong><code>roles/iam.serviceAccountUser</code></strong> granted ON that specific Service Account!</li>
+</ol>
+</li>
+<li>Without <code>roles/iam.serviceAccountUser</code>, GCP throws a permission denied error when launching the VM.</li>
+</ul>
+<p><strong>Default Service Account Risks</strong>:</p>
+<ul>
+<li>Compute Engine creates a default SA: <code>&lt;project-number&gt;-compute@developer.gserviceaccount.com</code>.</li>
+<li>By default, it is automatically granted the primitive <strong><code>Editor</code></strong> role! This is a massive security hazard.</li>
+<li>Best practice / Exam answer: Disable or avoid using default service accounts; create a dedicated custom SA with least privilege.</li>
+</ul>
+<h3 id="impersonate">Impersonate</h3>
+<p>GCP IAM Impersonation example, impersonate GCP Service Account to test permission read storage. So you don't need to use serviceAccount Key (More fuckin' secure!)</p>
+<div class="highlight"><pre><span></span><code>gcloud<span class="w"> </span>storage<span class="w"> </span>ls<span class="w"> </span>gs://my-company-bucket<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--impersonate-service-account<span class="o">=</span>app-reader@my-project.iam.gserviceaccount.com
+</code></pre></div>
+
+<p>You feel like familiar with something in K8S? right? Yes, exactly! It is fuckin' serviceAccount in K8S. Example test serviceAccount <strong>developer-sa</strong> in namespace <strong>dev</strong> if it is able to get pods!</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-n<span class="w"> </span>dev<span class="w"> </span>--as<span class="o">=</span>system:serviceaccount:dev:developer-sa
+</code></pre></div>
+
+<h3 id="service-account-keys-vs-short-lived-credentials">Service Account Keys vs Short-Lived Credentials</h3>
+<ul>
+<li>Avoid user-managed keys (<code>.json</code> key files). They can be leaked, committed to Git, and are painful to rotate.</li>
+<li>Best alternatives:<ul>
+<li>VM / Cloud Run / GCF: Attach SA directly to resource instance metadata.</li>
+<li>GKE: Workload Identity Federation.</li>
+<li>Local dev / testing: <code>gcloud auth application-default login</code> or IAM Impersonation (<code>roles/iam.serviceAccountTokenCreator</code>).</li>
+</ul>
+</li>
+</ul>
+<h3 id="fine-grained-accounts">Fine-grained accounts</h3>
+<p>Format: </p>
+<div class="highlight"><pre><span></span><code><span class="o">[</span><span class="n">app-name</span><span class="o">]-[</span><span class="n">env</span><span class="o">]-[</span><span class="n">purpose</span><span class="o">]-</span><span class="n">sa</span>
+</code></pre></div>
+
+<p>And yes, fuckin' <strong>Least privileges</strong> please!</p>
+<h3 id="iam-conditions">IAM Conditions</h3>
+<p>Allow conditional role bindings based on attributes (e.g. resource name prefix, current time, or IP address):</p>
+<ul>
+<li>Example: Grant access to Cloud Storage only if bucket name starts with <code>gs://dev-*</code>, or temporary access that expires automatically at a specific date/time.</li>
+</ul>
+<h3 id="workload-vs-workforce-identity-federation">Workload vs Workforce Identity Federation</h3>
+<ul>
+<li>Workforce: for human (e.g. login via Microsoft Entra ID / Okta for employees).</li>
+<li>Workload: for machine (e.g. GitHub Actions, AWS/Azure workloads calling GCP APIs without service account keys).</li>
+</ul>
+<h3 id="useful-gcloud-iam-commands">Useful <code>gcloud</code> IAM Commands</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Add IAM binding to a project</span>
+gcloud<span class="w"> </span>projects<span class="w"> </span>add-iam-policy-binding<span class="w"> </span>&lt;PROJECT_ID&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--member<span class="o">=</span><span class="s2">&quot;user:dev@example.com&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--role<span class="o">=</span><span class="s2">&quot;roles/storage.objectViewer&quot;</span>
+
+<span class="c1"># Create a custom service account</span>
+gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span class="w"> </span>create<span class="w"> </span>my-app-sa<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--display-name<span class="o">=</span><span class="s2">&quot;My App SA&quot;</span>
+
+<span class="c1"># Grant a developer permission to use/attach that SA to VMs</span>
+gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span class="w"> </span>add-iam-policy-binding<span class="w"> </span>my-app-sa@&lt;PROJECT_ID&gt;.iam.gserviceaccount.com<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--member<span class="o">=</span><span class="s2">&quot;user:dev@example.com&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--role<span class="o">=</span><span class="s2">&quot;roles/iam.serviceAccountUser&quot;</span>
+</code></pre></div>
+
+<hr />
+<h1 id="4-compute-scaling">4. Compute &amp; Scaling</h1>
+<h3 id="vm-access">VM Access</h3>
+<p>We can login with IAM instead of SSH or User/Password. Actually behind the scene, GCP did many many thing it in:</p>
+<ul>
+<li><a href="https://docs.cloud.google.com/compute/docs/oslogin?authuser=1">OS Login</a></li>
+<li><a href="https://docs.cloud.google.com/compute/docs/images/guest-agent-functions?authuser=1">Guest agent functionality</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/guest-oslogin">Github Guest Os Login</a></li>
+<li><a href="https://docs.cloud.google.com/iap/docs/using-tcp-forwarding"><strong>Identity-Aware Proxy (IAP) TCP forwarding</strong></a>: Enables secure SSH/RDP to VM instances over private internal IPs without needing public IP addresses or bastion/jump hosts.</li>
+</ul>
+<p>Default Google-provided OS images already included the Guest Agent and OS Login packages come pre-installed and pre-configured. So we don't need to install them manually xD.</p>
+<p>The OS Login Package provides the actual binaries and Linux modules that communicate with GCP (detail in Github above):</p>
+<ul>
+<li>Authorized Keys Command</li>
+<li>NSS Modules</li>
+<li>PAM(Pluggable Authentication Modules) Modules: You will like me feel like the last word "Modules" is little duplicate, but actually they are widely used. For example: ATM machine -&gt; Automated Teller Machine machine, PDF format -&gt; Portable Document Format format, SQL language -&gt; Structured Query Language language. That is how we talk in common of software engineering I guess xD</li>
+</ul>
+<h3 id="managed-instance-group-mig">Managed Instance Group (MIG)</h3>
+<p>Almost same as AWS Auto Scaling Group (ASG), but keep in mind these GCP-specific gotchas:</p>
+<ul>
+<li><strong>Instance Templates are IMMUTABLE</strong>: You cannot edit them in-place; you must create a new version or copy from an existing one.</li>
+<li><strong>Auto-healing</strong>: Requires a dedicated application health check (separate from the LB health check) to detect and recreate unhealthy VMs.</li>
+<li><strong>Stateful MIG</strong>: Preserves attached persistent disks and static IPs across VM recreations (useful for stateful workloads like Kafka/DB replicas).</li>
+</ul>
+<h3 id="gcp-compute-quirks-exam-traps">GCP Compute Quirks &amp; Exam Traps</h3>
+<ul>
+<li><strong>Spot vs Preemptible</strong>: Spot VMs have <strong>NO 24-hour limit</strong> (legacy Preemptible strictly died after 24h). Both have a 30-second termination notice.</li>
+<li><strong>Live Migration</strong>: Default behavior during host maintenance is live migration with zero downtime. Exception: GPU instances cannot live-migrate (<code>OnHostMaintenance=TERMINATE</code>).</li>
+<li><strong>Persistent Disk multi-attach</strong>: A standard/SSD PD can be attached to <strong>multiple VMs</strong> simultaneously in <strong><code>ReadOnly</code></strong> mode.</li>
+<li><strong>Scopes vs IAM</strong>: Modern best practice is <code>--scopes=cloud-platform</code> on the VM, controlling actual permissions strictly via the assigned Service Account.</li>
+</ul>
+<h3 id="other-shit_1">Other shit</h3>
+<ul>
+<li>Create Patch Deployment for patch management of fleet of computer engine, that will generate patch jobs</li>
+</ul>
+<hr />
+<h1 id="5-google-kubernetes-engine-gke">5. Google Kubernetes Engine (GKE)</h1>
+<p>This one worth to mention since this is new for me.</p>
+<p><img alt="GKE Standard vs Pilot" src="../images/2026/07/22.png" /></p>
+<p>And yes, we have same thing in Azure + AWS:</p>
+<ul>
+<li>Azure: Azure Container Apps or AKS Automatic</li>
+<li>AWS: AWS Fargate (cho EKS / ECS)</li>
+</ul>
+<h3 id="cluster-types-zonal-vs-regional-exam-trap">Cluster Types: Zonal vs Regional (Exam Trap)</h3>
+<ul>
+<li><strong>Zonal</strong>: Single control plane in 1 zone. Control plane upgrades cause temporary API downtime (running workloads unaffected).</li>
+<li><strong>Regional</strong>: Control plane replicated across 3 zones; nodes distributed across 3 zones. Zero downtime during control plane upgrades. Higher SLA.</li>
+<li><strong>Exam trap</strong>: You <strong>CANNOT</strong> convert an existing Zonal cluster to Regional (must spin up a new cluster and migrate workloads).</li>
+</ul>
+<h3 id="standard-vs-autopilot">Standard vs Autopilot</h3>
+<ul>
+<li><strong>Standard</strong>: Full control over node pools, OS, and machine types. Pay per VM instance.</li>
+<li><strong>Autopilot</strong>: Fully managed nodes. Pay strictly per Pod resource requests (vCPU/RAM). SSH to nodes and privileged containers are disabled by default.</li>
+</ul>
+<h3 id="node-pool-machine-type-upgrades">Node Pool Machine Type Upgrades</h3>
+<ul>
+<li>You <strong>cannot modify the machine type</strong> of an existing node pool.</li>
+<li>Migration pattern: Create a new node pool with target machine type -&gt; Cordon &amp; Drain old node pool (<code>kubectl drain</code>) -&gt; Delete the old node pool.</li>
+</ul>
+<h3 id="security-connectivity">Security &amp; Connectivity</h3>
+<ul>
+<li><strong>Private Cluster</strong>: Nodes have NO public IPs (requires Cloud NAT for outbound internet).</li>
+<li><strong>Master Authorized Networks</strong>: Restrict which specific CIDRs can access the K8s API server endpoint.</li>
+<li><strong>Fetch credentials</strong>: <code>gcloud container clusters get-credentials &lt;NAME&gt; --region=&lt;REGION&gt;</code></li>
+</ul>
+<h3 id="cluster-autoscaling">Cluster Autoscaling</h3>
+<ul>
+<li>Scales node pools based on pending (unschedulable) pod resource requests, NOT node CPU/memory utilization.</li>
+</ul>
+<h3 id="workload-identity">Workload Identity</h3>
+<p>The recommended, secure way for GKE pods to access GCP services without keys (Equivalent to AWS IRSA).
+- Bind a Kubernetes Service Account (KSA) to a Google Cloud Service Account (GSA) with <code>roles/iam.workloadIdentityUser</code>.
+- The GKE metadata server automatically exchanges the KSA token for short-lived Google Cloud credentials.</p>
+<h3 id="backup-for-gke">Backup for GKE</h3>
+<ul>
+<li>Fully managed service to protect, backup, and restore application workloads (K8s manifests/configurations) and persistent volume data in GKE clusters.</li>
+</ul>
+<hr />
+<h1 id="6-serverless-with-cloud-run">6. Serverless with Cloud Run</h1>
+<h3 id="cloud-run-services-serverless-containers">Cloud run services (Serverless containers)</h3>
+<ul>
+<li>GCP: Cloud Run</li>
+<li>AWS: Fargate or App Runner</li>
+<li>Azure: Azure Container Apps / App Service Container</li>
+</ul>
+<h3 id="cloud-run-function-serverless-functions">Cloud run function (Serverless functions)</h3>
+<ul>
+<li>GCP: Cloud Run Functions</li>
+<li>AWS: Lambda</li>
+<li>Azure: Azure Functions</li>
+</ul>
+<h3 id="event-trigger-for-function">Event Trigger for function</h3>
+<ul>
+<li>GCP: Eventarc or Pub/Sub</li>
+<li>AWS: EventBridge</li>
+<li>Azure: Azure Event Grid</li>
+</ul>
+<h3 id="example-with-eventarc">Example with Eventarc</h3>
+<p>This is fuckin' popular example that would appear in every tutorial, LOL. When user upload an image to Cloud Storage Bucket (S3), Eventarc will catch this event and trigger Cloud Run Function to handle (resize image, extract metadata of image and write to somewhere?)</p>
+<p>Another example would to mention: Pub/Sub will related to decoupling services (using Eventarc). Also remember, there is no fuckin' persistant data in Cloud Run Service (But mount NFS or publish data to Cloud Storage are fine xD)</p>
+<h3 id="concurrency-differs-from-aws-lambda">Concurrency (Differs from AWS Lambda)</h3>
+<ul>
+<li>In Lambda: 1 invocation = 1 container.</li>
+<li>In Cloud Run: 1 container handles <strong>multiple concurrent requests</strong> (up to 1,000, default 80). Set <code>--concurrency=1</code> only if your app cannot handle multi-threading/concurrency.</li>
+</ul>
+<h3 id="app-engine-standard-vs-flexible-legacy-exam-favorite">App Engine: Standard vs Flexible (Legacy Exam Favorite)</h3>
+<ul>
+<li><strong>Standard</strong>: Pre-configured sandboxes, scales to zero instantly, fast startup (ms), no Docker customizations, cannot write to local disk.</li>
+<li><strong>Flexible</strong>: Runs on GCE VMs inside custom Docker containers. Supports any runtime, can write to disk, can SSH, but <strong>cannot scale to zero</strong> (min 1 VM, slower boot, more expensive).</li>
+</ul>
+<hr />
+<h1 id="7-cloud-storage">7. Cloud Storage</h1>
+<h3 id="storage-classes">Storage Classes</h3>
+<p>Bucket name must be globally unique. We have some storage classes like others but almost just name different, LOL:</p>
+<ul>
+<li>Standard (Hot)</li>
+<li>Nearline (Warm)</li>
+<li>Coldline (Cool)</li>
+<li>Archive (Cold)</li>
+</ul>
+<p>And for early deletion fee. The author explained pretty well and easy to understand in this picture:</p>
+<p><img alt="Cloud storage plan" src="../images/2026/07/23.png" /></p>
+<p>And there is little different in retrieval time of GCP vs AWS/Azure:</p>
+<ul>
+<li>Archive in GCP allow you able to read data from archive class</li>
+<li>AWS (S3 Glacier) / Azure (Archive Tier): ask you to wait 3 to 12 hours to retrieve data after "request restore".</li>
+</ul>
+<h3 id="policies-permissions">Policies &amp; Permissions</h3>
+<ul>
+<li>Signed URL in GCP (GCS) = SAS Token in Azure (Blob Storage) = Presigned URL in AWS (S3)</li>
+<li>Delete encryption key = permanent data loss, because there is no way to decrypt files storage in bucket without key (But we have Pending deletion for key and soft delete for files in bucket. So don't worry if accident happens xD).</li>
+<li>Lifecycle policy management: same as other, move files from current classes to other classes or delete it for costs saving. But wait, early deletion fees STILL apply if objects are deleted or overwritten before their minimum duration (30d Nearline, 90d Coldline, 365d Archive)! Though transitions themselves are free, and Autoclass buckets are exempt from early deletion fees.</li>
+<li>And use lifecycle for know, autoclass for unknown. Age condition then set storage class actions.</li>
+<li>Autoclass ignores file size &lt; 128Kb by default, it only transitions to Nearline (unless you configured it for Archive).</li>
+<li>And even with Automation, remember minimum durations: Nearline(30 days), Coldline(90 days), Archive (365 days)</li>
+<li>Uniform Bucket-Level access is the standard, no need legacy ACL and required to use feature like Managed Folders. And enabling Uniform bucket-level access will disable existing object-level ACLs.</li>
+</ul>
+<h3 id="storage-transfer-service-sts">Storage Transfer Service (STS)</h3>
+<ul>
+<li>Use when needed for large transfers into GCS: support Cloud to Cloud or On-premises to Cloud</li>
+<li>Able to run directly or via scheduling, run synchronization and have data integrity for validation.</li>
+</ul>
+<h3 id="bucket-lock-retention-policy-lock-compliance">Bucket Lock (Retention Policy Lock - Compliance)</h3>
+<ul>
+<li>Set retention policy for WORM (Write Once, Read Many) compliance.</li>
+<li><strong>Exam trap</strong>: Once you <strong>Lock</strong> the retention policy, it is <strong>IRREVERSIBLE</strong>. Neither the Project Owner nor Google Cloud Support can unlock it, delete the bucket, or reduce the retention duration until it expires.</li>
+</ul>
+<h3 id="data-migration-sts-vs-transfer-appliance">Data Migration: STS vs Transfer Appliance</h3>
+<ul>
+<li><strong>Storage Transfer Service (STS)</strong>: Online over-the-network transfer (from S3/Azure/on-prem).</li>
+<li><strong>Transfer Appliance</strong>: High-capacity physical hardware appliance shipped to your datacenter. Choose this when data volume is massive (&gt;10-20 TB up to PB) and network bandwidth is too slow/constrained.</li>
+</ul>
+<h3 id="dual-region-turbo-replication">Dual-Region &amp; Turbo Replication</h3>
+<ul>
+<li><strong>Dual-Region</strong>: Replicated across 2 specific regions.</li>
+<li><strong>Turbo Replication</strong>: Ensures 100% of newly written objects are replicated to the paired region within <strong>15 minutes</strong> (critical for strict DR/RPO requirements).</li>
+</ul>
+<hr />
+<h1 id="8-managed-databases-in-gcp">8. Managed Databases in GCP</h1>
+<h3 id="relational-sql-options">Relational (SQL) options</h3>
+<ul>
+<li>Cloud SQL: Mysql, PostgreSQL, SQL Server...</li>
+<li>AlloyDB: PostgreSQL by GCP, not fuckin' open source xD, like Aurora in AWS.</li>
+<li>Cloud Spanner: horizontally scalable Relational (SQL) database (AWS doesn't have a direct equivalent, but think of it as managed CockroachDB/YugabyteDB). Offers a signature SLA of 99.999% for multi-region (and 99.99% for single-region).</li>
+</ul>
+<h3 id="nosql-options">NoSQL options</h3>
+<ul>
+<li>Firestore: Document database, like MongoDB. Perfect for mobile/web apps</li>
+<li>Bigtable: Wide-column NoSQL database, same as Apache HBase or Apache Cassandra. (Clickhouse/TiFlash are OLAP column stores, their actual GCP equivalent is BigQuery, not Bigtable).</li>
+<li><strong>Use cases</strong>: IoT data, clickstreams, time-series, financial data. Massive scale, high-throughput, and low latency (TB to PB).</li>
+<li><strong>Key exam points</strong>:<ul>
+<li><strong>Single index</strong>: Data is only indexed by the row key. </li>
+<li><strong>Avoid Hotspotting</strong>: Sequential row keys (like raw timestamps or alphabetical ID sequences) cause traffic to hit a single node (hotspotting). Prevent this by salting (pre-pending a hash), reversing IDs, or promoting fields.</li>
+<li><strong>Dynamic scale</strong>: Storage is decoupled from compute. You can dynamically add/remove nodes to scale throughput/IOPS without downtime or data migration.</li>
+<li><strong>Storage Types</strong>: SSD (default, recommended for low-latency queries) vs HDD (recommended for large historical/archival datasets where latency isn't critical).</li>
+<li><strong>Tooling</strong>: Use the <code>cbt</code> CLI tool to interact with and query Bigtable.</li>
+</ul>
+</li>
+<li>MemoryStore: Redis/Memcached</li>
+</ul>
+<h3 id="backup-recovery">Backup &amp; Recovery</h3>
+<ul>
+<li><strong>PITR (Point-in-Time Recovery)</strong>: Always restores to a <strong>NEW database instance with a NEW IP address</strong>; the original instance remains untouched.</li>
+<li><strong>Automated backups</strong>: Bound to the instance lifecycle (deleted when the instance is deleted). Export to GCS for permanent retention.</li>
+</ul>
+<h3 id="high-availability-ha-vs-failover-trap">High availability (HA) vs Failover Trap</h3>
+<ul>
+<li><strong>HA Failover</strong>: Uses a standby instance in a secondary zone and regional PD. <strong>IP address DOES NOT CHANGE</strong> during failover (no connection string reconfig needed for apps!).</li>
+<li><strong>Cloud SQL Auth Proxy</strong>: Google-recommended best practice to connect from apps/GKE/VMs to Cloud SQL over IAM &amp; TLS without managing SSL certs or whitelisting public IPs.</li>
+</ul>
+<h3 id="exam-decision-matrix-which-database-to-pick">Exam Decision Matrix: Which Database to Pick?</h3>
+<ul>
+<li><strong>Cloud SQL</strong>: Traditional RDBMS (PostgreSQL/MySQL/SQL Server), single-region, OLTP.</li>
+<li><strong>Cloud Spanner</strong>: Global/Multi-region distributed SQL, horizontal write scaling, 99.999% SLA.</li>
+<li><strong>Firestore</strong>: Mobile/web document DB, real-time client sync, offline support.</li>
+<li><strong>Bigtable</strong>: Heavy write throughput, low latency (&lt;10ms), IoT/time-series/financial data (TB to PB).</li>
+<li><strong>BigQuery</strong>: OLAP / SQL queries on petabytes (never use Bigtable for analytical ad-hoc aggregations).</li>
+</ul>
+<h3 id="other-shit_2">Other shit</h3>
+<ul>
+<li>Want a centralized view -&gt; go for Database Center</li>
+<li><a href="https://cloud.google.com/products/alloydb?hl=en">AlloyDB</a> is a fully managed PostgreSQL-compatible database service for your most demanding enterprise database workloads </li>
+</ul>
+<h3 id="cloud-managed-services-vs-open-source-equivalents">Cloud Managed Services vs. Open-Source Equivalents</h3>
+<p>Not related but I want to put here, everytime I see services in AWS/GCP/Azure, I often search if there is same solution but <strong>open-source</strong>. So here is my little research:</p>
+<ul>
+<li>GCP Cloud Spanner = CockroachDB/YugabyteDB (Distributed SQL).</li>
+<li>AWS DynamoDB = ScyllaDB (Distributed NoSQL, Key-Value/Documents.</li>
+<li>Cloud-Native RDBMS: Aurora (AWS) &amp; AlloyDB (GCP). Not multi-write, still using single master (primary node for write).</li>
+</ul>
+<hr />
+<h1 id="9-big-data-analytics-platforms">9. Big Data &amp; Analytics Platforms</h1>
+<h3 id="bigquery-optimization-exam-favorites">BigQuery Optimization (Exam Favorites)</h3>
+<ul>
+<li><strong>Partitioning</strong>: Segments table by a Date/Timestamp column. Massive cost &amp; performance booster because queries only scan the relevant partition (e.g. <code>WHERE date = '2026-01-01'</code>).</li>
+<li><strong>Clustering</strong>: Colocates and sorts data based on up to 4 columns. Best for high-cardinality filters (<code>WHERE customer_id = 123</code>).</li>
+<li><strong>Best Practice</strong>: Partition by date first, then cluster by frequently filtered dimensions.</li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/running-queries"><strong>BigQuery dry run</strong></a>: Estimates the number of bytes a query will scan and validates syntax for free, without using query slots or processing actual data.</li>
+</ul>
+<h3 id="dataproc-vs-dataflow-cheat-sheet">Dataproc vs Dataflow (Cheat Sheet)</h3>
+<ul>
+<li><strong>Dataproc</strong>: Managed <strong>Hadoop / Spark / Hive</strong> (AWS EMR equivalent). Pick this when migrating existing on-prem Spark/Hadoop jobs with <strong>minimal code changes</strong>.</li>
+<li><strong>Dataflow</strong>: Fully managed, serverless stream/batch processing based on <strong>Apache Beam</strong>. No clusters to size or manage. For example: Raw Data (CSV, logs...) --&gt; Dataflow (Transform/aggregate) --&gt; Clean Data in BigQuery.</li>
+<li><strong>Pub/Sub</strong>: Ingestion buffer for streaming pipelines (Global, decoupled, at-least-once delivery).</li>
+</ul>
+<hr />
+<h1 id="10-managed-file-storage">10. Managed file storage</h1>
+<ul>
+<li><strong>Filestore</strong>: Managed <strong>NFSv3</strong> (POSIX-compliant) file share. Equivalent to AWS EFS / Azure Files.<ul>
+<li><strong>ReadWriteMany (RWX)</strong>: Pick this when multiple VMs or GKE pods must mount and <strong>concurrently write</strong> to the same shared filesystem (since Persistent Disks only support multi-attach in <code>ReadOnly</code> mode).</li>
+<li>Use cases: Legacy apps lift-and-shift, shared CMS (WordPress media), GKE shared PVCs.</li>
+<li>Minimum provisioned size starts at <strong>1 TiB</strong>.</li>
+</ul>
+</li>
+<li><strong>Google Cloud NetApp Volumes</strong>: Enterprise-grade NFS/SMB file services (primarily for Windows SMB workloads and high-performance enterprise storage).</li>
+</ul>
+<hr />
+<h1 id="11-virtual-private-cloud-vpc-networking">11. Virtual Private Cloud (VPC) Networking</h1>
+<p>Unlike AWS or Azure, a Google VPC is <strong>Global</strong> by default, remember this!</p>
+<h3 id="auto-vs-custom-mode-vpc-one-way-street">Auto vs Custom Mode VPC (One-way street!)</h3>
+<ul>
+<li><strong>Auto Mode</strong>: Creates a <code>/20</code> subnet in every region automatically. Risk of IP overlapping with on-prem networks.</li>
+<li><strong>Custom Mode</strong>: Production standard. Zero subnets by default; define your own CIDRs.</li>
+<li><strong>Exam trap</strong>: You can convert Auto Mode to Custom Mode (<code>switch-mode --mode=custom</code>), but <strong>CANNOT convert Custom Mode back to Auto Mode</strong>.</li>
+</ul>
+<h3 id="subnet">Subnet</h3>
+<ul>
+<li>Subnets are regional resources. THey are Cross-zone (meaning a single subnet spans all zones within its region!)</li>
+<li>When IPs in subnet run out of IP, zero downtime expansion, I meaning it is able to change the subnet mask (ex: from /24 to /20) without fuckin' downtime! And yeah expand is easy but not able to shrink xD, like volumes.</li>
+</ul>
+<h3 id="cloud-ngfw">Cloud NGFW</h3>
+<p>It is fuckin' stateful, meaning you only need to allow ingress and it will allow egress for you! No need a seprate egress rule.
+- <a href="https://docs.cloud.google.com/firewall/docs/firewall-policies"><strong>Hierarchical firewall policies</strong></a>: Enforce consistent firewall policies across the entire Organization or Folder levels (evaluated before VPC firewall rules).</p>
+<h3 id="shared-vpc">Shared VPC</h3>
+<p>No need to talk about VPC Peering but shared VPC, one network, many projects:</p>
+<ul>
+<li>Multiple projects share the same VPC</li>
+<li>Centralized control by networking team</li>
+<li>One set of firewall rules for all</li>
+</ul>
+<h3 id="private-access-to-google-services-private">Private access to google services private</h3>
+<p>How to enable:</p>
+<ul>
+<li>Per subnet setting (you can turn it on in subnet setting)</li>
+<li>Internal traffic only</li>
+<li>Google services only.</li>
+</ul>
+<p>What we can access via private services:</p>
+<ul>
+<li>Cloud Storage</li>
+<li>BigQuery</li>
+<li>Pub/Sub</li>
+<li>Cloud Logging &amp; Monitoring</li>
+<li>Container Registry</li>
+<li>Artifact Registry</li>
+</ul>
+<h3 id="pga-vs-psa-dont-confuse-these-two">PGA vs PSA (Don't confuse these two!)</h3>
+<ul>
+<li><strong>Private Google Access (PGA)</strong>: Subnet-level setting. Allows VMs with only internal IPs to reach <strong>Google APIs</strong> (Cloud Storage, BigQuery, Pub/Sub).</li>
+<li><strong>Private Services Access (PSA)</strong>: Internal peering connection to reach managed services inside Google's tenant VPC (specifically <strong>Cloud SQL &amp; Memorystore</strong>).</li>
+</ul>
+<p>If you need internet access, you will need cloud NAT, hmm what about Cloud NAT:</p>
+<ul>
+<li>One Cloud Nat gateway for the fuckin' entire subnet or region.</li>
+<li>Auto scales to handle traffic from thousands of VMs.</li>
+<li>Outbound only.</li>
+</ul>
+<h3 id="cloud-dns-hybrid-resolution">Cloud DNS &amp; Hybrid Resolution</h3>
+<ul>
+<li><a href="https://oneuptime.com/blog/post/2026-02-17-how-to-set-up-inbound-dns-forwarding-to-allow-on-premises-queries-to-cloud-dns-in-gcp/"><strong>Inbound DNS forwarding</strong></a>: Allows on-premises networks to resolve private DNS zones hosted in Cloud DNS by configuring a DNS server policy.</li>
+</ul>
+<hr />
+<h1 id="12-load-balancer">12. Load Balancer</h1>
+<p>Nothing to talk much about this section, remember the different between 2 tiers: Standard vs Premium Tier:</p>
+<ul>
+<li>Standard Tier: cheaper, more hops, can not use global LB.</li>
+<li>Premium Tier: cost more, less hops (which mean faster, low latency).</li>
+</ul>
+<h3 id="gcp-load-balancing-quirks-vs-aws">GCP Load Balancing Quirks vs AWS</h3>
+<ul>
+<li><strong>Global Anycast IP</strong>: Unlike AWS (which provides regional DNS names), GCP Global External LBs provide a <strong>single Anycast IP globally</strong>. Traffic enters Google's private backbone at the nearest edge PoP.</li>
+<li><strong>Proxy vs Passthrough (Client IP Trap)</strong>:<ul>
+<li><strong>Proxy LBs (L7 HTTP/S &amp; SSL Proxy)</strong>: Terminates connection at LB. Backend sees LB proxy IP; original IP is in <code>X-Forwarded-For</code>.</li>
+<li><strong>Passthrough LBs (L4 Network LB)</strong>: Does NOT terminate TCP. <strong>Preserves original client source IP natively</strong> at packet level (Direct Server Return).</li>
+</ul>
+</li>
+<li><strong>Health Check Firewall Trap</strong>: If all backend VMs report unhealthy, verify firewall allows health check probes from Google's fixed IP ranges: <code>35.191.0.0/16</code> and <code>130.211.0.0/22</code>.</li>
+<li><strong>Cloud Armor (WAF/DDoS) &amp; Cloud CDN</strong>: Can ONLY attach to <strong>External Application Load Balancers</strong> (HTTP/HTTPS).</li>
+</ul>
+<h3 id="other-shit_3">Other shit</h3>
+<ul>
+<li>When autoscaling based on Load Balancing capacity, you must first define the capacity (Maximum RPS) in the Backend Service. Once defined, configure the autoscaler to maintain a target utilization percentage (commonly 80%) of that capacity.</li>
+</ul>
+<hr />
+<h1 id="13-infrastructure-as-code-iac">13. Infrastructure as Code (IaC)</h1>
+<p>LOL, first time I heard about <strong>Config Connector</strong>, you have k8s cluster running in GCP, manifest with kind Storage Bucket, kubectl apply that fuckin' file, config connector calls GCP APIs.</p>
+<p>And <strong>Fabric FAST</strong>, ready-made landing zone for new org with pre-built terraform modules, GCP best practices, secure by default, production-ready.</p>
+<h3 id="terraform-on-gcp-best-practice">Terraform on GCP Best Practice</h3>
+<ul>
+<li><strong>GCS Remote Backend</strong>: Natively supports state locking (no separate locking database required like legacy AWS S3/DynamoDB setup).</li>
+<li><strong>State Security</strong>: Always enable <strong>Object Versioning</strong> on the state GCS bucket to protect against state file corruption or accidental overwrites.</li>
+</ul>
+<h3 id="cloud-deployment-manager-gcp-native-iac">Cloud Deployment Manager (GCP Native IaC)</h3>
+<ul>
+<li>Google's native declarative service (equivalent to AWS CloudFormation / Azure ARM). Uses YAML configs with Jinja2 or Python templates. (Though Google officially recommends Terraform now).</li>
+</ul>
+<h3 id="ai-tooling">AI Tooling</h3>
+<ul>
+<li>Application Design Center: is a console tool that converts plain language descriptions into visual architecture diagrams and deployable Terraform code, using pre-approved, best-practice templates.</li>
+<li>Cloud Hub: is your unified operational dashboard, giving a single view of application health, alerts, costs, security findings, and quota usage across all your deployed applications.</li>
+</ul>
+<hr />
+<h1 id="14monitoring">14.Monitoring</h1>
+<p>Nothing much worht to mention here, except Gemini Cloud, since we sent logs, metrics to GCP and simply we only need ask Gemini what is the fuckin' wrong, it's accuracy about 70-80%. Pretty sure we need to validate it before apply xD</p>
+<h3 id="multi-project-monitoring-metrics-scope">Multi-Project Monitoring (Metrics Scope)</h3>
+<ul>
+<li>Host multiple projects under a single <strong>Scoping Project</strong>.</li>
+<li>Allows a central SRE team to view dashboards, charts, and alerts across multiple projects in a single pane of glass.</li>
+</ul>
+<h3 id="log-based-metrics-bridge-between-logs-alerts">Log-based Metrics (Bridge between Logs &amp; Alerts)</h3>
+<ul>
+<li>Convert log occurrences (e.g. counting <code>ERROR 500</code> strings or regex matches) into measurable metrics in Cloud Monitoring to trigger alert policies.</li>
+</ul>
+<h3 id="uptime-checks-muting-rules">Uptime Checks &amp; Muting Rules</h3>
+<ul>
+<li><strong>Uptime Checks</strong>: Probes public endpoints from multiple global locations to verify external availability and latency.</li>
+<li><strong>Muting Rules</strong>: Temporarily suppress notification channels during planned maintenance windows.</li>
+</ul>
+<h3 id="ops-agent-guest-level-metrics">Ops Agent (Guest-level Metrics)</h3>
+<ul>
+<li>Default Compute Engine monitoring only captures hypervisor-level metrics (CPU, disk throughput, network).</li>
+<li>To monitor <strong>Memory (RAM) utilization, available disk space, and process-level metrics</strong>, you MUST install the <strong>Google Cloud Ops Agent</strong> inside the VM.</li>
+</ul>
+<hr />
+<h1 id="15-logging">15. Logging</h1>
+<p>GCP Cloud logging = AWS CloudWatch Logs.</p>
+<ul>
+<li>Log Buckets are container within cloud logging. <strong>_Required</strong> bucket stores for 400 days and can not be disabled. <strong>_Default</strong> bucket stores for 30 days by default,retention can be optimized.</li>
+<li>Buckets are regional, a specialized, database-like engine built exclusively inside Cloud Logging.</li>
+<li>Log Analytics allows you to run SQL queries directly against your log data without exporting it to BigQuery.</li>
+<li>You can upgrade existing bucket to use Log Analytics.</li>
+<li>Cloud Audit Log GCP = AWS CloudTrail</li>
+<li>Need more metrics (Ram, disk space used, app metrics...), required to install Agent Metrics (Ops Agent).</li>
+<li>Cloud Trace is for tracing, find latency bottlenecks, why this shit takes 5 seconds to complete!</li>
+<li>Cloud Profiler is for code performance: Finding cpu/memory leaks in specific functions.</li>
+<li>Query Insight helps you identify slow SQL queries in Cloud SQL based on CPU and latency.</li>
+</ul>
+<h3 id="log-router-sinks-writer-identity-trap">Log Router Sinks &amp; Writer Identity Trap</h3>
+<ul>
+<li><strong>4 Valid Destinations</strong>:<ol>
+<li><strong>Cloud Storage</strong>: Cheap long-term compliance archival.</li>
+<li><strong>BigQuery</strong>: Analytical querying &amp; BI dashboards.</li>
+<li><strong>Pub/Sub</strong>: Stream logs to external SIEMs (Splunk, Datadog, Elastic) or trigger automation.</li>
+<li><strong>Another Cloud Logging Bucket</strong>: Centralize logs in a dedicated security/compliance project.</li>
+</ol>
+</li>
+<li><strong>Writer Identity Trap</strong>: Creating a sink generates a unique service account (Writer Identity). You <strong>MUST explicitly grant</strong> that identity write permission on the destination resource (e.g. <code>Storage Object Creator</code> on the target GCS bucket).</li>
+</ul>
+<h3 id="cloud-audit-logs-admin-activity-vs-data-access">Cloud Audit Logs: Admin Activity vs Data Access</h3>
+<ul>
+<li><strong>Admin Activity</strong>: Modifying metadata/configs (create VM, update IAM). <strong>Always ON, FREE</strong>, retained 400 days in <code>_Required</code>.</li>
+<li><strong>Data Access</strong>: Reading or writing user data (reading GCS objects, querying tables). <strong>DISABLED by default</strong> (except BigQuery) to prevent massive volume &amp; ingestion costs. Must be manually enabled.</li>
+</ul>
+<h3 id="exclusion-filters-cost-optimization">Exclusion Filters (Cost Optimization)</h3>
+<ul>
+<li>Drop noisy, high-volume logs (e.g., LB health check pings or verbose <code>DEBUG</code> logs) before ingestion to avoid storage charges.</li>
+</ul>
+<hr />
+<h1 id="16-other-shit">16. Other shit</h1>
+<ul>
+<li><strong>Gemini Enterprise Agent Platform Workbench</strong> instances are Jupyter notebook-based development environments on Google Cloud. No need to manage infrastructure.</li>
+<li><a href="https://cloud.google.com/blog/products/management-tools/active-assist-comes-to-google-cloud"><strong>Active Assist</strong></a> refers to the portfolio of tools used in Google Cloud to generate recommendations and insights to help you optimize your Google Cloud projects (cost, security, performance).</li>
+<li><strong>Data Encryption Tiers (KMS Trap)</strong>:<ul>
+<li><strong>Google-default</strong>: Encrypted at rest automatically with Google-managed keys (zero config, free).</li>
+<li><strong>CMEK</strong>: Keys generated and managed in <strong>Google Cloud KMS</strong> (customer controls rotation and IAM).</li>
+<li><strong>CSEK</strong>: Keys generated and kept on-premises by customer, provided with API calls. <strong>Google NEVER stores CSEK keys</strong> (if you lose the key, data is permanently unrecoverable).</li>
+</ul>
+</li>
+<li><strong>Artifact Registry</strong>: The modern replacement for Container Registry (GCR). Supports Docker images, Helm charts, and language packages (npm/Maven/Python) with fine-grained per-repository IAM.</li>
+<li><strong>Secret Manager</strong>: Securely stores API keys and credentials with versioning. Applications only need <strong><code>roles/secretmanager.secretAccessor</code></strong> to retrieve secret payloads.</li>
+<li><strong>Cloud Shell</strong>:<ul>
+<li>Ephemeral VM with a <strong>persistent 5 GB <code>$HOME</code> directory</strong>. Auto-terminates after 20 minutes of inactivity (anything outside <code>$HOME</code> is lost).</li>
+<li><a href="https://docs.cloud.google.com/shell/docs/configuring-cloud-shell"><strong>Environment customization</strong></a>: Runs <code>$HOME/.customize_environment</code> once when the instance boots to install packages/tools automatically.</li>
+</ul>
+</li>
+<li>Google Cloud's <a href="https://cloud.google.com/tpu?hl=en"><strong>Tensor Processing Units</strong></a> (TPUs) are custom-built to help speed up machine learning workloads</li>
+</ul>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2026-07-27T00:00:00+07:00">Mon 27 July 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://blackmetalz.github.io/tags.html#certification-ref">certification
+                    <span class="superscript">15</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#gcp-ref">gcp
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://blackmetalz.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
