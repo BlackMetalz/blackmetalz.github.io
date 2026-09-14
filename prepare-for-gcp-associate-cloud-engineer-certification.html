@@ -22,7 +22,7 @@
 <meta property="og:description" content="" />
 <meta property="og:site_name" content="Kienlt&#39;s notebook" />
 <meta property="og:article:author" content="kienlt" />
-<meta property="og:article:published_time" content="2026-07-27T00:00:00+07:00" />
+<meta property="og:article:published_time" content="2026-09-14T00:00:00+07:00" />
 <meta name="twitter:title" content="Prepare for GCP - Associate Cloud Engineer Certification ">
 <meta name="twitter:description" content="">
 
@@ -93,6 +93,7 @@
 <li>Section 4: Ensuring successful operation of a cloud solution (~30% of the exam)</li>
 <li>Section 5: Configuring access and security (~10% of the exam)</li>
 </ul>
+<p><strong>Update</strong>: My goal changed, so no more cloud certifications for this year.</p>
 <hr />
 <h1 id="2resource-hierarchy">2.Resource Hierarchy</h1>
 <h3 id="concept-of-project-in-gcp">Concept of project in GCP</h3>
@@ -180,8 +181,8 @@
 </li>
 <li><strong>Predefined Roles</strong>: Fine-grained, managed and maintained by Google (e.g. <code>roles/compute.instanceAdmin.v1</code>, <code>roles/storage.objectViewer</code>). Recommended default!</li>
 <li><strong>Custom Roles</strong>: User-tailored set of granular permissions when predefined roles are too broad.<ul>
-<li><strong>Exam Trap</strong>: Custom roles can ONLY be created at <strong>Organization</strong> or <strong>Project</strong> levels (CANNOT create custom   roles at Folder or Resource level!).
- They do NOT auto-update when Google introduces new service permissions.</li>
+<li><strong>Exam Trap</strong>: Custom roles can ONLY be created at <strong>Organization</strong> or <strong>Project</strong> levels (CANNOT be created at Folder level, nor defined on individual resources!).</li>
+<li>They do NOT auto-update when Google introduces new service permissions.</li>
 </ul>
 </li>
 </ul>
@@ -191,14 +192,10 @@
 <li><strong>As an Identity</strong>: You grant the SA permissions to talk to other GCP resources (e.g. read GCS bucket).</li>
 <li><strong>As a Resource</strong>: You grant human users permissions <em>on the SA itself</em>!</li>
 </ol>
-<p><strong>The <code>serviceAccountUser</code> Trap (Exam favorite)</strong>:</p>
+<p><strong>The <code>serviceAccountUser</code> vs <code>serviceAccountTokenCreator</code> Trap (Exam favorite)</strong>:</p>
 <ul>
-<li>If a developer needs to deploy a Compute Engine VM that runs under a custom Service Account, they need two permissions:<ol>
-<li>Permission to create the VM (e.g. <code>roles/compute.instanceAdmin.v1</code>).</li>
-<li>Permission to "act as" or attach that SA: <strong><code>roles/iam.serviceAccountUser</code></strong> granted ON that specific Service Account!</li>
-</ol>
-</li>
-<li>Without <code>roles/iam.serviceAccountUser</code>, GCP throws a permission denied error when launching the VM.</li>
+<li><strong>Attaching to resources (<code>actAs</code>)</strong>: If a developer needs to deploy a Compute Engine VM or Cloud Run service running under a Service Account, they need <strong><code>roles/iam.serviceAccountUser</code></strong> (<code>iam.serviceAccounts.actAs</code>) granted ON that Service Account. Without it, GCP throws a permission denied error when launching the VM.</li>
+<li><strong>Direct Impersonation</strong>: If a developer needs to directly impersonate an SA (e.g. <code>gcloud ... --impersonate-service-account</code> or generate short-lived tokens via API), they need <strong><code>roles/iam.serviceAccountTokenCreator</code></strong>, NOT <code>serviceAccountUser</code>!</li>
 </ul>
 <p><strong>Default Service Account Risks</strong>:</p>
 <ul>
@@ -267,6 +264,7 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 <li><a href="https://docs.cloud.google.com/compute/docs/images/guest-agent-functions?authuser=1">Guest agent functionality</a></li>
 <li><a href="https://github.com/GoogleCloudPlatform/guest-oslogin">Github Guest Os Login</a></li>
 <li><a href="https://docs.cloud.google.com/iap/docs/using-tcp-forwarding"><strong>Identity-Aware Proxy (IAP) TCP forwarding</strong></a>: Enables secure SSH/RDP to VM instances over private internal IPs without needing public IP addresses or bastion/jump hosts.</li>
+<li><strong>Short-Lived SSH Certificates</strong>: When using OS Login with 2FA or certificate authentication, Google Cloud issues ephemeral SSH certificates valid for only <strong>5 minutes</strong> (300 seconds), eliminating long-lived SSH key sprawl.</li>
 </ul>
 <p>Default Google-provided OS images already included the Guest Agent and OS Login packages come pre-installed and pre-configured. So we don't need to install them manually xD.</p>
 <p>The OS Login Package provides the actual binaries and Linux modules that communicate with GCP (detail in Github above):</p>
@@ -313,8 +311,8 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 <h3 id="cluster-types-zonal-vs-regional-exam-trap">Cluster Types: Zonal vs Regional (Exam Trap)</h3>
 <ul>
 <li><strong>Zonal</strong>: Single control plane in 1 zone. Control plane upgrades cause temporary API downtime (running workloads unaffected).</li>
-<li><strong>Regional</strong>: Control plane replicated across 3 zones; nodes distributed across 3 zones. Zero downtime during control plane upgrades. Higher SLA.</li>
-<li><strong>Exam trap</strong>: You <strong>CANNOT</strong> convert an existing Zonal cluster to Regional (must spin up a new cluster and migrate workloads).</li>
+<li><strong>Regional</strong>: Control plane replicated across 3 zones; node pools can span across multiple zones in the region (default is 3 nodes/zone = 9 nodes in default standard pool, but can be customized). Zero downtime during control plane upgrades. Higher SLA.</li>
+<li><strong>Exam trap</strong>: Cluster location type is <strong>strictly immutable in BOTH directions</strong> — you <strong>CANNOT</strong> convert Zonal to Regional, nor Regional to Zonal (must spin up a new cluster and migrate workloads).</li>
 </ul>
 <h3 id="standard-vs-autopilot">Standard vs Autopilot</h3>
 <ul>
@@ -423,8 +421,8 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 </ul>
 <h3 id="dual-region-turbo-replication">Dual-Region &amp; Turbo Replication</h3>
 <ul>
-<li><strong>Dual-Region</strong>: Replicated across 2 specific regions.</li>
-<li><strong>Turbo Replication</strong>: Ensures 100% of newly written objects are replicated to the paired region within <strong>15 minutes</strong> (critical for strict DR/RPO requirements).</li>
+<li><strong>Dual-Region</strong>: Replicated across 2 specific regions asynchronously by default (no strict replication time SLA).</li>
+<li><strong>Turbo Replication</strong>: An <strong>optional, paid add-on</strong> that provides an SLA-backed guarantee: 100% of newly written objects are replicated to the paired region within <strong>15 minutes</strong> (critical for strict DR/RPO requirements).</li>
 </ul>
 <hr />
 <h1 id="8-managed-databases-in-gcp">8. Managed Databases in GCP</h1>
@@ -676,7 +674,7 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 <li><strong>CSEK</strong>: Keys generated and kept on-premises by customer, provided with API calls. <strong>Google NEVER stores CSEK keys</strong> (if you lose the key, data is permanently unrecoverable).</li>
 </ul>
 </li>
-<li><strong>Artifact Registry</strong>: The modern replacement for Container Registry (GCR). Supports Docker images, Helm charts, and language packages (npm/Maven/Python) with fine-grained per-repository IAM.</li>
+<li><strong>Artifact Registry</strong>: The official and sole container/package registry on GCP following the shutdown of Container Registry (GCR) in early 2025. Supports Docker/OCI images, Helm charts, and language packages (npm/Maven/Python) with fine-grained per-repository IAM (legacy <code>gcr.io</code> hostnames automatically route to Artifact Registry repositories).</li>
 <li><strong>Secret Manager</strong>: Securely stores API keys and credentials with versioning. Applications only need <strong><code>roles/secretmanager.secretAccessor</code></strong> to retrieve secret payloads.</li>
 <li><strong>Cloud Shell</strong>:<ul>
 <li>Ephemeral VM with a <strong>persistent 5 GB <code>$HOME</code> directory</strong>. Auto-terminates after 20 minutes of inactivity (anything outside <code>$HOME</code> is lost).</li>
@@ -711,7 +709,7 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
         </div>
         <section id="article-sidebar" class="span2">
             <h4>Published</h4>
-            <time itemprop="dateCreated" datetime="2026-07-27T00:00:00+07:00">Mon 27 July 2026</time>
+            <time itemprop="dateCreated" datetime="2026-09-14T00:00:00+07:00">Mon 14 September 2026</time>
             <h4>Category</h4>
             <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
             <h4>Tags</h4>
