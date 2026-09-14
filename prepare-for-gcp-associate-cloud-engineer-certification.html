@@ -17,16 +17,16 @@
 
 <meta name="keywords" content="gcp, certification, Knowledge Base, " />
 
-<meta property="og:title" content="[WIP] Prepare for GCP - Associate Cloud Engineer Certification "/>
-<meta property="og:url" content="https://blackmetalz.github.io/wip-prepare-for-gcp-associate-cloud-engineer-certification.html" />
+<meta property="og:title" content="Prepare for GCP - Associate Cloud Engineer Certification "/>
+<meta property="og:url" content="https://blackmetalz.github.io/prepare-for-gcp-associate-cloud-engineer-certification.html" />
 <meta property="og:description" content="" />
 <meta property="og:site_name" content="Kienlt&#39;s notebook" />
 <meta property="og:article:author" content="kienlt" />
 <meta property="og:article:published_time" content="2026-07-27T00:00:00+07:00" />
-<meta name="twitter:title" content="[WIP] Prepare for GCP - Associate Cloud Engineer Certification ">
+<meta name="twitter:title" content="Prepare for GCP - Associate Cloud Engineer Certification ">
 <meta name="twitter:description" content="">
 
-        <title>[WIP] Prepare for GCP - Associate Cloud Engineer Certification  · Kienlt&#39;s notebook
+        <title>Prepare for GCP - Associate Cloud Engineer Certification  · Kienlt&#39;s notebook
 </title>
         <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
 
@@ -68,8 +68,8 @@
 <div class="row-fluid">
     <header class="page-header span10 offset2">
         <h1>
-            <a href="https://blackmetalz.github.io/wip-prepare-for-gcp-associate-cloud-engineer-certification.html">
-                [WIP] Prepare for GCP - Associate Cloud Engineer Certification
+            <a href="https://blackmetalz.github.io/prepare-for-gcp-associate-cloud-engineer-certification.html">
+                Prepare for GCP - Associate Cloud Engineer Certification
             </a>
         </h1>
     </header>
@@ -143,8 +143,19 @@
 <p>A single billing account can pay for thoudsands of projects, centralizing financial control. And need to remember that billing accounts are "Separate" from projects in GCP (to use paid service, a project must be linked to an active cloud billing account so Google know where to send the fuckin' bill!)</p>
 <p>Exam traps to remember:</p>
 <ul>
-<li><strong>Roles to link Billing to a Project</strong>: Requires <strong><code>Billing Account User</code></strong> on the billing account + <strong><code>Project Creator</code></strong> (or Project Owner) on the project/folder/org.</li>
+<li><strong>Roles to link Billing to a Project</strong>: Requires <strong><code>Billing Account User</code></strong> on the billing account + <strong><code>Project Billing Manager</code></strong> (<code>roles/billing.projectManager</code>, or Project Owner) on the target project. (<code>Project Creator</code> only creates new projects under Org/Folders; it cannot link billing to an existing project!).</li>
 <li><strong>Budget alerts DO NOT stop resources</strong>: Setting a budget with 50%/90%/100% alerts only sends notifications (Email or Pub/Sub). It will <strong>never</strong> automatically shut down VMs or stop spending by itself. If you want automated cost capping, export budget alerts to a Pub/Sub topic and trigger a Cloud Function/Run to disable billing or delete resources.</li>
+</ul>
+<h3 id="cost-optimization-cud-vs-sud-exam-staple">Cost Optimization: CUD vs SUD (Exam Staple!)</h3>
+<ul>
+<li><strong>Committed Use Discounts (CUD)</strong>: 1-year or 3-year contractual commitment for steady-state workloads (up to 57% - 70% discount). Resource-based (vCPU/RAM) or Spend-based ($/hr commitment).</li>
+<li><strong>Sustained Use Discounts (SUD)</strong>: Automatic discount (up to 30%) applied when running certain Compute Engine VM types (e.g. N1, N2) for more than 25% of a billing month. <strong>No upfront commitment needed</strong>!</li>
+</ul>
+<h3 id="quota-management">Quota Management</h3>
+<ul>
+<li><strong>Rate Quotas</strong>: Resets after a time interval (e.g. 60 requests/minute to an API).</li>
+<li><strong>Allocation Quotas</strong>: Maximum concurrent resources in a project/region (e.g. max 24 vCPUs or 5 static external IPs).</li>
+<li><strong>Requesting Increase</strong>: Go to <strong>IAM &amp; Admin -&gt; Quotas</strong>, select the quota, and click <strong>Edit Quotas</strong> (requires business justification; approved automatically or reviewed by Google).</li>
 </ul>
 <p>Ofc, like other public cloud providers, you are able to view the cost with labels...</p>
 <h3 id="other-shit">Other shit</h3>
@@ -192,7 +203,7 @@
 <p><strong>Default Service Account Risks</strong>:</p>
 <ul>
 <li>Compute Engine creates a default SA: <code>&lt;project-number&gt;-compute@developer.gserviceaccount.com</code>.</li>
-<li>By default, it is automatically granted the primitive <strong><code>Editor</code></strong> role! This is a massive security hazard.</li>
+<li><strong>Legacy behavior vs Modern Org Policy</strong>: Historically, it was automatically granted the primitive <strong><code>Editor</code></strong> role (a massive security hazard). Note that for organizations created after <strong>May 3, 2024</strong>, Google enforces the Org Policy constraint <code>iam.automaticIamGrantsForDefaultServiceAccounts</code> by default, disabling this automatic grant. However, in exam questions and older environments, this automatic <code>Editor</code> grant is still treated as a classic security trap!</li>
 <li>Best practice / Exam answer: Disable or avoid using default service accounts; create a dedicated custom SA with least privilege.</li>
 </ul>
 <h3 id="impersonate">Impersonate</h3>
@@ -275,7 +286,15 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 <ul>
 <li><strong>Spot vs Preemptible</strong>: Spot VMs have <strong>NO 24-hour limit</strong> (legacy Preemptible strictly died after 24h). Both have a 30-second termination notice.</li>
 <li><strong>Live Migration</strong>: Default behavior during host maintenance is live migration with zero downtime. Exception: GPU instances cannot live-migrate (<code>OnHostMaintenance=TERMINATE</code>).</li>
-<li><strong>Persistent Disk multi-attach</strong>: A standard/SSD PD can be attached to <strong>multiple VMs</strong> simultaneously in <strong><code>ReadOnly</code></strong> mode.</li>
+<li><strong>Persistent Disk (PD) Types</strong>:<ul>
+<li><code>pd-standard</code> (HDD): Low cost, large sequential I/O, backup targets.</li>
+<li><code>pd-balanced</code> (SSD): General-purpose balanced price/performance (default for many VMs).</li>
+<li><code>pd-ssd</code> (SSD): High performance, high IOPS/low latency for production databases.</li>
+<li><code>pd-extreme</code> / <code>Hyperdisk</code>: Ultra-high throughput and IOPS (dynamically configurable independent of disk size) for mission-critical enterprise workloads (SAP HANA, high-end Oracle).</li>
+</ul>
+</li>
+<li><strong>Persistent Disk multi-attach</strong>: Standard and SSD PDs can be attached to <strong>multiple VMs</strong> simultaneously in <strong><code>ReadOnly</code></strong> mode.</li>
+<li><strong>Online disk expansion</strong>: Disks can be grown online without downtime, but can <strong>never be shrunk</strong>.</li>
 <li><strong>Scopes vs IAM</strong>: Modern best practice is <code>--scopes=cloud-platform</code> on the VM, controlling actual permissions strictly via the assigned Service Account.</li>
 </ul>
 <h3 id="other-shit_1">Other shit</h3>
@@ -318,9 +337,11 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 <li>Scales node pools based on pending (unschedulable) pod resource requests, NOT node CPU/memory utilization.</li>
 </ul>
 <h3 id="workload-identity">Workload Identity</h3>
-<p>The recommended, secure way for GKE pods to access GCP services without keys (Equivalent to AWS IRSA).
-- Bind a Kubernetes Service Account (KSA) to a Google Cloud Service Account (GSA) with <code>roles/iam.workloadIdentityUser</code>.
-- The GKE metadata server automatically exchanges the KSA token for short-lived Google Cloud credentials.</p>
+<p>The recommended, secure way for GKE pods to access GCP services without keys (Equivalent to AWS IRSA).</p>
+<ul>
+<li>Bind a Kubernetes Service Account (KSA) to a Google Cloud Service Account (GSA) with <code>roles/iam.workloadIdentityUser</code>.</li>
+<li>The GKE metadata server automatically exchanges the KSA token for short-lived Google Cloud credentials.</li>
+</ul>
 <h3 id="backup-for-gke">Backup for GKE</h3>
 <ul>
 <li>Fully managed service to protect, backup, and restore application workloads (K8s manifests/configurations) and persistent volume data in GKE clusters.</li>
@@ -430,7 +451,7 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 </ul>
 <h3 id="backup-recovery">Backup &amp; Recovery</h3>
 <ul>
-<li><strong>PITR (Point-in-Time Recovery)</strong>: Always restores to a <strong>NEW database instance with a NEW IP address</strong>; the original instance remains untouched.</li>
+<li><strong>PITR (Point-in-Time Recovery)</strong>: Always restores to a <strong>NEW database instance with a NEW IP address</strong>; the original instance remains untouched. And this required enable binary logigng option!</li>
 <li><strong>Automated backups</strong>: Bound to the instance lifecycle (deleted when the instance is deleted). Export to GCS for permanent retention.</li>
 </ul>
 <h3 id="high-availability-ha-vs-failover-trap">High availability (HA) vs Failover Trap</h3>
@@ -479,7 +500,7 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 <li><strong>Filestore</strong>: Managed <strong>NFSv3</strong> (POSIX-compliant) file share. Equivalent to AWS EFS / Azure Files.<ul>
 <li><strong>ReadWriteMany (RWX)</strong>: Pick this when multiple VMs or GKE pods must mount and <strong>concurrently write</strong> to the same shared filesystem (since Persistent Disks only support multi-attach in <code>ReadOnly</code> mode).</li>
 <li>Use cases: Legacy apps lift-and-shift, shared CMS (WordPress media), GKE shared PVCs.</li>
-<li>Minimum provisioned size starts at <strong>1 TiB</strong>.</li>
+<li>Minimum provisioned size starts at <strong>1 TiB</strong> (applies to legacy Basic HDD/SSD; newer Zonal and Enterprise tiers have different minimum capacity thresholds).</li>
 </ul>
 </li>
 <li><strong>Google Cloud NetApp Volumes</strong>: Enterprise-grade NFS/SMB file services (primarily for Windows SMB workloads and high-performance enterprise storage).</li>
@@ -495,12 +516,12 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 </ul>
 <h3 id="subnet">Subnet</h3>
 <ul>
-<li>Subnets are regional resources. THey are Cross-zone (meaning a single subnet spans all zones within its region!)</li>
+<li>Subnets are regional resources. They are Cross-zone (meaning a single subnet spans all zones within its region!)</li>
 <li>When IPs in subnet run out of IP, zero downtime expansion, I meaning it is able to change the subnet mask (ex: from /24 to /20) without fuckin' downtime! And yeah expand is easy but not able to shrink xD, like volumes.</li>
 </ul>
 <h3 id="cloud-ngfw">Cloud NGFW</h3>
-<p>It is fuckin' stateful, meaning you only need to allow ingress and it will allow egress for you! No need a seprate egress rule.
-- <a href="https://docs.cloud.google.com/firewall/docs/firewall-policies"><strong>Hierarchical firewall policies</strong></a>: Enforce consistent firewall policies across the entire Organization or Folder levels (evaluated before VPC firewall rules).</p>
+<p>It is fuckin' stateful, meaning you only need to allow ingress and it will allow egress for you! No need a seprate egress rule.</p>
+<p><a href="https://docs.cloud.google.com/firewall/docs/firewall-policies"><strong>Hierarchical firewall policies</strong></a>: Enforce consistent firewall policies across the entire Organization or Folder levels (evaluated before VPC firewall rules).</p>
 <h3 id="shared-vpc">Shared VPC</h3>
 <p>No need to talk about VPC Peering but shared VPC, one network, many projects:</p>
 <ul>
@@ -541,14 +562,14 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 </ul>
 <hr />
 <h1 id="12-load-balancer">12. Load Balancer</h1>
-<p>Nothing to talk much about this section, remember the different between 2 tiers: Standard vs Premium Tier:</p>
+<p>Nothing to talk much about this section, remember the different between 2 tiers; Standard vs Premium Tier:</p>
 <ul>
 <li>Standard Tier: cheaper, more hops, can not use global LB.</li>
-<li>Premium Tier: cost more, less hops (which mean faster, low latency).</li>
+<li>Premium Tier: cost more, less hops (which mean faster, lower latency).</li>
 </ul>
 <h3 id="gcp-load-balancing-quirks-vs-aws">GCP Load Balancing Quirks vs AWS</h3>
 <ul>
-<li><strong>Global Anycast IP</strong>: Unlike AWS (which provides regional DNS names), GCP Global External LBs provide a <strong>single Anycast IP globally</strong>. Traffic enters Google's private backbone at the nearest edge PoP.</li>
+<li><strong>Global Anycast IP</strong>: Unlike AWS (which provides regional DNS names), GCP Global External LBs provide a <strong>single Anycast IP globally</strong>. Traffic enters Google's private backbone at the nearest edge PoP(Point of Presence).</li>
 <li><strong>Proxy vs Passthrough (Client IP Trap)</strong>:<ul>
 <li><strong>Proxy LBs (L7 HTTP/S &amp; SSL Proxy)</strong>: Terminates connection at LB. Backend sees LB proxy IP; original IP is in <code>X-Forwarded-For</code>.</li>
 <li><strong>Passthrough LBs (L4 Network LB)</strong>: Does NOT terminate TCP. <strong>Preserves original client source IP natively</strong> at packet level (Direct Server Return).</li>
@@ -562,7 +583,7 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 <li>When autoscaling based on Load Balancing capacity, you must first define the capacity (Maximum RPS) in the Backend Service. Once defined, configure the autoscaler to maintain a target utilization percentage (commonly 80%) of that capacity.</li>
 </ul>
 <hr />
-<h1 id="13-infrastructure-as-code-iac">13. Infrastructure as Code (IaC)</h1>
+<h1 id="13-infrastructure-as-code-iac-cicd">13. Infrastructure as Code (IaC) &amp; CI/CD</h1>
 <p>LOL, first time I heard about <strong>Config Connector</strong>, you have k8s cluster running in GCP, manifest with kind Storage Bucket, kubectl apply that fuckin' file, config connector calls GCP APIs.</p>
 <p>And <strong>Fabric FAST</strong>, ready-made landing zone for new org with pre-built terraform modules, GCP best practices, secure by default, production-ready.</p>
 <h3 id="terraform-on-gcp-best-practice">Terraform on GCP Best Practice</h3>
@@ -574,6 +595,15 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 <ul>
 <li>Google's native declarative service (equivalent to AWS CloudFormation / Azure ARM). Uses YAML configs with Jinja2 or Python templates. (Though Google officially recommends Terraform now).</li>
 </ul>
+<h3 id="cicd-source-repositories-cloud-build-cloud-deploy">CI/CD: Source Repositories, Cloud Build &amp; Cloud Deploy</h3>
+<ul>
+<li><strong>Cloud Source Repositories (CSR)</strong>: Fully managed private Git repositories hosted on Google Cloud (AWS CodeCommit equivalent). Integrates natively with Cloud Build triggers and uses Cloud IAM for access control.</li>
+<li><strong>Cloud Build</strong>: Fully managed serverless build service (equivalent to AWS CodeBuild / GitHub Actions).</li>
+<li>Defined via <code>cloudbuild.yaml</code> (or Dockerfile) using containerized steps (<code>name: 'gcr.io/cloud-builders/docker'</code>, <code>name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'</code>).</li>
+<li><strong>Triggers</strong>: Automatically runs builds on code pushes or PRs from GitHub, GitLab, or Cloud Source Repositories.</li>
+<li><strong>Service Account Permissions Trap</strong>: Cloud Build executes under its default service account (<code>[project-number]@cloudbuild.gserviceaccount.com</code>). To deploy to GKE or Cloud Run, you <strong>MUST explicitly grant</strong> that service account the required target roles (e.g. <code>roles/run.admin</code>, <code>roles/container.developer</code>, <code>roles/iam.serviceAccountUser</code>).</li>
+<li><strong>Cloud Deploy</strong>: Managed, opinionated continuous delivery pipeline for GKE, Cloud Run, and Anthos. Provides multi-target promotion (dev -&gt; staging -&gt; prod), release approvals, and automatic rollbacks.</li>
+</ul>
 <h3 id="ai-tooling">AI Tooling</h3>
 <ul>
 <li>Application Design Center: is a console tool that converts plain language descriptions into visual architecture diagrams and deployable Terraform code, using pre-approved, best-practice templates.</li>
@@ -581,7 +611,7 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 </ul>
 <hr />
 <h1 id="14monitoring">14.Monitoring</h1>
-<p>Nothing much worht to mention here, except Gemini Cloud, since we sent logs, metrics to GCP and simply we only need ask Gemini what is the fuckin' wrong, it's accuracy about 70-80%. Pretty sure we need to validate it before apply xD</p>
+<p>Nothing much worht to mention here, except Gemini Cloud Assist, since we sent logs, metrics to GCP and simply we only need ask Gemini what is the fuckin' wrong, it's accuracy about 70-80%. Pretty sure we need to validate it before apply xD</p>
 <h3 id="multi-project-monitoring-metrics-scope">Multi-Project Monitoring (Metrics Scope)</h3>
 <ul>
 <li>Host multiple projects under a single <strong>Scoping Project</strong>.</li>
@@ -613,7 +643,7 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 <li>Need more metrics (Ram, disk space used, app metrics...), required to install Agent Metrics (Ops Agent).</li>
 <li>Cloud Trace is for tracing, find latency bottlenecks, why this shit takes 5 seconds to complete!</li>
 <li>Cloud Profiler is for code performance: Finding cpu/memory leaks in specific functions.</li>
-<li>Query Insight helps you identify slow SQL queries in Cloud SQL based on CPU and latency.</li>
+<li>Query Insights helps you identify slow SQL queries in Cloud SQL based on CPU and latency.</li>
 </ul>
 <h3 id="log-router-sinks-writer-identity-trap">Log Router Sinks &amp; Writer Identity Trap</h3>
 <ul>
@@ -638,7 +668,7 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 <hr />
 <h1 id="16-other-shit">16. Other shit</h1>
 <ul>
-<li><strong>Gemini Enterprise Agent Platform Workbench</strong> instances are Jupyter notebook-based development environments on Google Cloud. No need to manage infrastructure.</li>
+<li><strong>Vertex AI Workbench</strong> (rebranded to <strong>Gemini Enterprise Agent Platform Workbench</strong> since Cloud Next '26): Managed Jupyter notebook-based development environments on Google Cloud without managing infrastructure. (Exam questions still refer to it as <strong>Vertex AI Workbench</strong>).</li>
 <li><a href="https://cloud.google.com/blog/products/management-tools/active-assist-comes-to-google-cloud"><strong>Active Assist</strong></a> refers to the portfolio of tools used in Google Cloud to generate recommendations and insights to help you optimize your Google Cloud projects (cost, security, performance).</li>
 <li><strong>Data Encryption Tiers (KMS Trap)</strong>:<ul>
 <li><strong>Google-default</strong>: Encrypted at rest automatically with Google-managed keys (zero config, free).</li>
@@ -654,6 +684,14 @@ gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span c
 </ul>
 </li>
 <li>Google Cloud's <a href="https://cloud.google.com/tpu?hl=en"><strong>Tensor Processing Units</strong></a> (TPUs) are custom-built to help speed up machine learning workloads</li>
+</ul>
+<hr />
+<h1 id="17-conclusion">17. Conclusion</h1>
+<p>A quick wrap-up for anyone preparing for the exam:</p>
+<ul>
+<li><strong>Hands-on labs are not strictly mandatory</strong>: If you already have a solid foundation in Linux, networking, containers, and another major cloud (AWS/Azure), you don't necessarily need to spend hours doing hands-on labs to pass this exam (like me xD). Grasping the architectural concepts, GCP-specific terminologies, and exam traps is more than enough.</li>
+<li><strong>Practice Exams</strong>: Highly recommend checking out this course to get familiar with question patterns and real exam scenarios: <a href="https://www.udemy.com/course/google-certified-associate-cloud-engineer-practice-exams-gcp">Google Certified Associate Cloud Engineer Practice Exams on Udemy</a>.</li>
+<li><strong>Final thoughts</strong>: This is definitely my last cloud cert for now because I don't really have many opportunities to work extensively with cloud infrastructure in my current daily work. I will only aim for higher-level certs (like Professional DevOps / Architect) when I actually have the chance to work directly with production cloud infra.</li>
 </ul>
 
 
