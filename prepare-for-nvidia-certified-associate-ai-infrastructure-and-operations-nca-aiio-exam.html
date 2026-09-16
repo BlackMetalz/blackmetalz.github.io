@@ -82,7 +82,7 @@
 <hr />
 <h1 id="1-introduction-motivation">1. Introduction &amp; Motivation</h1>
 <p>After getting our hands dirty with high-performance computing in <a href="https://blackmetalz.github.io/wip-slurm-101.html"><strong>Slurm 101</strong></a> and building a 5-node cluster in <a href="https://blackmetalz.github.io/slurm-202-hands-on-multi-node-cluster-with-docker-cli-mastery.html"><strong>Slurm 202</strong></a>, the next logical step in the AI infrastructure journey is validating this knowledge with an industry-recognized credential: the <strong>NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO)</strong>.</p>
-<p>Since I'm going to have a chance to works with <strong>NVIDIA GPU</strong> and I will take exam, aiming for certification if I'm serious.</p>
+<p>Since I'm going to have a chance to work with <strong>NVIDIA GPU</strong> and I will take exam, aiming for certification if I'm serious.</p>
 <hr />
 <h1 id="2-exam-details-certification-overview">2. Exam Details &amp; Certification Overview</h1>
 <p>Please visit <a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/"><strong>here</strong></a> for full detail xD</p>
@@ -114,8 +114,8 @@
 </ul>
 <h3 id="12-ai-workflow-lifecycle">1.2 AI Workflow Lifecycle:</h3>
 <ul>
-<li><strong>Data Ingestion &amp; Preprocessing:</strong> High I/O throughput, CPU/RAM intensive.</li>
-<li><strong>Model Training:</strong> Compute and inter-GPU bandwidth intensive. Utilizes mixed precision (FP32, TF32, FP16, BF16, FP8).</li>
+<li><strong>Data Ingestion &amp; Preprocessing:</strong> High I/O throughput, traditionally CPU/RAM intensive. Can be GPU-accelerated with <strong>RAPIDS</strong> (cuDF, cuML) and <strong>DALI</strong> (data loading/augmentation).</li>
+<li><strong>Model Training:</strong> Compute and inter-GPU bandwidth intensive. Utilizes mixed precision (FP32 master weights + TF32/FP16/BF16/FP8 compute).</li>
 <li><strong>Model Fine-Tuning:</strong> LoRA, QLoRA, full parameter fine-tuning.</li>
 <li><strong>Inference &amp; Serving:</strong> Low-latency, high-throughput token generation. Optimized with quantization (INT8, FP4) and KV-caching.</li>
 </ul>
@@ -124,11 +124,11 @@
                                    │
 [ Applications &amp; Models ] ──► NeMo (LLMs), BioNeMo, Clara, Omniverse, Riva
                                    │
-[ Microservices &amp; Runtimes] ──► NVIDIA NIM (Inference Microservices), Triton, TensorRT
+[ Microservices &amp; Runtimes] ──► NVIDIA NIM (Inference Microservices), Triton, TensorRT, TensorRT-LLM
                                    │
 [ Platforms &amp; Frameworks ] ──► PyTorch, JAX, TensorFlow, RAPIDS
                                    │
-[ Core Accelerated SDKs ] ──► CUDA, cuDNN, NCCL (Multi-GPU), TensorRT-LLM
+[ Core Accelerated SDKs ] ──► CUDA, cuDNN, NCCL (Multi-GPU), DOCA (BlueField DPU)
                                    │
 [ System Layer ]          ──► NVIDIA GPU Driver, NVIDIA Container Toolkit, DCGM
 </code></pre></div>
@@ -138,7 +138,9 @@
 <li><strong>cuDNN:</strong> Highly tuned primitives for deep neural networks (convolutions, pooling, normalization, activation).</li>
 <li><strong>NCCL (NVIDIA Collective Communications Library):</strong> Multi-GPU and multi-node collective communication primitives (<code>AllReduce</code>, <code>AllGather</code>, <code>Broadcast</code>, <code>ReduceScatter</code>) optimized for NVLink and InfiniBand.</li>
 <li><strong>TensorRT:</strong> High-performance deep learning inference optimizer and runtime (layer fusion, kernel auto-tuning, quantization).</li>
-<li><strong>Triton Inference Server:</strong> Multi-framework open-source model serving software (PyTorch, ONNX, TensorRT, vLLM, Python backend) supporting concurrent model execution, dynamic batching, and model pipelining.</li>
+<li><strong>TensorRT-LLM:</strong> Open-source library for optimizing LLM inference on NVIDIA GPUs (in-flight batching, paged KV-cache, FP8/FP4 quantization).</li>
+<li><strong>Triton Inference Server (now branded NVIDIA Dynamo Triton):</strong> Multi-framework open-source model serving software (PyTorch, ONNX, TensorRT, vLLM, Python backend) supporting concurrent model execution, dynamic batching, and model pipelining. <em>TensorRT optimizes the model; Triton serves it.</em></li>
+<li><strong>DOCA:</strong> SDK for programming BlueField DPUs / SuperNICs (networking, security, storage offload).</li>
 <li><strong>NVIDIA NeMo:</strong> End-to-end cloud-native framework for building, customizing, and training generative AI models.</li>
 <li><strong>NVIDIA AI Enterprise (NVAIE):</strong> Enterprise platform providing production support, validated container images, security patches, and microservices (NVIDIA NIM).</li>
 <li><strong>NGC (NVIDIA GPU Cloud) Registry:</strong> Curated catalog of GPU-optimized containers, pre-trained model weights, Helm charts, and SDKs.</li>
@@ -148,59 +150,258 @@
 <p>The largest domain in the exam covers GPU hardware architectures, interconnects, high-speed networking fabrics, and storage pipelines.</p>
 <h3 id="21-gpu-architectural-generations">2.1 GPU Architectural Generations:</h3>
 <ul>
-<li><strong>Ampere (A100):</strong> Introduced 3rd Gen Tensor Cores, TF32 precision, and Multi-Instance GPU (MIG).</li>
-<li><strong>Hopper (H100 / H200):</strong> Introduced Transformer Engine (FP8 precision), DPX instructions for dynamic programming, 4th Gen Tensor Cores, and NVLink 4 (900 GB/s bidirectional).</li>
-<li><strong>Blackwell (B200 / GB200):</strong> 2nd Gen Transformer Engine (FP4 precision), dual-die packaging (208 billion transistors), NVLink 5 (1.8 TB/s bidirectional), NVLink Switch Chip.</li>
+<li><strong>Ampere (A100):</strong> Introduced 3rd Gen Tensor Cores, TF32 precision, BF16 support, Multi-Instance GPU (MIG), and NVLink 3 (600 GB/s bidirectional).</li>
+<li><strong>Hopper (H100 / H200):</strong> Introduced Transformer Engine (FP8 precision), DPX instructions for dynamic programming, confidential computing, and NVLink 4 (900 GB/s bidirectional). H200 = H100 compute with 141GB HBM3e.</li>
+<li><strong>Blackwell (B200 / GB200):</strong> 2nd Gen Transformer Engine (FP4 precision), 208 billion transistors, NVLink 5 (1.8 TB/s bidirectional), NVLink Switch Chip.<ul>
+<li><strong>GB200 Superchip</strong> = 1 Grace CPU + 2 Blackwell GPUs connected via NVLink-C2C.</li>
+<li><strong>GB200 NVL72</strong> = 36 Grace CPUs + 72 Blackwell GPUs in a single NVLink domain (liquid-cooled rack).</li>
 </ul>
-<h3 id="22-tensor-cores-precision-formats">2.2 Tensor Cores &amp; Precision Formats:</h3>
+</li>
+</ul>
+<h4 id="gpu-spec-cheat-sheet-a100-h100-h200-b100-b200">GPU Spec Cheat Sheet (A100 / H100 / H200 / B100 / B200):</h4>
+<table>
+<thead>
+<tr>
+<th>Spec</th>
+<th>A100</th>
+<th>H100</th>
+<th>H200</th>
+<th>B100</th>
+<th>B200</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Architecture</td>
+<td>Ampere</td>
+<td>Hopper</td>
+<td>Hopper</td>
+<td>Blackwell</td>
+<td>Blackwell</td>
+</tr>
+<tr>
+<td>GPU Memory</td>
+<td>40 / 80GB HBM2e</td>
+<td>80GB HBM3</td>
+<td>141GB HBM3e</td>
+<td>192GB HBM3</td>
+<td>180GB HBM3e (often quoted as 192GB)</td>
+</tr>
+<tr>
+<td>NVLink (per GPU)</td>
+<td>NVLink 3, 600 GB/s</td>
+<td>NVLink 4, 900 GB/s</td>
+<td>NVLink 4, 900 GB/s</td>
+<td>NVLink 5, 1.8 TB/s</td>
+<td>NVLink 5, 1.8 TB/s</td>
+</tr>
+<tr>
+<td>PCIe</td>
+<td>Gen4</td>
+<td>Gen5</td>
+<td>Gen5</td>
+<td>Gen5</td>
+<td>Gen5</td>
+</tr>
+<tr>
+<td>Max TDP (SXM)</td>
+<td>400W</td>
+<td>700W</td>
+<td>700W</td>
+<td>700W</td>
+<td>1000W</td>
+</tr>
+<tr>
+<td>Key precision</td>
+<td>TF32</td>
+<td>FP8 (Transformer Engine)</td>
+<td>FP8</td>
+<td>FP4 (2nd Gen TE)</td>
+<td>FP4 (2nd Gen TE)</td>
+</tr>
+<tr>
+<td>MIG</td>
+<td>Up to 7</td>
+<td>Up to 7</td>
+<td>Up to 7</td>
+<td>Up to 7</td>
+<td>Up to 7</td>
+</tr>
+<tr>
+<td>Transistors</td>
+<td>54B</td>
+<td>80B</td>
+<td>80B</td>
+<td>208B</td>
+<td>208B</td>
+</tr>
+</tbody>
+</table>
+<p>Key points to remember:</p>
 <ul>
-<li><strong>Matrix Acceleration:</strong> Tensor Cores perform fused matrix multiply-accumulate operations in a single clock cycle: $D = A \times B + C$.</li>
-<li><strong>FP32:</strong> Single precision (standard scientific computing).</li>
-<li><strong>TF32 (TensorFloat-32):</strong> Same range as FP32, same precision as FP16, native on Tensor Cores without code changes.</li>
-<li><strong>BF16 / FP16:</strong> Half precision, standard for LLM pre-training.</li>
-<li><strong>FP8 (E4M3 / E5M2):</strong> Standard on Hopper/Blackwell for 2x faster transformer training.</li>
-<li><strong>INT8 / FP4:</strong> Ultra-fast inference with minimal loss in model perplexity.</li>
+<li><strong>H100 vs. A100:</strong> Same max memory size (80GB) but faster HBM3, 1.5x NVLink bandwidth (900 vs. 600 GB/s), FP8 via Transformer Engine.</li>
+<li><strong>H200 = H100 + more/faster memory:</strong> Same Hopper compute, but 141GB HBM3e (~1.8x capacity, ~1.4x memory bandwidth). Best for large-model inference and long context. Drop-in compatible with HGX H100 systems.</li>
+<li><strong>B100:</strong> Lower-power Blackwell (700W, same as H100), HGX B100 boards are <strong>drop-in compatible with HGX H100</strong> (no new power/cooling needed). In practice, NVIDIA ships mainly <strong>B200</strong> / <strong>GB200</strong>.</li>
+<li><strong>B200:</strong> 180GB HBM3e (NVIDIA docs; early launch material said 192GB, and DGX B200 = 8 × 180 = 1,440GB), 1000W (liquid cooling recommended at scale), FP4, 2x NVLink bandwidth vs. H100. New Blackwell features: <strong>RAS Engine</strong> (reliability/predictive maintenance), <strong>confidential computing</strong>, <strong>decompression engine</strong> (accelerates data analytics).</li>
+<li><strong>Grace CPU (in GB200 / GH200):</strong> 72 Arm Neoverse V2 cores, LPDDR5X memory, connected to GPUs via <strong>NVLink-C2C (900 GB/s)</strong>, 7x faster than PCIe Gen5.</li>
+<li><strong>Other GPUs that may appear:</strong> <strong>L40S</strong> (Ada Lovelace, 48GB GDDR6, no NVLink, for inference/graphics/Omniverse), <strong>L4</strong> (Ada, 24GB, low-power 72W inference/video), <strong>GH200</strong> (Grace Hopper Superchip = 1 Grace + 1 H100/H200).</li>
 </ul>
-<h3 id="23-high-speed-interconnects-nvlink-nvswitch">2.3 High-Speed Interconnects: NVLink &amp; NVSwitch:</h3>
+<p><em>Sources: <a href="https://www.nvidia.com/en-us/data-center/h200/">NVIDIA H200</a>, <a href="https://docs.nvidia.com/dgx/dgxb200-user-guide/introduction-to-dgxb200.html">DGX B200 User Guide</a>, <a href="https://developer.nvidia.com/blog/inside-nvidia-blackwell-ultra-the-chip-powering-the-ai-factory-era/">Inside NVIDIA Blackwell Ultra</a> (B200: 208B transistors, 180GB HBM3e).</em></p>
+<h4 id="dgx-system-cheat-sheet">DGX System Cheat Sheet:</h4>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>GPUs</th>
+<th>Total GPU Memory</th>
+<th>NVSwitch</th>
+<th>Compute Networking</th>
+<th>Max Power</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DGX A100</td>
+<td>8× A100 (40GB or 80GB)</td>
+<td>320GB / 640GB</td>
+<td>6 (NVLink 3)</td>
+<td>8× single-port ConnectX-6 VPI 200Gb/s HDR IB</td>
+<td>~6.5 kW</td>
+</tr>
+<tr>
+<td>DGX H100</td>
+<td>8× H100</td>
+<td>640GB</td>
+<td>4 (NVLink 4)</td>
+<td>8× single-port ConnectX-7 VPI 400Gb/s NDR (via 4 OSFP ports)</td>
+<td>~10.2 kW</td>
+</tr>
+<tr>
+<td>DGX H200</td>
+<td>8× H200</td>
+<td>1,128GB</td>
+<td>4 (NVLink 4)</td>
+<td>Same as DGX H100</td>
+<td>~10.2 kW</td>
+</tr>
+<tr>
+<td>DGX B200</td>
+<td>8× B200 (180GB usable each)</td>
+<td>1,440GB</td>
+<td>2 (NVLink 5)</td>
+<td>Same as DGX H100 (8× ConnectX-7 400Gb/s)</td>
+<td>~14.3 kW</td>
+</tr>
+<tr>
+<td>GB200 NVL72</td>
+<td>72× B200 + 36 Grace</td>
+<td>13.4TB HBM3e GPU + 17TB LPDDR5X CPU</td>
+<td>18 compute trays (2 Grace + 4 B200 each) + 9 NVLink Switch trays, 130 TB/s</td>
+<td>ConnectX-7/8 or BlueField-3</td>
+<td>~120 kW (liquid-cooled)</td>
+</tr>
+</tbody>
+</table>
+<p><em>Sources: <a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/nvidia-dgx-a100-datasheet.pdf">DGX A100 Datasheet</a>, <a href="https://docs.nvidia.com/dgx/dgxh100-user-guide/introduction-to-dgxh100.html">DGX H100/H200 User Guide</a>, <a href="https://docs.nvidia.com/dgx/dgxb200-user-guide/introduction-to-dgxb200.html">DGX B200 User Guide</a>, <a href="https://www.nvidia.com/en-us/data-center/gb200-nvl72/">GB200 NVL72</a>, <a href="https://docs.nvidia.com/dgx-superpod/reference-architecture-scalable-infrastructure-gb200/latest/dgx-superpod-components.html">DGX SuperPOD GB200 Components</a>.</em></p>
+<h4 id="dgx-hardware-details-common-how-many-x-in-a-dgx-questions">DGX Hardware Details (common "how many X in a DGX" questions):</h4>
+<p><strong>DGX A100</strong> (6U):</p>
 <ul>
-<li><strong>PCIe Limitation:</strong> Standard PCIe Gen5 x16 provides ~64 GB/s unidirectional bandwidth, creating a major communication bottleneck for multi-GPU training.</li>
-<li><strong>NVLink:</strong> Direct point-to-point interconnect between GPUs bypassing the PCIe bus.</li>
-<li><strong>NVSwitch:</strong> Crossbar switch chip enabling any-to-any full bidirectional line-rate GPU communication within a node (e.g., all 8 GPUs in a DGX H100 talk to each other simultaneously at full NVLink speed).</li>
+<li><strong>GPU:</strong> 8× A100, connected by <strong>6 NVSwitch</strong> chips (600 GB/s per GPU).</li>
+<li><strong>CPU:</strong> 2× AMD EPYC 7742 (Rome), 64 cores each = <strong>128 cores</strong> total.</li>
+<li><strong>System memory:</strong> 1TB (320GB model) / 2TB (640GB model).</li>
+<li><strong>Compute networking:</strong> <strong>8× single-port Mellanox ConnectX-6 VPI</strong> (200Gb/s HDR InfiniBand) — 1 NIC per GPU.</li>
+<li><strong>Storage / in-band networking:</strong> <strong>1× dual-port ConnectX-6 VPI</strong> (10/25/50/100/200Gb/s Ethernet by default), <strong>2×</strong> on the 640GB model.</li>
+<li><strong>Storage:</strong> OS on 2× 1.92TB M.2 NVMe; internal cache 15TB (4× 3.84TB U.2 NVMe), 30TB on the 640GB model.</li>
 </ul>
-<h3 id="24-multi-instance-gpu-mig">2.4 Multi-Instance GPU (MIG):</h3>
+<p><strong>DGX H100</strong> (8U) — DGX H200 is the same chassis with H200 GPUs:</p>
 <ul>
-<li>Partitions a single physical GPU (A100/H100) into up to <strong>7 isolated GPU instances</strong>.</li>
-<li>Each instance has dedicated hardware resources: compute cores, memory controllers, cache, and memory bandwidth (true hardware QoS and fault isolation).</li>
+<li><strong>GPU:</strong> 8× H100, connected by <strong>4 NVSwitch</strong> chips (900 GB/s per GPU).</li>
+<li><strong>CPU:</strong> 2× Intel Xeon Platinum 8480C (Sapphire Rapids), 56 cores each = <strong>112 cores</strong> total.</li>
+<li><strong>System memory:</strong> 2TB.</li>
+<li><strong>Compute networking:</strong> <strong>8× single-port ConnectX-7 VPI</strong> (400Gb/s NDR InfiniBand/Ethernet), exposed through <strong>4 twin-port OSFP</strong> cages (800G each).</li>
+<li><strong>Storage / in-band networking:</strong> <strong>2× dual-port BlueField-3 DPU</strong> (up to 400Gb/s, QSFP112).</li>
+<li><strong>Storage:</strong> OS on 2× 1.92TB M.2 NVMe (RAID 1); data cache ~30TB (8× 3.84TB U.2 NVMe, RAID 0).</li>
+<li><strong>Power:</strong> 6× 3.3kW PSUs, ~10.2 kW max.</li>
 </ul>
-<h3 id="25-ai-data-center-networking-fabrics">2.5 AI Data Center Networking &amp; Fabrics:</h3>
+<p><strong>DGX B200</strong> (10U):</p>
+<ul>
+<li><strong>GPU:</strong> 8× B200 (1,440GB total), connected by <strong>2 NVLink 5 switch</strong> chips (1.8 TB/s per GPU, 14.4 TB/s aggregate).</li>
+<li><strong>CPU:</strong> 2× Intel Xeon Platinum 8570, <strong>112 cores</strong> total.</li>
+<li><strong>System memory:</strong> 2TB (configurable to 4TB).</li>
+<li><strong>Networking:</strong> Same pattern as DGX H100: 8× ConnectX-7 400Gb/s (4 OSFP ports) for compute + 2× dual-port BlueField-3 DPU for storage/in-band.</li>
+<li><strong>Storage:</strong> OS on 2× 1.92TB M.2 NVMe (RAID 1); data cache 8× 3.84TB U.2 NVMe (RAID 0).</li>
+<li><strong>Power:</strong> 6× 3.3kW PSUs, ~14.3 kW max.</li>
+</ul>
+<p>Rule of thumb: <strong>1 compute NIC per GPU</strong> (8 GPUs → 8 compute NICs, "rail-optimized" design), and a separate NIC/DPU pair for storage and in-band management. On top of that, every DGX has a dedicated <strong>BMC (RJ45) port</strong> for out-of-band management.</p>
+<p>NVIDIA headline performance claims (often used in exam questions):</p>
+<ul>
+<li><strong>DGX B200 vs. DGX H100:</strong> up to <strong>3x</strong> training and <strong>15x</strong> LLM inference performance.</li>
+<li><strong>GB200 NVL72 vs. H100:</strong> up to <strong>30x</strong> faster real-time trillion-parameter LLM inference, <strong>4x</strong> faster training, <strong>25x</strong> better energy efficiency (TCO).</li>
+</ul>
+<p><em>Note: Spec numbers above were cross-checked (Sep 2026) against the official <a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/nvidia-dgx-a100-datasheet.pdf">DGX A100 Datasheet</a>, <a href="https://docs.nvidia.com/dgx/dgxh100-user-guide/introduction-to-dgxh100.html">DGX H100/H200 User Guide</a>, <a href="https://docs.nvidia.com/dgx/dgxb200-user-guide/introduction-to-dgxb200.html">DGX B200 User Guide</a>, <a href="https://www.nvidia.com/en-us/data-center/dgx-b200/">DGX B200 product page</a>, <a href="https://www.nvidia.com/en-us/data-center/gb200-nvl72/">GB200 NVL72 product page</a> and <a href="https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html">DGX GB200 Hardware Guide</a>. NVIDIA updates these pages over time, so re-check before your exam.</em></p>
+<h3 id="22-nvidia-system-platforms-dgx-vs-hgx-vs-mgx">2.2 NVIDIA System Platforms: DGX vs. HGX vs. MGX:</h3>
+<ul>
+<li><strong>DGX:</strong> NVIDIA's complete, turnkey AI system (hardware + software stack), e.g., DGX H100/B200. Scales to <strong>DGX SuperPOD</strong> (reference architecture).</li>
+<li><strong>HGX:</strong> GPU baseboard (8 GPUs + NVSwitch) sold to OEMs (Dell, HPE, Supermicro...) to build their own servers.</li>
+<li><strong>MGX:</strong> Modular reference server architecture for OEMs to build many server configurations (CPU, GPU, DPU combinations).</li>
+</ul>
+<h3 id="23-tensor-cores-precision-formats">2.3 Tensor Cores &amp; Precision Formats:</h3>
+<ul>
+<li><strong>Matrix Acceleration:</strong> Tensor Cores are specialized cores that accelerate the matrix multiply-and-add operations at the heart of deep learning: <code>D = A × B + C</code>.</li>
+<li><strong>FP32:</strong> Single precision (1 sign, 8 exponent, 23 mantissa bits). Standard scientific computing, master weights.</li>
+<li><strong>TF32 (TensorFloat-32):</strong> Same range as FP32 (8-bit exponent), same precision as FP16 (10-bit mantissa). Internal compute format only (not a storage format), used by Ampere+ math libraries. <em>Note: PyTorch disabled TF32 for matmul by default since v1.12 (still on for cuDNN convolutions).</em></li>
+<li><strong>BF16 (bfloat16):</strong> 1 sign, 8 exponent, 7 mantissa bits. Same range as FP32, no loss scaling needed. Ampere+. <strong>The de facto standard for LLM training today.</strong></li>
+<li><strong>FP16:</strong> 1 sign, 5 exponent, 10 mantissa bits. Narrow range, requires <strong>loss scaling</strong> to avoid gradient underflow. Classic mixed precision on Volta/Turing.</li>
+<li><strong>FP8 (E4M3 / E5M2):</strong> Hopper/Blackwell via Transformer Engine. <strong>E4M3</strong> (more precision) for forward pass (weights/activations), <strong>E5M2</strong> (more range) for backward pass (gradients).</li>
+<li><strong>INT8 / FP4 (NVFP4 on Blackwell):</strong> Quantized inference with small accuracy loss, lower memory and higher throughput.</li>
+</ul>
+<h3 id="24-high-speed-interconnects-nvlink-nvswitch">2.4 High-Speed Interconnects: NVLink &amp; NVSwitch:</h3>
+<ul>
+<li><strong>PCIe Limitation:</strong> Standard PCIe Gen5 x16 provides ~64 GB/s per direction (~128 GB/s bidirectional), creating a major communication bottleneck for multi-GPU training. NVLink 4 (900 GB/s) is <strong>~7x</strong> PCIe Gen5.</li>
+<li><strong>NVLink:</strong> Direct high-speed interconnect between GPUs bypassing the PCIe bus (H100: 18 links × 50 GB/s = 900 GB/s).</li>
+<li><strong>NVSwitch:</strong> Non-blocking switch chip enabling any-to-any full-bandwidth GPU communication within a node (e.g., all 8 GPUs in a DGX H100 talk to each other simultaneously at full NVLink speed via <strong>4 NVSwitch chips</strong>; DGX A100 uses 6).</li>
+<li><strong>NVLink Switch (Blackwell):</strong> Extends NVLink beyond a single server to form rack-scale NVLink domains (e.g., 72 GPUs in GB200 NVL72).</li>
+</ul>
+<h3 id="25-gpu-sharing-mig-vs-vgpu-vs-time-slicing">2.5 GPU Sharing: MIG vs. vGPU vs. Time-Slicing:</h3>
+<ul>
+<li><strong>Multi-Instance GPU (MIG):</strong> Partitions a single physical GPU (A100/H100/H200/B200) into up to <strong>7 isolated GPU instances</strong> (A30: up to 4).<ul>
+<li>Each instance has dedicated hardware resources: compute cores, high-bandwidth memory, cache, and memory bandwidth (true hardware QoS and fault isolation).</li>
+</ul>
+</li>
+<li><strong>NVIDIA vGPU (Virtual GPU):</strong> Software (hypervisor-level) sharing of GPUs across virtual machines (VMware, KVM...). Requires vGPU license. Can be combined with MIG.</li>
+<li><strong>Time-Slicing:</strong> GPU is shared by multiple processes/containers taking turns. No memory or fault isolation (common in Kubernetes for light workloads).</li>
+</ul>
+<h3 id="26-ai-data-center-networking-fabrics">2.6 AI Data Center Networking &amp; Fabrics:</h3>
+<p>Remember this shit, 4 distinct network fabrics.</p>
 <div class="highlight"><pre><span></span><code>                    THE 4 DATA CENTER NETWORK FABRICS
                                    │
   ┌─────────────────┬──────────────┴──────────────┬─────────────────┐
   ▼                 ▼                             ▼                 ▼
 [ Compute Fabric ] [ Storage Fabric ]       [ In-Band Mgmt ]  [ Out-of-Band (OOB) ]
-• InfiniBand /     • RoCE / NVMe-oF         • Node telemetry  • IPMI, BMC
+• InfiniBand /     • InfiniBand / RoCE      • Node telemetry  • IPMI, BMC
   Spectrum-X       • Parallel storage access• SSH, cluster API• Dedicated 1GbE
 • Inter-node NCCL    (Weka, Lustre, VAST)
 </code></pre></div>
 
 <ol>
 <li><strong>Compute (East-West) Fabric:</strong> Connects GPUs across different server nodes for distributed training (AllReduce collective operations). Uses InfiniBand (Quantum-2 400Gb/s, Quantum-X800 800Gb/s) or Spectrum-X Ethernet.</li>
-<li><strong>Storage Fabric:</strong> Connects compute nodes to high-speed shared parallel storage systems (Lustre, Weka, VAST Data).</li>
+<li><strong>Storage Fabric:</strong> Connects compute nodes to high-speed shared parallel storage systems (Lustre, Weka, VAST Data) over InfiniBand or RoCE Ethernet (NVMe-oF).</li>
 <li><strong>In-Band Management Fabric:</strong> Cluster communication, job scheduling, API requests, and user traffic.</li>
 <li>
 <p><strong>Out-of-Band (OOB) Management Fabric:</strong> Dedicated physical network connecting server BMC/IPMI controllers for power control and bare-metal provisioning.</p>
 </li>
 <li>
-<p><strong>RDMA (Remote Direct Memory Access):</strong> Bypasses the operating system kernel and CPU, allowing a network adapter to read/write GPU memory directly across the network.</p>
+<p><strong>RDMA (Remote Direct Memory Access):</strong> Bypasses the operating system kernel and remote CPU (zero-copy), allowing a network adapter to read/write the <strong>host memory</strong> of a remote machine directly.</p>
 </li>
-<li><strong>InfiniBand:</strong> Native hardware-based credit-flow control, sub-microsecond latency, zero packet loss, adaptive routing, and In-Network Computing (<strong>SHARP - Scalable Hierarchical Aggregation and Reduction Protocol</strong>).</li>
-<li><strong>RoCE (RDMA over Converged Ethernet):</strong> Encapsulates InfiniBand packets inside standard Ethernet UDP headers (RoCEv2). Requires lossless Ethernet configuration (PFC - Priority Flow Control, ECN - Explicit Congestion Notification).</li>
-<li><strong>NVIDIA Spectrum-X:</strong> Ethernet platform designed specifically for generative AI clouds, delivering near-InfiniBand performance over Ethernet.</li>
+<li><strong>GPUDirect RDMA:</strong> Extends RDMA so the NIC reads/writes <strong>GPU memory</strong> directly, without staging through host RAM. This is what NCCL uses for fast inter-node GPU communication.</li>
+<li><strong>InfiniBand:</strong> Native hardware-based credit-based flow control (lossless), very low latency, adaptive routing, and In-Network Computing (<strong>SHARP - Scalable Hierarchical Aggregation and Reduction Protocol</strong>). Managed by a <strong>Subnet Manager</strong> (UFM).</li>
+<li><strong>RoCE (RDMA over Converged Ethernet):</strong> RoCEv1 works at Ethernet L2 only; <strong>RoCEv2</strong> encapsulates the InfiniBand transport header inside <strong>UDP/IP</strong> (port 4791), making it routable. Requires lossless/congestion-controlled Ethernet (PFC - Priority Flow Control, ECN - Explicit Congestion Notification, combined as <strong>DCQCN</strong>).</li>
+<li><strong>NVIDIA Spectrum-X:</strong> Ethernet platform designed specifically for generative AI clouds (<strong>Spectrum-4 switches + BlueField-3 SuperNICs</strong>), delivering near-InfiniBand performance over Ethernet.</li>
 </ol>
-<h3 id="26-ai-storage-architecture-gpudirect-storage-gds">2.6 AI Storage Architecture &amp; GPUDirect Storage (GDS):</h3>
+<h3 id="27-ai-storage-architecture-gpudirect-storage-gds">2.7 AI Storage Architecture &amp; GPUDirect Storage (GDS):</h3>
 <ul>
-<li>Traditional I/O copies data from NVMe disk -&gt; CPU Memory (RAM) -&gt; Bounce Buffer -&gt; GPU Memory (VRAM), consuming CPU cycles and PCIe bandwidth.</li>
-<li><strong>GPUDirect Storage (GDS):</strong> Enables direct DMA transfers between local NVMe drives or remote storage NICs directly into GPU VRAM using RDMA, cutting latency by 10x and freeing CPU cores.</li>
+<li>Traditional I/O copies data from NVMe disk -&gt; CPU Memory (page cache) -&gt; Bounce Buffer (also in CPU memory) -&gt; GPU Memory (VRAM), consuming CPU cycles and PCIe bandwidth.</li>
+<li><strong>GPUDirect Storage (GDS):</strong> Enables a direct memory access (DMA) path between storage and GPU VRAM, skipping the CPU bounce buffer. Local NVMe uses <strong>PCIe peer-to-peer</strong>; remote storage (NVMe-oF, parallel file systems) uses <strong>RDMA</strong>. Result: lower latency, higher throughput, and lower CPU utilization. Applications use the <strong>cuFile API</strong> (kernel module <code>nvidia-fs</code>).</li>
 </ul>
 <div class="highlight"><pre><span></span><code>Traditional Path:
 Storage/NIC ──► Host RAM (CPU Buffer) ──► Host RAM (Bounce) ──► GPU Memory
@@ -210,34 +411,74 @@ Storage/NIC ─────────────────(Direct PCIe / RD
 </code></pre></div>
 
 <ul>
-<li><strong>Parallel File Systems:</strong> AI architectures utilize parallel file systems (<strong>Lustre, Weka.io, VAST Data, IBM Spectrum Scale, BeeGFS</strong>) to sustain millions of concurrent file reads without metadata bottlenecks.</li>
+<li><strong>Parallel File Systems:</strong> AI architectures utilize parallel file systems (<strong>Lustre / DDN EXAScaler, WEKA, VAST Data, IBM Storage Scale (formerly Spectrum Scale), BeeGFS</strong>) to serve many concurrent clients with high throughput and scalable metadata.</li>
+<li><strong>Storage tiers:</strong> Local NVMe (fast cache/scratch) -&gt; shared parallel file system (training datasets, checkpoints) -&gt; object storage (long-term data lake).</li>
+</ul>
+<h3 id="28-power-cooling-data-center-considerations">2.8 Power, Cooling &amp; Data Center Considerations:</h3>
+<ul>
+<li><strong>Power density:</strong> AI racks draw far more power than traditional racks (DGX H100 ~10.2 kW per system; GB200 NVL72 ~120 kW per rack), so power and cooling capacity must be planned up front.</li>
+<li><strong>Air cooling vs. liquid cooling:</strong> Air cooling hits its limit at high rack density. <strong>Direct-to-chip liquid cooling</strong> (cold plates) removes heat much more efficiently and is required for GB200 NVL72.</li>
+<li><strong>PUE (Power Usage Effectiveness):</strong> Total facility power / IT equipment power. Closer to <strong>1.0</strong> = more efficient.</li>
+<li><strong>Other factors:</strong> Redundant power (N+1, 2N), hot/cold aisle containment, floor weight, and cabling for high-speed fabrics.</li>
+<li><strong>On-prem vs. Cloud vs. Hybrid:</strong> On-prem gives control and lower long-term cost at high utilization; cloud gives elasticity and fast start with no CapEx; hybrid mixes both.</li>
 </ul>
 <hr />
 <h1 id="domain-3-ai-operations-22-of-exam">Domain 3: AI Operations (22% of Exam)</h1>
 <p>This domain covers workload scheduling, cluster orchestration, provisioning, and health telemetry.</p>
 <h3 id="31-workload-schedulers-slurm-vs-kubernetes">3.1 Workload Schedulers: Slurm vs. Kubernetes:</h3>
 <ul>
-<li><strong>Slurm:</strong> The standard for large-scale distributed AI pre-training. Native support for multi-node MPI, InfiniBand topology awareness, atomic gang-scheduling, and tight consumable resource tracking (<code>cons_tres</code>).</li>
-<li><strong>Kubernetes + NVIDIA GPU Operator:</strong> The standard for microservices, inference serving, and enterprise pipelines. The GPU Operator automates the deployment of the NVIDIA driver, Container Toolkit, device plugin, and DCGM monitoring on K8s nodes.</li>
+<li><strong>Slurm:</strong> The standard for large-scale distributed AI pre-training. Native support for multi-node MPI, network topology awareness (<code>topology/tree</code>), all-or-nothing multi-node allocation, and tight consumable resource tracking (<code>cons_tres</code>, GRES for GPUs). <em>Note: in Slurm terminology, "gang scheduling" means time-slicing jobs (<code>PreemptMode=GANG</code>), not all-or-nothing allocation.</em></li>
+<li><strong>Kubernetes + NVIDIA GPU Operator:</strong> The standard for microservices, inference serving, and enterprise pipelines. The GPU Operator automates the deployment of:<ul>
+<li>NVIDIA driver and NVIDIA Container Toolkit</li>
+<li>Kubernetes device plugin (exposes <code>nvidia.com/gpu</code> resource)</li>
+<li>GPU Feature Discovery (labels nodes with GPU properties) and Node Feature Discovery</li>
+<li>MIG Manager</li>
+<li>DCGM / DCGM Exporter (monitoring)</li>
+<li>Operator validator</li>
+</ul>
+</li>
+<li><strong>NVIDIA Network Operator:</strong> Companion operator that deploys networking components (MOFED/DOCA drivers, RDMA shared device plugin, GPUDirect RDMA) on K8s nodes.</li>
 </ul>
 <h3 id="32-nvidia-base-command-manager-bcm">3.2 NVIDIA Base Command Manager (BCM):</h3>
 <ul>
-<li>Cluster management and provisioning software for DGX systems. Automates bare-metal OS provisioning, InfiniBand fabric health checks, monitoring, and workload scheduler integration.</li>
+<li>Cluster management and provisioning software (formerly <strong>Bright Cluster Manager</strong>) for DGX and non-DGX clusters. Automates bare-metal OS provisioning, InfiniBand fabric health checks, monitoring, and workload scheduler integration (Slurm, Kubernetes).</li>
+<li>Do not confuse with <strong>NVIDIA Base Command Platform</strong> (a SaaS for managing AI training workloads on DGX Cloud).</li>
 </ul>
-<h3 id="33-monitoring-telemetry-dcgm">3.3 Monitoring &amp; Telemetry (DCGM):</h3>
+<h3 id="33-monitoring-telemetry-nvidia-smi-dcgm">3.3 Monitoring &amp; Telemetry (nvidia-smi &amp; DCGM):</h3>
 <ul>
-<li><strong>NVIDIA DCGM (Data Center GPU Manager):</strong> Low-overhead daemon that collects GPU telemetry metrics (temperature, power draw, GPU utilization, memory utilization, PCIe bandwidth, NVLink bandwidth, ECC memory errors).</li>
-<li>Exposes metrics via Prometheus DCGM Exporter for Grafana dashboards and automated alerting.</li>
+<li><strong>nvidia-smi:</strong> CLI for checking a single node: GPU utilization, memory usage, temperature, power, running processes, ECC errors, MIG configuration (<code>nvidia-smi mig</code>), topology (<code>nvidia-smi topo -m</code>).</li>
+<li><strong>NVIDIA DCGM (Data Center GPU Manager):</strong> Low-overhead daemon (<code>nv-hostengine</code>) that collects GPU telemetry across the cluster (temperature, power draw, GPU utilization, memory utilization, PCIe bandwidth, NVLink bandwidth, ECC memory errors, XID errors).<ul>
+<li><strong>Health checks &amp; policies:</strong> Background health monitoring and automated actions on events.</li>
+<li><strong>Diagnostics:</strong> <code>dcgmi diag -r 1|2|3|4</code> (from quick checks to long stress tests).</li>
+</ul>
+</li>
+<li>Exposes metrics via <strong>NVIDIA DCGM Exporter</strong> to Prometheus, for Grafana dashboards and automated alerting.</li>
+<li><strong>XID errors:</strong> Error codes reported by the NVIDIA driver in the kernel log (<code>dmesg</code>), used to diagnose GPU hardware/driver issues.</li>
 </ul>
 <hr />
-<h1 id="5-study-plan-quick-review-checklist">5. Study Plan &amp; Quick Review Checklist</h1>
+<h1 id="5-other-things-to-remember">5. Other Things to Remember</h1>
+<ul>
+<li>NVIDIA Merlin is a scalable and GPU-accelerated solution, making it easy to build recommender systems.</li>
+<li>Apptainer is not orchestration, it is containerization (like Docker), usually used in HPC.</li>
+<li>When we talking about optimize communication and transfer data between multi-GPU in same or multi-node, remember NCCL.</li>
+<li>NVIDIA NIM is a set of accelerated inference microservices that allow organizations to run AI models on NVIDIA GPUs anywhere.</li>
+<li>OpenSM (Open Subnet Manager) is an InfiniBand specification-based subnet manager and administrator that configures the InfiniBand fabric</li>
+<li>LLM foundation: Transformer model (read more about Attention is what you need). Transformer like a car and Attention is engine.</li>
+<li>ConnectX-6 supports two ports of 200Gb/s Ethernet connectivity.</li>
+</ul>
+<hr />
+<h1 id="6-study-plan-quick-review-checklist">6. Study Plan &amp; Quick Review Checklist</h1>
 <p>Before sitting for the exam, ensure you can confidently answer the following checklist:</p>
 <ul>
 <li>Explain why GPUs are faster than CPUs for matrix operations.</li>
 <li>Differentiate between InfiniBand and Ethernet, and explain what RDMA achieves.</li>
 <li>Explain the role of NVLink and NVSwitch inside an 8-GPU node.</li>
-<li>Describe how Multi-Instance GPU (MIG) provides hardware-level QoS.</li>
+<li>Describe how Multi-Instance GPU (MIG) provides hardware-level QoS, and how it differs from vGPU and time-slicing.</li>
+<li>Differentiate FP16, BF16, TF32 and FP8 (E4M3 vs. E5M2).</li>
+<li>Explain the difference between RDMA and GPUDirect RDMA.</li>
 <li>Explain how GPUDirect Storage (GDS) eliminates CPU memory bounce buffers.</li>
+<li>Differentiate DGX, HGX and MGX.</li>
+<li>Explain why high-density AI racks need liquid cooling, and what PUE measures.</li>
 <li>List the 4 network fabrics in an AI data center and identify their functions.</li>
 <li>Explain the purpose of NCCL in distributed multi-GPU training.</li>
 <li>Identify the differences between Triton Inference Server and TensorRT.</li>
@@ -255,6 +496,20 @@ Storage/NIC ─────────────────(Direct PCIe / RD
 <li>Schedule your exam on <a href="https://www.certiverse.com/#/checkout/nvidia/store-exam/NCA-AIIO">Certiverse</a>.</li>
 </ol>
 <p>Good luck with your certification journey!</p>
+<hr />
+<h1 id="references">References</h1>
+<ul>
+<li><a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/">NVIDIA-Certified Associate: AI Infrastructure and Operations (official exam page)</a></li>
+<li><a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/nvidia-dgx-a100-datasheet.pdf">NVIDIA DGX A100 Datasheet</a></li>
+<li><a href="https://docs.nvidia.com/dgx/dgxh100-user-guide/introduction-to-dgxh100.html">NVIDIA DGX H100/H200 User Guide — Introduction</a></li>
+<li><a href="https://docs.nvidia.com/dgx/dgxb200-user-guide/introduction-to-dgxb200.html">NVIDIA DGX B200 User Guide — Introduction</a></li>
+<li><a href="https://www.nvidia.com/en-us/data-center/dgx-b200/">NVIDIA DGX B200 product page</a></li>
+<li><a href="https://www.nvidia.com/en-us/data-center/h200/">NVIDIA H200 product page</a></li>
+<li><a href="https://www.nvidia.com/en-us/data-center/gb200-nvl72/">NVIDIA GB200 NVL72 product page</a></li>
+<li><a href="https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html">NVIDIA DGX GB Rack Scale Systems User Guide — Hardware</a></li>
+<li><a href="https://docs.nvidia.com/dgx-superpod/reference-architecture-scalable-infrastructure-gb200/latest/dgx-superpod-components.html">NVIDIA DGX SuperPOD Reference Architecture (GB200) — Key Components</a></li>
+<li><a href="https://developer.nvidia.com/blog/inside-nvidia-blackwell-ultra-the-chip-powering-the-ai-factory-era/">Inside NVIDIA Blackwell Ultra (NVIDIA Technical Blog)</a></li>
+</ul>
 
 
              

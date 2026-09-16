@@ -149,7 +149,7 @@ Scheduler        ~=    Slurm Scheduler
 <p>While Kubernetes has <code>Job</code> objects, Slurm remains the gold standard for large-scale GPU training because of three core HPC capabilities built into its DNA:</p>
 <p><strong>Atomic Multi-Node Allocation (Native Co-Allocation):</strong></p>
 <ul>
-<li>Multi-node distributed training (<a href="https://pytorch.org/docs/stable/notes/ddp.html">PyTorch DDP</a> / <a href="https://pytorch.org/docs/stable/fsdp.html">FSDP</a> / <a href="https://github.com/NVIDIA/Megatron-LM">Megatron-LM</a>) requires all $N$ GPUs across multiple nodes to start simultaneously to establish rendezvous and synchronize gradients.</li>
+<li>Multi-node distributed training (<a href="https://pytorch.org/docs/stable/notes/ddp.html">PyTorch DDP</a> / <a href="https://pytorch.org/docs/stable/fsdp.html">FSDP</a> / <a href="https://github.com/NVIDIA/Megatron-LM">Megatron-LM</a>) requires all N GPUs across multiple nodes to start simultaneously to establish rendezvous and synchronize gradients.</li>
 <li>In vanilla Kubernetes, the default scheduler binds pods incrementally. If 60 GPUs are free and 4 are busy, it might schedule 60 pods and leave them idling—wasting expensive GPU hours unless using external batch co-scheduling add-ons like <a href="https://kueue.sigs.k8s.io/">Kueue</a> or <a href="https://volcano.sh/">Volcano</a>.</li>
 <li>Slurm natively guarantees <strong>atomic allocation</strong>: a job is only launched when 100% of the requested nodes and resources are simultaneously available, remaining in <code>PENDING</code> state without holding or fragmenting resources. <em>(Note: In Slurm documentation, "<a href="https://slurm.schedmd.com/gang_scheduling.html">Gang Scheduling</a>" specifically refers to time-slicing oversubscribed resources between jobs, rather than co-allocation).</em></li>
 </ul>
@@ -317,14 +317,20 @@ Backup slurmctld
 <h3 id="shared-storage-strategy">Shared Storage Strategy</h3>
 <p>While not a hardcoded Slurm specification, the standard industry convention in HPC/AI clusters is to tier shared storage into 3 distinct mount paths based on I/O performance and lifecycle:</p>
 <ul>
-<li><strong><code>/home</code> (User Environment):</strong></li>
+<li><strong><code>/home</code> (User Environment):</strong><ul>
 <li>Holds dotfiles, Python virtualenvs, and job submission scripts.</li>
 <li>Backed by standard NFS / CephFS with daily backups and strict quotas (e.g., 20GB/user).</li>
-<li><strong><code>/scratch</code> (High-Speed Ephemeral Workspace):</strong></li>
+</ul>
+</li>
+<li><strong><code>/scratch</code> (High-Speed Ephemeral Workspace):</strong><ul>
 <li>Dedicated for active job I/O, temporary checkpoints (<code>.pt</code>), and staging datasets.</li>
 <li>Backed by high-throughput Parallel File Systems (<a href="https://www.lustre.org/">Lustre</a>, <a href="https://www.beegfs.io/">BeeGFS</a>). <strong>No backups</strong> and subject to auto-purging policies (e.g., automatically deleted if unaccessed for 30 days).</li>
-<li><strong><code>/project</code> or <code>/data</code> (Team Shared Assets):</strong></li>
+</ul>
+</li>
+<li><strong><code>/project</code> or <code>/data</code> (Team Shared Assets):</strong><ul>
 <li>Shared storage for base datasets (e.g., ImageNet, HuggingFace caches) and long-term project artifacts with team-based POSIX permissions (<code>setgid</code>).</li>
+</ul>
+</li>
 </ul>
 <hr />
 <h1 id="phase-6-slurm-containers">Phase 6: Slurm + Containers</h1>
