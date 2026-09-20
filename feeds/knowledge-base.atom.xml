@@ -831,7 +831,7 @@ gcloud&lt;span class="w"&gt; &lt;/span&gt;iam&lt;span class="w"&gt; &lt;/span&gt
 &lt;/ul&gt;
 &lt;p&gt;Rule of thumb: &lt;strong&gt;tabular data with thousands of rows → classical ML. Unstructured data (images, audio, text) at scale → deep learning.&lt;/strong&gt;&lt;/p&gt;
 &lt;h3 id="13-why-now-what-actually-changed"&gt;1.3 Why Now — What Actually Changed&lt;/h3&gt;
-&lt;p&gt;Neural networks are from the 1980s. The blueprint asks why they only took over recently, and it's four Neural networks are from the 1980s. Four things landed at once:&lt;/p&gt;
+&lt;p&gt;Neural networks are from the 1980s. The blueprint asks why they only took over recently. Four things landed at once:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Data&lt;/strong&gt; — &lt;em&gt;self-supervised&lt;/em&gt; learning (Phase 1.5) removed the human-labeling
   bottleneck, so the raw internet became training data.&lt;/li&gt;
@@ -842,7 +842,7 @@ gcloud&lt;span class="w"&gt; &lt;/span&gt;iam&lt;span class="w"&gt; &lt;/span&gt
 &lt;li&gt;&lt;strong&gt;Ecosystem&lt;/strong&gt; — CUDA, PyTorch, pretrained models, GPU by the hour. Most teams
   fine-tune someone else's model rather than train one.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;The consequence for infrastructure scaling laws. More parameters + data + compute gives predictably better models.&lt;/p&gt;
+&lt;p&gt;The consequence for infrastructure is scaling laws: more parameters + data + compute gives predictably better models, so the cluster keeps getting bigger.&lt;/p&gt;
 &lt;h3 id="14-training-fundamentals"&gt;1.4 Training Fundamentals&lt;/h3&gt;
 &lt;p&gt;Example: Model 70B params -&amp;gt; gradient is 70B numbers, each number is direction for a weight (weight = weight - learning_rate × gradient). AllReduce sync gradient, not the fuckin data!&lt;/p&gt;
 &lt;p&gt;Training is a loop: feed data in + let the model guess (forward pass), measure how wrong it was (loss), adjust slightly (optimizer step), repeat millions of times. The "adjust" step is matrix math, which is why it needs a GPU.&lt;/p&gt;
@@ -1017,7 +1017,6 @@ gcloud&lt;span class="w"&gt; &lt;/span&gt;iam&lt;span class="w"&gt; &lt;/span&gt
 &lt;p&gt;&lt;strong&gt;RAG in one line:&lt;/strong&gt; chunk your documents → embed them → store in a vector DB → at query time, retrieve the most relevant chunks and paste them into the prompt as context.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="RAG pipeline: documents are preprocessed, embedded and stored in a vector DB; a user query is embedded, matched against that DB, and the retrieved context is passed to the LLM with the prompt" src="images/2026/09/10.png" /&gt;
 &lt;em&gt;Ingest runs offline, query runs per request — and notice the LLM itself is never retrained. Source: &lt;a href="https://developer.nvidia.com/blog/rag-101-demystifying-retrieval-augmented-generation-pipelines/"&gt;NVIDIA, RAG 101&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img alt="RAG" src="../images/2026/09/10.png" /&gt;&lt;/p&gt;
 &lt;p&gt;If a question says &lt;em&gt;"must reflect data that changes daily"&lt;/em&gt; or &lt;em&gt;"must cite internal documents"&lt;/em&gt;, the answer is &lt;strong&gt;RAG&lt;/strong&gt;, not fine-tuning. If it says &lt;em&gt;"must always respond in our house style / output strict JSON"&lt;/em&gt;, that's &lt;strong&gt;fine-tuning&lt;/strong&gt;.&lt;/p&gt;
 &lt;h3 id="18-who-uses-what"&gt;1.8 Who Uses What&lt;/h3&gt;
 &lt;p&gt;Scenario questions like &lt;em&gt;"a hospital wants X — which NVIDIA offering?"&lt;/em&gt; are common:&lt;/p&gt;
@@ -1201,14 +1200,12 @@ gcloud&lt;span class="w"&gt; &lt;/span&gt;iam&lt;span class="w"&gt; &lt;/span&gt
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;&lt;img alt="mig" src="../images/2026/09/08.png" /&gt;&lt;/p&gt;
 &lt;p&gt;MIG is the only one giving &lt;strong&gt;true QoS and fault isolation&lt;/strong&gt; — a crash in one instance doesn't touch the others. That phrase is how the exam identifies it.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="MIG profiles on an A100 40GB: the same GPU shown sliced as one 7g.40gb instance, two 3g.20gb, three 2g.10gb, or seven 1g.5gb" src="images/2026/09/08.png" /&gt;
 &lt;em&gt;The same physical GPU, four legal ways to cut it. The crossed-out boxes are the capacity you lose to partitioning. Source: &lt;a href="https://docs.nvidia.com/datacenter/tesla/mig-user-guide/concepts.html"&gt;NVIDIA MIG User Guide&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 &lt;h3 id="26-sizing-how-much-hardware"&gt;2.6 Sizing: How Much Hardware?&lt;/h3&gt;
 &lt;p&gt;Two blueprint bullets ask you to pick hardware for a described use case. Both come down to memory. Why? this can be daily job if I'm not fuckin' wrong!. &lt;/p&gt;
 &lt;p&gt;Small example: a customer says they want to run a 70B model. The first question back is &lt;strong&gt;train it, or serve it?&lt;/strong&gt; Serving it at BF16 takes ~170 GB once the KV cache is counted, so a single DGX H100 (8 × 80 GB = 640 GB) is already more than enough — three GPUs would do — and selling them a second box is wasted money. Training that same model needs over 1 TB before activations, so one DGX is &lt;em&gt;not&lt;/em&gt; enough and you are looking at two nodes minimum. Same model, completely different bill.&lt;/p&gt;
-&lt;p&gt;&lt;img alt="DGX H100" src="../images/2026/09/09.png" /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Inference — memory holds the weights:&lt;/strong&gt;&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
@@ -1676,11 +1673,11 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 &lt;p&gt;Operationally the reflex is the same one you already have for a flaky K8s node: &lt;strong&gt;detect → drain → diagnose → RMA or return to service.&lt;/strong&gt; DCGM can watch for them across the fleet so you're not grepping &lt;code&gt;dmesg&lt;/code&gt; on 200 machines.&lt;/p&gt;
 &lt;p&gt;For NCA-AIIO, knowing what an Xid is and where it surfaces is enough — matching specific codes to specific faults is NCP-AIO work.&lt;/p&gt;
 &lt;p&gt;Related: &lt;strong&gt;ECC errors&lt;/strong&gt;. Correctable ones get fixed silently; a rising count or an uncorrectable error means drain the node.&lt;/p&gt;
-&lt;h3 id="73-reading-a-bottleneck-optional-ncp-aio-level"&gt;7.3 Reading a Bottleneck &lt;em&gt;(optional — NCP-AIO level)&lt;/em&gt;&lt;/h3&gt;
+&lt;h3 id="73-reading-a-bottleneck"&gt;7.3 Reading a Bottleneck&lt;/h3&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;Above Associate level — useful for the job, not for this exam.&lt;/strong&gt; Every NCA-AIIO operations bullet is &lt;em&gt;describe&lt;/em&gt;, &lt;em&gt;articulate&lt;/em&gt; or &lt;em&gt;identify&lt;/em&gt;; none of them ask you to diagnose. Reading telemetry belongs to &lt;strong&gt;NCP-AIO&lt;/strong&gt;, which carries a whole 23% &lt;em&gt;Troubleshooting and Optimization&lt;/em&gt; domain plus hands-on labs. Skim it now, come back when you own a cluster.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Where the Associate line is.&lt;/strong&gt; The official NCA-AIIO study guide lists Run:ai's &lt;em&gt;6 Reasons for Low GPU Utilization and How to Improve It&lt;/em&gt; as suggested reading under AI Operations, and blueprint bullet 3.3 is &lt;em&gt;"articulate the key measures and criteria related to monitoring GPUs"&lt;/em&gt;. So &lt;strong&gt;"GPU util is low, what is starving it?"&lt;/strong&gt; is exam material. Reading raw telemetry, matching Xid codes and running &lt;code&gt;dcgmi&lt;/code&gt; yourself is &lt;strong&gt;NCP-AIO&lt;/strong&gt;, which carries a whole 23% &lt;em&gt;Troubleshooting and Optimization&lt;/em&gt; domain plus hands-on labs.&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;The most useful skill on the job, and the format NCP-AIO likes — you're given telemetry and asked what's wrong. &lt;strong&gt;GPU utilization alone tells you nothing&lt;/strong&gt;; read it alongside everything else:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;GPU utilization alone tells you nothing&lt;/strong&gt;; read it alongside CPU, disk and network. These are the shapes the exam describes in words and asks you to name:&lt;/p&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -1716,6 +1713,24 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 &lt;td&gt;Larger batch, enable mixed precision&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
+&lt;td&gt;Clocks dropping under load&lt;/td&gt;
+&lt;td&gt;Thermal or power throttling&lt;/td&gt;
+&lt;td&gt;Check inlet temps and power caps&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;The pattern behind every row: &lt;strong&gt;the GPU is the most expensive part, so everything else exists to keep it fed.&lt;/strong&gt; If it is idle, something upstream is the problem, never the GPU itself.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;The rest is NCP-AIO&lt;/strong&gt; &lt;em&gt;(optional — NCP-AIO level)&lt;/em&gt;. Same table, but now you are expected to know the memory math and the tooling, not just the name of the bottleneck:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Symptom&lt;/th&gt;
+&lt;th&gt;Bottleneck&lt;/th&gt;
+&lt;th&gt;Fix&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
 &lt;td&gt;OOM during training&lt;/td&gt;
 &lt;td&gt;Activations + optimizer state exceed HBM&lt;/td&gt;
 &lt;td&gt;Gradient checkpointing, smaller batch, sharding, lower precision&lt;/td&gt;
@@ -1724,11 +1739,6 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 &lt;td&gt;OOM during serving&lt;/td&gt;
 &lt;td&gt;KV cache growth&lt;/td&gt;
 &lt;td&gt;Cap context/concurrency, paged KV cache, quantization&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;Clocks dropping under load&lt;/td&gt;
-&lt;td&gt;Thermal or power throttling&lt;/td&gt;
-&lt;td&gt;Check inlet temps and power caps&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;Job dies, &lt;code&gt;Xid&lt;/code&gt; in &lt;code&gt;dmesg&lt;/code&gt;&lt;/td&gt;
@@ -1863,7 +1873,7 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 &lt;li&gt;Distinguish scale-up (NVLink) from scale-out (InfiniBand), and say which you exhaust first.&lt;/li&gt;
 &lt;li&gt;Differentiate DGX, HGX and MGX.&lt;/li&gt;
 &lt;li&gt;Explain NVLink, NVSwitch and NVLink Switch, and why PCIe isn't enough.&lt;/li&gt;
-&lt;li&gt;Differentiate FP32, TF32, BF16, FP16, FP8 (E4M3 vs E5M2), FP4 — and say which needs loss scaling.&lt;/li&gt;
+&lt;li&gt;Differentiate FP32, BF16/FP16, FP8 and FP4 by bytes per value, and say which generation introduced FP8 and FP4.&lt;/li&gt;
 &lt;li&gt;Describe MIG's hardware QoS and how it differs from vGPU and time-slicing.&lt;/li&gt;
 &lt;li&gt;List the four fabrics and what each carries.&lt;/li&gt;
 &lt;li&gt;Explain RDMA vs. GPUDirect RDMA.&lt;/li&gt;
