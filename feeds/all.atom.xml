@@ -611,87 +611,940 @@ gcloud&lt;span class="w"&gt; &lt;/span&gt;iam&lt;span class="w"&gt; &lt;/span&gt
 &lt;li&gt;&lt;strong&gt;Hands-on labs are not strictly mandatory&lt;/strong&gt;: If you already have a solid foundation in Linux, networking, containers, and another major cloud (AWS/Azure), you don't necessarily need to spend hours doing hands-on labs to pass this exam (like me xD). Grasping the architectural concepts, GCP-specific terminologies, and exam traps is more than enough.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Practice Exams&lt;/strong&gt;: Highly recommend checking out this course to get familiar with question patterns and real exam scenarios: &lt;a href="https://www.udemy.com/course/google-certified-associate-cloud-engineer-practice-exams-gcp"&gt;Google Certified Associate Cloud Engineer Practice Exams on Udemy&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Final thoughts&lt;/strong&gt;: This is definitely my last cloud cert for now because I don't really have many opportunities to work extensively with cloud infrastructure in my current daily work. I will only aim for higher-level certs (like Professional DevOps / Architect) when I actually have the chance to work directly with production cloud infra.&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="gcp"/><category term="certification"/></entry><entry><title>Prepare for NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO) Exam</title><link href="https://blackmetalz.github.io/prepare-for-nvidia-certified-associate-ai-infrastructure-and-operations-nca-aiio-exam.html" rel="alternate"/><published>2026-09-08T00:00:00+07:00</published><updated>2026-09-08T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-09-08:/prepare-for-nvidia-certified-associate-ai-infrastructure-and-operations-nca-aiio-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;TLDR: Study guide and core blueprint for the &lt;strong&gt;NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO)&lt;/strong&gt; exam.&lt;/p&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="gcp"/><category term="certification"/></entry><entry><title>Prepare for NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO) Exam</title><link href="https://blackmetalz.github.io/prepare-for-nvidia-certified-associate-ai-infrastructure-and-operations-nca-aiio-exam.html" rel="alternate"/><published>2026-09-08T00:00:00+07:00</published><updated>2026-09-08T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-09-08:/prepare-for-nvidia-certified-associate-ai-infrastructure-and-operations-nca-aiio-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;TLDR: Study guide for the &lt;strong&gt;NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO)&lt;/strong&gt; exam, written from an operations background — if you already run Kubernetes or Slurm, this maps the AI infrastructure world onto what you already know.&lt;/p&gt;
 &lt;hr /&gt;
-&lt;h1 id="1-introduction-motivation"&gt;1. Introduction &amp;amp; Motivation&lt;/h1&gt;
-&lt;p&gt;After getting our hands dirty with high-performance computing in &lt;a href="https://blackmetalz.github.io/wip-slurm-101.html"&gt;&lt;strong&gt;Slurm 101&lt;/strong&gt;&lt;/a&gt; and building a 5-node cluster in &lt;a href="https://blackmetalz.github.io/slurm-202-hands-on-multi-node-cluster-with-docker-cli-mastery.html"&gt;&lt;strong&gt;Slurm 202&lt;/strong&gt;&lt;/a&gt;, the next logical step in the AI infrastructure journey is validating this knowledge with an industry-recognized credential: the &lt;strong&gt;NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO)&lt;/strong&gt;.&lt;/p&gt;
-&lt;p&gt;Since I'm going to have a chance to work with &lt;strong&gt;NVIDIA GPU&lt;/strong&gt; and I will take exam, aiming for certification if I'm serious.&lt;/p&gt;
-&lt;hr /&gt;
-&lt;h1 id="2-exam-details-certification-overview"&gt;2. Exam Details &amp;amp; Certification Overview&lt;/h1&gt;
-&lt;p&gt;Please visit &lt;a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/"&gt;&lt;strong&gt;here&lt;/strong&gt;&lt;/a&gt; for full detail xD&lt;/p&gt;
+&lt;h1 id="introduction-why-this-certification"&gt;Introduction: Why This Certification&lt;/h1&gt;
+&lt;p&gt;I'm about to start working with NVIDIA GPUs at work, so I'd rather learn this properly than pick it up by accident — and the &lt;a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/"&gt;&lt;strong&gt;NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO)&lt;/strong&gt;&lt;/a&gt; is a reasonable way to force that.&lt;/p&gt;
+&lt;p&gt;Everything here is written from an operations background. If you already run Kubernetes clusters, a lot of this world has a familiar shape — and where it doesn't, I've tried to say so explicitly rather than paper over it. &lt;strong&gt;I don't have GPU hardware yet&lt;/strong&gt;, so every command below is listed with what it does, not with output I didn't generate. When I get real hardware, that becomes the hands-on follow-up.&lt;/p&gt;
+&lt;h3 id="where-nca-aiio-sits"&gt;Where NCA-AIIO Sits&lt;/h3&gt;
+&lt;p&gt;NCA-AIIO is the entry point, not the destination. Same idea as passing AWS Cloud Practitioner before Solutions Architect Associate, like everyone:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Certification&lt;/th&gt;
+&lt;th&gt;Level&lt;/th&gt;
+&lt;th&gt;Price&lt;/th&gt;
+&lt;th&gt;Focus&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/"&gt;&lt;strong&gt;NCA-AIIO&lt;/strong&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Associate&lt;/td&gt;
+&lt;td&gt;$125&lt;/td&gt;
+&lt;td&gt;Foundational AI infra &amp;amp; ops concepts — &lt;strong&gt;we are here&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;NCP-AIO&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Professional&lt;/td&gt;
+&lt;td&gt;$500&lt;/td&gt;
+&lt;td&gt;&lt;em&gt;Monitor, troubleshoot, optimize&lt;/em&gt; AI infrastructure&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;NCP-AII&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Professional&lt;/td&gt;
+&lt;td&gt;$400&lt;/td&gt;
+&lt;td&gt;&lt;em&gt;Deploy, configure, validate&lt;/em&gt; AI infrastructure&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;NCP-AIN&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Professional&lt;/td&gt;
+&lt;td&gt;$400&lt;/td&gt;
+&lt;td&gt;AI networking (InfiniBand / Spectrum-X)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Notice the verbs on NCP-AIO: monitor, troubleshoot, optimize. That is an ops job description, and it's the reason this article spends more time on &lt;em&gt;why something exists&lt;/em&gt; than on &lt;em&gt;how many transistors it has&lt;/em&gt;.&lt;/p&gt;
+&lt;h3 id="exam-details"&gt;Exam Details&lt;/h3&gt;
+&lt;p&gt;Full details on the &lt;a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/"&gt;official exam page&lt;/a&gt; — 50 questions, 1 hour, online proctored, registered through &lt;a href="https://www.certiverse.com/#/checkout/nvidia/store-exam/NCA-AIIO"&gt;Certiverse&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="exam detail" src="../images/2026/09/07.png" /&gt;&lt;/p&gt;
-&lt;hr /&gt;
-&lt;h1 id="3-recommended-learning-resources-courses"&gt;3. Recommended Learning Resources &amp;amp; Courses&lt;/h1&gt;
-&lt;p&gt;Here are the key learning resources and study materials recommended for preparing for the exam:&lt;/p&gt;
-&lt;h3 id="core-training-courses"&gt;Core Training Courses:&lt;/h3&gt;
+&lt;p&gt;Three weighted domains:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Domain&lt;/th&gt;
+&lt;th&gt;Weight&lt;/th&gt;
+&lt;th&gt;Covered in&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Essential AI Knowledge&lt;/td&gt;
+&lt;td&gt;38%&lt;/td&gt;
+&lt;td&gt;Phase 1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;AI Infrastructure&lt;/td&gt;
+&lt;td&gt;40%&lt;/td&gt;
+&lt;td&gt;Phases 2-5, 8&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;AI Operations&lt;/td&gt;
+&lt;td&gt;22%&lt;/td&gt;
+&lt;td&gt;Phases 6-7&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="learning-resources"&gt;Learning Resources&lt;/h3&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href="https://www.coursera.org/learn/ai-infrastructure-operations-fundamentals"&gt;&lt;strong&gt;Coursera Course (Paid):&lt;/strong&gt;&lt;/a&gt;. This is the official foundational course on Coursera covering AI computing paradigms, GPU architecture, networking fabrics, and cluster software. &lt;em&gt;Note: Requires a paid Coursera subscription/enrollment fee — recommended for those with budget or company sponsorship.&lt;/em&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://www.youtube.com/watch?v=0WjfKQdfeMU"&gt;&lt;strong&gt;YouTube Video Course:&lt;/strong&gt;&lt;/a&gt;. A comprehensive free video alternative covering the essential topics. While it does not include timestamped chapters/sections, it is 100% free to access.&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.coursera.org/learn/ai-infrastructure-operations-fundamentals"&gt;&lt;strong&gt;AI Infrastructure and Operations Fundamentals&lt;/strong&gt;&lt;/a&gt; on Coursera — the official course. Paid, worth it if your company sponsors training.&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.youtube.com/watch?v=0WjfKQdfeMU"&gt;&lt;strong&gt;YouTube full course&lt;/strong&gt;&lt;/a&gt; — free alternative covering the same ground, no chapters though.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr /&gt;
-&lt;h1 id="4-official-exam-blueprint-domain-weights"&gt;4. Official Exam Blueprint &amp;amp; Domain Weights&lt;/h1&gt;
-&lt;p&gt;According to NVIDIA's official exam specifications, the certification is divided into &lt;strong&gt;3 core weighted domains&lt;/strong&gt;:&lt;/p&gt;
+&lt;h1 id="mapping-what-you-already-operate-ai-infrastructure"&gt;Mapping: What You Already Operate → AI Infrastructure&lt;/h1&gt;
+&lt;p&gt;If you come from Kubernetes, most of this world has a familiar shape. Start here:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;You already know&lt;/th&gt;
+&lt;th&gt;AI infra equivalent&lt;/th&gt;
+&lt;th&gt;Note&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Worker node&lt;/td&gt;
+&lt;td&gt;GPU node / &lt;a href="https://www.nvidia.com/en-us/data-center/dgx-platform/"&gt;DGX&lt;/a&gt; system&lt;/td&gt;
+&lt;td&gt;One DGX = 8 GPUs + 2 CPUs in one chassis&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Deployment&lt;/code&gt; + HPA&lt;/td&gt;
+&lt;td&gt;Inference service (&lt;a href="https://developer.nvidia.com/triton-inference-server"&gt;Triton&lt;/a&gt;, &lt;a href="https://www.nvidia.com/en-us/ai/"&gt;NIM&lt;/a&gt;)&lt;/td&gt;
+&lt;td&gt;Long-running, scales with request load&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;Job&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Training job&lt;/td&gt;
+&lt;td&gt;Runs for days, then exits&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;resources.limits&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;GPU allocation, &lt;a href="https://docs.nvidia.com/datacenter/tesla/mig-user-guide/"&gt;MIG&lt;/a&gt; profile&lt;/td&gt;
+&lt;td&gt;MIG is a &lt;em&gt;hardware&lt;/em&gt; limit, not cgroups&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;kube-scheduler&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;a href="https://slurm.schedmd.com/"&gt;Slurm&lt;/a&gt; / &lt;a href="https://www.nvidia.com/en-us/software/run-ai/"&gt;Run:ai&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;Batch queueing, not incremental binding&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;PVC + CSI&lt;/td&gt;
+&lt;td&gt;Parallel filesystem mount (Lustre, WEKA, VAST)&lt;/td&gt;
+&lt;td&gt;POSIX, shared by every node&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;node-exporter&lt;/code&gt; → Prometheus&lt;/td&gt;
+&lt;td&gt;&lt;a href="https://developer.nvidia.com/dcgm"&gt;DCGM Exporter&lt;/a&gt; → Prometheus&lt;/td&gt;
+&lt;td&gt;Same pattern, GPU metrics&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;kubectl drain&lt;/code&gt; on bad node&lt;/td&gt;
+&lt;td&gt;Drain node on Xid / ECC error&lt;/td&gt;
+&lt;td&gt;Same reflex, different signal&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;kubeadm&lt;/code&gt; / Cluster API&lt;/td&gt;
+&lt;td&gt;&lt;a href="https://www.nvidia.com/en-us/data-center/base-command/"&gt;Base Command Manager&lt;/a&gt; (BCM)&lt;/td&gt;
+&lt;td&gt;Bare-metal provisioning + fabric health&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;IPMI / BMC&lt;/td&gt;
+&lt;td&gt;Exactly the same, still RJ45&lt;/td&gt;
+&lt;td&gt;Some things never change&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;And the one thing that has &lt;strong&gt;no Kubernetes equivalent at all&lt;/strong&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;The compute fabric.&lt;/strong&gt; In K8s you have one network and you mostly don't think about it. In AI infrastructure there are four physically separate networks, and the fastest of them exists purely so GPUs in different chassis can behave like one giant GPU. This is the biggest conceptual gap coming from the cloud-native world, and it's covered in Phase 3.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr /&gt;
+&lt;h1 id="phase-1-the-ai-workload-what-are-we-actually-running"&gt;Phase 1: The AI Workload — What Are We Actually Running?&lt;/h1&gt;
+&lt;p&gt;This is 38% of the exam, and it's the part infrastructure people skip. Don't. You can't size a cluster for a workload you can't describe.&lt;/p&gt;
+&lt;h3 id="11-training-vs-inference"&gt;1.1 Training vs. Inference&lt;/h3&gt;
+&lt;p&gt;Everything else in this article follows from this table. These are two completely different workloads that happen to use the same hardware:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;&lt;strong&gt;Training&lt;/strong&gt;&lt;/th&gt;
+&lt;th&gt;&lt;strong&gt;Inference&lt;/strong&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;What it does&lt;/td&gt;
+&lt;td&gt;Builds the model from data&lt;/td&gt;
+&lt;td&gt;Uses the finished model to answer&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Runs for&lt;/td&gt;
+&lt;td&gt;Days to weeks, one huge job&lt;/td&gt;
+&lt;td&gt;Forever, millions of small requests&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Feels like&lt;/td&gt;
+&lt;td&gt;A giant &lt;code&gt;Job&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;A &lt;code&gt;Deployment&lt;/code&gt; behind a load balancer&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Scale unit&lt;/td&gt;
+&lt;td&gt;Many GPUs, many nodes, tightly coupled&lt;/td&gt;
+&lt;td&gt;Often 1-8 GPUs, loosely coupled&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Main bottleneck&lt;/td&gt;
+&lt;td&gt;Inter-GPU bandwidth (gradient sync)&lt;/td&gt;
+&lt;td&gt;Memory bandwidth and latency&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Network that matters&lt;/td&gt;
+&lt;td&gt;Compute fabric (InfiniBand)&lt;/td&gt;
+&lt;td&gt;Normal Ethernet is usually fine&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;If a node dies&lt;/td&gt;
+&lt;td&gt;Whole job stops, resume from checkpoint&lt;/td&gt;
+&lt;td&gt;Kill the pod, reschedule, nobody notices&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Typical scheduler&lt;/td&gt;
+&lt;td&gt;Slurm&lt;/td&gt;
+&lt;td&gt;Kubernetes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Success metric&lt;/td&gt;
+&lt;td&gt;Time-to-train, GPU utilization&lt;/td&gt;
+&lt;td&gt;Tokens/sec, p99 latency, cost per request&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;This single table explains a lot of the hardware catalogue. It's why the H200 beats the H100 on inference despite having &lt;em&gt;identical compute&lt;/em&gt; — inference is limited by how fast you can move weights out of memory, and the H200 has faster, larger memory. It's also why a training cluster spends a fortune on InfiniBand while an inference cluster often doesn't need it.&lt;/p&gt;
+&lt;h3 id="12-ai-vs-ml-vs-deep-learning-vs-genai"&gt;1.2 AI vs. ML vs. Deep Learning vs. GenAI&lt;/h3&gt;
+&lt;p&gt;Nested circles, broadest to narrowest:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Essential AI Knowledge&lt;/li&gt;
-&lt;li&gt;AI Infrastructure&lt;/li&gt;
-&lt;li&gt;AI Operations&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;AI&lt;/strong&gt; — any system doing something that normally needs human intelligence, including plain rule-based systems that never learn.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Machine Learning&lt;/strong&gt; — learns patterns from data instead of being programmed. A human still picks which input features matter (&lt;em&gt;feature engineering&lt;/em&gt;).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Deep Learning&lt;/strong&gt; — ML with multi-layer neural networks that work out the features themselves. Needs far more data and compute, which is what made GPUs mandatory.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Generative AI&lt;/strong&gt; — a deep learning application that produces new content (text, images, code) rather than a label or a number.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Rule of thumb: &lt;strong&gt;tabular data with thousands of rows → classical ML. Unstructured data (images, audio, text) at scale → deep learning.&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id="13-training-fundamentals"&gt;1.3 Training Fundamentals&lt;/h3&gt;
+&lt;p&gt;Training is a loop: feed data in, let the model guess, measure how wrong it was, adjust slightly, repeat — millions of times. The "adjust" step is matrix math, which is why it needs a GPU.&lt;/p&gt;
+&lt;p&gt;Terms worth recognizing:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Batch size&lt;/strong&gt; — how many samples the GPU processes before the model updates. Bigger batch = better GPU utilization but more GPU memory.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Epoch&lt;/strong&gt; — one complete pass over the training dataset. Training runs for many epochs. (&lt;a href="https://www.geeksforgeeks.org/deep-learning/epoch-in-machine-learning/"&gt;epochs, batches &amp;amp; iterations →&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Overfitting&lt;/strong&gt; — the model memorized the training data instead of learning the general pattern: great scores on data it has seen, poor scores on anything new. The opposite is &lt;strong&gt;underfitting&lt;/strong&gt; — too simple, bad at both. (&lt;a href="https://www.geeksforgeeks.org/machine-learning/underfitting-and-overfitting-in-machine-learning/"&gt;overfitting &amp;amp; underfitting →&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Checkpoint&lt;/strong&gt; — a periodic save of model state to shared storage, so a job that dies on day three resumes instead of restarting.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Two of these land directly on infrastructure: &lt;strong&gt;batch size drives GPU memory&lt;/strong&gt;, and &lt;strong&gt;checkpointing drives storage bandwidth&lt;/strong&gt; — every GPU writes at the same instant and they all sit idle until the write completes. Checkpoint sizing is a real capacity input, not an afterthought.&lt;/p&gt;
+&lt;h3 id="14-how-models-learn"&gt;1.4 How Models Learn&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Paradigm&lt;/th&gt;
+&lt;th&gt;Labeled data?&lt;/th&gt;
+&lt;th&gt;Example use case&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Supervised&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Yes&lt;/td&gt;
+&lt;td&gt;Fraud detection, image classification, forecasting&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Unsupervised&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;No&lt;/td&gt;
+&lt;td&gt;Customer segmentation, anomaly detection&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Self-supervised&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Labels derived from the data itself&lt;/td&gt;
+&lt;td&gt;LLM pre-training (predict the next word)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Reinforcement&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;No — learns from a reward signal&lt;/td&gt;
+&lt;td&gt;Robotics, game playing, RLHF for chatbots&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Two output types under supervised learning: &lt;strong&gt;classification&lt;/strong&gt; (discrete — spam or not spam) and &lt;strong&gt;regression&lt;/strong&gt; (continuous — predicted price).&lt;/p&gt;
+&lt;h3 id="15-evaluation-metrics"&gt;1.5 Evaluation Metrics&lt;/h3&gt;
+&lt;p&gt;If you've ever tuned an alert rule, you already have the intuition:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Precision&lt;/strong&gt; — of everything I flagged, how much was real? &lt;em&gt;Low precision = noisy alerts.&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Recall&lt;/strong&gt; — of everything real, how much did I catch? &lt;em&gt;Low recall = missed incidents.&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;F1 score&lt;/strong&gt; — one number balancing the two. The default choice when the classes are imbalanced.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Accuracy&lt;/strong&gt; — percentage correct overall. &lt;strong&gt;Dangerous on imbalanced data&lt;/strong&gt;: a fraud model that always answers "not fraud" scores 99.9% and is worthless.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;(&lt;a href="https://www.geeksforgeeks.org/machine-learning/precision-recall-and-f1-score-using-r/"&gt;precision, recall &amp;amp; F1 →&lt;/a&gt;)&lt;/p&gt;
+&lt;p&gt;Exam questions describe a business scenario and ask which metric matters. The trick is always the same: &lt;strong&gt;which mistake is more expensive, a false positive or a false negative?&lt;/strong&gt; Cancer screening can't afford misses → recall. Spam filters can't afford deleting real mail → precision.&lt;/p&gt;
+&lt;h3 id="16-generative-ai-llms"&gt;1.6 Generative AI &amp;amp; LLMs&lt;/h3&gt;
+&lt;p&gt;This is the part worth actually understanding, because everything NVIDIA sells right now is aimed at it.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Transformer&lt;/strong&gt; — the architecture behind every modern LLM (&lt;a href="https://arxiv.org/abs/1706.03762"&gt;&lt;em&gt;Attention Is All You Need&lt;/em&gt;&lt;/a&gt;, 2017). Its core trick, &lt;strong&gt;self-attention&lt;/strong&gt;, lets every word weigh its relevance against every other word — and does it &lt;em&gt;in parallel&lt;/em&gt;, which is exactly why GPUs suit it and older sequential architectures didn't.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Token&lt;/strong&gt; — the unit an LLM processes, roughly ¾ of an English word. &lt;strong&gt;Context window&lt;/strong&gt; — how many tokens it can consider at once.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Embedding&lt;/strong&gt; — text turned into a vector, where similar meaning means nearby in space. Stored in a &lt;strong&gt;vector database&lt;/strong&gt; (FAISS, Milvus, pgvector) so you can search by meaning instead of keyword.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Hallucination&lt;/strong&gt; — confident, fluent, wrong. The fix is grounding the model in real documents, not more training.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Inference has two phases&lt;/strong&gt;, and they stress the GPU differently:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Phase&lt;/th&gt;
+&lt;th&gt;What happens&lt;/th&gt;
+&lt;th&gt;Bound by&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Prefill&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Reads the entire prompt at once&lt;/td&gt;
+&lt;td&gt;Compute — highly parallel&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Decode&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Generates output one token at a time&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;Memory bandwidth&lt;/strong&gt; — sequential&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;That second row is why inference GPUs are chosen for HBM bandwidth and capacity. The &lt;strong&gt;KV cache&lt;/strong&gt; — which stores the attention state of tokens already generated so each new token doesn't recompute the whole conversation — grows with batch size × context length and is frequently the real memory ceiling in production serving.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Customizing a model&lt;/strong&gt; — guaranteed exam material:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Approach&lt;/th&gt;
+&lt;th&gt;Changes the model?&lt;/th&gt;
+&lt;th&gt;Use when&lt;/th&gt;
+&lt;th&gt;Cost&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Prompt engineering&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;No&lt;/td&gt;
+&lt;td&gt;Quick behavior steering&lt;/td&gt;
+&lt;td&gt;~Zero&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;&lt;a href="https://developer.nvidia.com/blog/rag-101-demystifying-retrieval-augmented-generation-pipelines/"&gt;RAG&lt;/a&gt;&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;No&lt;/td&gt;
+&lt;td&gt;Facts that are proprietary or change often&lt;/td&gt;
+&lt;td&gt;Low&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Fine-tuning (LoRA / QLoRA)&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Small adapter weights&lt;/td&gt;
+&lt;td&gt;Teaching style, format, domain jargon&lt;/td&gt;
+&lt;td&gt;Moderate&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Full fine-tuning&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;All weights&lt;/td&gt;
+&lt;td&gt;Deep domain shift&lt;/td&gt;
+&lt;td&gt;High&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Pre-training from scratch&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;All weights&lt;/td&gt;
+&lt;td&gt;Basically never, for an enterprise&lt;/td&gt;
+&lt;td&gt;Extreme&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;RAG in one line:&lt;/strong&gt; chunk your documents → embed them → store in a vector DB → at query time, retrieve the most relevant chunks and paste them into the prompt as context.&lt;/p&gt;
+&lt;p&gt;If a question says &lt;em&gt;"must reflect data that changes daily"&lt;/em&gt; or &lt;em&gt;"must cite internal documents"&lt;/em&gt;, the answer is &lt;strong&gt;RAG&lt;/strong&gt;, not fine-tuning. If it says &lt;em&gt;"must always respond in our house style / output strict JSON"&lt;/em&gt;, that's &lt;strong&gt;fine-tuning&lt;/strong&gt;.&lt;/p&gt;
+&lt;h3 id="17-who-uses-what"&gt;1.7 Who Uses What&lt;/h3&gt;
+&lt;p&gt;Scenario questions like &lt;em&gt;"a hospital wants X — which NVIDIA offering?"&lt;/em&gt; are common:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Industry&lt;/th&gt;
+&lt;th&gt;Workload&lt;/th&gt;
+&lt;th&gt;NVIDIA stack&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Healthcare / life sciences&lt;/td&gt;
+&lt;td&gt;Medical imaging, drug discovery, genomics&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;Clara&lt;/strong&gt;, &lt;strong&gt;MONAI&lt;/strong&gt;, &lt;strong&gt;BioNeMo&lt;/strong&gt;, &lt;strong&gt;Parabricks&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Retail / e-commerce&lt;/td&gt;
+&lt;td&gt;Recommender systems, forecasting&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;Merlin&lt;/strong&gt;, RAPIDS&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Telecom / customer service&lt;/td&gt;
+&lt;td&gt;Speech AI, translation, contact centers&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;Riva&lt;/strong&gt;, &lt;strong&gt;NeMo&lt;/strong&gt;, &lt;strong&gt;ACE&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Manufacturing / robotics&lt;/td&gt;
+&lt;td&gt;Digital twins, defect detection&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;Omniverse&lt;/strong&gt;, &lt;strong&gt;Isaac&lt;/strong&gt;, &lt;strong&gt;Metropolis&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Financial services&lt;/td&gt;
+&lt;td&gt;Fraud detection, risk modeling&lt;/td&gt;
+&lt;td&gt;RAPIDS, &lt;strong&gt;Morpheus&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Smart cities / edge&lt;/td&gt;
+&lt;td&gt;Video analytics&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;Metropolis&lt;/strong&gt;, &lt;strong&gt;DeepStream&lt;/strong&gt;, Jetson&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Any enterprise&lt;/td&gt;
+&lt;td&gt;Serving an LLM behind a stable API&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;NIM&lt;/strong&gt; on &lt;strong&gt;NVIDIA AI Enterprise&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr /&gt;
+&lt;h1 id="phase-2-the-compute-layer"&gt;Phase 2: The Compute Layer&lt;/h1&gt;
+&lt;h3 id="21-cpu-vs-gpu-vs-dpu"&gt;2.1 CPU vs. GPU vs. DPU&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;CPU — latency optimized.&lt;/strong&gt; Few powerful cores, big caches, branch prediction. Good at sequential logic and decisions.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GPU — throughput optimized.&lt;/strong&gt; Thousands of small cores doing the same operation on different data (SIMT). Good at matrix math, useless at branching logic.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DPU (&lt;a href="https://www.nvidia.com/en-us/networking/products/data-processing-unit/"&gt;BlueField&lt;/a&gt;) — infrastructure offload.&lt;/strong&gt; Takes networking, storage and security work &lt;em&gt;off&lt;/em&gt; the host CPU so the CPU can stay busy feeding the GPUs. Programmed with the &lt;strong&gt;DOCA&lt;/strong&gt; SDK.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Amdahl's law is the practical takeaway:&lt;/strong&gt; if 90% of your pipeline is GPU-accelerated, the other 10% caps your total speedup at 10x. In real clusters that 10% is almost always data loading and preprocessing — which is exactly why &lt;a href="https://developer.nvidia.com/dali"&gt;&lt;strong&gt;DALI&lt;/strong&gt;&lt;/a&gt; and &lt;a href="https://rapids.ai/"&gt;&lt;strong&gt;RAPIDS&lt;/strong&gt;&lt;/a&gt; exist.&lt;/p&gt;
+&lt;h3 id="22-gpu-generations-what-actually-changed"&gt;2.2 GPU Generations — What Actually Changed&lt;/h3&gt;
+&lt;p&gt;Skip the transistor counts. Remember what each generation &lt;em&gt;introduced&lt;/em&gt;, because that's what gets asked:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Generation&lt;/th&gt;
+&lt;th&gt;Flagship&lt;/th&gt;
+&lt;th&gt;What it introduced&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Ampere&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;A100&lt;/td&gt;
+&lt;td&gt;MIG, TF32, BF16, NVLink 3 (600 GB/s)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Hopper&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;H100 / H200&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;Transformer Engine + FP8&lt;/strong&gt;, confidential computing, NVLink 4 (900 GB/s)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Blackwell&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;B200 / GB200&lt;/td&gt;
+&lt;td&gt;2nd Gen Transformer Engine + &lt;strong&gt;FP4&lt;/strong&gt;, NVLink 5 (1.8 TB/s), RAS Engine, rack-scale NVLink domains&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Three relationships worth memorizing:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;H100 vs. A100&lt;/strong&gt; — same 80GB capacity, but faster HBM3, 1.5x NVLink bandwidth, and FP8 via Transformer Engine.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;H200 = H100 compute + better memory&lt;/strong&gt; — 141GB HBM3e, ~1.4x memory bandwidth. Drop-in compatible with HGX H100 systems. &lt;strong&gt;Best for large-model inference and long context&lt;/strong&gt;, and now you know why (Phase 1.6: decode is memory-bandwidth bound).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GB200 Superchip&lt;/strong&gt; = 1 Grace CPU + 2 Blackwell GPUs over &lt;strong&gt;NVLink-C2C&lt;/strong&gt; (900 GB/s, ~7x PCIe Gen5). &lt;strong&gt;GB200 NVL72&lt;/strong&gt; = 36 Grace + 72 Blackwell in one liquid-cooled rack acting as a single NVLink domain.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Also worth recognizing: &lt;strong&gt;L40S&lt;/strong&gt; (Ada, 48GB, no NVLink — inference and graphics), &lt;strong&gt;L4&lt;/strong&gt; (Ada, 24GB, 72W — low-power inference/video), &lt;strong&gt;GH200&lt;/strong&gt; (1 Grace + 1 Hopper).&lt;/p&gt;
+&lt;p&gt;Detailed specs are in &lt;a href="#appendix-a-hardware-spec-reference"&gt;Appendix A&lt;/a&gt; — reference material, not memorization material.&lt;/p&gt;
+&lt;h3 id="23-dgx-vs-hgx-vs-mgx"&gt;2.3 DGX vs. HGX vs. MGX&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;DGX&lt;/strong&gt; — NVIDIA's own complete turnkey system, hardware plus software stack. Scales into a &lt;strong&gt;DGX SuperPOD&lt;/strong&gt; reference architecture.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;HGX&lt;/strong&gt; — just the GPU baseboard (8 GPUs + NVSwitch), sold to OEMs like Dell and Supermicro to build their own servers around.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MGX&lt;/strong&gt; — a modular &lt;em&gt;reference design&lt;/em&gt; letting OEMs assemble many different CPU/GPU/DPU server configurations.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;One-liner: &lt;strong&gt;DGX you buy finished, HGX is the engine block, MGX is the chassis blueprint.&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id="24-tensor-cores-precision-formats"&gt;2.4 Tensor Cores &amp;amp; Precision Formats&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Tensor Cores&lt;/strong&gt; are dedicated units that do fused matrix multiply-and-add (&lt;code&gt;D = A × B + C&lt;/code&gt;) — the single operation that dominates deep learning. Regular CUDA cores can do this too, just far slower.&lt;/p&gt;
+&lt;p&gt;Lower precision means smaller numbers, less memory, more throughput — at some accuracy risk. The formats, and why each exists:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Format&lt;/th&gt;
+&lt;th&gt;Bits (S/E/M)&lt;/th&gt;
+&lt;th&gt;Why it exists&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;FP32&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1/8/23&lt;/td&gt;
+&lt;td&gt;The baseline. Master weights, scientific computing&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;TF32&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1/8/10&lt;/td&gt;
+&lt;td&gt;FP32's &lt;em&gt;range&lt;/em&gt; with FP16's &lt;em&gt;precision&lt;/em&gt;. An internal compute format only — Ampere+ math libraries use it transparently&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;BF16&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1/8/7&lt;/td&gt;
+&lt;td&gt;Same range as FP32, so &lt;strong&gt;no loss scaling needed&lt;/strong&gt;. The de facto standard for LLM training today&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;FP16&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;1/5/10&lt;/td&gt;
+&lt;td&gt;More precision, much less range → &lt;strong&gt;requires loss scaling&lt;/strong&gt; to stop gradients underflowing to zero&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;FP8&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;E4M3 / E5M2&lt;/td&gt;
+&lt;td&gt;Hopper+ via Transformer Engine. &lt;strong&gt;E4M3&lt;/strong&gt; (precision) forward, &lt;strong&gt;E5M2&lt;/strong&gt; (range) backward — gradients span a wider range, so they need the exponent bits&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;FP4 / INT8&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;Inference quantization. Blackwell's NVFP4&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;The exponent/mantissa trade-off is the whole story: &lt;strong&gt;exponent bits buy range, mantissa bits buy precision.&lt;/strong&gt; BF16 beat FP16 for training because range matters more than precision when your gradients are tiny.&lt;/p&gt;
+&lt;h3 id="25-sharing-a-gpu-mig-vs-vgpu-vs-time-slicing"&gt;2.5 Sharing a GPU: MIG vs. vGPU vs. Time-Slicing&lt;/h3&gt;
+&lt;p&gt;A full H100 is overkill for most inference workloads, so there are three ways to split one. Ordered from strongest isolation to weakest:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Method&lt;/th&gt;
+&lt;th&gt;Isolation&lt;/th&gt;
+&lt;th&gt;Mechanism&lt;/th&gt;
+&lt;th&gt;K8s analogy&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;&lt;a href="https://docs.nvidia.com/datacenter/tesla/mig-user-guide/"&gt;MIG&lt;/a&gt;&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;Hardware&lt;/strong&gt; — dedicated cores, memory, cache, bandwidth&lt;/td&gt;
+&lt;td&gt;Physically partitions the GPU into up to &lt;strong&gt;7 instances&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;A dedicated node, carved from one machine&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;vGPU&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Hypervisor&lt;/td&gt;
+&lt;td&gt;Software sharing across VMs. Needs a license. Combinable with MIG&lt;/td&gt;
+&lt;td&gt;A VM per tenant&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Time-slicing&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;None&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Processes take turns on the whole GPU&lt;/td&gt;
+&lt;td&gt;Overcommitted CPU with no limits — one bad neighbor ruins everything&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;MIG is the only one giving &lt;strong&gt;true QoS and fault isolation&lt;/strong&gt; — a crash in one instance doesn't touch the others. That phrase is how the exam identifies it.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1 id="phase-3-the-fabric-layer"&gt;Phase 3: The Fabric Layer&lt;/h1&gt;
+&lt;p&gt;This is the part with no Kubernetes equivalent, and the part most worth understanding.&lt;/p&gt;
+&lt;h3 id="31-why-not-just-use-pcie"&gt;3.1 Why Not Just Use PCIe?&lt;/h3&gt;
+&lt;p&gt;Distributed training means every GPU must exchange gradients with every other GPU, every single step. That collective operation is &lt;strong&gt;AllReduce&lt;/strong&gt;, and it happens thousands of times per epoch.&lt;/p&gt;
+&lt;p&gt;PCIe Gen5 x16 gives ~64 GB/s per direction. NVLink 4 gives 900 GB/s — &lt;strong&gt;roughly 7x&lt;/strong&gt;. Run AllReduce over PCIe and your expensive GPUs spend most of their life waiting.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href="https://www.nvidia.com/en-us/data-center/nvlink/"&gt;NVLink&lt;/a&gt;&lt;/strong&gt; — direct GPU-to-GPU interconnect bypassing PCIe entirely (H100: 18 links × 50 GB/s = 900 GB/s).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;NVSwitch&lt;/strong&gt; — a non-blocking switch chip so all 8 GPUs in a chassis talk to each other simultaneously at full speed, not just in pairs.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;NVLink Switch&lt;/strong&gt; (Blackwell) — extends NVLink &lt;em&gt;outside&lt;/em&gt; the chassis, making 72 GPUs in a GB200 NVL72 behave as one NVLink domain.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="32-the-four-fabrics"&gt;3.2 The Four Fabrics&lt;/h3&gt;
+&lt;p&gt;An AI datacenter runs four physically separate networks. Know which does what:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Fabric&lt;/th&gt;
+&lt;th&gt;Purpose&lt;/th&gt;
+&lt;th&gt;Technology&lt;/th&gt;
+&lt;th&gt;Speed&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Compute (East-West)&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Inter-node GPU traffic, NCCL AllReduce&lt;/td&gt;
+&lt;td&gt;InfiniBand (Quantum-2 400G, Quantum-X800 800G) or Spectrum-X Ethernet&lt;/td&gt;
+&lt;td&gt;Fastest thing in the building&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Storage&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Nodes ↔ parallel filesystem&lt;/td&gt;
+&lt;td&gt;InfiniBand or RoCE Ethernet, NVMe-oF&lt;/td&gt;
+&lt;td&gt;Very fast&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;In-Band Management&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;SSH, job scheduling, cluster APIs, user traffic&lt;/td&gt;
+&lt;td&gt;Standard Ethernet&lt;/td&gt;
+&lt;td&gt;Ordinary&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Out-of-Band (OOB)&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;BMC / IPMI, power control, bare-metal provisioning&lt;/td&gt;
+&lt;td&gt;Dedicated 1GbE&lt;/td&gt;
+&lt;td&gt;Slow, and must stay isolated&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;The rule of thumb for a DGX: &lt;strong&gt;one compute NIC per GPU&lt;/strong&gt; (8 GPUs → 8 NICs, a "rail-optimized" design), plus separate NICs or DPUs for storage and in-band, plus one RJ45 BMC port.&lt;/p&gt;
+&lt;h3 id="33-rdma-and-its-friends"&gt;3.3 RDMA and Its Friends&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;RDMA&lt;/strong&gt; — a NIC writes directly into a remote machine's &lt;strong&gt;host memory&lt;/strong&gt;, bypassing the OS kernel and the remote CPU. Zero-copy, very low latency.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href="https://docs.nvidia.com/cuda/gpudirect-rdma/"&gt;GPUDirect RDMA&lt;/a&gt;&lt;/strong&gt; — the same, but straight into &lt;strong&gt;GPU memory&lt;/strong&gt;, never touching host RAM. This is what NCCL uses for inter-node traffic, and the distinction between these two is exam material.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="34-infiniband-vs-roce-vs-spectrum-x"&gt;3.4 InfiniBand vs. RoCE vs. Spectrum-X&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;InfiniBand&lt;/th&gt;
+&lt;th&gt;RoCE&lt;/th&gt;
+&lt;th&gt;Spectrum-X&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Base&lt;/td&gt;
+&lt;td&gt;Purpose-built fabric&lt;/td&gt;
+&lt;td&gt;RDMA over Ethernet&lt;/td&gt;
+&lt;td&gt;NVIDIA's AI-tuned Ethernet&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Lossless&lt;/td&gt;
+&lt;td&gt;Native, credit-based flow control&lt;/td&gt;
+&lt;td&gt;Must be configured (PFC + ECN, together called DCQCN)&lt;/td&gt;
+&lt;td&gt;Built in&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Routable&lt;/td&gt;
+&lt;td&gt;Within a subnet&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;RoCEv2&lt;/strong&gt; encapsulates in UDP/IP (port 4791), so yes&lt;/td&gt;
+&lt;td&gt;Yes&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Extras&lt;/td&gt;
+&lt;td&gt;Adaptive routing, &lt;strong&gt;SHARP&lt;/strong&gt; in-network reduction&lt;/td&gt;
+&lt;td&gt;—&lt;/td&gt;
+&lt;td&gt;Spectrum-4 switches + BlueField-3 SuperNICs&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Managed by&lt;/td&gt;
+&lt;td&gt;A &lt;strong&gt;Subnet Manager&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Standard Ethernet tooling&lt;/td&gt;
+&lt;td&gt;Standard Ethernet tooling&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Two clarifications the exam likes:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;SHARP&lt;/strong&gt; (Scalable Hierarchical Aggregation and Reduction Protocol) does part of the AllReduce &lt;em&gt;inside the switch&lt;/em&gt;, so less data crosses the wire.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Subnet Manager&lt;/strong&gt;: &lt;strong&gt;OpenSM&lt;/strong&gt; is the open-source subnet manager that configures the fabric. &lt;strong&gt;UFM&lt;/strong&gt; is NVIDIA's fabric management &lt;em&gt;platform&lt;/em&gt; built around it (monitoring, telemetry, health). Don't mix them up.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr /&gt;
-&lt;h1 id="domain-1-essential-ai-knowledge-38-of-exam"&gt;Domain 1: Essential AI Knowledge (38% of Exam)&lt;/h1&gt;
-&lt;p&gt;This domain validates foundational understanding of accelerated computing concepts, AI workload lifecycles, and the NVIDIA software ecosystem.&lt;/p&gt;
-&lt;h3 id="11-cpu-vs-gpu-vs-dpu-architecture"&gt;1.1 CPU vs. GPU vs. DPU Architecture:&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;CPU (Latency-Optimized):&lt;/strong&gt; Few powerful cores with large caches designed for sequential processing and branch prediction.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;GPU (Throughput-Optimized):&lt;/strong&gt; Thousands of smaller, energy-efficient cores designed for massive parallel matrix operations (SIMD/SIMT).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;DPU (Data Processing Unit - BlueField):&lt;/strong&gt; Offloads, accelerates, and isolates data center infrastructure workloads (networking, security, telemetry, storage virtualization) away from host CPUs/GPUs.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="12-ai-workflow-lifecycle"&gt;1.2 AI Workflow Lifecycle:&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Data Ingestion &amp;amp; Preprocessing:&lt;/strong&gt; High I/O throughput, traditionally CPU/RAM intensive. Can be GPU-accelerated with &lt;strong&gt;RAPIDS&lt;/strong&gt; (cuDF, cuML) and &lt;strong&gt;DALI&lt;/strong&gt; (data loading/augmentation).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Model Training:&lt;/strong&gt; Compute and inter-GPU bandwidth intensive. Utilizes mixed precision (FP32 master weights + TF32/FP16/BF16/FP8 compute).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Model Fine-Tuning:&lt;/strong&gt; LoRA, QLoRA, full parameter fine-tuning.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Inference &amp;amp; Serving:&lt;/strong&gt; Low-latency, high-throughput token generation. Optimized with quantization (INT8, FP4) and KV-caching.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="13-nvidia-full-stack-ai-ecosystem-software"&gt;1.3 NVIDIA Full-Stack AI Ecosystem &amp;amp; Software:&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;                     NVIDIA FULL-STACK AI ECOSYSTEM
-                                   │
-[ Applications &amp;amp; Models ] ──► NeMo (LLMs), BioNeMo, Clara, Omniverse, Riva
-                                   │
-[ Microservices &amp;amp; Runtimes] ──► NVIDIA NIM (Inference Microservices), Triton, TensorRT, TensorRT-LLM
-                                   │
-[ Platforms &amp;amp; Frameworks ] ──► PyTorch, JAX, TensorFlow, RAPIDS
-                                   │
-[ Core Accelerated SDKs ] ──► CUDA, cuDNN, NCCL (Multi-GPU), DOCA (BlueField DPU)
-                                   │
-[ System Layer ]          ──► NVIDIA GPU Driver, NVIDIA Container Toolkit, DCGM
+&lt;h1 id="phase-4-the-storage-layer"&gt;Phase 4: The Storage Layer&lt;/h1&gt;
+&lt;h3 id="41-why-storage-is-a-gpu-problem"&gt;4.1 Why Storage Is a GPU Problem&lt;/h3&gt;
+&lt;p&gt;Traditional I/O wastes CPU and PCIe bandwidth on pure copying:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Traditional Path:
+Storage/NIC ──► Host RAM (page cache) ──► Host RAM (bounce buffer) ──► GPU Memory
+
+GPUDirect Storage (GDS) Path:
+Storage/NIC ─────────────────(Direct PCIe P2P / RDMA)───────────────► GPU Memory
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a href="https://docs.nvidia.com/gpudirect-storage/index.html"&gt;&lt;strong&gt;GPUDirect Storage&lt;/strong&gt;&lt;/a&gt; opens a direct DMA path from storage into GPU memory, skipping the CPU bounce buffer. Local NVMe uses PCIe peer-to-peer; remote storage uses RDMA. Applications reach it through the &lt;strong&gt;cuFile API&lt;/strong&gt; (kernel module &lt;code&gt;nvidia-fs&lt;/code&gt;). Result: lower latency, higher throughput, &lt;strong&gt;and lower CPU utilization&lt;/strong&gt; — that last one matters because the CPU is usually busy preprocessing data.&lt;/p&gt;
+&lt;h3 id="42-storage-tiers"&gt;4.2 Storage Tiers&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Local NVMe          →  Shared parallel FS        →  Object storage
+(scratch, cache)       (datasets, checkpoints)      (data lake, archive)
+fastest, smallest      fast, shared by all nodes    cheap, slow, huge
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Parallel filesystems&lt;/strong&gt; (Lustre / DDN EXAScaler, WEKA, VAST Data, IBM Storage Scale, BeeGFS) exist because a normal NFS server cannot feed hundreds of GPUs at once. They spread both data &lt;em&gt;and&lt;/em&gt; metadata across many servers.&lt;/p&gt;
+&lt;p&gt;Remember the checkpoint problem from Phase 1.3: hundreds of GPUs writing simultaneously, all idle until the write finishes. Checkpoint burst bandwidth is usually what sizes the filesystem, not average throughput.&lt;/p&gt;
+&lt;hr /&gt;
+&lt;h1 id="phase-5-the-software-stack"&gt;Phase 5: The Software Stack&lt;/h1&gt;
+&lt;h3 id="51-the-layers"&gt;5.1 The Layers&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;[ Applications &amp;amp; Models ]   NeMo, BioNeMo, Clara, Riva, Omniverse
+            ▲
+[ Serving &amp;amp; Optimization ]  NIM, Triton Inference Server, TensorRT, TensorRT-LLM
+            ▲
+[ Frameworks ]              PyTorch, JAX, TensorFlow  │  RAPIDS (data science)
+            ▲
+[ Accelerated Libraries ]   CUDA, cuDNN, NCCL, DOCA
+            ▲
+[ System Layer ]            GPU Driver, NVIDIA Container Toolkit
+            ◄── DCGM monitors every layer above
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;CUDA (Compute Unified Device Architecture):&lt;/strong&gt; Parallel computing platform and programming model for NVIDIA GPUs.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;cuDNN:&lt;/strong&gt; Highly tuned primitives for deep neural networks (convolutions, pooling, normalization, activation).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;NCCL (NVIDIA Collective Communications Library):&lt;/strong&gt; Multi-GPU and multi-node collective communication primitives (&lt;code&gt;AllReduce&lt;/code&gt;, &lt;code&gt;AllGather&lt;/code&gt;, &lt;code&gt;Broadcast&lt;/code&gt;, &lt;code&gt;ReduceScatter&lt;/code&gt;) optimized for NVLink and InfiniBand.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;TensorRT:&lt;/strong&gt; High-performance deep learning inference optimizer and runtime (layer fusion, kernel auto-tuning, quantization).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;TensorRT-LLM:&lt;/strong&gt; Open-source library for optimizing LLM inference on NVIDIA GPUs (in-flight batching, paged KV-cache, FP8/FP4 quantization).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Triton Inference Server (now branded NVIDIA Dynamo Triton):&lt;/strong&gt; Multi-framework open-source model serving software (PyTorch, ONNX, TensorRT, vLLM, Python backend) supporting concurrent model execution, dynamic batching, and model pipelining. &lt;em&gt;TensorRT optimizes the model; Triton serves it.&lt;/em&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;DOCA:&lt;/strong&gt; SDK for programming BlueField DPUs / SuperNICs (networking, security, storage offload).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;NVIDIA NeMo:&lt;/strong&gt; End-to-end cloud-native framework for building, customizing, and training generative AI models.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;NVIDIA AI Enterprise (NVAIE):&lt;/strong&gt; Enterprise platform providing production support, validated container images, security patches, and microservices (NVIDIA NIM).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;NGC (NVIDIA GPU Cloud) Registry:&lt;/strong&gt; Curated catalog of GPU-optimized containers, pre-trained model weights, Helm charts, and SDKs.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href="https://developer.nvidia.com/cuda-toolkit"&gt;CUDA&lt;/a&gt;&lt;/strong&gt; — the parallel computing platform and programming model. Everything sits on this.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;cuDNN&lt;/strong&gt; — tuned primitives for neural networks (convolution, pooling, normalization).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href="https://developer.nvidia.com/nccl"&gt;NCCL&lt;/a&gt;&lt;/strong&gt; — the collective communication library for multi-GPU and multi-node (&lt;code&gt;AllReduce&lt;/code&gt;, &lt;code&gt;AllGather&lt;/code&gt;, &lt;code&gt;Broadcast&lt;/code&gt;, &lt;code&gt;ReduceScatter&lt;/code&gt;), optimized for NVLink and InfiniBand. &lt;strong&gt;Any question about optimizing inter-GPU communication is a NCCL question.&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DOCA&lt;/strong&gt; — SDK for BlueField DPUs and SuperNICs.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="52-serving-tensorrt-vs-triton-vs-nim"&gt;5.2 Serving: TensorRT vs. Triton vs. NIM&lt;/h3&gt;
+&lt;p&gt;These three get confused constantly, and the exam knows it:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;What it is&lt;/th&gt;
+&lt;th&gt;Analogy&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;&lt;a href="https://developer.nvidia.com/tensorrt"&gt;TensorRT&lt;/a&gt;&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Compiler/optimizer that makes one model run fast (layer fusion, kernel tuning, quantization)&lt;/td&gt;
+&lt;td&gt;Compiling your code with &lt;code&gt;-O3&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;TensorRT-LLM&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Same idea, LLM-specific (in-flight batching, paged KV cache, FP8/FP4)&lt;/td&gt;
+&lt;td&gt;A compiler that understands transformers&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;&lt;a href="https://developer.nvidia.com/triton-inference-server"&gt;Triton Inference Server&lt;/a&gt;&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Serves models over HTTP/gRPC — multi-framework, concurrent execution, dynamic batching, versioning&lt;/td&gt;
+&lt;td&gt;Your web server&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;NIM&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;A prebuilt container with model + TensorRT-LLM + Triton + an OpenAI-compatible API&lt;/td&gt;
+&lt;td&gt;The whole thing as a Helm chart&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;TensorRT optimizes the model; Triton serves it; NIM ships both as a supported container.&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id="53-distribution-support"&gt;5.3 Distribution &amp;amp; Support&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href="https://catalog.ngc.nvidia.com/"&gt;NGC&lt;/a&gt;&lt;/strong&gt; — NVIDIA's registry of GPU-optimized containers, pretrained models and Helm charts. Think Docker Hub, curated.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;NVIDIA AI Enterprise (NVAIE)&lt;/strong&gt; — the paid layer: validated images, security patches, enterprise support, and NIM. This is what a company buys so someone else is accountable for CVEs.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Apptainer (formerly Singularity)&lt;/strong&gt; — containerization for HPC, not orchestration. Runs unprivileged and mounts the host filesystem naturally, which is why Slurm sites use it over Docker.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr /&gt;
-&lt;h1 id="domain-2-ai-infrastructure-40-of-exam"&gt;Domain 2: AI Infrastructure (40% of Exam)&lt;/h1&gt;
-&lt;p&gt;The largest domain in the exam covers GPU hardware architectures, interconnects, high-speed networking fabrics, and storage pipelines.&lt;/p&gt;
-&lt;h3 id="21-gpu-architectural-generations"&gt;2.1 GPU Architectural Generations:&lt;/h3&gt;
+&lt;h1 id="phase-6-operations-scheduling-orchestration"&gt;Phase 6: Operations — Scheduling &amp;amp; Orchestration&lt;/h1&gt;
+&lt;h3 id="61-slurm-vs-kubernetes-vs-runai"&gt;6.1 Slurm vs. Kubernetes vs. Run:ai&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://slurm.schedmd.com/"&gt;Slurm&lt;/a&gt; is still the standard for large training jobs, mainly because it allocates &lt;strong&gt;all or nothing&lt;/strong&gt; — vanilla &lt;code&gt;kube-scheduler&lt;/code&gt; will happily bind 60 of 64 pods and leave them idling.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;Best for&lt;/th&gt;
+&lt;th&gt;Why&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Slurm&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Large distributed training&lt;/td&gt;
+&lt;td&gt;All-or-nothing allocation, &lt;code&gt;topology/tree&lt;/code&gt; awareness, &lt;code&gt;cons_tres&lt;/code&gt; + GRES resource tracking&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Kubernetes + GPU Operator&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Inference serving, microservices, pipelines&lt;/td&gt;
+&lt;td&gt;Everything cloud-native already does well&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;&lt;a href="https://www.nvidia.com/en-us/software/run-ai/"&gt;Run:ai&lt;/a&gt;&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Multi-tenant GPU governance on K8s&lt;/td&gt;
+&lt;td&gt;Adds what kube-scheduler lacks: queues, quotas, fair-share, gang scheduling, fractional GPUs&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Run:ai is worth understanding because it's essentially &lt;em&gt;"Slurm's scheduling brain, but for Kubernetes"&lt;/em&gt; — teams get quotas, idle quota gets borrowed and reclaimed, and distributed jobs start all-or-nothing instead of deadlocking half-scheduled.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;(Note: Slurm uses "gang scheduling" to mean time-slicing oversubscribed jobs — see &lt;a href="https://slurm.schedmd.com/gang_scheduling.html"&gt;&lt;code&gt;PreemptMode=GANG&lt;/code&gt;&lt;/a&gt;. Everyone else uses it to mean all-or-nothing co-allocation. Blame history.)&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id="62-nvidia-gpu-operator"&gt;6.2 NVIDIA GPU Operator&lt;/h3&gt;
+&lt;p&gt;The &lt;a href="https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/index.html"&gt;&lt;strong&gt;GPU Operator&lt;/strong&gt;&lt;/a&gt; is the reason you don't hand-install drivers on 200 nodes. It deploys and manages:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Ampere (A100):&lt;/strong&gt; Introduced 3rd Gen Tensor Cores, TF32 precision, BF16 support, Multi-Instance GPU (MIG), and NVLink 3 (600 GB/s bidirectional).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Hopper (H100 / H200):&lt;/strong&gt; Introduced Transformer Engine (FP8 precision), DPX instructions for dynamic programming, confidential computing, and NVLink 4 (900 GB/s bidirectional). H200 = H100 compute with 141GB HBM3e.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Blackwell (B200 / GB200):&lt;/strong&gt; 2nd Gen Transformer Engine (FP4 precision), 208 billion transistors, NVLink 5 (1.8 TB/s bidirectional), NVLink Switch Chip.&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;GB200 Superchip&lt;/strong&gt; = 1 Grace CPU + 2 Blackwell GPUs connected via NVLink-C2C.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;GB200 NVL72&lt;/strong&gt; = 36 Grace CPUs + 72 Blackwell GPUs in a single NVLink domain (liquid-cooled rack).&lt;/li&gt;
+&lt;li&gt;NVIDIA driver + &lt;strong&gt;Container Toolkit&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Device plugin&lt;/strong&gt; — exposes &lt;code&gt;nvidia.com/gpu&lt;/code&gt; as a schedulable resource&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GPU Feature Discovery&lt;/strong&gt; + Node Feature Discovery — labels nodes with GPU model, MIG profile, etc.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;MIG Manager&lt;/strong&gt; — applies MIG partitioning declaratively&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DCGM + DCGM Exporter&lt;/strong&gt; — monitoring&lt;/li&gt;
+&lt;li&gt;Operator validator&lt;/li&gt;
 &lt;/ul&gt;
-&lt;/li&gt;
+&lt;p&gt;The companion &lt;strong&gt;Network Operator&lt;/strong&gt; handles the networking side: MOFED/DOCA drivers, RDMA shared device plugin, GPUDirect RDMA.&lt;/p&gt;
+&lt;h3 id="63-base-command-manager"&gt;6.3 Base Command Manager&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;BCM&lt;/strong&gt; (formerly Bright Cluster Manager) is bare-metal cluster provisioning for DGX and non-DGX clusters: OS deployment, InfiniBand fabric health checks, monitoring, and integration with both Slurm and Kubernetes. Closest thing to Cluster API in this world.&lt;/p&gt;
+&lt;p&gt;Do not confuse it with &lt;strong&gt;Base Command Platform&lt;/strong&gt;, which is a SaaS for running training workloads on &lt;strong&gt;DGX Cloud&lt;/strong&gt;.&lt;/p&gt;
+&lt;h3 id="64-mlops-briefly"&gt;6.4 MLOps, Briefly&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Lifecycle:&lt;/strong&gt; data versioning → experiment tracking → training → model registry → validation → deploy → monitor → retrain.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Model registry&lt;/strong&gt; — versioned model artifacts with lineage and stage promotion. NGC plays this role for NVIDIA-published models.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Deployment&lt;/strong&gt; — canary and blue/green apply exactly as they do for services; Triton can serve multiple model versions concurrently on one GPU.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Drift&lt;/strong&gt; — &lt;em&gt;data drift&lt;/em&gt; is the inputs changing; &lt;em&gt;concept drift&lt;/em&gt; is the input→output relationship changing. Either one is the signal to retrain.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Reproducibility&lt;/strong&gt; — pin the container image, framework version, driver version, dataset version and random seed. Containers are the mechanism.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h4 id="gpu-spec-cheat-sheet-a100-h100-h200-b100-b200"&gt;GPU Spec Cheat Sheet (A100 / H100 / H200 / B100 / B200):&lt;/h4&gt;
+&lt;hr /&gt;
+&lt;h1 id="phase-7-operations-monitoring-war-stories"&gt;Phase 7: Operations — Monitoring &amp;amp; War Stories&lt;/h1&gt;
+&lt;h3 id="71-the-tools"&gt;7.1 The Tools&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Tool&lt;/th&gt;
+&lt;th&gt;Scope&lt;/th&gt;
+&lt;th&gt;Use it for&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;nvidia-smi&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;One node&lt;/td&gt;
+&lt;td&gt;Quick look: utilization, memory, temperature, power, processes, ECC&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;nvidia-smi topo -m&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;One node&lt;/td&gt;
+&lt;td&gt;Shows which GPUs are NVLink-connected vs. PCIe-connected&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;nvidia-smi mig&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;One node&lt;/td&gt;
+&lt;td&gt;Create and inspect MIG instances&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://developer.nvidia.com/dcgm"&gt;&lt;strong&gt;DCGM&lt;/strong&gt;&lt;/a&gt; (&lt;code&gt;nv-hostengine&lt;/code&gt;)&lt;/td&gt;
+&lt;td&gt;Cluster&lt;/td&gt;
+&lt;td&gt;Low-overhead telemetry daemon: util, power, PCIe/NVLink bandwidth, ECC, Xid&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;DCGM Exporter&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Cluster&lt;/td&gt;
+&lt;td&gt;Feeds Prometheus → Grafana. Same pattern as node-exporter&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;dcgmi diag -r 1..4&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;One node&lt;/td&gt;
+&lt;td&gt;On-demand validation, from quick check to long stress test&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;dmesg&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;One node&lt;/td&gt;
+&lt;td&gt;Where &lt;strong&gt;Xid&lt;/strong&gt; errors surface&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;I don't have GPU hardware yet, so I'm not going to paste output I didn't generate. When I do, the hands-on version of this table gets its own article.&lt;/p&gt;
+&lt;h3 id="72-xid-errors"&gt;7.2 Xid Errors&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://docs.nvidia.com/deploy/xid-errors/index.html"&gt;&lt;strong&gt;Xid&lt;/strong&gt;&lt;/a&gt; errors are codes the NVIDIA driver writes into the kernel log when something goes wrong — hardware fault, bad memory, driver bug, or an application doing something illegal. The number identifies the class of problem.&lt;/p&gt;
+&lt;p&gt;Operationally the reflex is the same one you already have for a flaky K8s node: &lt;strong&gt;detect → drain → diagnose → RMA or return to service.&lt;/strong&gt; DCGM can watch for them across the fleet so you're not grepping &lt;code&gt;dmesg&lt;/code&gt; on 200 machines.&lt;/p&gt;
+&lt;p&gt;Related: &lt;strong&gt;ECC errors&lt;/strong&gt;. Correctable ones get fixed silently; a rising count or an uncorrectable error means drain the node.&lt;/p&gt;
+&lt;h3 id="73-reading-a-bottleneck"&gt;7.3 Reading a Bottleneck&lt;/h3&gt;
+&lt;p&gt;The most useful skill here, and a common question format — you're given telemetry and asked what's wrong. &lt;strong&gt;GPU utilization alone tells you nothing&lt;/strong&gt;; read it alongside everything else:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Symptom&lt;/th&gt;
+&lt;th&gt;Bottleneck&lt;/th&gt;
+&lt;th&gt;Fix&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;GPU util low, CPU pegged&lt;/td&gt;
+&lt;td&gt;Preprocessing can't keep up&lt;/td&gt;
+&lt;td&gt;More dataloader workers, &lt;strong&gt;DALI&lt;/strong&gt;, GPU-side preprocessing&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;GPU util low, CPU low, disk busy&lt;/td&gt;
+&lt;td&gt;Storage starving the GPUs&lt;/td&gt;
+&lt;td&gt;Faster parallel FS, local NVMe cache, &lt;strong&gt;GDS&lt;/strong&gt;, bigger prefetch&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;GPU util spiky, scales badly past one node&lt;/td&gt;
+&lt;td&gt;Inter-node communication&lt;/td&gt;
+&lt;td&gt;Check NCCL topology, GPUDirect RDMA enabled, fabric health&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;GPU util high but throughput low&lt;/td&gt;
+&lt;td&gt;Batch too small, Tensor Cores idle&lt;/td&gt;
+&lt;td&gt;Larger batch, enable mixed precision&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;OOM during training&lt;/td&gt;
+&lt;td&gt;Activations + optimizer state exceed HBM&lt;/td&gt;
+&lt;td&gt;Gradient checkpointing, smaller batch, sharding, lower precision&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;OOM during serving&lt;/td&gt;
+&lt;td&gt;KV cache growth&lt;/td&gt;
+&lt;td&gt;Cap context/concurrency, paged KV cache, quantization&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Clocks dropping under load&lt;/td&gt;
+&lt;td&gt;Thermal or power throttling&lt;/td&gt;
+&lt;td&gt;Check inlet temps and power caps&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Job dies, &lt;code&gt;Xid&lt;/code&gt; in &lt;code&gt;dmesg&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;Hardware or driver fault&lt;/td&gt;
+&lt;td&gt;Match the Xid, run &lt;code&gt;dcgmi diag -r 3&lt;/code&gt;, drain the node&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id="74-multi-tenancy-security"&gt;7.4 Multi-Tenancy &amp;amp; Security&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Isolation ladder&lt;/strong&gt;, weakest to strongest: time-slicing (none) → MPS (shared fault domain) → vGPU (hypervisor) → &lt;strong&gt;MIG&lt;/strong&gt; (hardware) → dedicated GPU.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Confidential computing&lt;/strong&gt; (Hopper and Blackwell) encrypts data &lt;em&gt;in use&lt;/em&gt; so even the hypervisor or cloud operator can't read GPU memory. For regulated workloads on shared infrastructure.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;The OOB fabric must never be routable from user networks.&lt;/strong&gt; Same rule as any BMC network, higher stakes.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;h1 id="phase-8-data-center-realities"&gt;Phase 8: Data Center Realities&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Power density&lt;/strong&gt; — a DGX H100 draws ~10.2 kW; a GB200 NVL72 rack draws ~120 kW. A traditional rack is 5-10 kW. You cannot drop these into an existing datacenter and hope.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cooling&lt;/strong&gt; — air cooling runs out around 40-50 kW per rack. &lt;strong&gt;Direct-to-chip liquid cooling&lt;/strong&gt; (cold plates) is required for GB200 NVL72, not optional.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PUE (Power Usage Effectiveness)&lt;/strong&gt; = total facility power ÷ IT equipment power. &lt;strong&gt;Closer to 1.0 is better.&lt;/strong&gt; 1.5 means half your IT load again is spent on cooling and losses.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Also plan for&lt;/strong&gt;: redundant power (N+1, 2N), hot/cold aisle containment, floor weight, and cable runs for high-speed fabrics.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;On-prem vs. cloud vs. hybrid&lt;/strong&gt; — on-prem wins on long-term cost &lt;em&gt;at high utilization&lt;/em&gt; and on data control; cloud wins on elasticity and zero CapEx; hybrid keeps sensitive data local and bursts out. Utilization is the deciding number.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;h1 id="exam-checklist"&gt;Exam Checklist&lt;/h1&gt;
+&lt;p&gt;Study time should follow the blueprint weights, not your comfort zone.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Essential AI Knowledge (38%)&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Contrast training and inference across duration, bottleneck, failure behavior and scheduler.&lt;/li&gt;
+&lt;li&gt;Place AI, ML, DL and GenAI as nested sets; say when classical ML beats deep learning.&lt;/li&gt;
+&lt;li&gt;Explain batch size, epoch, overfitting, checkpoint — and which two hit infrastructure.&lt;/li&gt;
+&lt;li&gt;Name the four learning paradigms with one use case each.&lt;/li&gt;
+&lt;li&gt;Pick between accuracy, precision, recall and F1 given a described business cost.&lt;/li&gt;
+&lt;li&gt;Explain self-attention in one sentence, and why prefill is compute-bound but decode is memory-bandwidth-bound.&lt;/li&gt;
+&lt;li&gt;Choose between prompt engineering, RAG, LoRA and full fine-tuning for a requirement.&lt;/li&gt;
+&lt;li&gt;Describe the RAG pipeline and where embeddings and the vector DB fit.&lt;/li&gt;
+&lt;li&gt;Match an industry scenario to Clara / Merlin / Riva / Omniverse / Metropolis / Morpheus / NIM.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;AI Infrastructure (40%)&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Explain why GPUs beat CPUs at matrix math, and what a DPU offloads.&lt;/li&gt;
+&lt;li&gt;Say what Ampere, Hopper and Blackwell each introduced.&lt;/li&gt;
+&lt;li&gt;Explain why H200 is the inference choice despite H100-identical compute.&lt;/li&gt;
+&lt;li&gt;Differentiate DGX, HGX and MGX.&lt;/li&gt;
+&lt;li&gt;Explain NVLink, NVSwitch and NVLink Switch, and why PCIe isn't enough.&lt;/li&gt;
+&lt;li&gt;Differentiate FP32, TF32, BF16, FP16, FP8 (E4M3 vs E5M2), FP4 — and say which needs loss scaling.&lt;/li&gt;
+&lt;li&gt;Describe MIG's hardware QoS and how it differs from vGPU and time-slicing.&lt;/li&gt;
+&lt;li&gt;List the four fabrics and what each carries.&lt;/li&gt;
+&lt;li&gt;Explain RDMA vs. GPUDirect RDMA.&lt;/li&gt;
+&lt;li&gt;Compare InfiniBand, RoCEv2 and Spectrum-X; say what SHARP does.&lt;/li&gt;
+&lt;li&gt;Explain how GDS removes the CPU bounce buffer, and name three parallel filesystems.&lt;/li&gt;
+&lt;li&gt;Distinguish TensorRT, Triton and NIM.&lt;/li&gt;
+&lt;li&gt;Explain what NCCL does and name its main collectives.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;AI Operations (22%)&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Choose between Slurm, Kubernetes + GPU Operator, and Run:ai for a workload.&lt;/li&gt;
+&lt;li&gt;List what the GPU Operator deploys and what the Network Operator adds.&lt;/li&gt;
+&lt;li&gt;Describe what DCGM monitors and how it reaches Grafana.&lt;/li&gt;
+&lt;li&gt;Distinguish Base Command Manager from Base Command Platform.&lt;/li&gt;
+&lt;li&gt;Given utilization figures, name the bottleneck and the fix.&lt;/li&gt;
+&lt;li&gt;Explain what an Xid error is and where it appears.&lt;/li&gt;
+&lt;li&gt;Outline the MLOps lifecycle; distinguish data drift from concept drift.&lt;/li&gt;
+&lt;li&gt;Explain PUE and why 120 kW racks need liquid cooling.&lt;/li&gt;
+&lt;li&gt;Compare on-prem, cloud and hybrid on cost, control and elasticity.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;h1 id="appendix-a-hardware-spec-reference"&gt;Appendix A: Hardware Spec Reference&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Reference only — do not memorize this.&lt;/strong&gt; None of these numbers are worth exam study time at Associate level, and most aren't worth it at Professional level either. They're here because I keep needing to look them up. What matters is the &lt;em&gt;why&lt;/em&gt; in Phase 2, not the digits.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="gpu-specs"&gt;GPU Specs&lt;/h3&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -699,7 +1552,6 @@ gcloud&lt;span class="w"&gt; &lt;/span&gt;iam&lt;span class="w"&gt; &lt;/span&gt
 &lt;th&gt;A100&lt;/th&gt;
 &lt;th&gt;H100&lt;/th&gt;
 &lt;th&gt;H200&lt;/th&gt;
-&lt;th&gt;B100&lt;/th&gt;
 &lt;th&gt;B200&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
@@ -710,28 +1562,24 @@ gcloud&lt;span class="w"&gt; &lt;/span&gt;iam&lt;span class="w"&gt; &lt;/span&gt
 &lt;td&gt;Hopper&lt;/td&gt;
 &lt;td&gt;Hopper&lt;/td&gt;
 &lt;td&gt;Blackwell&lt;/td&gt;
-&lt;td&gt;Blackwell&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;GPU Memory&lt;/td&gt;
+&lt;td&gt;GPU memory&lt;/td&gt;
 &lt;td&gt;40 / 80GB HBM2e&lt;/td&gt;
 &lt;td&gt;80GB HBM3&lt;/td&gt;
 &lt;td&gt;141GB HBM3e&lt;/td&gt;
-&lt;td&gt;192GB HBM3&lt;/td&gt;
-&lt;td&gt;180GB HBM3e (often quoted as 192GB)&lt;/td&gt;
+&lt;td&gt;180GB HBM3e&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;NVLink (per GPU)&lt;/td&gt;
-&lt;td&gt;NVLink 3, 600 GB/s&lt;/td&gt;
-&lt;td&gt;NVLink 4, 900 GB/s&lt;/td&gt;
-&lt;td&gt;NVLink 4, 900 GB/s&lt;/td&gt;
-&lt;td&gt;NVLink 5, 1.8 TB/s&lt;/td&gt;
-&lt;td&gt;NVLink 5, 1.8 TB/s&lt;/td&gt;
+&lt;td&gt;NVLink per GPU&lt;/td&gt;
+&lt;td&gt;600 GB/s (v3)&lt;/td&gt;
+&lt;td&gt;900 GB/s (v4)&lt;/td&gt;
+&lt;td&gt;900 GB/s (v4)&lt;/td&gt;
+&lt;td&gt;1.8 TB/s (v5)&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;PCIe&lt;/td&gt;
 &lt;td&gt;Gen4&lt;/td&gt;
-&lt;td&gt;Gen5&lt;/td&gt;
 &lt;td&gt;Gen5&lt;/td&gt;
 &lt;td&gt;Gen5&lt;/td&gt;
 &lt;td&gt;Gen5&lt;/td&gt;
@@ -741,24 +1589,21 @@ gcloud&lt;span class="w"&gt; &lt;/span&gt;iam&lt;span class="w"&gt; &lt;/span&gt
 &lt;td&gt;400W&lt;/td&gt;
 &lt;td&gt;700W&lt;/td&gt;
 &lt;td&gt;700W&lt;/td&gt;
-&lt;td&gt;700W&lt;/td&gt;
 &lt;td&gt;1000W&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;Key precision&lt;/td&gt;
 &lt;td&gt;TF32&lt;/td&gt;
-&lt;td&gt;FP8 (Transformer Engine)&lt;/td&gt;
 &lt;td&gt;FP8&lt;/td&gt;
-&lt;td&gt;FP4 (2nd Gen TE)&lt;/td&gt;
-&lt;td&gt;FP4 (2nd Gen TE)&lt;/td&gt;
+&lt;td&gt;FP8&lt;/td&gt;
+&lt;td&gt;FP4&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;MIG&lt;/td&gt;
-&lt;td&gt;Up to 7&lt;/td&gt;
-&lt;td&gt;Up to 7&lt;/td&gt;
-&lt;td&gt;Up to 7&lt;/td&gt;
-&lt;td&gt;Up to 7&lt;/td&gt;
-&lt;td&gt;Up to 7&lt;/td&gt;
+&lt;td&gt;MIG instances&lt;/td&gt;
+&lt;td&gt;up to 7&lt;/td&gt;
+&lt;td&gt;up to 7&lt;/td&gt;
+&lt;td&gt;up to 7&lt;/td&gt;
+&lt;td&gt;up to 7&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;Transistors&lt;/td&gt;
@@ -766,935 +1611,105 @@ gcloud&lt;span class="w"&gt; &lt;/span&gt;iam&lt;span class="w"&gt; &lt;/span&gt
 &lt;td&gt;80B&lt;/td&gt;
 &lt;td&gt;80B&lt;/td&gt;
 &lt;td&gt;208B&lt;/td&gt;
-&lt;td&gt;208B&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;Key points to remember:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;H100 vs. A100:&lt;/strong&gt; Same max memory size (80GB) but faster HBM3, 1.5x NVLink bandwidth (900 vs. 600 GB/s), FP8 via Transformer Engine.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;H200 = H100 + more/faster memory:&lt;/strong&gt; Same Hopper compute, but 141GB HBM3e (~1.8x capacity, ~1.4x memory bandwidth). Best for large-model inference and long context. Drop-in compatible with HGX H100 systems.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;B100:&lt;/strong&gt; Lower-power Blackwell (700W, same as H100), HGX B100 boards are &lt;strong&gt;drop-in compatible with HGX H100&lt;/strong&gt; (no new power/cooling needed). In practice, NVIDIA ships mainly &lt;strong&gt;B200&lt;/strong&gt; / &lt;strong&gt;GB200&lt;/strong&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;B200:&lt;/strong&gt; 180GB HBM3e (NVIDIA docs; early launch material said 192GB, and DGX B200 = 8 × 180 = 1,440GB), 1000W (liquid cooling recommended at scale), FP4, 2x NVLink bandwidth vs. H100. New Blackwell features: &lt;strong&gt;RAS Engine&lt;/strong&gt; (reliability/predictive maintenance), &lt;strong&gt;confidential computing&lt;/strong&gt;, &lt;strong&gt;decompression engine&lt;/strong&gt; (accelerates data analytics).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Grace CPU (in GB200 / GH200):&lt;/strong&gt; 72 Arm Neoverse V2 cores, LPDDR5X memory, connected to GPUs via &lt;strong&gt;NVLink-C2C (900 GB/s)&lt;/strong&gt;, 7x faster than PCIe Gen5.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Other GPUs that may appear:&lt;/strong&gt; &lt;strong&gt;L40S&lt;/strong&gt; (Ada Lovelace, 48GB GDDR6, no NVLink, for inference/graphics/Omniverse), &lt;strong&gt;L4&lt;/strong&gt; (Ada, 24GB, low-power 72W inference/video), &lt;strong&gt;GH200&lt;/strong&gt; (Grace Hopper Superchip = 1 Grace + 1 H100/H200).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;em&gt;Sources: &lt;a href="https://www.nvidia.com/en-us/data-center/h200/"&gt;NVIDIA H200&lt;/a&gt;, &lt;a href="https://docs.nvidia.com/dgx/dgxb200-user-guide/introduction-to-dgxb200.html"&gt;DGX B200 User Guide&lt;/a&gt;, &lt;a href="https://developer.nvidia.com/blog/inside-nvidia-blackwell-ultra-the-chip-powering-the-ai-factory-era/"&gt;Inside NVIDIA Blackwell Ultra&lt;/a&gt; (B200: 208B transistors, 180GB HBM3e).&lt;/em&gt;&lt;/p&gt;
-&lt;h4 id="dgx-system-cheat-sheet"&gt;DGX System Cheat Sheet:&lt;/h4&gt;
+&lt;p&gt;&lt;em&gt;B100 also exists — a 700W Blackwell that drops into HGX H100 chassis — but NVIDIA ships mainly B200 and GB200.&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id="dgx-systems"&gt;DGX Systems&lt;/h3&gt;
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
 &lt;th&gt;System&lt;/th&gt;
 &lt;th&gt;GPUs&lt;/th&gt;
-&lt;th&gt;Total GPU Memory&lt;/th&gt;
+&lt;th&gt;Total GPU memory&lt;/th&gt;
 &lt;th&gt;NVSwitch&lt;/th&gt;
-&lt;th&gt;Compute Networking&lt;/th&gt;
-&lt;th&gt;Max Power&lt;/th&gt;
+&lt;th&gt;Compute NICs&lt;/th&gt;
+&lt;th&gt;Max power&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td&gt;DGX A100&lt;/td&gt;
-&lt;td&gt;8× A100 (40GB or 80GB)&lt;/td&gt;
-&lt;td&gt;320GB / 640GB&lt;/td&gt;
-&lt;td&gt;6 (NVLink 3)&lt;/td&gt;
-&lt;td&gt;8× single-port ConnectX-6 VPI 200Gb/s HDR IB&lt;/td&gt;
+&lt;td&gt;DGX A100 (6U)&lt;/td&gt;
+&lt;td&gt;8× A100&lt;/td&gt;
+&lt;td&gt;320 / 640GB&lt;/td&gt;
+&lt;td&gt;6&lt;/td&gt;
+&lt;td&gt;8× ConnectX-6, 200Gb/s HDR&lt;/td&gt;
 &lt;td&gt;~6.5 kW&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;DGX H100&lt;/td&gt;
+&lt;td&gt;DGX H100 (8U)&lt;/td&gt;
 &lt;td&gt;8× H100&lt;/td&gt;
 &lt;td&gt;640GB&lt;/td&gt;
-&lt;td&gt;4 (NVLink 4)&lt;/td&gt;
-&lt;td&gt;8× single-port ConnectX-7 VPI 400Gb/s NDR (via 4 OSFP ports)&lt;/td&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;8× ConnectX-7, 400Gb/s NDR&lt;/td&gt;
 &lt;td&gt;~10.2 kW&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;DGX H200&lt;/td&gt;
+&lt;td&gt;DGX H200 (8U)&lt;/td&gt;
 &lt;td&gt;8× H200&lt;/td&gt;
 &lt;td&gt;1,128GB&lt;/td&gt;
-&lt;td&gt;4 (NVLink 4)&lt;/td&gt;
-&lt;td&gt;Same as DGX H100&lt;/td&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;same as H100&lt;/td&gt;
 &lt;td&gt;~10.2 kW&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;DGX B200&lt;/td&gt;
-&lt;td&gt;8× B200 (180GB usable each)&lt;/td&gt;
+&lt;td&gt;DGX B200 (10U)&lt;/td&gt;
+&lt;td&gt;8× B200&lt;/td&gt;
 &lt;td&gt;1,440GB&lt;/td&gt;
-&lt;td&gt;2 (NVLink 5)&lt;/td&gt;
-&lt;td&gt;Same as DGX H100 (8× ConnectX-7 400Gb/s)&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;same as H100&lt;/td&gt;
 &lt;td&gt;~14.3 kW&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;GB200 NVL72&lt;/td&gt;
 &lt;td&gt;72× B200 + 36 Grace&lt;/td&gt;
-&lt;td&gt;13.4TB HBM3e GPU + 17TB LPDDR5X CPU&lt;/td&gt;
-&lt;td&gt;18 compute trays (2 Grace + 4 B200 each) + 9 NVLink Switch trays, 130 TB/s&lt;/td&gt;
+&lt;td&gt;13.4TB HBM3e&lt;/td&gt;
+&lt;td&gt;9 switch trays&lt;/td&gt;
 &lt;td&gt;ConnectX-7/8 or BlueField-3&lt;/td&gt;
-&lt;td&gt;~120 kW (liquid-cooled)&lt;/td&gt;
+&lt;td&gt;~120 kW&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;&lt;em&gt;Sources: &lt;a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/nvidia-dgx-a100-datasheet.pdf"&gt;DGX A100 Datasheet&lt;/a&gt;, &lt;a href="https://docs.nvidia.com/dgx/dgxh100-user-guide/introduction-to-dgxh100.html"&gt;DGX H100/H200 User Guide&lt;/a&gt;, &lt;a href="https://docs.nvidia.com/dgx/dgxb200-user-guide/introduction-to-dgxb200.html"&gt;DGX B200 User Guide&lt;/a&gt;, &lt;a href="https://www.nvidia.com/en-us/data-center/gb200-nvl72/"&gt;GB200 NVL72&lt;/a&gt;, &lt;a href="https://docs.nvidia.com/dgx-superpod/reference-architecture-scalable-infrastructure-gb200/latest/dgx-superpod-components.html"&gt;DGX SuperPOD GB200 Components&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
-&lt;h4 id="dgx-hardware-details-common-how-many-x-in-a-dgx-questions"&gt;DGX Hardware Details (common "how many X in a DGX" questions):&lt;/h4&gt;
-&lt;p&gt;&lt;strong&gt;DGX A100&lt;/strong&gt; (6U):&lt;/p&gt;
+&lt;p&gt;CPUs, for completeness: DGX A100 = 2× AMD EPYC 7742 (128 cores); DGX H100/H200 = 2× Xeon Platinum 8480C (112 cores); DGX B200 = 2× Xeon Platinum 8570 (112 cores). Storage on all of them is roughly "2× 1.92TB M.2 for the OS, 8× 3.84TB U.2 for cache".&lt;/p&gt;
+&lt;h3 id="marketing-numbers"&gt;Marketing Numbers&lt;/h3&gt;
+&lt;p&gt;NVIDIA quotes these constantly; they occasionally show up as answer options:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;GPU:&lt;/strong&gt; 8× A100, connected by &lt;strong&gt;6 NVSwitch&lt;/strong&gt; chips (600 GB/s per GPU).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;CPU:&lt;/strong&gt; 2× AMD EPYC 7742 (Rome), 64 cores each = &lt;strong&gt;128 cores&lt;/strong&gt; total.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;System memory:&lt;/strong&gt; 1TB (320GB model) / 2TB (640GB model).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Compute networking:&lt;/strong&gt; &lt;strong&gt;8× single-port Mellanox ConnectX-6 VPI&lt;/strong&gt; (200Gb/s HDR InfiniBand) — 1 NIC per GPU.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Storage / in-band networking:&lt;/strong&gt; &lt;strong&gt;1× dual-port ConnectX-6 VPI&lt;/strong&gt; (10/25/50/100/200Gb/s Ethernet by default), &lt;strong&gt;2×&lt;/strong&gt; on the 640GB model.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Storage:&lt;/strong&gt; OS on 2× 1.92TB M.2 NVMe; internal cache 15TB (4× 3.84TB U.2 NVMe), 30TB on the 640GB model.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DGX B200 vs. DGX H100&lt;/strong&gt; — up to 3x training, 15x inference.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;GB200 NVL72 vs. H100&lt;/strong&gt; — up to 30x trillion-parameter inference, 4x training, 25x better energy efficiency.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;DGX H100&lt;/strong&gt; (8U) — DGX H200 is the same chassis with H200 GPUs:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;GPU:&lt;/strong&gt; 8× H100, connected by &lt;strong&gt;4 NVSwitch&lt;/strong&gt; chips (900 GB/s per GPU).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;CPU:&lt;/strong&gt; 2× Intel Xeon Platinum 8480C (Sapphire Rapids), 56 cores each = &lt;strong&gt;112 cores&lt;/strong&gt; total.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;System memory:&lt;/strong&gt; 2TB.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Compute networking:&lt;/strong&gt; &lt;strong&gt;8× single-port ConnectX-7 VPI&lt;/strong&gt; (400Gb/s NDR InfiniBand/Ethernet), exposed through &lt;strong&gt;4 twin-port OSFP&lt;/strong&gt; cages (800G each).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Storage / in-band networking:&lt;/strong&gt; &lt;strong&gt;2× dual-port BlueField-3 DPU&lt;/strong&gt; (up to 400Gb/s, QSFP112).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Storage:&lt;/strong&gt; OS on 2× 1.92TB M.2 NVMe (RAID 1); data cache ~30TB (8× 3.84TB U.2 NVMe, RAID 0).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Power:&lt;/strong&gt; 6× 3.3kW PSUs, ~10.2 kW max.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;DGX B200&lt;/strong&gt; (10U):&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;GPU:&lt;/strong&gt; 8× B200 (1,440GB total), connected by &lt;strong&gt;2 NVLink 5 switch&lt;/strong&gt; chips (1.8 TB/s per GPU, 14.4 TB/s aggregate).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;CPU:&lt;/strong&gt; 2× Intel Xeon Platinum 8570, &lt;strong&gt;112 cores&lt;/strong&gt; total.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;System memory:&lt;/strong&gt; 2TB (configurable to 4TB).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Networking:&lt;/strong&gt; Same pattern as DGX H100: 8× ConnectX-7 400Gb/s (4 OSFP ports) for compute + 2× dual-port BlueField-3 DPU for storage/in-band.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Storage:&lt;/strong&gt; OS on 2× 1.92TB M.2 NVMe (RAID 1); data cache 8× 3.84TB U.2 NVMe (RAID 0).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Power:&lt;/strong&gt; 6× 3.3kW PSUs, ~14.3 kW max.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Rule of thumb: &lt;strong&gt;1 compute NIC per GPU&lt;/strong&gt; (8 GPUs → 8 compute NICs, "rail-optimized" design), and a separate NIC/DPU pair for storage and in-band management. On top of that, every DGX has a dedicated &lt;strong&gt;BMC (RJ45) port&lt;/strong&gt; for out-of-band management.&lt;/p&gt;
-&lt;p&gt;NVIDIA headline performance claims (often used in exam questions):&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;DGX B200 vs. DGX H100:&lt;/strong&gt; up to &lt;strong&gt;3x&lt;/strong&gt; training and &lt;strong&gt;15x&lt;/strong&gt; LLM inference performance.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;GB200 NVL72 vs. H100:&lt;/strong&gt; up to &lt;strong&gt;30x&lt;/strong&gt; faster real-time trillion-parameter LLM inference, &lt;strong&gt;4x&lt;/strong&gt; faster training, &lt;strong&gt;25x&lt;/strong&gt; better energy efficiency (TCO).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;em&gt;Note: Spec numbers above were cross-checked (Sep 2026) against the official &lt;a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/nvidia-dgx-a100-datasheet.pdf"&gt;DGX A100 Datasheet&lt;/a&gt;, &lt;a href="https://docs.nvidia.com/dgx/dgxh100-user-guide/introduction-to-dgxh100.html"&gt;DGX H100/H200 User Guide&lt;/a&gt;, &lt;a href="https://docs.nvidia.com/dgx/dgxb200-user-guide/introduction-to-dgxb200.html"&gt;DGX B200 User Guide&lt;/a&gt;, &lt;a href="https://www.nvidia.com/en-us/data-center/dgx-b200/"&gt;DGX B200 product page&lt;/a&gt;, &lt;a href="https://www.nvidia.com/en-us/data-center/gb200-nvl72/"&gt;GB200 NVL72 product page&lt;/a&gt; and &lt;a href="https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html"&gt;DGX GB200 Hardware Guide&lt;/a&gt;. NVIDIA updates these pages over time, so re-check before your exam.&lt;/em&gt;&lt;/p&gt;
-&lt;h3 id="22-nvidia-system-platforms-dgx-vs-hgx-vs-mgx"&gt;2.2 NVIDIA System Platforms: DGX vs. HGX vs. MGX:&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;DGX:&lt;/strong&gt; NVIDIA's complete, turnkey AI system (hardware + software stack), e.g., DGX H100/B200. Scales to &lt;strong&gt;DGX SuperPOD&lt;/strong&gt; (reference architecture).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;HGX:&lt;/strong&gt; GPU baseboard (8 GPUs + NVSwitch) sold to OEMs (Dell, HPE, Supermicro...) to build their own servers.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;MGX:&lt;/strong&gt; Modular reference server architecture for OEMs to build many server configurations (CPU, GPU, DPU combinations).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="23-tensor-cores-precision-formats"&gt;2.3 Tensor Cores &amp;amp; Precision Formats:&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Matrix Acceleration:&lt;/strong&gt; Tensor Cores are specialized cores that accelerate the matrix multiply-and-add operations at the heart of deep learning: &lt;code&gt;D = A × B + C&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;FP32:&lt;/strong&gt; Single precision (1 sign, 8 exponent, 23 mantissa bits). Standard scientific computing, master weights.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;TF32 (TensorFloat-32):&lt;/strong&gt; Same range as FP32 (8-bit exponent), same precision as FP16 (10-bit mantissa). Internal compute format only (not a storage format), used by Ampere+ math libraries. &lt;em&gt;Note: PyTorch disabled TF32 for matmul by default since v1.12 (still on for cuDNN convolutions).&lt;/em&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;BF16 (bfloat16):&lt;/strong&gt; 1 sign, 8 exponent, 7 mantissa bits. Same range as FP32, no loss scaling needed. Ampere+. &lt;strong&gt;The de facto standard for LLM training today.&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;FP16:&lt;/strong&gt; 1 sign, 5 exponent, 10 mantissa bits. Narrow range, requires &lt;strong&gt;loss scaling&lt;/strong&gt; to avoid gradient underflow. Classic mixed precision on Volta/Turing.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;FP8 (E4M3 / E5M2):&lt;/strong&gt; Hopper/Blackwell via Transformer Engine. &lt;strong&gt;E4M3&lt;/strong&gt; (more precision) for forward pass (weights/activations), &lt;strong&gt;E5M2&lt;/strong&gt; (more range) for backward pass (gradients).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;INT8 / FP4 (NVFP4 on Blackwell):&lt;/strong&gt; Quantized inference with small accuracy loss, lower memory and higher throughput.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="24-high-speed-interconnects-nvlink-nvswitch"&gt;2.4 High-Speed Interconnects: NVLink &amp;amp; NVSwitch:&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;PCIe Limitation:&lt;/strong&gt; Standard PCIe Gen5 x16 provides ~64 GB/s per direction (~128 GB/s bidirectional), creating a major communication bottleneck for multi-GPU training. NVLink 4 (900 GB/s) is &lt;strong&gt;~7x&lt;/strong&gt; PCIe Gen5.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;NVLink:&lt;/strong&gt; Direct high-speed interconnect between GPUs bypassing the PCIe bus (H100: 18 links × 50 GB/s = 900 GB/s).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;NVSwitch:&lt;/strong&gt; Non-blocking switch chip enabling any-to-any full-bandwidth GPU communication within a node (e.g., all 8 GPUs in a DGX H100 talk to each other simultaneously at full NVLink speed via &lt;strong&gt;4 NVSwitch chips&lt;/strong&gt;; DGX A100 uses 6).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;NVLink Switch (Blackwell):&lt;/strong&gt; Extends NVLink beyond a single server to form rack-scale NVLink domains (e.g., 72 GPUs in GB200 NVL72).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="25-gpu-sharing-mig-vs-vgpu-vs-time-slicing"&gt;2.5 GPU Sharing: MIG vs. vGPU vs. Time-Slicing:&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Multi-Instance GPU (MIG):&lt;/strong&gt; Partitions a single physical GPU (A100/H100/H200/B200) into up to &lt;strong&gt;7 isolated GPU instances&lt;/strong&gt; (A30: up to 4).&lt;ul&gt;
-&lt;li&gt;Each instance has dedicated hardware resources: compute cores, high-bandwidth memory, cache, and memory bandwidth (true hardware QoS and fault isolation).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;NVIDIA vGPU (Virtual GPU):&lt;/strong&gt; Software (hypervisor-level) sharing of GPUs across virtual machines (VMware, KVM...). Requires vGPU license. Can be combined with MIG.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Time-Slicing:&lt;/strong&gt; GPU is shared by multiple processes/containers taking turns. No memory or fault isolation (common in Kubernetes for light workloads).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="26-ai-data-center-networking-fabrics"&gt;2.6 AI Data Center Networking &amp;amp; Fabrics:&lt;/h3&gt;
-&lt;p&gt;Remember this shit, 4 distinct network fabrics.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;                    THE 4 DATA CENTER NETWORK FABRICS
-                                   │
-  ┌─────────────────┬──────────────┴──────────────┬─────────────────┐
-  ▼                 ▼                             ▼                 ▼
-[ Compute Fabric ] [ Storage Fabric ]       [ In-Band Mgmt ]  [ Out-of-Band (OOB) ]
-• InfiniBand /     • InfiniBand / RoCE      • Node telemetry  • IPMI, BMC
-  Spectrum-X       • Parallel storage access• SSH, cluster API• Dedicated 1GbE
-• Inter-node NCCL    (Weka, Lustre, VAST)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;ol&gt;
-&lt;li&gt;&lt;strong&gt;Compute (East-West) Fabric:&lt;/strong&gt; Connects GPUs across different server nodes for distributed training (AllReduce collective operations). Uses InfiniBand (Quantum-2 400Gb/s, Quantum-X800 800Gb/s) or Spectrum-X Ethernet.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Storage Fabric:&lt;/strong&gt; Connects compute nodes to high-speed shared parallel storage systems (Lustre, Weka, VAST Data) over InfiniBand or RoCE Ethernet (NVMe-oF).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;In-Band Management Fabric:&lt;/strong&gt; Cluster communication, job scheduling, API requests, and user traffic.&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Out-of-Band (OOB) Management Fabric:&lt;/strong&gt; Dedicated physical network connecting server BMC/IPMI controllers for power control and bare-metal provisioning.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;RDMA (Remote Direct Memory Access):&lt;/strong&gt; Bypasses the operating system kernel and remote CPU (zero-copy), allowing a network adapter to read/write the &lt;strong&gt;host memory&lt;/strong&gt; of a remote machine directly.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;GPUDirect RDMA:&lt;/strong&gt; Extends RDMA so the NIC reads/writes &lt;strong&gt;GPU memory&lt;/strong&gt; directly, without staging through host RAM. This is what NCCL uses for fast inter-node GPU communication.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;InfiniBand:&lt;/strong&gt; Native hardware-based credit-based flow control (lossless), very low latency, adaptive routing, and In-Network Computing (&lt;strong&gt;SHARP - Scalable Hierarchical Aggregation and Reduction Protocol&lt;/strong&gt;). Managed by a &lt;strong&gt;Subnet Manager&lt;/strong&gt; (UFM).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;RoCE (RDMA over Converged Ethernet):&lt;/strong&gt; RoCEv1 works at Ethernet L2 only; &lt;strong&gt;RoCEv2&lt;/strong&gt; encapsulates the InfiniBand transport header inside &lt;strong&gt;UDP/IP&lt;/strong&gt; (port 4791), making it routable. Requires lossless/congestion-controlled Ethernet (PFC - Priority Flow Control, ECN - Explicit Congestion Notification, combined as &lt;strong&gt;DCQCN&lt;/strong&gt;).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;NVIDIA Spectrum-X:&lt;/strong&gt; Ethernet platform designed specifically for generative AI clouds (&lt;strong&gt;Spectrum-4 switches + BlueField-3 SuperNICs&lt;/strong&gt;), delivering near-InfiniBand performance over Ethernet.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id="27-ai-storage-architecture-gpudirect-storage-gds"&gt;2.7 AI Storage Architecture &amp;amp; GPUDirect Storage (GDS):&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Traditional I/O copies data from NVMe disk -&amp;gt; CPU Memory (page cache) -&amp;gt; Bounce Buffer (also in CPU memory) -&amp;gt; GPU Memory (VRAM), consuming CPU cycles and PCIe bandwidth.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;GPUDirect Storage (GDS):&lt;/strong&gt; Enables a direct memory access (DMA) path between storage and GPU VRAM, skipping the CPU bounce buffer. Local NVMe uses &lt;strong&gt;PCIe peer-to-peer&lt;/strong&gt;; remote storage (NVMe-oF, parallel file systems) uses &lt;strong&gt;RDMA&lt;/strong&gt;. Result: lower latency, higher throughput, and lower CPU utilization. Applications use the &lt;strong&gt;cuFile API&lt;/strong&gt; (kernel module &lt;code&gt;nvidia-fs&lt;/code&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Traditional Path:
-Storage/NIC ──► Host RAM (CPU Buffer) ──► Host RAM (Bounce) ──► GPU Memory
-
-GPUDirect Storage (GDS) Path:
-Storage/NIC ─────────────────(Direct PCIe / RDMA)───────────────► GPU Memory
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Parallel File Systems:&lt;/strong&gt; AI architectures utilize parallel file systems (&lt;strong&gt;Lustre / DDN EXAScaler, WEKA, VAST Data, IBM Storage Scale (formerly Spectrum Scale), BeeGFS&lt;/strong&gt;) to serve many concurrent clients with high throughput and scalable metadata.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Storage tiers:&lt;/strong&gt; Local NVMe (fast cache/scratch) -&amp;gt; shared parallel file system (training datasets, checkpoints) -&amp;gt; object storage (long-term data lake).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="28-power-cooling-data-center-considerations"&gt;2.8 Power, Cooling &amp;amp; Data Center Considerations:&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Power density:&lt;/strong&gt; AI racks draw far more power than traditional racks (DGX H100 ~10.2 kW per system; GB200 NVL72 ~120 kW per rack), so power and cooling capacity must be planned up front.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Air cooling vs. liquid cooling:&lt;/strong&gt; Air cooling hits its limit at high rack density. &lt;strong&gt;Direct-to-chip liquid cooling&lt;/strong&gt; (cold plates) removes heat much more efficiently and is required for GB200 NVL72.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;PUE (Power Usage Effectiveness):&lt;/strong&gt; Total facility power / IT equipment power. Closer to &lt;strong&gt;1.0&lt;/strong&gt; = more efficient.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Other factors:&lt;/strong&gt; Redundant power (N+1, 2N), hot/cold aisle containment, floor weight, and cabling for high-speed fabrics.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;On-prem vs. Cloud vs. Hybrid:&lt;/strong&gt; On-prem gives control and lower long-term cost at high utilization; cloud gives elasticity and fast start with no CapEx; hybrid mixes both.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr /&gt;
-&lt;h1 id="domain-3-ai-operations-22-of-exam"&gt;Domain 3: AI Operations (22% of Exam)&lt;/h1&gt;
-&lt;p&gt;This domain covers workload scheduling, cluster orchestration, provisioning, and health telemetry.&lt;/p&gt;
-&lt;h3 id="31-workload-schedulers-slurm-vs-kubernetes"&gt;3.1 Workload Schedulers: Slurm vs. Kubernetes:&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Slurm:&lt;/strong&gt; The standard for large-scale distributed AI pre-training. Native support for multi-node MPI, network topology awareness (&lt;code&gt;topology/tree&lt;/code&gt;), all-or-nothing multi-node allocation, and tight consumable resource tracking (&lt;code&gt;cons_tres&lt;/code&gt;, GRES for GPUs). &lt;em&gt;Note: in Slurm terminology, "gang scheduling" means time-slicing jobs (&lt;code&gt;PreemptMode=GANG&lt;/code&gt;), not all-or-nothing allocation.&lt;/em&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Kubernetes + NVIDIA GPU Operator:&lt;/strong&gt; The standard for microservices, inference serving, and enterprise pipelines. The GPU Operator automates the deployment of:&lt;ul&gt;
-&lt;li&gt;NVIDIA driver and NVIDIA Container Toolkit&lt;/li&gt;
-&lt;li&gt;Kubernetes device plugin (exposes &lt;code&gt;nvidia.com/gpu&lt;/code&gt; resource)&lt;/li&gt;
-&lt;li&gt;GPU Feature Discovery (labels nodes with GPU properties) and Node Feature Discovery&lt;/li&gt;
-&lt;li&gt;MIG Manager&lt;/li&gt;
-&lt;li&gt;DCGM / DCGM Exporter (monitoring)&lt;/li&gt;
-&lt;li&gt;Operator validator&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;NVIDIA Network Operator:&lt;/strong&gt; Companion operator that deploys networking components (MOFED/DOCA drivers, RDMA shared device plugin, GPUDirect RDMA) on K8s nodes.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="32-nvidia-base-command-manager-bcm"&gt;3.2 NVIDIA Base Command Manager (BCM):&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Cluster management and provisioning software (formerly &lt;strong&gt;Bright Cluster Manager&lt;/strong&gt;) for DGX and non-DGX clusters. Automates bare-metal OS provisioning, InfiniBand fabric health checks, monitoring, and workload scheduler integration (Slurm, Kubernetes).&lt;/li&gt;
-&lt;li&gt;Do not confuse with &lt;strong&gt;NVIDIA Base Command Platform&lt;/strong&gt; (a SaaS for managing AI training workloads on DGX Cloud).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="33-monitoring-telemetry-nvidia-smi-dcgm"&gt;3.3 Monitoring &amp;amp; Telemetry (nvidia-smi &amp;amp; DCGM):&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;nvidia-smi:&lt;/strong&gt; CLI for checking a single node: GPU utilization, memory usage, temperature, power, running processes, ECC errors, MIG configuration (&lt;code&gt;nvidia-smi mig&lt;/code&gt;), topology (&lt;code&gt;nvidia-smi topo -m&lt;/code&gt;).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;NVIDIA DCGM (Data Center GPU Manager):&lt;/strong&gt; Low-overhead daemon (&lt;code&gt;nv-hostengine&lt;/code&gt;) that collects GPU telemetry across the cluster (temperature, power draw, GPU utilization, memory utilization, PCIe bandwidth, NVLink bandwidth, ECC memory errors, XID errors).&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Health checks &amp;amp; policies:&lt;/strong&gt; Background health monitoring and automated actions on events.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Diagnostics:&lt;/strong&gt; &lt;code&gt;dcgmi diag -r 1|2|3|4&lt;/code&gt; (from quick checks to long stress tests).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Exposes metrics via &lt;strong&gt;NVIDIA DCGM Exporter&lt;/strong&gt; to Prometheus, for Grafana dashboards and automated alerting.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;XID errors:&lt;/strong&gt; Error codes reported by the NVIDIA driver in the kernel log (&lt;code&gt;dmesg&lt;/code&gt;), used to diagnose GPU hardware/driver issues.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr /&gt;
-&lt;h1 id="5-other-things-to-remember"&gt;5. Other Things to Remember&lt;/h1&gt;
-&lt;ul&gt;
-&lt;li&gt;NVIDIA Merlin is a scalable and GPU-accelerated solution, making it easy to build recommender systems.&lt;/li&gt;
-&lt;li&gt;Apptainer is not orchestration, it is containerization (like Docker), usually used in HPC.&lt;/li&gt;
-&lt;li&gt;When we talking about optimize communication and transfer data between multi-GPU in same or multi-node, remember NCCL.&lt;/li&gt;
-&lt;li&gt;NVIDIA NIM is a set of accelerated inference microservices that allow organizations to run AI models on NVIDIA GPUs anywhere.&lt;/li&gt;
-&lt;li&gt;OpenSM (Open Subnet Manager) is an InfiniBand specification-based subnet manager and administrator that configures the InfiniBand fabric&lt;/li&gt;
-&lt;li&gt;LLM foundation: Transformer model (read more about Attention is what you need). Transformer like a car and Attention is engine.&lt;/li&gt;
-&lt;li&gt;ConnectX-6 supports two ports of 200Gb/s Ethernet connectivity.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr /&gt;
-&lt;h1 id="6-study-plan-quick-review-checklist"&gt;6. Study Plan &amp;amp; Quick Review Checklist&lt;/h1&gt;
-&lt;p&gt;Before sitting for the exam, ensure you can confidently answer the following checklist:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Explain why GPUs are faster than CPUs for matrix operations.&lt;/li&gt;
-&lt;li&gt;Differentiate between InfiniBand and Ethernet, and explain what RDMA achieves.&lt;/li&gt;
-&lt;li&gt;Explain the role of NVLink and NVSwitch inside an 8-GPU node.&lt;/li&gt;
-&lt;li&gt;Describe how Multi-Instance GPU (MIG) provides hardware-level QoS, and how it differs from vGPU and time-slicing.&lt;/li&gt;
-&lt;li&gt;Differentiate FP16, BF16, TF32 and FP8 (E4M3 vs. E5M2).&lt;/li&gt;
-&lt;li&gt;Explain the difference between RDMA and GPUDirect RDMA.&lt;/li&gt;
-&lt;li&gt;Explain how GPUDirect Storage (GDS) eliminates CPU memory bounce buffers.&lt;/li&gt;
-&lt;li&gt;Differentiate DGX, HGX and MGX.&lt;/li&gt;
-&lt;li&gt;Explain why high-density AI racks need liquid cooling, and what PUE measures.&lt;/li&gt;
-&lt;li&gt;List the 4 network fabrics in an AI data center and identify their functions.&lt;/li&gt;
-&lt;li&gt;Explain the purpose of NCCL in distributed multi-GPU training.&lt;/li&gt;
-&lt;li&gt;Identify the differences between Triton Inference Server and TensorRT.&lt;/li&gt;
-&lt;li&gt;Explain what the NVIDIA GPU Operator deploys on a Kubernetes cluster.&lt;/li&gt;
-&lt;li&gt;Describe what DCGM monitors and how it integrates with Prometheus.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;Specs cross-checked September 2026 against the sources below. NVIDIA edits these pages, so re-verify before your exam.&lt;/em&gt;&lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1 id="summary-next-steps"&gt;Summary &amp;amp; Next Steps&lt;/h1&gt;
-&lt;p&gt;The &lt;strong&gt;NVIDIA Certified Associate: AI Infrastructure and Operations&lt;/strong&gt; credential is an excellent validation for systems engineers, DevOps practitioners, and platform architects looking to specialize in AI and HPC infrastructure.&lt;/p&gt;
-&lt;h3 id="preparation-checklist"&gt;Preparation Checklist:&lt;/h3&gt;
+&lt;p&gt;NCA-AIIO is a foundation credential, and the honest way to treat it is as the vocabulary exam before the real ones. Coming from a Kubernetes or Slurm background, most of the operations domain is already familiar — the genuinely new material is the fabric layer and the ML fundamentals.&lt;/p&gt;
+&lt;p&gt;Preparation order that made sense to me:&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;Complete the &lt;a href="https://www.coursera.org/learn/ai-infrastructure-operations-fundamentals"&gt;&lt;strong&gt;AI Infrastructure and Operations Fundamentals&lt;/strong&gt; course on Coursera&lt;/a&gt; (paid) or watch the &lt;a href="https://www.youtube.com/watch?v=0WjfKQdfeMU"&gt;&lt;strong&gt;YouTube Full Video Course&lt;/strong&gt;&lt;/a&gt; (free alternative).&lt;/li&gt;
-&lt;li&gt;Review the core concepts in our &lt;a href="https://blackmetalz.github.io/wip-slurm-101.html"&gt;&lt;strong&gt;Slurm 101&lt;/strong&gt;&lt;/a&gt; and &lt;a href="https://blackmetalz.github.io/slurm-202-hands-on-multi-node-cluster-with-docker-cli-mastery.html"&gt;&lt;strong&gt;Slurm 202&lt;/strong&gt;&lt;/a&gt; articles.&lt;/li&gt;
-&lt;li&gt;Review the exam blueprint on the &lt;a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/"&gt;official NVIDIA Certification page&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Schedule your exam on &lt;a href="https://www.certiverse.com/#/checkout/nvidia/store-exam/NCA-AIIO"&gt;Certiverse&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Watch the &lt;a href="https://www.youtube.com/watch?v=0WjfKQdfeMU"&gt;&lt;strong&gt;YouTube course&lt;/strong&gt;&lt;/a&gt; (free) or take the &lt;a href="https://www.coursera.org/learn/ai-infrastructure-operations-fundamentals"&gt;&lt;strong&gt;Coursera course&lt;/strong&gt;&lt;/a&gt; (paid).&lt;/li&gt;
+&lt;li&gt;Work through Phase 1 here until the training-vs-inference table is automatic — everything else hangs off it.&lt;/li&gt;
+&lt;li&gt;Check the &lt;a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/"&gt;official blueprint&lt;/a&gt; for anything that shifted.&lt;/li&gt;
+&lt;li&gt;Book it on &lt;a href="https://www.certiverse.com/#/checkout/nvidia/store-exam/NCA-AIIO"&gt;Certiverse&lt;/a&gt;.&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;Good luck with your certification journey!&lt;/p&gt;
+&lt;p&gt;Next for me: getting real GPU hardware in front of me and doing the hands-on version — DCGM + Prometheus + Grafana, GPU Operator on Kubernetes, and &lt;code&gt;dcgmi diag&lt;/code&gt; against something that can actually fail. That's the path toward NCP-AIO.&lt;/p&gt;
+&lt;p&gt;Good luck!&lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1 id="references"&gt;References&lt;/h1&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/"&gt;NVIDIA-Certified Associate: AI Infrastructure and Operations (official exam page)&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/nvidia-dgx-a100-datasheet.pdf"&gt;NVIDIA DGX A100 Datasheet&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://docs.nvidia.com/dgx/dgxh100-user-guide/introduction-to-dgxh100.html"&gt;NVIDIA DGX H100/H200 User Guide — Introduction&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://docs.nvidia.com/dgx/dgxb200-user-guide/introduction-to-dgxb200.html"&gt;NVIDIA DGX B200 User Guide — Introduction&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://www.nvidia.com/en-us/data-center/dgx-b200/"&gt;NVIDIA DGX B200 product page&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.nvidia.com/en-us/learn/certification/"&gt;NVIDIA Certification catalog&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/"&gt;NCA-AIIO official exam page&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.nvidia.com/datacenter/tesla/mig-user-guide/"&gt;NVIDIA MIG User Guide&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/index.html"&gt;NVIDIA GPU Operator Documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.nvidia.com/gpudirect-storage/index.html"&gt;NVIDIA GPUDirect Storage Documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.nvidia.com/deploy/xid-errors/index.html"&gt;NVIDIA Xid Errors&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://developer.nvidia.com/dcgm"&gt;NVIDIA DCGM&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.nvidia.com/en-us/software/run-ai/"&gt;NVIDIA Run:ai&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://developer.nvidia.com/nccl"&gt;NVIDIA NCCL&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/nvidia-dgx-a100-datasheet.pdf"&gt;DGX A100 Datasheet&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.nvidia.com/dgx/dgxh100-user-guide/introduction-to-dgxh100.html"&gt;DGX H100/H200 User Guide&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.nvidia.com/dgx/dgxb200-user-guide/introduction-to-dgxb200.html"&gt;DGX B200 User Guide&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://www.nvidia.com/en-us/data-center/h200/"&gt;NVIDIA H200 product page&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://www.nvidia.com/en-us/data-center/gb200-nvl72/"&gt;NVIDIA GB200 NVL72 product page&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html"&gt;NVIDIA DGX GB Rack Scale Systems User Guide — Hardware&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://docs.nvidia.com/dgx-superpod/reference-architecture-scalable-infrastructure-gb200/latest/dgx-superpod-components.html"&gt;NVIDIA DGX SuperPOD Reference Architecture (GB200) — Key Components&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://developer.nvidia.com/blog/inside-nvidia-blackwell-ultra-the-chip-powering-the-ai-factory-era/"&gt;Inside NVIDIA Blackwell Ultra (NVIDIA Technical Blog)&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="nvidia"/><category term="hpc"/><category term="ai"/><category term="certification"/><category term="devops"/></entry><entry><title>Slurm 202: Hands-on Multi-Node Cluster with Docker &amp; CLI Mastery</title><link href="https://blackmetalz.github.io/slurm-202-hands-on-multi-node-cluster-with-docker-cli-mastery.html" rel="alternate"/><published>2026-09-07T00:00:00+07:00</published><updated>2026-09-07T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-09-07:/slurm-202-hands-on-multi-node-cluster-with-docker-cli-mastery.html</id><summary type="html"/><content type="html">&lt;p&gt;TLDR: Hands-on guide to building and operating a production-grade 5-container Slurm cluster locally with Docker Compose (~1GB RAM), featuring Munge auth, SlurmDBD accounting, GPU simulation (GRES), and CLI mastery.&lt;/p&gt;
-&lt;hr /&gt;
-&lt;h1 id="introduction-from-theory-to-a-living-hpc-cluster"&gt;Introduction: From Theory to a Living HPC Cluster&lt;/h1&gt;
-&lt;p&gt;In &lt;a href="https://blackmetalz.github.io/wip-slurm-101.html"&gt;&lt;strong&gt;Slurm 101&lt;/strong&gt;&lt;/a&gt;, we explored the architectural theory of Slurm and why it powers the world's largest AI supercomputers. &lt;/p&gt;
-&lt;p&gt;However, reading theory alone leaves critical operational questions unanswered:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;How does Munge handle cryptographic authentication handshakes between distributed daemons?&lt;/li&gt;
-&lt;li&gt;How does SlurmDBD track and persist GPU-hours into a relational database?&lt;/li&gt;
-&lt;li&gt;How does Slurm automatically isolate resources and inject &lt;code&gt;$CUDA_VISIBLE_DEVICES&lt;/code&gt; into job contexts?&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;In this guide, we will build a &lt;strong&gt;fully functional multi-node Slurm cluster on your local machine (1 PC or Laptop)&lt;/strong&gt; using Docker Compose. Despite consuming only &lt;strong&gt;~1GB of RAM&lt;/strong&gt;, this local lab accurately mirrors &lt;strong&gt;95% of real-world production HPC architectures&lt;/strong&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Companion Repository:&lt;/strong&gt; All configuration files, automated Make targets, and comprehensive documentation are open-sourced at &lt;a href="https://github.com/BlackMetalz/slurm-101"&gt;&lt;strong&gt;github.com/BlackMetalz/slurm-101&lt;/strong&gt;&lt;/a&gt;.&lt;/p&gt;
-&lt;hr /&gt;
-&lt;h1 id="phase-1-cluster-architecture-the-4-vital-pillars"&gt;Phase 1: Cluster Architecture &amp;amp; The 4 Vital Pillars&lt;/h1&gt;
-&lt;p&gt;Our local cluster consists of &lt;strong&gt;5 containers&lt;/strong&gt; connected via an isolated bridge network (&lt;code&gt;slurm_net&lt;/code&gt;):&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;[ Your Local Host Terminal (Native Login Node) ]
-                   │
-                   │ (Direct RPC: localhost:6817 / 6819)
-                   ▼
-+-----------------------------------------------------------------------------------+
-|                            Docker Bridge Network: slurm_net                       |
-|                                                                                   |
-|  +--------------------+        +--------------------+      +--------------------+ |
-|  |     mariadb        | &amp;lt;----&amp;gt; |      slurmdbd      | &amp;lt;--&amp;gt; |     slurmctld      | |
-|  | (Accounting DB)    |        |   (Accounting)     |      | (Controller/Sched) | |
-|  +--------------------+        +--------------------+      +--------------------+ |
-|                                                                      |            |
-|                                       +------------------------------+            |
-|                                       v                              v            |
-|                             +--------------------+         +--------------------+ |
-|                             |      cnode01       |         |      cnode02       | |
-|                             |  (Partition: cpu)  |         |  (Partition: gpu)  | |
-|                             | (2 CPUs / 1GB RAM) |         |(2 CPUs + 2x A100)  | |
-|                             +--------------------+         +--------------------+ |
-+-----------------------------------------------------------------------------------+
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="the-4-vital-pillars-of-hpc-infrastructure"&gt;The 4 Vital Pillars of HPC Infrastructure:&lt;/h3&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="text-align: left;"&gt;Pillar&lt;/th&gt;
-&lt;th style="text-align: left;"&gt;Key Component&lt;/th&gt;
-&lt;th style="text-align: left;"&gt;Why It Matters (The "Make or Break" Rule)&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;1. Cryptographic Auth&lt;/strong&gt;&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;&lt;code&gt;/etc/munge/munge.key&lt;/code&gt;&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;Munge provides ticket-based auth without passwords. Every node must share an identical key with strict &lt;strong&gt;&lt;code&gt;0400&lt;/code&gt;&lt;/strong&gt; permissions (owned by &lt;code&gt;munge:munge&lt;/code&gt;). Open permissions (&lt;code&gt;0644&lt;/code&gt;/&lt;code&gt;0777&lt;/code&gt;) will crash Munge immediately.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;2. Identity Consistency&lt;/strong&gt;&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;User &lt;code&gt;hpcuser&lt;/code&gt; (UID: &lt;code&gt;1001&lt;/code&gt;)&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;Slurm runs jobs under the submitter's UID/GID. If UID &lt;code&gt;1001&lt;/code&gt; exists on the login node but maps to someone else on worker nodes, jobs fail with &lt;code&gt;Permission Denied&lt;/code&gt;.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;3. Shared POSIX Storage&lt;/strong&gt;&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;Volume &lt;code&gt;/shared&lt;/code&gt;&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;Simulates shared file systems (NFS/Lustre). Batch scripts and output logs (&lt;code&gt;job_%j.out&lt;/code&gt;) must reside on a shared mount path accessible by all nodes.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;4. Network Topology&lt;/strong&gt;&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;Docker Bridge DNS&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;Daemons resolve each other by hostname (&lt;code&gt;slurmctld&lt;/code&gt;, &lt;code&gt;slurmdbd&lt;/code&gt;, &lt;code&gt;cnode01&lt;/code&gt;, &lt;code&gt;cnode02&lt;/code&gt;).&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;hr /&gt;
-&lt;h1 id="phase-2-deploying-the-mini-cluster-with-docker-compose"&gt;Phase 2: Deploying the Mini-Cluster with Docker Compose&lt;/h1&gt;
-&lt;p&gt;To optimize memory footprint and build speed, we use a single base image based on Ubuntu 22.04 LTS containing all necessary Slurm binaries.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;slurm-101/
-├── Dockerfile                   # Unified base image (Ubuntu 22.04 + Slurm + Munge)
-├── docker-compose.yml           # 5-container cluster specification
-├── entrypoint.sh                # Startup daemon lifecycle, Munge sync, and permission guard
-├── Makefile                     # 1-Click shortcuts (make up, make test, make shell)
-├── config/                      # Mounted configuration files
-│   ├── slurm.conf               # Master cluster, partition, and node definitions
-│   ├── slurmdbd.conf            # Accounting daemon configuration
-│   └── gres.conf                # Generic resource configuration (Dummy A100 GPUs)
-└── shared/                      # Simulated Shared POSIX Storage (/shared)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="key-configuration-highlights"&gt;Key Configuration Highlights&lt;/h3&gt;
-&lt;p&gt;Instead of dumping hundreds of lines of code, here are the critical configuration parameters:&lt;/p&gt;
-&lt;h4 id="1-in-slurmconf"&gt;1. In &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/config/slurm.conf"&gt;&lt;code&gt;slurm.conf&lt;/code&gt;&lt;/a&gt;:&lt;/h4&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Container-friendly process tracking (no systemd/dbus requirements)&lt;/span&gt;
-&lt;span class="na"&gt;ProctrackType&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;proctrack/linuxproc&lt;/span&gt;
-&lt;span class="na"&gt;TaskPlugin&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;task/none&lt;/span&gt;
-&lt;span class="na"&gt;SlurmdParameters&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;config_overrides&lt;/span&gt;
-
-&lt;span class="c1"&gt;# Fine-grained consumable resource tracking (Cores + Memory + GPUs)&lt;/span&gt;
-&lt;span class="na"&gt;SelectType&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;select/cons_tres&lt;/span&gt;
-&lt;span class="na"&gt;SelectTypeParameters&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;CR_Core_Memory&lt;/span&gt;
-&lt;span class="na"&gt;GresTypes&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;gpu&lt;/span&gt;
-
-&lt;span class="c1"&gt;# Accounting connection to SlurmDBD&lt;/span&gt;
-&lt;span class="na"&gt;AccountingStorageType&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;accounting_storage/slurmdbd&lt;/span&gt;
-&lt;span class="na"&gt;AccountingStorageHost&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;slurmdbd&lt;/span&gt;
-&lt;span class="na"&gt;AccountingStoragePort&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;6819&lt;/span&gt;
-
-&lt;span class="c1"&gt;# Node &amp;amp; Partition definitions&lt;/span&gt;
-&lt;span class="na"&gt;NodeName&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;cnode01 CPUs=2 RealMemory=1000 State=UNKNOWN&lt;/span&gt;
-&lt;span class="na"&gt;NodeName&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;cnode02 CPUs=2 RealMemory=1000 Gres=gpu:a100:2 State=UNKNOWN&lt;/span&gt;
-
-&lt;span class="na"&gt;PartitionName&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;cpu Nodes=cnode01 Default=YES MaxTime=INFINITE State=UP&lt;/span&gt;
-&lt;span class="na"&gt;PartitionName&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;gpu Nodes=cnode02 Default=NO MaxTime=INFINITE State=UP&lt;/span&gt;
-&lt;span class="na"&gt;PartitionName&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;all Nodes=cnode01,cnode02 Default=NO MaxTime=INFINITE State=UP&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h4 id="2-in-docker-composeyml"&gt;2. In &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/docker-compose.yml"&gt;&lt;code&gt;docker-compose.yml&lt;/code&gt;&lt;/a&gt;:&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Ports Exposed:&lt;/strong&gt; &lt;code&gt;6817:6817&lt;/code&gt; (&lt;code&gt;slurmctld&lt;/code&gt;) and &lt;code&gt;6819:6819&lt;/code&gt; (&lt;code&gt;slurmdbd&lt;/code&gt;) to allow native host access.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Compute Node Privileges:&lt;/strong&gt; &lt;code&gt;privileged: true&lt;/code&gt; on &lt;code&gt;cnode01&lt;/code&gt; and &lt;code&gt;cnode02&lt;/code&gt; so &lt;code&gt;slurmd&lt;/code&gt; can switch UIDs and create process namespaces.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;Full Source Files on GitHub:&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/Dockerfile"&gt;&lt;strong&gt;&lt;code&gt;Dockerfile&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/docker-compose.yml"&gt;&lt;strong&gt;&lt;code&gt;docker-compose.yml&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/entrypoint.sh"&gt;&lt;strong&gt;&lt;code&gt;entrypoint.sh&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr /&gt;
-&lt;h1 id="phase-3-database-accounting-multi-tenancy-sacctmgr"&gt;Phase 3: Database Accounting &amp;amp; Multi-Tenancy (&lt;code&gt;sacctmgr&lt;/code&gt;)&lt;/h1&gt;
-&lt;p&gt;In real AI organizations, compute clusters are shared across multiple teams (NLP, Computer Vision, Data Platform). Slurm models multi-tenancy as an &lt;strong&gt;Association Hierarchy&lt;/strong&gt;:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;                             [ Cluster: homelab ]
-                                      │
-              ┌───────────────────────┴───────────────────────┐
-              ▼                                               ▼
-   [ Account: ai-team ]                              [ Account: data-team ]
-   (Org: AI-Research)                                (Org: Data-Engineering)
-              │                                               │
-       ┌──────┴──────┐                                        ▼
-       ▼             ▼                                  [ User: bob ]
-[ User: kienlt ] [ User: alice ]
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="initializing-accounting-via-sacctmgr"&gt;Initializing Accounting via &lt;code&gt;sacctmgr&lt;/code&gt;:&lt;/h3&gt;
-&lt;p&gt;Run the one-time initialization script (&lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/shared/scripts/01_init_cluster.sh"&gt;&lt;code&gt;01_init_cluster.sh&lt;/code&gt;&lt;/a&gt;):&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# 1. Register Cluster&lt;/span&gt;
-sacctmgr&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;add&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;homelab
-
-&lt;span class="c1"&gt;# 2. Create Accounts (Teams / Cost Centers)&lt;/span&gt;
-sacctmgr&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;add&lt;span class="w"&gt; &lt;/span&gt;account&lt;span class="w"&gt; &lt;/span&gt;ai-team&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;Description&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;AI/ML Team&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;Organization&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;AI-Org&amp;quot;&lt;/span&gt;
-sacctmgr&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;add&lt;span class="w"&gt; &lt;/span&gt;account&lt;span class="w"&gt; &lt;/span&gt;data-team&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;Description&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Data Team&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;Organization&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Data-Org&amp;quot;&lt;/span&gt;
-
-&lt;span class="c1"&gt;# 3. Create Users and Bind to Default Accounts&lt;/span&gt;
-sacctmgr&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;add&lt;span class="w"&gt; &lt;/span&gt;user&lt;span class="w"&gt; &lt;/span&gt;kienlt&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;DefaultAccount&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;ai-team&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;AdminLevel&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;Administrator
-sacctmgr&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;add&lt;span class="w"&gt; &lt;/span&gt;user&lt;span class="w"&gt; &lt;/span&gt;hpcuser&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;DefaultAccount&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;ai-team
-
-&lt;span class="c1"&gt;# 4. Inspect Active Associations&lt;/span&gt;
-sacctmgr&lt;span class="w"&gt; &lt;/span&gt;list&lt;span class="w"&gt; &lt;/span&gt;association&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;Cluster,Account,User,Partition,Share,GrpTRES,MaxJobs
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="enforcing-resource-limits-qos-quotas"&gt;Enforcing Resource Limits &amp;amp; QoS Quotas:&lt;/h3&gt;
-&lt;p&gt;Prevent individual engineers or teams from monopolizing cluster hardware:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Limit user alice to a maximum of 5 concurrent running jobs:&lt;/span&gt;
-sacctmgr&lt;span class="w"&gt; &lt;/span&gt;modify&lt;span class="w"&gt; &lt;/span&gt;user&lt;span class="w"&gt; &lt;/span&gt;alice&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;MaxJobs&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;5&lt;/span&gt;
-
-&lt;span class="c1"&gt;# Restrict the entire ai-team to a maximum of 8 concurrent GPUs:&lt;/span&gt;
-sacctmgr&lt;span class="w"&gt; &lt;/span&gt;modify&lt;span class="w"&gt; &lt;/span&gt;account&lt;span class="w"&gt; &lt;/span&gt;ai-team&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;GrpTRES&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;gres/gpu&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="m"&gt;8&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;For advanced QoS and limit enforcement patterns, see the &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/command/sacctmgr.md"&gt;&lt;strong&gt;&lt;code&gt;sacctmgr&lt;/code&gt; Reference Guide&lt;/strong&gt;&lt;/a&gt;.&lt;/p&gt;
-&lt;hr /&gt;
-&lt;h1 id="phase-4-gpu-cluster-simulation-via-generic-resources-gres"&gt;Phase 4: GPU Cluster Simulation via Generic Resources (GRES)&lt;/h1&gt;
-&lt;p&gt;How can you practice submitting multi-GPU jobs, testing &lt;code&gt;--gres=gpu:1&lt;/code&gt;, and verifying &lt;code&gt;$CUDA_VISIBLE_DEVICES&lt;/code&gt; injection on a machine &lt;strong&gt;without physical NVIDIA GPUs&lt;/strong&gt;?&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Solution:&lt;/strong&gt; Use Slurm's &lt;strong&gt;Generic Resources (GRES)&lt;/strong&gt; mechanism with simulated character devices!&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;[ Job Request: sbatch --gres=gpu:1 ]
-                 │
-                 ▼
-      [ slurmctld Scheduler ]
-                 │ (Selects available GPU slot: Device 0)
-                 ▼
-       [ Worker Node: cnode02 ]
-                 │
-                 ├── Locks /dev/nvidia0
-                 └── Injects: CUDA_VISIBLE_DEVICES=0
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="how-it-works"&gt;How It Works:&lt;/h3&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Device Creation:&lt;/strong&gt; In &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/entrypoint.sh"&gt;&lt;code&gt;entrypoint.sh&lt;/code&gt;&lt;/a&gt;, container &lt;code&gt;cnode02&lt;/code&gt; creates two character devices:
-   &lt;code&gt;bash
-   mknod -m 666 /dev/nvidia0 c 195 0 2&amp;gt;/dev/null || true
-   mknod -m 666 /dev/nvidia1 c 195 1 2&amp;gt;/dev/null || true&lt;/code&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Resource Mapping:&lt;/strong&gt; In &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/config/gres.conf"&gt;&lt;code&gt;config/gres.conf&lt;/code&gt;&lt;/a&gt;, these devices are declared as two NVIDIA A100 GPUs:
-   &lt;code&gt;ini
-   NodeName=cnode02 Name=gpu Type=a100 File=/dev/nvidia[0-1]&lt;/code&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Automatic Allocation:&lt;/strong&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;Request 1 GPU: &lt;code&gt;srun -p gpu --gres=gpu:1 bash -c 'echo $CUDA_VISIBLE_DEVICES'&lt;/code&gt; -&amp;gt; Output: &lt;code&gt;0&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Request 2 GPUs: &lt;code&gt;srun -p gpu --gres=gpu:2 bash -c 'echo $CUDA_VISIBLE_DEVICES'&lt;/code&gt; -&amp;gt; Output: &lt;code&gt;0,1&lt;/code&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;hr /&gt;
-&lt;h1 id="phase-5-turning-your-host-machine-into-a-native-login-node"&gt;Phase 5: Turning Your Host Machine into a Native Login Node&lt;/h1&gt;
-&lt;p&gt;In production, engineers do not &lt;code&gt;docker exec&lt;/code&gt; into cluster containers. You can configure &lt;strong&gt;your physical host machine&lt;/strong&gt; as a native Slurm Login Node to run &lt;code&gt;sinfo&lt;/code&gt;, &lt;code&gt;squeue&lt;/code&gt;, and &lt;code&gt;sbatch&lt;/code&gt; directly from your regular terminal:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;[ Your Physical Host Terminal ]
-  • Native Commands: sinfo, squeue, sbatch
-  • Local Config: /etc/slurm/slurm.conf &amp;amp; /etc/munge/munge.key
-                 │
-                 │ Direct RPC to localhost:6817
-                 ▼
-[ Docker Cluster (slurmctld:6817) ]
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;The setup requires 3 key steps:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Install &lt;code&gt;slurm-client&lt;/code&gt; and &lt;code&gt;munge&lt;/code&gt; on your host OS (&lt;code&gt;sudo apt install -y slurm-client munge&lt;/code&gt;).&lt;/li&gt;
-&lt;li&gt;Synchronize &lt;code&gt;/etc/munge/munge.key&lt;/code&gt; (with strict &lt;code&gt;0400&lt;/code&gt; permissions) and &lt;code&gt;/etc/slurm/slurm.conf&lt;/code&gt; from the cluster.&lt;/li&gt;
-&lt;li&gt;Add DNS mapping &lt;code&gt;127.0.0.1 slurmctld slurmdbd&lt;/code&gt; to &lt;code&gt;/etc/hosts&lt;/code&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;For the complete step-by-step installation walkthrough, verification commands, and permissions guide, see &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/HOST_LOGIN_NODE_GUIDE.md"&gt;&lt;strong&gt;&lt;code&gt;HOST_LOGIN_NODE_GUIDE.md&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;.&lt;/p&gt;
-&lt;hr /&gt;
-&lt;h1 id="phase-6-slurm-cli-toolkit-workflow-mastery"&gt;Phase 6: Slurm CLI Toolkit &amp;amp; Workflow Mastery&lt;/h1&gt;
-&lt;p&gt;The Slurm CLI toolkit is structured into &lt;strong&gt;5 operational domains&lt;/strong&gt;:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;                                 [ SLURM CLI TOOLKIT ]
-                                           │
-  ┌───────────────────┬────────────────────┼───────────────────┬───────────────────┐
-  ▼                   ▼                    ▼                   ▼                   ▼
-[ Cluster &amp;amp; Nodes ] [ Job Execution &amp;amp;    [ Active Queue &amp;amp;    [ Accounting &amp;amp;      [ Administration &amp;amp;
-• sinfo               Interactive ]        Job Control ]       Profiling ]         Configuration ]
-                    • sbatch             • squeue            • sacct             • scontrol
-                    • srun               • scancel           • sstat             • sacctmgr
-                    • salloc                                 • sreport
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="1-sinfo-inspecting-nodes-partitions"&gt;1. &lt;code&gt;sinfo&lt;/code&gt; — Inspecting Nodes &amp;amp; Partitions&lt;/h3&gt;
-&lt;p&gt;Reference: &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/command/sinfo.md"&gt;&lt;strong&gt;&lt;code&gt;sinfo&lt;/code&gt; Guide&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sinfo&lt;span class="w"&gt;                 &lt;/span&gt;&lt;span class="c1"&gt;# Summarized view of partitions and states&lt;/span&gt;
-sinfo&lt;span class="w"&gt; &lt;/span&gt;-N&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="c1"&gt;# Detailed hardware specifications per node&lt;/span&gt;
-sinfo&lt;span class="w"&gt; &lt;/span&gt;-R&lt;span class="w"&gt;               &lt;/span&gt;&lt;span class="c1"&gt;# View reasons why nodes are down or draining&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;strong&gt;Node State Reference:&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;idle&lt;/code&gt;: 100% available and healthy.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;alloc&lt;/code&gt;: 100% of CPUs/GPUs allocated to running jobs.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;mix&lt;/code&gt;: Partially occupied (some CPUs free, some busy).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;drain&lt;/code&gt;: Node taken offline for maintenance (existing jobs continue until completion).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr /&gt;
-&lt;h3 id="2-squeue-scancel-active-queue-job-control"&gt;2. &lt;code&gt;squeue&lt;/code&gt; &amp;amp; &lt;code&gt;scancel&lt;/code&gt; — Active Queue &amp;amp; Job Control&lt;/h3&gt;
-&lt;p&gt;References: &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/command/squeue.md"&gt;&lt;strong&gt;&lt;code&gt;squeue&lt;/code&gt; Guide&lt;/strong&gt;&lt;/a&gt; | &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/command/scancel.md"&gt;&lt;strong&gt;&lt;code&gt;scancel&lt;/code&gt; Guide&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Queue Inspection&lt;/span&gt;
-squeue&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="c1"&gt;# View all active and pending jobs&lt;/span&gt;
-squeue&lt;span class="w"&gt; &lt;/span&gt;-u&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$USER&lt;/span&gt;&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="c1"&gt;# Filter jobs for your user&lt;/span&gt;
-squeue&lt;span class="w"&gt; &lt;/span&gt;-i&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="c1"&gt;# Live streaming refresh every 2 seconds&lt;/span&gt;
-
-&lt;span class="c1"&gt;# Targeted Job Cancellation&lt;/span&gt;
-scancel&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;105&lt;/span&gt;&lt;span class="w"&gt;                  &lt;/span&gt;&lt;span class="c1"&gt;# Cancel specific Job ID&lt;/span&gt;
-scancel&lt;span class="w"&gt; &lt;/span&gt;-u&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$USER&lt;/span&gt;&lt;span class="w"&gt;             &lt;/span&gt;&lt;span class="c1"&gt;# Cancel ALL jobs owned by user&lt;/span&gt;
-scancel&lt;span class="w"&gt; &lt;/span&gt;-u&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$USER&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;PENDING&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="c1"&gt;# Cancel only PENDING jobs (leave running jobs untouched)&lt;/span&gt;
-scancel&lt;span class="w"&gt; &lt;/span&gt;--signal&lt;span class="o"&gt;=&lt;/span&gt;SIGUSR1&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;105&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# Send graceful checkpointing signal before stopping&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;strong&gt;Common Pending Reasons (&lt;code&gt;NODELIST(REASON)&lt;/code&gt;):&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;(Resources)&lt;/code&gt;: All requested CPUs/GPUs are busy; job will run when hardware frees up.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;(Priority)&lt;/code&gt;: Higher-priority jobs are ahead in the queue.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;(ReqNodeNotAvail)&lt;/code&gt;: Target hardware is offline or draining.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;(Dependency)&lt;/code&gt;: Waiting for a prerequisite job to finish first.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr /&gt;
-&lt;h3 id="3-sbatch-srun-salloc-job-execution-batch-interactive"&gt;3. &lt;code&gt;sbatch&lt;/code&gt;, &lt;code&gt;srun&lt;/code&gt; &amp;amp; &lt;code&gt;salloc&lt;/code&gt; — Job Execution (Batch &amp;amp; Interactive)&lt;/h3&gt;
-&lt;p&gt;References: &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/command/sbatch.md"&gt;&lt;strong&gt;&lt;code&gt;sbatch&lt;/code&gt; Guide&lt;/strong&gt;&lt;/a&gt; | &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/command/srun.md"&gt;&lt;strong&gt;&lt;code&gt;srun&lt;/code&gt; Guide&lt;/strong&gt;&lt;/a&gt; | &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/command/salloc.md"&gt;&lt;strong&gt;&lt;code&gt;salloc&lt;/code&gt; Guide&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;h4 id="a-asynchronous-batch-execution-sbatch"&gt;A. Asynchronous Batch Execution (&lt;code&gt;sbatch&lt;/code&gt;):&lt;/h4&gt;
-&lt;p&gt;Create a batch script &lt;code&gt;train.sh&lt;/code&gt;:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="ch"&gt;#!/usr/bin/env bash&lt;/span&gt;
-&lt;span class="c1"&gt;#SBATCH --job-name=llm_finetune&lt;/span&gt;
-&lt;span class="c1"&gt;#SBATCH --partition=gpu&lt;/span&gt;
-&lt;span class="c1"&gt;#SBATCH --nodes=1&lt;/span&gt;
-&lt;span class="c1"&gt;#SBATCH --gres=gpu:a100:1             # Request 1x A100 GPU&lt;/span&gt;
-&lt;span class="c1"&gt;#SBATCH --time=02:00:00&lt;/span&gt;
-&lt;span class="c1"&gt;#SBATCH --output=/shared/job_%j.out   # %j is automatically replaced with Job ID&lt;/span&gt;
-&lt;span class="c1"&gt;#SBATCH --error=/shared/job_%j.err&lt;/span&gt;
-
-&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Job &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;SLURM_JOB_ID&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt; running on &lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;hostname&lt;span class="k"&gt;)&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
-&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Allocated GPU: &lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;CUDA_VISIBLE_DEVICES&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
-python3&lt;span class="w"&gt; &lt;/span&gt;-c&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;import time; print(&amp;#39;Training model...&amp;#39;); time.sleep(10)&amp;quot;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Submit with &lt;code&gt;sbatch train.sh&lt;/code&gt; (outputs &lt;code&gt;Submitted batch job 105&lt;/code&gt;).&lt;/p&gt;
-&lt;h4 id="b-synchronous-interactive-debugging-srun"&gt;B. Synchronous &amp;amp; Interactive Debugging (&lt;code&gt;srun&lt;/code&gt;):&lt;/h4&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Run command in parallel across all nodes simultaneously:&lt;/span&gt;
-srun&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;all&lt;span class="w"&gt; &lt;/span&gt;-N&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;hostname
-
-&lt;span class="c1"&gt;# Open an interactive PTY debugging shell directly on a GPU node:&lt;/span&gt;
-srun&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;gpu&lt;span class="w"&gt; &lt;/span&gt;--gres&lt;span class="o"&gt;=&lt;/span&gt;gpu:1&lt;span class="w"&gt; &lt;/span&gt;--pty&lt;span class="w"&gt; &lt;/span&gt;bash&lt;span class="w"&gt; &lt;/span&gt;-i
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h4 id="c-interactive-resource-reservation-salloc"&gt;C. Interactive Resource Reservation (&lt;code&gt;salloc&lt;/code&gt;):&lt;/h4&gt;
-&lt;p&gt;Hold an interactive resource allocation open and run multiple consecutive commands without re-queuing:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;salloc&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;gpu&lt;span class="w"&gt; &lt;/span&gt;--gres&lt;span class="o"&gt;=&lt;/span&gt;gpu:1&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;01&lt;/span&gt;:00:00
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;hr /&gt;
-&lt;h3 id="4-sacct-sstat-sreport-accounting-profiling-auditing"&gt;4. &lt;code&gt;sacct&lt;/code&gt;, &lt;code&gt;sstat&lt;/code&gt; &amp;amp; &lt;code&gt;sreport&lt;/code&gt; — Accounting, Profiling &amp;amp; Auditing&lt;/h3&gt;
-&lt;p&gt;References: &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/command/sacct.md"&gt;&lt;strong&gt;&lt;code&gt;sacct&lt;/code&gt; Guide&lt;/strong&gt;&lt;/a&gt; | &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/command/sstat.md"&gt;&lt;strong&gt;&lt;code&gt;sstat&lt;/code&gt; Guide&lt;/strong&gt;&lt;/a&gt; | &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/command/sreport.md"&gt;&lt;strong&gt;&lt;code&gt;sreport&lt;/code&gt; Guide&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Historical Accounting: Query past jobs, exit codes, and peak memory usage (MaxRSS):&lt;/span&gt;
-sacct&lt;span class="w"&gt; &lt;/span&gt;--format&lt;span class="o"&gt;=&lt;/span&gt;JobID,JobName,Partition,State,ExitCode,Elapsed,MaxRSS
-
-&lt;span class="c1"&gt;# Real-Time Profiling: Monitor live memory usage of running jobs to detect leaks before OOM:&lt;/span&gt;
-sstat&lt;span class="w"&gt; &lt;/span&gt;-j&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;105&lt;/span&gt;.batch&lt;span class="w"&gt; &lt;/span&gt;--format&lt;span class="o"&gt;=&lt;/span&gt;JobID,MaxRSS,AveCPU,AveDiskRead
-
-&lt;span class="c1"&gt;# Auditing: Aggregate GPU-hours consumed per team over the last 30 days:&lt;/span&gt;
-sreport&lt;span class="w"&gt; &lt;/span&gt;cluster&lt;span class="w"&gt; &lt;/span&gt;UserUtilizationByAccount&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;Start&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;now-30days&lt;span class="w"&gt; &lt;/span&gt;--tres&lt;span class="o"&gt;=&lt;/span&gt;gres/gpu&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;Hours
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;hr /&gt;
-&lt;h3 id="5-scontrol-sacctmgr-cluster-administration-multi-tenancy"&gt;5. &lt;code&gt;scontrol&lt;/code&gt; &amp;amp; &lt;code&gt;sacctmgr&lt;/code&gt; — Cluster Administration &amp;amp; Multi-Tenancy&lt;/h3&gt;
-&lt;p&gt;References: &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/command/scontrol.md"&gt;&lt;strong&gt;&lt;code&gt;scontrol&lt;/code&gt; Guide&lt;/strong&gt;&lt;/a&gt; | &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/command/sacctmgr.md"&gt;&lt;strong&gt;&lt;code&gt;sacctmgr&lt;/code&gt; Guide&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# Admin: Reload slurm.conf on the fly without restarting daemons&lt;/span&gt;
-scontrol&lt;span class="w"&gt; &lt;/span&gt;reconfigure
-
-&lt;span class="c1"&gt;# Admin: Take a node offline for maintenance and resume it&lt;/span&gt;
-scontrol&lt;span class="w"&gt; &lt;/span&gt;update&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;NodeName&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;cnode01&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;State&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;DRAIN&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;Reason&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;Hardware upgrade&amp;quot;&lt;/span&gt;
-scontrol&lt;span class="w"&gt; &lt;/span&gt;update&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;NodeName&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;cnode01&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;State&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;RESUME
-
-&lt;span class="c1"&gt;# Database: Inspect multi-tenancy associations and QoS quotas&lt;/span&gt;
-sacctmgr&lt;span class="w"&gt; &lt;/span&gt;list&lt;span class="w"&gt; &lt;/span&gt;association&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;Cluster,Account,User,Partition,Share,GrpTRES,MaxJobs
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;hr /&gt;
-&lt;h1 id="phase-7-battle-tested-troubleshooting-war-stories"&gt;Phase 7: Battle-Tested Troubleshooting (War Stories)&lt;/h1&gt;
-&lt;p&gt;Building containerized Slurm clusters often triggers subtle edge cases. Below are 5 real-world debugging lessons encountered during development:&lt;/p&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="text-align: left;"&gt;Symptom / Log Error&lt;/th&gt;
-&lt;th style="text-align: left;"&gt;Root Cause &amp;amp; Resolution&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;unpack_header: protocol_version not supported (Zero Bytes)&lt;/strong&gt;&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;Cause:&lt;/strong&gt; Version mismatch between client and server.&lt;br&gt;&lt;strong&gt;Fix:&lt;/strong&gt; Synchronize Slurm versions (e.g., ensure both host and containers run v21.08).&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;error: cgroup_dbus_attach_to_scope: cannot connect to dbus system daemon: /run/dbus/system_bus_socket&lt;/strong&gt;&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;Cause:&lt;/strong&gt; Slurm v23+ &lt;code&gt;cgroup/v2&lt;/code&gt; plugin requires systemd D-Bus to create process scopes in Docker.&lt;br&gt;&lt;strong&gt;Fix:&lt;/strong&gt; Set &lt;code&gt;ProctrackType=proctrack/linuxproc&lt;/code&gt; and &lt;code&gt;TaskPlugin=task/none&lt;/code&gt; in &lt;code&gt;slurm.conf&lt;/code&gt;.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;Node configuration differs from hardware (CPUs=2:24)&lt;/strong&gt;&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;Cause:&lt;/strong&gt; Host machine physical CPU count exceeds container config.&lt;br&gt;&lt;strong&gt;Fix:&lt;/strong&gt; Enable &lt;code&gt;SlurmdParameters=config_overrides&lt;/code&gt; in &lt;code&gt;slurm.conf&lt;/code&gt;.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;Invalid GRES record: duplicate device file name (/dev/null)&lt;/strong&gt;&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;Cause:&lt;/strong&gt; Duplicate file paths mapped to multiple GPUs.&lt;br&gt;&lt;strong&gt;Fix:&lt;/strong&gt; Create distinct character devices (&lt;code&gt;/dev/nvidia0&lt;/code&gt;, &lt;code&gt;/dev/nvidia1&lt;/code&gt;) via &lt;code&gt;mknod&lt;/code&gt;.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;Can not recover assoc_usage state, incompatible version&lt;/strong&gt;&lt;/td&gt;
-&lt;td style="text-align: left;"&gt;&lt;strong&gt;Cause:&lt;/strong&gt; Binary state files in &lt;code&gt;/var/spool/slurmctld&lt;/code&gt; created by newer Slurm.&lt;br&gt;&lt;strong&gt;Fix:&lt;/strong&gt; Wipe state volume via &lt;code&gt;docker compose down -v&lt;/code&gt;.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;For deep-dive root cause analyses and remediation scripts, see &lt;a href="https://github.com/BlackMetalz/slurm-101/blob/main/TROUBLESHOOTING.md"&gt;&lt;strong&gt;&lt;code&gt;TROUBLESHOOTING.md&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;.&lt;/p&gt;
-&lt;hr /&gt;
-&lt;h1 id="conclusion"&gt;Conclusion&lt;/h1&gt;
-&lt;p&gt;By completing this hands-on lab, you have:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Built a &lt;strong&gt;production-grade 5-node Slurm cluster&lt;/strong&gt; featuring Controller orchestration, Worker nodes, Database accounting, and GPU GRES simulation.&lt;/li&gt;
-&lt;li&gt;Mastered Munge ticket-based authentication, cgroup process isolation, and POSIX shared storage tiers.&lt;/li&gt;
-&lt;li&gt;Transformed your physical machine into a &lt;strong&gt;native Slurm Login Node&lt;/strong&gt; and gained proficiency across the complete CLI toolkit.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;All source code, automated Make targets, and comprehensive command documentation are available at:
-&lt;a href="https://github.com/BlackMetalz/slurm-101"&gt;&lt;strong&gt;https://github.com/BlackMetalz/slurm-101&lt;/strong&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Happy Clustering!&lt;/p&gt;</content><category term="Knowledge Base"/><category term="hpc"/><category term="slurm"/><category term="docker"/><category term="devops"/></entry><entry><title>[WIP] Slurm 101</title><link href="https://blackmetalz.github.io/wip-slurm-101.html" rel="alternate"/><published>2026-09-07T00:00:00+07:00</published><updated>2026-09-07T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-09-07:/wip-slurm-101.html</id><summary type="html"/><content type="html">&lt;p&gt;TLDR: &lt;strong&gt;Slurm&lt;/strong&gt; is an open source, fault-tolerant, and highly scalable cluster management and job scheduling system for large and small Linux clusters.&lt;/p&gt;
-&lt;h1 id="phase-1-understanding-the-core-concepts-of-slurm-most-important"&gt;Phase 1: Understanding the Core Concepts of Slurm (Most Important)&lt;/h1&gt;
-&lt;h3 id="first-understand-the-basic-topology"&gt;First, understand the basic topology:&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;User
-  |
-Login Node
-  |
-slurmctld (controller)
-  |
-+------------+------------+
-|            |            |
-slurmd      slurmd      slurmd
-Node01      Node02      Node03
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;img alt="Slurm Architecture Overview" src="../images/2026/09/01.png" /&gt;&lt;/p&gt;
-&lt;h3 id="key-components"&gt;Key Components:&lt;/h3&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;Component&lt;/th&gt;
-&lt;th&gt;Role&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;a href="https://slurm.schedmd.com/slurmctld.html"&gt;&lt;code&gt;slurmctld&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
-&lt;td&gt;Scheduler + Central Controller&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;a href="https://slurm.schedmd.com/slurmd.html"&gt;&lt;code&gt;slurmd&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
-&lt;td&gt;Agent daemon running on compute nodes&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;a href="https://slurm.schedmd.com/slurmdbd.html"&gt;&lt;code&gt;slurmdbd&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
-&lt;td&gt;Accounting daemon (&lt;a href="https://slurm.schedmd.com/accounting.html"&gt;Slurm Database Daemon&lt;/a&gt;)&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;a href="https://dun.github.io/munge/"&gt;&lt;code&gt;munge&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
-&lt;td&gt;Authentication service&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;&lt;code&gt;login node&lt;/code&gt;&lt;/td&gt;
-&lt;td&gt;Gateway node where users SSH in to submit jobs&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h3 id="mapping-concepts-slurm-vs-kubernetes"&gt;Mapping Concepts: Slurm vs Kubernetes&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;K8s                    Slurm
-
-kube-apiserver   ~=    slurmctld
-kubelet          ~=    slurmd
-Node             ~=    Compute Node
-Pod              ~=    Job/Task
-Scheduler        ~=    Slurm Scheduler
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Key fundamental differences:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Kubernetes&lt;/strong&gt; is optimized for long-running services (Deployments, APIs, web apps).&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://slurm.schedmd.com/"&gt;&lt;strong&gt;Slurm&lt;/strong&gt;&lt;/a&gt; is optimized for batch workloads (AI training, simulations, HPC jobs).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;For example:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;K8s:&lt;/strong&gt; &lt;em&gt;"I want to run an Nginx service indefinitely."&lt;/em&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Slurm:&lt;/strong&gt; &lt;em&gt;"I want to run a 48-hour model training job and exit when done."&lt;/em&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="why-not-just-use-k8s-jobs-for-distributed-ai-training"&gt;Why not just use K8s Jobs for Distributed AI Training?&lt;/h3&gt;
-&lt;p&gt;While Kubernetes has &lt;code&gt;Job&lt;/code&gt; objects, Slurm remains the gold standard for large-scale GPU training because of three core HPC capabilities built into its DNA:&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Atomic Multi-Node Allocation (Native Co-Allocation):&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Multi-node distributed training (&lt;a href="https://pytorch.org/docs/stable/notes/ddp.html"&gt;PyTorch DDP&lt;/a&gt; / &lt;a href="https://pytorch.org/docs/stable/fsdp.html"&gt;FSDP&lt;/a&gt; / &lt;a href="https://github.com/NVIDIA/Megatron-LM"&gt;Megatron-LM&lt;/a&gt;) requires all N GPUs across multiple nodes to start simultaneously to establish rendezvous and synchronize gradients.&lt;/li&gt;
-&lt;li&gt;In vanilla Kubernetes, the default scheduler binds pods incrementally. If 60 GPUs are free and 4 are busy, it might schedule 60 pods and leave them idling—wasting expensive GPU hours unless using external batch co-scheduling add-ons like &lt;a href="https://kueue.sigs.k8s.io/"&gt;Kueue&lt;/a&gt; or &lt;a href="https://volcano.sh/"&gt;Volcano&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Slurm natively guarantees &lt;strong&gt;atomic allocation&lt;/strong&gt;: a job is only launched when 100% of the requested nodes and resources are simultaneously available, remaining in &lt;code&gt;PENDING&lt;/code&gt; state without holding or fragmenting resources. &lt;em&gt;(Note: In Slurm documentation, "&lt;a href="https://slurm.schedmd.com/gang_scheduling.html"&gt;Gang Scheduling&lt;/a&gt;" specifically refers to time-slicing oversubscribed resources between jobs, rather than co-allocation).&lt;/em&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;Network Topology Awareness (InfiniBand / RoCE Tree):&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;The biggest bottleneck in AI training is inter-GPU communication (&lt;a href="https://developer.nvidia.com/nccl"&gt;NCCL&lt;/a&gt; AllReduce latency).&lt;/li&gt;
-&lt;li&gt;Slurm understands network switch hierarchy via &lt;a href="https://slurm.schedmd.com/topology.html"&gt;Topology Plugins&lt;/a&gt; (Spine-Leaf / Fat-Tree). It prioritizes packing jobs within the same Top-of-Rack (ToR) switch to maximize throughput and minimize latency.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;img alt="Network Topology &amp;amp; GPU Communication" src="../images/2026/09/03.png" /&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Bare-Metal Performance &amp;amp; Direct POSIX Storage:&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Slurm executes processes directly on the host OS with &lt;a href="https://docs.kernel.org/admin-guide/cgroup-v2.html"&gt;Linux cgroups&lt;/a&gt; locking specific CPU cores, NUMA nodes, and GPU PCI buses.&lt;/li&gt;
-&lt;li&gt;Zero container overlay network (CNI) overhead and direct POSIX access to high-performance parallel file systems (&lt;a href="https://www.lustre.org/"&gt;Lustre&lt;/a&gt;, &lt;a href="https://www.beegfs.io/"&gt;BeeGFS&lt;/a&gt;, &lt;a href="https://www.ibm.com/products/storage-scale"&gt;GPFS / IBM Storage Scale&lt;/a&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="essential-cli-commands"&gt;Essential CLI Commands:&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://slurm.schedmd.com/sbatch.html"&gt;&lt;strong&gt;&lt;code&gt;sbatch&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;: Submits a batch job script. Slurm accepts the job and initially places it in a &lt;code&gt;PENDING&lt;/code&gt; state:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;JobID&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;123&lt;/span&gt;
-&lt;span class="n"&gt;State&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;PENDING&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;It then waits for the scheduler to allocate resources and execute it. In Kubernetes terms, it feels like:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;apply&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;job.yaml
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;a href="https://slurm.schedmd.com/srun.html"&gt;&lt;strong&gt;&lt;code&gt;srun&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;: Executes jobs immediately in interactive mode or runs parallel tasks within an allocation. For example:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;srun&lt;span class="w"&gt; &lt;/span&gt;hostname
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Slurm allocates a node and executes the command on &lt;code&gt;node01&lt;/code&gt;. A quick way to distinguish them:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sbatch = Submit a job script (asynchronous)
-
-srun   = Run a command / step (synchronous / interactive)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;a href="https://slurm.schedmd.com/squeue.html"&gt;&lt;strong&gt;&lt;code&gt;squeue&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;: Views the cluster's job queue. Running &lt;strong&gt;&lt;code&gt;squeue&lt;/code&gt;&lt;/strong&gt;:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;JOBID PARTITION USER ST
-123   gpu       kien PD
-124   gpu       kien R
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;State meanings:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;PD = Pending
-R  = Running
-CG = Completing
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Conceptually similar to: &lt;strong&gt;&lt;code&gt;kubectl get pods&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://slurm.schedmd.com/sinfo.html"&gt;&lt;strong&gt;&lt;code&gt;sinfo&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;: Views the status of nodes and partitions. Running &lt;strong&gt;&lt;code&gt;sinfo&lt;/code&gt;&lt;/strong&gt;:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;PARTITION AVAIL NODES STATE
-cpu       up      4   idle
-gpu       up      2   alloc
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Think of it like:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;kubectl&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;nodes
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;a href="https://slurm.schedmd.com/scancel.html"&gt;&lt;strong&gt;&lt;code&gt;scancel&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;: Cancels/kills a job. For example: &lt;strong&gt;&lt;code&gt;scancel 123&lt;/code&gt;&lt;/strong&gt;. Similar to: &lt;strong&gt;&lt;code&gt;kubectl delete pod xxx&lt;/code&gt;&lt;/strong&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://slurm.schedmd.com/sacct.html"&gt;&lt;strong&gt;&lt;code&gt;sacct&lt;/code&gt;&lt;/strong&gt;&lt;/a&gt;: Accounting tool. Displays historical job accounting records.&lt;/p&gt;
-&lt;h3 id="core-resource-scheduling-concepts"&gt;Core Resource &amp;amp; Scheduling Concepts&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://slurm.schedmd.com/qos.html"&gt;&lt;strong&gt;QoS (Quality of Service)&lt;/strong&gt;&lt;/a&gt;: Priority, limits, and preemption rules.&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://slurm.schedmd.com/slurm.conf.html#OPT_PartitionName"&gt;&lt;strong&gt;Partition&lt;/strong&gt;&lt;/a&gt;: Logical grouping of nodes (like queues or namespaces with specific node pools).&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://slurm.schedmd.com/gres.html"&gt;&lt;strong&gt;GRES (Generic Resources)&lt;/strong&gt;&lt;/a&gt;: Generic resource management (e.g. GPUs).&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://slurm.schedmd.com/cgroups.html"&gt;&lt;strong&gt;cgroup&lt;/strong&gt;&lt;/a&gt;: Resource isolation (CPU cores, memory, devices) enforced on compute nodes.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;img alt="Slurm Entities, Partitions, and Jobs" src="../images/2026/09/02.png" /&gt;&lt;/p&gt;
-&lt;hr /&gt;
-&lt;h1 id="phase-2-localhost-lab-with-docker"&gt;Phase 2: Localhost Lab with Docker&lt;/h1&gt;
-&lt;h3 id="building-a-mini-cluster"&gt;Building a Mini Cluster&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;docker&lt;span class="w"&gt; &lt;/span&gt;network&lt;span class="w"&gt; &lt;/span&gt;create&lt;span class="w"&gt; &lt;/span&gt;slurm-net
-
-controller
-compute01
-compute02
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Each container acts as a specific role:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;slurm-controller
-slurm-node1
-slurm-node2
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Architecture:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;+------------------+&lt;/span&gt;
-&lt;span class="c"&gt;|    slurmctld     |&lt;/span&gt;
-&lt;span class="nb"&gt;+------------------+&lt;/span&gt;
-&lt;span class="c"&gt;         |&lt;/span&gt;
-&lt;span class="c"&gt;    &lt;/span&gt;&lt;span class="nb"&gt;+----+----+&lt;/span&gt;
-&lt;span class="c"&gt;    |         |&lt;/span&gt;
-&lt;span class="nb"&gt;+--------+&lt;/span&gt;&lt;span class="c"&gt; &lt;/span&gt;&lt;span class="nb"&gt;+--------+&lt;/span&gt;
-&lt;span class="c"&gt;| slurmd | | slurmd |&lt;/span&gt;
-&lt;span class="c"&gt;| node01 | | node02 |&lt;/span&gt;
-&lt;span class="nb"&gt;+--------+&lt;/span&gt;&lt;span class="c"&gt; &lt;/span&gt;&lt;span class="nb"&gt;+--------+&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="hands-on-testing"&gt;Hands-on Testing&lt;/h3&gt;
-&lt;p&gt;This is the most valuable part to practice:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;sbatch job.sh&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;srun hostname&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sinfo&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;squeue&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr /&gt;
-&lt;h1 id="phase-3-simulating-a-production-cluster"&gt;Phase 3: Simulating a Production Cluster&lt;/h1&gt;
-&lt;p&gt;Once the basic Docker cluster is up and running:&lt;/p&gt;
-&lt;h3 id="adding-a-login-node"&gt;Adding a Login Node:&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;login
-controller
-compute01
-compute02
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;The login node doesn't run computation workloads:&lt;/p&gt;
-&lt;p&gt;User workflow:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ssh&lt;span class="w"&gt; &lt;/span&gt;login
-sbatch&lt;span class="w"&gt; &lt;/span&gt;train.sh
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;This mirrors real-world production environments much closer.&lt;/p&gt;
-&lt;h3 id="adding-slurmdbd-accounting"&gt;Adding &lt;code&gt;slurmdbd&lt;/code&gt; (Accounting)&lt;/h3&gt;
-&lt;p&gt;Learn accounting — this is one of the most frequently used subsystems by HPC admins.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;MariaDB
-  |
-slurmdbd
-  |
-slurmctld
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Then explore these commands:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://slurm.schedmd.com/sacct.html"&gt;&lt;code&gt;sacct&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://slurm.schedmd.com/sreport.html"&gt;&lt;code&gt;sreport&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr /&gt;
-&lt;h1 id="phase-4-gpu-scheduling"&gt;Phase 4: GPU Scheduling&lt;/h1&gt;
-&lt;p&gt;Note: GPU scheduling (GRES) can be skipped initially if you don't have local GPUs.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Slurm manages GPU via &lt;a href="https://slurm.schedmd.com/gres.html"&gt;GRES (Generic Resources)&lt;/a&gt; combined with &lt;a href="https://slurm.schedmd.com/cgroups.html"&gt;Linux cgroups&lt;/a&gt; to map device files (&lt;code&gt;/dev/nvidia*&lt;/code&gt;).&lt;/li&gt;
-&lt;li&gt;Tip for learners without a local GPU like me, we still can define dummy GRES in &lt;a href="https://slurm.schedmd.com/slurm.conf.html"&gt;&lt;code&gt;slurm.conf&lt;/code&gt;&lt;/a&gt; and &lt;a href="https://slurm.schedmd.com/gres.conf.html"&gt;&lt;code&gt;gres.conf&lt;/code&gt;&lt;/a&gt; to completely understand the resource request flow of &lt;strong&gt;&lt;code&gt;--gres=gpu:1&lt;/code&gt;&lt;/strong&gt; in Slurm without any physical GPU!&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="c1"&gt;# slurm.conf&lt;/span&gt;
-&lt;span class="na"&gt;GresTypes&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;gpu&lt;/span&gt;
-&lt;span class="na"&gt;NodeName&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;node[1-2] Gres=gpu:fake:2&lt;/span&gt;
-
-&lt;span class="c1"&gt;# gres.conf&lt;/span&gt;
-&lt;span class="na"&gt;NodeName&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;node[1-2] Name=gpu Type=fake File=/dev/null&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;hr /&gt;
-&lt;h1 id="phase-5-high-availability-ha-production-setup"&gt;Phase 5: High Availability (HA) &amp;amp; Production Setup&lt;/h1&gt;
-&lt;p&gt;When scaling up to a larger lab:&lt;/p&gt;
-&lt;h3 id="controller-ha"&gt;Controller HA&lt;/h3&gt;
-&lt;p&gt;Learn &lt;a href="https://slurm.schedmd.com/quickstart_admin.html#HA"&gt;Slurm High Availability (HA)&lt;/a&gt;:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Primary slurmctld
-Backup slurmctld
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;Configuration concepts in &lt;a href="https://slurm.schedmd.com/slurm.conf.html"&gt;&lt;code&gt;slurm.conf&lt;/code&gt;&lt;/a&gt;:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="na"&gt;SlurmctldHost&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;ctrl1&lt;/span&gt;
-&lt;span class="na"&gt;SlurmctldHost&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;ctrl2&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="shared-storage-strategy"&gt;Shared Storage Strategy&lt;/h3&gt;
-&lt;p&gt;While not a hardcoded Slurm specification, the standard industry convention in HPC/AI clusters is to tier shared storage into 3 distinct mount paths based on I/O performance and lifecycle:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;&lt;code&gt;/home&lt;/code&gt; (User Environment):&lt;/strong&gt;&lt;ul&gt;
-&lt;li&gt;Holds dotfiles, Python virtualenvs, and job submission scripts.&lt;/li&gt;
-&lt;li&gt;Backed by standard NFS / CephFS with daily backups and strict quotas (e.g., 20GB/user).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;code&gt;/scratch&lt;/code&gt; (High-Speed Ephemeral Workspace):&lt;/strong&gt;&lt;ul&gt;
-&lt;li&gt;Dedicated for active job I/O, temporary checkpoints (&lt;code&gt;.pt&lt;/code&gt;), and staging datasets.&lt;/li&gt;
-&lt;li&gt;Backed by high-throughput Parallel File Systems (&lt;a href="https://www.lustre.org/"&gt;Lustre&lt;/a&gt;, &lt;a href="https://www.beegfs.io/"&gt;BeeGFS&lt;/a&gt;). &lt;strong&gt;No backups&lt;/strong&gt; and subject to auto-purging policies (e.g., automatically deleted if unaccessed for 30 days).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;&lt;code&gt;/project&lt;/code&gt; or &lt;code&gt;/data&lt;/code&gt; (Team Shared Assets):&lt;/strong&gt;&lt;ul&gt;
-&lt;li&gt;Shared storage for base datasets (e.g., ImageNet, HuggingFace caches) and long-term project artifacts with team-based POSIX permissions (&lt;code&gt;setgid&lt;/code&gt;).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr /&gt;
-&lt;h1 id="phase-6-slurm-containers"&gt;Phase 6: Slurm + Containers&lt;/h1&gt;
-&lt;p&gt;This is where the real fun begins:&lt;/p&gt;
-&lt;h3 id="why-dont-we-just-use-docker-run-in-slurm"&gt;Why don't we just use docker run in Slurm?&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;The essence: Docker requires a daemon running with root access. In multi-tenant HPC clusters, giving docker access to users is practically equivalent to giving them root access xD.&lt;/li&gt;
-&lt;li&gt;Solution for HPC: &lt;a href="https://apptainer.org/"&gt;&lt;strong&gt;Apptainer (Singularity)&lt;/strong&gt;&lt;/a&gt; or &lt;a href="https://github.com/NVIDIA/enroot"&gt;&lt;strong&gt;NVIDIA Enroot&lt;/strong&gt;&lt;/a&gt; / &lt;a href="https://github.com/NVIDIA/pyxis"&gt;&lt;strong&gt;Pyxis&lt;/strong&gt;&lt;/a&gt; that turn container images into flat files (&lt;code&gt;.sif&lt;/code&gt;), run completely under the user's UID/GID within a user namespace, and mount &lt;code&gt;/scratch&lt;/code&gt; and host NVIDIA drivers directly without a root daemon.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;img alt="Apptainer SIF vs Docker Architecture" src="../images/2026/09/06.png" /&gt;&lt;/p&gt;
-&lt;h3 id="apptainer-singularity"&gt;Apptainer (Singularity)&lt;/h3&gt;
-&lt;p&gt;Extremely popular in HPC environments. &lt;a href="https://apptainer.org/"&gt;Apptainer&lt;/a&gt; is well worth learning before Docker-on-Slurm, as almost every HPC cluster uses it for rootless container execution.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;srun&lt;span class="w"&gt; &lt;/span&gt;apptainer&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;exec&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;pytorch.sif&lt;span class="w"&gt; &lt;/span&gt;python&lt;span class="w"&gt; &lt;/span&gt;train.py
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;hr /&gt;
-&lt;h1 id="phase-7-slurm-kubernetes"&gt;Phase 7: Slurm + Kubernetes&lt;/h1&gt;
-&lt;p&gt;This is the most sensible model in modern AI/ML infrastructure today. For example:&lt;/p&gt;
-&lt;h3 id="k8s-layer-cloud-native-control-plane"&gt;K8S Layer (Cloud-native control plane)&lt;/h3&gt;
-&lt;p&gt;Serving developer experience:
-- &lt;a href="https://jupyter.org/hub"&gt;JupyterHub&lt;/a&gt;
-- &lt;a href="https://mlflow.org/"&gt;MLflow&lt;/a&gt;
-- &lt;a href="https://www.ray.io/"&gt;Ray&lt;/a&gt; / Ray Dashboard
-- Model Registry
-- Serving APIs / Inference Servers (&lt;a href="https://github.com/vllm-project/vllm"&gt;vLLM&lt;/a&gt; / &lt;a href="https://developer.nvidia.com/triton-inference-server"&gt;Triton Inference Server&lt;/a&gt;)&lt;/p&gt;
-&lt;h3 id="slurm-layer-bare-metal-execution-engine"&gt;Slurm Layer (Bare-metal Execution Engine)&lt;/h3&gt;
-&lt;p&gt;Serving heavy distributed training &amp;amp; fine-tuning where thousands of GPUs connect to each other via &lt;a href="https://www.infinibandta.org/"&gt;InfiniBand&lt;/a&gt; or &lt;a href="https://en.wikipedia.org/wiki/RDMA_over_Converged_Ethernet"&gt;RoCEv2&lt;/a&gt;.&lt;/p&gt;
-&lt;hr /&gt;</content><category term="Knowledge Base"/><category term="hpc"/><category term="slurm"/></entry><entry><title>Python standard json vs orjson</title><link href="https://blackmetalz.github.io/python-standard-json-vs-orjson.html" rel="alternate"/><published>2026-08-31T00:00:00+07:00</published><updated>2026-08-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-08-31:/python-standard-json-vs-orjson.html</id><summary type="html"/><content type="html">&lt;p&gt;TLDR: use &lt;strong&gt;orjson&lt;/strong&gt; when you need performance when dump(Serialize) json data, where every millisecond counts.&lt;/p&gt;
+&lt;li&gt;&lt;a href="https://www.nvidia.com/en-us/data-center/gb200-nvl72/"&gt;GB200 NVL72 product page&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://developer.nvidia.com/blog/inside-nvidia-blackwell-ultra-the-chip-powering-the-ai-factory-era/"&gt;Inside NVIDIA Blackwell Ultra&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://arxiv.org/abs/1706.03762"&gt;Attention Is All You Need&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><category term="Knowledge Base"/><category term="nvidia"/><category term="hpc"/><category term="ai"/><category term="certification"/><category term="devops"/></entry><entry><title>Python standard json vs orjson</title><link href="https://blackmetalz.github.io/python-standard-json-vs-orjson.html" rel="alternate"/><published>2026-08-31T00:00:00+07:00</published><updated>2026-08-31T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-08-31:/python-standard-json-vs-orjson.html</id><summary type="html"/><content type="html">&lt;p&gt;TLDR: use &lt;strong&gt;orjson&lt;/strong&gt; when you need performance when dump(Serialize) json data, where every millisecond counts.&lt;/p&gt;
 &lt;h1 id="introduction"&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;In our current project at work, I noticed that my team uses &lt;code&gt;orjson&lt;/code&gt; instead of Python's standard &lt;code&gt;json&lt;/code&gt; module. At first, I was like: &lt;em&gt;"Why do we need to &lt;code&gt;pip install&lt;/code&gt; an external library when Python already has built-in &lt;code&gt;json&lt;/code&gt; support?"&lt;/em&gt;. I'm a simple guy who likes to keep things simple xD&lt;/p&gt;
 &lt;p&gt;My boss told me that &lt;strong&gt;orjson&lt;/strong&gt; is much faster than standard &lt;strong&gt;json&lt;/strong&gt;, and I was like: "Ohh, this shit is definitely something worth digging into!"&lt;/p&gt;
