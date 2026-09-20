@@ -138,12 +138,12 @@
 <tr>
 <td>Essential AI Knowledge</td>
 <td>38%</td>
-<td>Phase 1</td>
+<td>Phase 1, plus 2.1 (CPU vs. GPU), Phase 5 (software stack) and 6.4 (lifecycle)</td>
 </tr>
 <tr>
 <td>AI Infrastructure</td>
 <td>40%</td>
-<td>Phases 2-5, 8</td>
+<td>Phases 2-4, Phase 8</td>
 </tr>
 <tr>
 <td>AI Operations</td>
@@ -152,6 +152,14 @@
 </tr>
 </tbody>
 </table>
+<p>Worth noting, because it surprised me: <strong>the software stack and the development lifecycle score under <em>Essential AI Knowledge</em>, not Operations</strong>, and <strong>power, cooling and facilities score under <em>Infrastructure</em>, not Operations</strong>. Study by blueprint bullet, not by where a topic feels like it belongs.</p>
+<h3 id="how-to-read-this">How to Read This</h3>
+<p>Everything here maps to a blueprint bullet <strong>unless the heading says otherwise</strong>. Two markers appear:</p>
+<ul>
+<li><strong><em>(optional — NCP-AIO level)</em></strong> — real ops knowledge that the Associate exam does not test. Skip it on the first pass; come back when you run a cluster.</li>
+<li><strong><em>(optional — reference)</em></strong> — numbers to look up, never to memorize.</li>
+</ul>
+<p>If you are short on time, read everything unmarked, do the <a href="#exam-checklist">Exam Checklist</a>, and ignore the rest.</p>
 <h3 id="learning-resources">Learning Resources</h3>
 <ul>
 <li><a href="https://www.coursera.org/learn/ai-infrastructure-operations-fundamentals"><strong>AI Infrastructure and Operations Fundamentals</strong></a> on Coursera — the official course. Paid, worth it if your company sponsors training.</li>
@@ -176,7 +184,7 @@
 </tr>
 <tr>
 <td><code>Deployment</code> + HPA</td>
-<td>Inference service (<a href="https://developer.nvidia.com/triton-inference-server">Triton</a>, <a href="https://www.nvidia.com/en-us/ai/">NIM</a>)</td>
+<td>Inference service (<a href="https://developer.nvidia.com/triton-inference-server">Triton</a>, <a href="https://developer.nvidia.com/nim">NIM</a>)</td>
 <td>Long-running, scales with request load</td>
 </tr>
 <tr>
@@ -296,7 +304,16 @@
 <li><strong>Generative AI</strong> — a deep learning application that produces new content (text, images, code) rather than a label or a number.</li>
 </ul>
 <p>Rule of thumb: <strong>tabular data with thousands of rows → classical ML. Unstructured data (images, audio, text) at scale → deep learning.</strong></p>
-<h3 id="13-training-fundamentals">1.3 Training Fundamentals</h3>
+<h3 id="13-why-now-what-actually-changed">1.3 Why Now — What Actually Changed</h3>
+<p>Neural networks are from the 1980s. The blueprint asks why they only took over recently, and it's four things landing at once:</p>
+<ul>
+<li><strong>Data at internet scale</strong> — and more importantly <em>self-supervised</em> learning (Phase 1.5), which removed the human-labeling bottleneck. Raw unlabeled text suddenly became training data.</li>
+<li><strong>Compute got cheap per unit of math</strong> — each GPU generation added Tensor Cores and a lower precision format (FP32 → BF16 → FP8 → FP4). Same watt, far more useful math.</li>
+<li><strong>An architecture that parallelizes</strong> — the transformer replaced sequential RNNs, so a model could finally <em>use</em> ten thousand GPUs at once. Without this one, the other three don't matter.</li>
+<li><strong>The ecosystem stopped requiring a PhD</strong> — CUDA, PyTorch, pretrained models on NGC, GPU capacity rentable by the hour. Most teams now fine-tune someone else's model rather than train one.</li>
+</ul>
+<p>The consequence that matters to infrastructure people: <strong>scaling laws.</strong> More parameters + more data + more compute produces predictably better models, which turned AI progress from a research gamble into a <em>budgeting exercise</em>. That is exactly why NVIDIA sells racks instead of cards — and why this exam exists.</p>
+<h3 id="14-training-fundamentals">1.4 Training Fundamentals</h3>
 <p>Training is a loop: feed data in, let the model guess, measure how wrong it was, adjust slightly, repeat — millions of times. The "adjust" step is matrix math, which is why it needs a GPU.</p>
 <p>Terms worth recognizing:</p>
 <ul>
@@ -305,8 +322,8 @@
 <li><strong>Overfitting</strong> — the model memorized the training data instead of learning the general pattern: great scores on data it has seen, poor scores on anything new. The opposite is <strong>underfitting</strong> — too simple, bad at both. (<a href="https://www.geeksforgeeks.org/machine-learning/underfitting-and-overfitting-in-machine-learning/">overfitting &amp; underfitting →</a>)</li>
 <li><strong>Checkpoint</strong> — a periodic save of model state to shared storage, so a job that dies on day three resumes instead of restarting.</li>
 </ul>
-<p>Two of these land directly on infrastructure: <strong>batch size drives GPU memory</strong>, and <strong>checkpointing drives storage bandwidth</strong> — every GPU writes at the same instant and they all sit idle until the write completes. Checkpoint sizing is a real capacity input, not an afterthought.</p>
-<h3 id="14-how-models-learn">1.4 How Models Learn</h3>
+<p>Two of these land directly on infrastructure: <strong>batch size drives GPU memory</strong>, and <strong>checkpointing drives storage bandwidth</strong> — with <em>synchronous</em> checkpointing every rank writes at the same instant and they all sit idle until the write completes. <em>Asynchronous</em> checkpointing (stage to local NVMe, flush to the parallel filesystem in the background) is the standard way out, but the burst still has to land somewhere. Checkpoint sizing is a real capacity input, not an afterthought.</p>
+<h3 id="15-how-models-learn">1.5 How Models Learn</h3>
 <table>
 <thead>
 <tr>
@@ -339,7 +356,7 @@
 </tbody>
 </table>
 <p>Two output types under supervised learning: <strong>classification</strong> (discrete — spam or not spam) and <strong>regression</strong> (continuous — predicted price).</p>
-<h3 id="15-evaluation-metrics">1.5 Evaluation Metrics</h3>
+<h3 id="16-evaluation-metrics">1.6 Evaluation Metrics</h3>
 <p>If you've ever tuned an alert rule, you already have the intuition:</p>
 <ul>
 <li><strong>Precision</strong> — of everything I flagged, how much was real? <em>Low precision = noisy alerts.</em></li>
@@ -349,7 +366,7 @@
 </ul>
 <p>(<a href="https://www.geeksforgeeks.org/machine-learning/precision-recall-and-f1-score-using-r/">precision, recall &amp; F1 →</a>)</p>
 <p>Exam questions describe a business scenario and ask which metric matters. The trick is always the same: <strong>which mistake is more expensive, a false positive or a false negative?</strong> Cancer screening can't afford misses → recall. Spam filters can't afford deleting real mail → precision.</p>
-<h3 id="16-generative-ai-llms">1.6 Generative AI &amp; LLMs</h3>
+<h3 id="17-generative-ai-llms">1.7 Generative AI &amp; LLMs</h3>
 <p>This is the part worth actually understanding, because everything NVIDIA sells right now is aimed at it.</p>
 <ul>
 <li><strong>Transformer</strong> — the architecture behind every modern LLM (<a href="https://arxiv.org/abs/1706.03762"><em>Attention Is All You Need</em></a>, 2017). Its core trick, <strong>self-attention</strong>, lets every word weigh its relevance against every other word — and does it <em>in parallel</em>, which is exactly why GPUs suit it and older sequential architectures didn't.</li>
@@ -425,7 +442,7 @@
 </table>
 <p><strong>RAG in one line:</strong> chunk your documents → embed them → store in a vector DB → at query time, retrieve the most relevant chunks and paste them into the prompt as context.</p>
 <p>If a question says <em>"must reflect data that changes daily"</em> or <em>"must cite internal documents"</em>, the answer is <strong>RAG</strong>, not fine-tuning. If it says <em>"must always respond in our house style / output strict JSON"</em>, that's <strong>fine-tuning</strong>.</p>
-<h3 id="17-who-uses-what">1.7 Who Uses What</h3>
+<h3 id="18-who-uses-what">1.8 Who Uses What</h3>
 <p>Scenario questions like <em>"a hospital wants X — which NVIDIA offering?"</em> are common:</p>
 <table>
 <thead>
@@ -513,11 +530,11 @@
 <p>Three relationships worth memorizing:</p>
 <ul>
 <li><strong>H100 vs. A100</strong> — same 80GB capacity, but faster HBM3, 1.5x NVLink bandwidth, and FP8 via Transformer Engine.</li>
-<li><strong>H200 = H100 compute + better memory</strong> — 141GB HBM3e, ~1.4x memory bandwidth. Drop-in compatible with HGX H100 systems. <strong>Best for large-model inference and long context</strong>, and now you know why (Phase 1.6: decode is memory-bandwidth bound).</li>
+<li><strong>H200 = H100 compute + better memory</strong> — 141GB HBM3e, ~1.4x memory bandwidth. Drop-in compatible with HGX H100 systems. <strong>Best for large-model inference and long context</strong>, and now you know why (Phase 1.7: decode is memory-bandwidth bound).</li>
 <li><strong>GB200 Superchip</strong> = 1 Grace CPU + 2 Blackwell GPUs over <strong>NVLink-C2C</strong> (900 GB/s, ~7x PCIe Gen5). <strong>GB200 NVL72</strong> = 36 Grace + 72 Blackwell in one liquid-cooled rack acting as a single NVLink domain.</li>
 </ul>
 <p>Also worth recognizing: <strong>L40S</strong> (Ada, 48GB, no NVLink — inference and graphics), <strong>L4</strong> (Ada, 24GB, 72W — low-power inference/video), <strong>GH200</strong> (1 Grace + 1 Hopper).</p>
-<p>Detailed specs are in <a href="#appendix-a-hardware-spec-reference">Appendix A</a> — reference material, not memorization material.</p>
+<p>Detailed specs are in <a href="#appendix-a-hardware-spec-reference-optional-reference">Appendix A</a> — reference material, not memorization material.</p>
 <h3 id="23-dgx-vs-hgx-vs-mgx">2.3 DGX vs. HGX vs. MGX</h3>
 <ul>
 <li><strong>DGX</strong> — NVIDIA's own complete turnkey system, hardware plus software stack. Scales into a <strong>DGX SuperPOD</strong> reference architecture.</li>
@@ -563,12 +580,18 @@
 <td>Hopper+ via Transformer Engine. <strong>E4M3</strong> (precision) forward, <strong>E5M2</strong> (range) backward — gradients span a wider range, so they need the exponent bits</td>
 </tr>
 <tr>
-<td><strong>FP4 / INT8</strong></td>
-<td>—</td>
-<td>Inference quantization. Blackwell's NVFP4</td>
+<td><strong>INT8</strong></td>
+<td>8-bit int</td>
+<td>Integer inference quantization, Turing onward — <strong>not</strong> a Blackwell feature</td>
+</tr>
+<tr>
+<td><strong>FP4</strong></td>
+<td>1/2/1</td>
+<td>Blackwell's <strong>NVFP4</strong>, inference only. Per-block scaling is what keeps the accuracy usable</td>
 </tr>
 </tbody>
 </table>
+<p>You need the <em>names</em>, the ordering and the trade-off. The exact S/E/M splits above are reference — the exam won't ask you to count mantissa bits.</p>
 <p>The exponent/mantissa trade-off is the whole story: <strong>exponent bits buy range, mantissa bits buy precision.</strong> BF16 beat FP16 for training because range matters more than precision when your gradients are tiny.</p>
 <h3 id="25-sharing-a-gpu-mig-vs-vgpu-vs-time-slicing">2.5 Sharing a GPU: MIG vs. vGPU vs. Time-Slicing</h3>
 <p>A full H100 is overkill for most inference workloads, so there are three ways to split one. Ordered from strongest isolation to weakest:</p>
@@ -603,14 +626,130 @@
 </tbody>
 </table>
 <p>MIG is the only one giving <strong>true QoS and fault isolation</strong> — a crash in one instance doesn't touch the others. That phrase is how the exam identifies it.</p>
+<h3 id="26-sizing-how-much-hardware">2.6 Sizing: How Much Hardware?</h3>
+<p>Two blueprint bullets ask you to pick hardware for a described use case. Both come down to memory.</p>
+<p><strong>Inference — memory holds the weights:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Precision</th>
+<th>Bytes per parameter</th>
+<th>A 70B model needs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FP16 / BF16</td>
+<td>2</td>
+<td>~140 GB</td>
+</tr>
+<tr>
+<td>FP8</td>
+<td>1</td>
+<td>~70 GB</td>
+</tr>
+<tr>
+<td>INT4</td>
+<td>0.5</td>
+<td>~35 GB</td>
+</tr>
+</tbody>
+</table>
+<p>Add the KV cache and runtime overhead on top — budget roughly 20%. So a 70B model at BF16 does <strong>not</strong> fit one 80GB H100, but does fit one 141GB H200. That's the H200 story from 2.2 in concrete form.</p>
+<p><strong>Training — memory holds far more than the weights:</strong></p>
+<p>Weights + gradients + Adam optimizer state runs about <strong>16 bytes per parameter</strong>, before activations. The same 70B model therefore needs ~1.1 TB of state — at least 14 GPUs' worth of HBM, so 16 in practice, and more once activations are counted.</p>
+<blockquote>
+<p><strong>Training needs roughly 10x the memory of inference.</strong> If you remember one number from this section, that's the one.</p>
+</blockquote>
+<p><strong>Scaling up vs. scaling out</strong> — NVIDIA's own vocabulary, and a likely answer option:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Means</th>
+<th>Technology</th>
+<th>Where it stops</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Scale-up</strong></td>
+<td>More GPUs inside one coherent domain</td>
+<td>NVLink + NVSwitch</td>
+<td>8 GPUs per chassis — or 72 in a GB200 NVL72</td>
+</tr>
+<tr>
+<td><strong>Scale-out</strong></td>
+<td>More nodes joined by a fabric</td>
+<td>InfiniBand / Spectrum-X</td>
+<td>The size of your datacenter</td>
+</tr>
+</tbody>
+</table>
+<p>Scale up first, because NVLink is far faster than anything crossing a chassis boundary; scale out when you run out of chassis. <strong>DGX SuperPOD</strong> is NVIDIA's reference architecture for doing the second properly.</p>
+<p><strong>Picking the part:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Workload</th>
+<th>Part</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Large distributed training</td>
+<td>H100 / B200 SXM</td>
+<td>NVLink + NVSwitch, scales across nodes</td>
+</tr>
+<tr>
+<td>Large-model or long-context inference</td>
+<td><strong>H200</strong></td>
+<td>Memory capacity and bandwidth</td>
+</tr>
+<tr>
+<td>Small-model inference, video, graphics</td>
+<td>L40S / L4</td>
+<td>Cheap, and NVLink buys you nothing here</td>
+</tr>
+<tr>
+<td>Edge</td>
+<td>Jetson</td>
+<td>Power budget measured in watts, not kilowatts</td>
+</tr>
+</tbody>
+</table>
 <hr />
 <h1 id="phase-3-the-fabric-layer">Phase 3: The Fabric Layer</h1>
 <p>This is the part with no Kubernetes equivalent, and the part most worth understanding.</p>
 <h3 id="31-why-not-just-use-pcie">3.1 Why Not Just Use PCIe?</h3>
 <p>Distributed training means every GPU must exchange gradients with every other GPU, every single step. That collective operation is <strong>AllReduce</strong>, and it happens thousands of times per epoch.</p>
-<p>PCIe Gen5 x16 gives ~64 GB/s per direction. NVLink 4 gives 900 GB/s — <strong>roughly 7x</strong>. Run AllReduce over PCIe and your expensive GPUs spend most of their life waiting.</p>
+<p>PCIe Gen5 x16 gives ~128 GB/s bidirectional. NVLink 4 gives 900 GB/s bidirectional — <strong>roughly 7x</strong>. Run AllReduce over PCIe and your expensive GPUs spend most of their life waiting.</p>
+<p><strong>Quick note on units.</strong> These links are full duplex — separate lanes each way — so the same cable gets quoted two ways, and the two conventions differ by exactly 2x:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Per direction</th>
+<th>Bidirectional</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PCIe Gen5 x16</td>
+<td>~64 GB/s</td>
+<td>~128 GB/s</td>
+</tr>
+<tr>
+<td>NVLink 4 (H100)</td>
+<td>450 GB/s</td>
+<td>900 GB/s</td>
+</tr>
+</tbody>
+</table>
+<p>NVIDIA prints NVLink bidirectional, PCIe specs are per direction. Compare them as-printed and you "find" a 14x that isn't there. Networking flips it again: <strong>400 Gb/s NDR InfiniBand means 400 Gb/s <em>each</em> direction.</strong></p>
 <ul>
-<li><strong><a href="https://www.nvidia.com/en-us/data-center/nvlink/">NVLink</a></strong> — direct GPU-to-GPU interconnect bypassing PCIe entirely (H100: 18 links × 50 GB/s = 900 GB/s).</li>
+<li><strong><a href="https://www.nvidia.com/en-us/data-center/nvlink/">NVLink</a></strong> — direct GPU-to-GPU interconnect bypassing PCIe entirely (H100: 18 links × 50 GB/s bidirectional = 900 GB/s).</li>
 <li><strong>NVSwitch</strong> — a non-blocking switch chip so all 8 GPUs in a chassis talk to each other simultaneously at full speed, not just in pairs.</li>
 <li><strong>NVLink Switch</strong> (Blackwell) — extends NVLink <em>outside</em> the chassis, making 72 GPUs in a GB200 NVL72 behave as one NVLink domain.</li>
 </ul>
@@ -678,7 +817,7 @@
 <tr>
 <td>Lossless</td>
 <td>Native, credit-based flow control</td>
-<td>Must be configured (PFC + ECN, together called DCQCN)</td>
+<td>Must be configured: <strong>PFC</strong> pauses at link level, <strong>ECN</strong> marks congestion, and <strong>DCQCN</strong> is the ECN-based congestion control algorithm on top</td>
 <td>Built in</td>
 </tr>
 <tr>
@@ -725,7 +864,7 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 </code></pre></div>
 
 <p><strong>Parallel filesystems</strong> (Lustre / DDN EXAScaler, WEKA, VAST Data, IBM Storage Scale, BeeGFS) exist because a normal NFS server cannot feed hundreds of GPUs at once. They spread both data <em>and</em> metadata across many servers.</p>
-<p>Remember the checkpoint problem from Phase 1.3: hundreds of GPUs writing simultaneously, all idle until the write finishes. Checkpoint burst bandwidth is usually what sizes the filesystem, not average throughput.</p>
+<p>Remember the checkpoint problem from Phase 1.4: hundreds of GPUs writing simultaneously, all idle until the write finishes. Checkpoint burst bandwidth is usually what sizes the filesystem, not average throughput.</p>
 <hr />
 <h1 id="phase-5-the-software-stack">Phase 5: The Software Stack</h1>
 <h3 id="51-the-layers">5.1 The Layers</h3>
@@ -735,7 +874,7 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
             ▲
 [ Frameworks ]              PyTorch, JAX, TensorFlow  │  RAPIDS (data science)
             ▲
-[ Accelerated Libraries ]   CUDA, cuDNN, NCCL, DOCA
+[ Accelerated Libraries ]   CUDA  │  CUDA-X: cuDNN, NCCL, cuBLAS, DALI  │  DOCA
             ▲
 [ System Layer ]            GPU Driver, NVIDIA Container Toolkit
             ◄── DCGM monitors every layer above
@@ -744,7 +883,8 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 <ul>
 <li><strong><a href="https://developer.nvidia.com/cuda-toolkit">CUDA</a></strong> — the parallel computing platform and programming model. Everything sits on this.</li>
 <li><strong>cuDNN</strong> — tuned primitives for neural networks (convolution, pooling, normalization).</li>
-<li><strong><a href="https://developer.nvidia.com/nccl">NCCL</a></strong> — the collective communication library for multi-GPU and multi-node (<code>AllReduce</code>, <code>AllGather</code>, <code>Broadcast</code>, <code>ReduceScatter</code>), optimized for NVLink and InfiniBand. <strong>Any question about optimizing inter-GPU communication is a NCCL question.</strong></li>
+<li><strong><a href="https://developer.nvidia.com/nccl">NCCL</a></strong> — the collective communication library for multi-GPU and multi-node (<code>AllReduce</code>, <code>AllGather</code>, <code>Broadcast</code>, <code>ReduceScatter</code>), optimized for NVLink and InfiniBand. <strong>Any question about optimizing inter-GPU communication is an NCCL question.</strong></li>
+<li><strong>CUDA-X</strong> — the umbrella name for the accelerated libraries sitting on top of CUDA (cuDNN, NCCL, cuBLAS, RAPIDS, DALI). NVIDIA uses the term constantly, so recognize it.</li>
 <li><strong>DOCA</strong> — SDK for BlueField DPUs and SuperNICs.</li>
 </ul>
 <h3 id="52-serving-tensorrt-vs-triton-vs-nim">5.2 Serving: TensorRT vs. Triton vs. NIM</h3>
@@ -781,6 +921,7 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 </tbody>
 </table>
 <p><strong>TensorRT optimizes the model; Triton serves it; NIM ships both as a supported container.</strong></p>
+<p>And three ways to shrink a model <em>before</em> you serve it — classic answer options, so don't mix them up: <strong>quantization</strong> (fewer bits per weight, what TensorRT does), <strong>pruning</strong> (drop weights that barely contribute), <strong>distillation</strong> (train a small <em>student</em> model to imitate a large <em>teacher</em>).</p>
 <h3 id="53-distribution-support">5.3 Distribution &amp; Support</h3>
 <ul>
 <li><strong><a href="https://catalog.ngc.nvidia.com/">NGC</a></strong> — NVIDIA's registry of GPU-optimized containers, pretrained models and Helm charts. Think Docker Hub, curated.</li>
@@ -841,6 +982,54 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 <li><strong>Drift</strong> — <em>data drift</em> is the inputs changing; <em>concept drift</em> is the input→output relationship changing. Either one is the signal to retrain.</li>
 <li><strong>Reproducibility</strong> — pin the container image, framework version, driver version, dataset version and random seed. Containers are the mechanism.</li>
 </ul>
+<p>The blueprint asks you to <em>"describe software components related to the AI development and deployment life cycle"</em> — and it files that under <strong>Essential AI Knowledge</strong>, the 38% domain. So know which tool sits at which stage:</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>What happens</th>
+<th>Tooling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data prep</td>
+<td>Ingest, clean, augment</td>
+<td><strong>RAPIDS</strong>, <strong>DALI</strong></td>
+</tr>
+<tr>
+<td>Train</td>
+<td>The training loop itself</td>
+<td>PyTorch, TensorFlow, JAX, <strong>NeMo</strong> for LLMs</td>
+</tr>
+<tr>
+<td>Track &amp; version</td>
+<td>Experiments, datasets, lineage</td>
+<td>MLflow, Weights &amp; Biases</td>
+</tr>
+<tr>
+<td>Registry</td>
+<td>Store the approved model</td>
+<td><strong>NGC</strong>, MLflow registry</td>
+</tr>
+<tr>
+<td>Optimize</td>
+<td>Make it fast enough to serve</td>
+<td><strong>TensorRT</strong>, <strong>TensorRT-LLM</strong></td>
+</tr>
+<tr>
+<td>Deploy</td>
+<td>Put it behind an API</td>
+<td><strong>Triton</strong>, <strong>NIM</strong>, Kubernetes</td>
+</tr>
+<tr>
+<td>Monitor</td>
+<td>Latency, throughput, drift</td>
+<td><strong>DCGM</strong> for GPUs, Prometheus + Grafana for the rest</td>
+</tr>
+</tbody>
+</table>
+<p>The pattern is the same CI/CD loop you already run, with a model artifact instead of a binary — and one extra failure mode (<strong>drift</strong>) that has no equivalent in ordinary software.</p>
 <hr />
 <h1 id="phase-7-operations-monitoring-war-stories">Phase 7: Operations — Monitoring &amp; War Stories</h1>
 <h3 id="71-the-tools">7.1 The Tools</h3>
@@ -894,9 +1083,13 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 <h3 id="72-xid-errors">7.2 Xid Errors</h3>
 <p><a href="https://docs.nvidia.com/deploy/xid-errors/index.html"><strong>Xid</strong></a> errors are codes the NVIDIA driver writes into the kernel log when something goes wrong — hardware fault, bad memory, driver bug, or an application doing something illegal. The number identifies the class of problem.</p>
 <p>Operationally the reflex is the same one you already have for a flaky K8s node: <strong>detect → drain → diagnose → RMA or return to service.</strong> DCGM can watch for them across the fleet so you're not grepping <code>dmesg</code> on 200 machines.</p>
+<p>For NCA-AIIO, knowing what an Xid is and where it surfaces is enough — matching specific codes to specific faults is NCP-AIO work.</p>
 <p>Related: <strong>ECC errors</strong>. Correctable ones get fixed silently; a rising count or an uncorrectable error means drain the node.</p>
-<h3 id="73-reading-a-bottleneck">7.3 Reading a Bottleneck</h3>
-<p>The most useful skill here, and a common question format — you're given telemetry and asked what's wrong. <strong>GPU utilization alone tells you nothing</strong>; read it alongside everything else:</p>
+<h3 id="73-reading-a-bottleneck-optional-ncp-aio-level">7.3 Reading a Bottleneck <em>(optional — NCP-AIO level)</em></h3>
+<blockquote>
+<p><strong>Above Associate level — useful for the job, not for this exam.</strong> Every NCA-AIIO operations bullet is <em>describe</em>, <em>articulate</em> or <em>identify</em>; none of them ask you to diagnose. Reading telemetry belongs to <strong>NCP-AIO</strong>, which carries a whole 23% <em>Troubleshooting and Optimization</em> domain plus hands-on labs. Skim it now, come back when you own a cluster.</p>
+</blockquote>
+<p>The most useful skill on the job, and the format NCP-AIO likes — you're given telemetry and asked what's wrong. <strong>GPU utilization alone tells you nothing</strong>; read it alongside everything else:</p>
 <table>
 <thead>
 <tr>
@@ -915,6 +1108,11 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 <td>GPU util low, CPU low, disk busy</td>
 <td>Storage starving the GPUs</td>
 <td>Faster parallel FS, local NVMe cache, <strong>GDS</strong>, bigger prefetch</td>
+</tr>
+<tr>
+<td>GPU util flatlines periodically, all ranks at once</td>
+<td>Synchronous checkpoint stall</td>
+<td>Async or sharded checkpointing, stage to local NVMe, checkpoint less often</td>
 </tr>
 <tr>
 <td>GPU util spiky, scales badly past one node</td>
@@ -949,6 +1147,7 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 </tbody>
 </table>
 <h3 id="74-multi-tenancy-security">7.4 Multi-Tenancy &amp; Security</h3>
+<p>This one <em>is</em> on the NCA-AIIO blueprint: <em>"identify key considerations for virtualizing accelerated infrastructure."</em></p>
 <ul>
 <li><strong>Isolation ladder</strong>, weakest to strongest: time-slicing (none) → MPS (shared fault domain) → vGPU (hypervisor) → <strong>MIG</strong> (hardware) → dedicated GPU.</li>
 <li><strong>Confidential computing</strong> (Hopper and Blackwell) encrypts data <em>in use</em> so even the hypervisor or cloud operator can't read GPU memory. For regulated workloads on shared infrastructure.</li>
@@ -956,13 +1155,94 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 </ul>
 <hr />
 <h1 id="phase-8-data-center-realities">Phase 8: Data Center Realities</h1>
+<p>Three blueprint bullets live here — power and cooling, facility requirements, and on-prem vs. cloud — and all three sit inside the <strong>40% infrastructure domain</strong>, not operations. More exam weight than the length of this phase suggests.</p>
+<h3 id="81-power">8.1 Power</h3>
 <ul>
-<li><strong>Power density</strong> — a DGX H100 draws ~10.2 kW; a GB200 NVL72 rack draws ~120 kW. A traditional rack is 5-10 kW. You cannot drop these into an existing datacenter and hope.</li>
-<li><strong>Cooling</strong> — air cooling runs out around 40-50 kW per rack. <strong>Direct-to-chip liquid cooling</strong> (cold plates) is required for GB200 NVL72, not optional.</li>
-<li><strong>PUE (Power Usage Effectiveness)</strong> = total facility power ÷ IT equipment power. <strong>Closer to 1.0 is better.</strong> 1.5 means half your IT load again is spent on cooling and losses.</li>
-<li><strong>Also plan for</strong>: redundant power (N+1, 2N), hot/cold aisle containment, floor weight, and cable runs for high-speed fabrics.</li>
-<li><strong>On-prem vs. cloud vs. hybrid</strong> — on-prem wins on long-term cost <em>at high utilization</em> and on data control; cloud wins on elasticity and zero CapEx; hybrid keeps sensitive data local and bursts out. Utilization is the deciding number.</li>
+<li><strong>Density</strong> — a traditional enterprise rack is 5-10 kW. A single DGX H100 draws ~10.2 kW, and a GB200 NVL72 rack ~120 kW. You cannot drop these into an existing hall and hope.</li>
+<li><strong>Delivery</strong> — that density means three-phase distribution and busways rather than ordinary PDUs, and it resizes the whips, breakers, UPS and generator behind them.</li>
+<li><strong>Redundancy</strong> — <strong>N+1</strong> is one spare unit; <strong>2N</strong> is a complete second path at roughly double the cost. 2N is what you buy when a three-week training run must not die.</li>
+<li><strong>Transients</strong> — GPUs are not a steady load. Thousands of them entering the same AllReduce swing power hard and fast, which stresses upstream gear in a way a rack of web servers never does.</li>
 </ul>
+<h3 id="82-cooling">8.2 Cooling</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Practical ceiling</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Air + hot/cold aisle containment</td>
+<td>~40-50 kW/rack</td>
+<td>Where traditional datacenters top out</td>
+</tr>
+<tr>
+<td>Rear-door heat exchanger</td>
+<td>~50-60 kW/rack</td>
+<td>Liquid at the rack door, air inside the box — the retrofit step</td>
+</tr>
+<tr>
+<td><strong>Direct-to-chip liquid</strong> (cold plates)</td>
+<td>100 kW+/rack</td>
+<td><strong>Required</strong> for GB200 NVL72, not an upgrade option</td>
+</tr>
+<tr>
+<td>Immersion</td>
+<td>Highest</td>
+<td>Rare, invasive, niche</td>
+</tr>
+</tbody>
+</table>
+<p>Direct-to-chip needs a <strong>CDU</strong> (coolant distribution unit) to separate the facility water loop from the clean loop touching the cold plates, plus pipework into the row. That is a building project, not a rack purchase.</p>
+<p><strong>PUE (Power Usage Effectiveness)</strong> = total facility power ÷ IT equipment power. <strong>Closer to 1.0 is better.</strong> A PUE of 1.5 means every 2 kW of compute costs another 1 kW in cooling and losses. Liquid cooling is one of the main levers for pushing it down.</p>
+<h3 id="83-facility-requirements">8.3 Facility Requirements</h3>
+<p>The unglamorous list that stops projects:</p>
+<ul>
+<li><strong>Floor loading</strong> — a fully populated NVL72 rack weighs over a tonne. Raised floors have limits, and so do freight elevators and the route from the loading dock.</li>
+<li><strong>Water</strong> — direct-to-chip means supply, return, leak detection and a CDU. Most enterprise halls have none of it today.</li>
+<li><strong>Cable runs</strong> — one compute NIC per GPU means eight high-speed links per node plus storage and management. Optics have reach limits, which constrains where a rack can physically sit relative to the spine.</li>
+<li><strong>Space and service access</strong> — containment, ceiling height, and enough clearance to actually slide out a 10U chassis that takes two people to lift.</li>
+</ul>
+<h3 id="84-on-prem-vs-cloud-vs-hybrid">8.4 On-prem vs. Cloud vs. Hybrid</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>On-prem</th>
+<th>Cloud</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cost</td>
+<td>Wins at <strong>high sustained utilization</strong></td>
+<td>Wins for bursty or unknown demand</td>
+</tr>
+<tr>
+<td>Money shape</td>
+<td>CapEx, depreciated over years</td>
+<td>OpEx, nothing up front</td>
+</tr>
+<tr>
+<td>Control</td>
+<td>Full — data never leaves</td>
+<td>Shared responsibility</td>
+</tr>
+<tr>
+<td>Time to start</td>
+<td>Procurement and buildout in months</td>
+<td>Minutes</td>
+</tr>
+<tr>
+<td>Ceiling</td>
+<td>Whatever you bought</td>
+<td>Somebody else's quota</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Utilization is the deciding number.</strong> A cluster busy 20% of the time should have been rented; one pinned at 90% for three years should have been bought. Hybrid keeps regulated data local and bursts the overflow out — <strong>DGX Cloud</strong> is NVIDIA's own version of that.</p>
 <hr />
 <h1 id="exam-checklist">Exam Checklist</h1>
 <p>Study time should follow the blueprint weights, not your comfort zone.</p>
@@ -970,6 +1250,7 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 <ul>
 <li>Contrast training and inference across duration, bottleneck, failure behavior and scheduler.</li>
 <li>Place AI, ML, DL and GenAI as nested sets; say when classical ML beats deep learning.</li>
+<li>Name the four factors behind AI's recent takeoff, and why the transformer was the unlock.</li>
 <li>Explain batch size, epoch, overfitting, checkpoint — and which two hit infrastructure.</li>
 <li>Name the four learning paradigms with one use case each.</li>
 <li>Pick between accuracy, precision, recall and F1 given a described business cost.</li>
@@ -977,12 +1258,16 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 <li>Choose between prompt engineering, RAG, LoRA and full fine-tuning for a requirement.</li>
 <li>Describe the RAG pipeline and where embeddings and the vector DB fit.</li>
 <li>Match an industry scenario to Clara / Merlin / Riva / Omniverse / Metropolis / Morpheus / NIM.</li>
+<li>Name the layers of the NVIDIA stack from driver to application, and what CUDA-X covers.</li>
+<li>Walk the AI lifecycle and name the tool at each stage, from RAPIDS to Triton to DCGM.</li>
 </ul>
 <p><strong>AI Infrastructure (40%)</strong></p>
 <ul>
 <li>Explain why GPUs beat CPUs at matrix math, and what a DPU offloads.</li>
 <li>Say what Ampere, Hopper and Blackwell each introduced.</li>
 <li>Explain why H200 is the inference choice despite H100-identical compute.</li>
+<li>Estimate model memory at a given precision, and say why training needs ~10x inference.</li>
+<li>Distinguish scale-up (NVLink) from scale-out (InfiniBand), and say which you exhaust first.</li>
 <li>Differentiate DGX, HGX and MGX.</li>
 <li>Explain NVLink, NVSwitch and NVLink Switch, and why PCIe isn't enough.</li>
 <li>Differentiate FP32, TF32, BF16, FP16, FP8 (E4M3 vs E5M2), FP4 — and say which needs loss scaling.</li>
@@ -992,7 +1277,11 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 <li>Compare InfiniBand, RoCEv2 and Spectrum-X; say what SHARP does.</li>
 <li>Explain how GDS removes the CPU bounce buffer, and name three parallel filesystems.</li>
 <li>Distinguish TensorRT, Triton and NIM.</li>
+<li>Distinguish quantization, pruning and distillation as ways to shrink a model.</li>
 <li>Explain what NCCL does and name its main collectives.</li>
+<li>Size power and cooling for a 120 kW rack; explain PUE and when liquid cooling stops being optional.</li>
+<li>List the facility requirements that block a deployment: floor loading, water, cable reach, service access.</li>
+<li>Compare on-prem, cloud and hybrid on cost, control, elasticity — and name utilization as the deciding number.</li>
 </ul>
 <p><strong>AI Operations (22%)</strong></p>
 <ul>
@@ -1000,14 +1289,12 @@ fastest, smallest      fast, shared by all nodes    cheap, slow, huge
 <li>List what the GPU Operator deploys and what the Network Operator adds.</li>
 <li>Describe what DCGM monitors and how it reaches Grafana.</li>
 <li>Distinguish Base Command Manager from Base Command Platform.</li>
-<li>Given utilization figures, name the bottleneck and the fix.</li>
+<li>Given utilization figures, name the bottleneck and the fix. <em>(NCP-AIO level — lowest priority here.)</em></li>
 <li>Explain what an Xid error is and where it appears.</li>
 <li>Outline the MLOps lifecycle; distinguish data drift from concept drift.</li>
-<li>Explain PUE and why 120 kW racks need liquid cooling.</li>
-<li>Compare on-prem, cloud and hybrid on cost, control and elasticity.</li>
 </ul>
 <hr />
-<h1 id="appendix-a-hardware-spec-reference">Appendix A: Hardware Spec Reference</h1>
+<h1 id="appendix-a-hardware-spec-reference-optional-reference">Appendix A: Hardware Spec Reference <em>(optional — reference)</em></h1>
 <blockquote>
 <p><strong>Reference only — do not memorize this.</strong> None of these numbers are worth exam study time at Associate level, and most aren't worth it at Professional level either. They're here because I keep needing to look them up. What matters is the <em>why</em> in Phase 2, not the digits.</p>
 </blockquote>
