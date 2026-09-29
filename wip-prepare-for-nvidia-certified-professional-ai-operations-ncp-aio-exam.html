@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/elegant.prod.9e9d5ce754.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blackmetalz.github.io/theme/css/custom.css" media="screen">
+
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+
+        <meta name="author" content="kienlt" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="nvidia, hpc, ai, certification, devops, slurm, kubernetes, bcm, Knowledge Base, " />
+
+<meta property="og:title" content="[WIP] Prepare for NVIDIA Certified Professional: AI Operations (NCP-AIO) Exam "/>
+<meta property="og:url" content="https://blackmetalz.github.io/wip-prepare-for-nvidia-certified-professional-ai-operations-ncp-aio-exam.html" />
+<meta property="og:description" content="" />
+<meta property="og:site_name" content="Kienlt&#39;s notebook" />
+<meta property="og:article:author" content="kienlt" />
+<meta property="og:article:published_time" content="2026-09-29T00:00:00+07:00" />
+<meta name="twitter:title" content="[WIP] Prepare for NVIDIA Certified Professional: AI Operations (NCP-AIO) Exam ">
+<meta name="twitter:description" content="">
+
+        <title>[WIP] Prepare for NVIDIA Certified Professional: AI Operations (NCP-AIO) Exam  · Kienlt&#39;s notebook
+</title>
+        <link href="https://blackmetalz.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Kienlt&#39;s notebook - Full Atom Feed" />
+
+
+
+    </head>
+    <body>
+        <div id="content">
+            <div class="navbar navbar-static-top">
+                <div class="navbar-inner">
+                    <div class="container-fluid">
+                        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </a>
+                        <a class="brand" href="https://blackmetalz.github.io/"><span class=site-name>Kienlt's notebook</span></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav pull-right top-menu">
+                                <li >
+                                    <a href=
+                                       https://blackmetalz.github.io
+                                    >Home</a>
+                                </li>
+                                <li ><a href="https://blackmetalz.github.io/categories.html">Categories</a></li>
+                                <li ><a href="https://blackmetalz.github.io/tags.html">Tags</a></li>
+                                <li ><a href="https://blackmetalz.github.io/archives.html">Archives</a></li>
+                                <li><form class="navbar-search" action="https://blackmetalz.github.io/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row-fluid">
+                    <div class="span1"></div>
+                    <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+        <h1>
+            <a href="https://blackmetalz.github.io/wip-prepare-for-nvidia-certified-professional-ai-operations-ncp-aio-exam.html">
+                [WIP] Prepare for NVIDIA Certified Professional: AI Operations (NCP-AIO) Exam
+            </a>
+        </h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+            
+            <p>TLDR: A blueprint-anchored study plan for <strong>NCP-AIO</strong>. Two findings drive it: NVIDIA names the three hands-on labs outright in the study guide, and <strong>Base Command Manager has a free-to-use license</strong> — so the labs everyone assumes need a DGX can be built on a workstation with no GPU.</p>
+<hr />
+<blockquote>
+<p><strong>WIP — I have not sat this exam yet.</strong> Everything numbered comes from the official <em>NVIDIA-Certified Professional: AI Operations Exam Study Guide</em>, doc <code>4929800</code>, <code>FEB26</code>. Download it from the <a href="https://www.nvidia.com/en-us/learn/certification/ai-operations-professional/">certification page</a>; it is free and seven pages. Read it before this.</p>
+</blockquote>
+<hr />
+<h1 id="1-the-exam">1. The Exam</h1>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Format</td>
+<td><strong>30 multiple choice + 3 performance-based labs</strong></td>
+</tr>
+<tr>
+<td>Weighting</td>
+<td><strong>Each section is 50% of the score</strong></td>
+</tr>
+<tr>
+<td>Duration</td>
+<td>120 minutes total, labs included</td>
+</tr>
+<tr>
+<td>Price</td>
+<td>$500</td>
+</tr>
+<tr>
+<td>Delivery</td>
+<td>Online, remotely proctored (Certiverse)</td>
+</tr>
+<tr>
+<td>Result</td>
+<td>Pass/Fail, with a per-topic score report</td>
+</tr>
+<tr>
+<td>Validity</td>
+<td>2 years, recertify by retaking</td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-three-labs-are-published">The three labs are published</h2>
+<p>The performance-based section puts you in a live VM with a scenario panel. The study guide then says this, which I have not seen quoted anywhere:</p>
+<blockquote>
+<p><em>"To complete the performance-based test you will need to be comfortable using Slurm in BCM to troubleshoot a cluster, using Kubernetes to run a workload, and using BCM to add a node to a cluster."</em></p>
+</blockquote>
+<p>Three clauses, three labs, published in plain English.</p>
+<table>
+<thead>
+<tr>
+<th>Lab</th>
+<th>Task</th>
+<th>GPU needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>Troubleshoot a Slurm cluster, inside BCM</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>Run a workload on Kubernetes</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>Add a node to a cluster using BCM</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Time budget:</strong> ~35–40 min for the MCQ, 80+ for the labs. Running out of lab time is the failure mode, not running out of knowledge.</p>
+<hr />
+<h1 id="2-the-blueprint">2. The Blueprint</h1>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Domain</th>
+<th>Weight</th>
+<th>Covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Administration</strong></td>
+<td><strong>28%</strong></td>
+<td>Fleet Command, Slurm, DC architecture, Run:ai, MIG</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Workload Management</strong></td>
+<td><strong>20%</strong></td>
+<td>Kubernetes, DCGM/NVSM/nvidia-smi, BCM provisioning</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Install and Deploy</strong></td>
+<td><strong>32%</strong></td>
+<td>BCM install, K8s <em>via</em> BCM, NGC, cloud VMI, storage, DOCA</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Troubleshooting and Optimization</strong></td>
+<td><strong>20%</strong></td>
+<td>Docker, Fabric Manager, BCM, Magnum IO, storage perf</td>
+</tr>
+</tbody>
+</table>
+<p><strong>BCM appears in all four domains</strong> — items 2.3, 3.1, 3.2, 4.3, plus two of three labs. Budget by frequency of appearance, not by domain weight.</p>
+<p>Two document defects worth knowing, because third-party guides have hallucinated scope from them:</p>
+<ul>
+<li>The contents page lists a fifth domain, <em>"Cognition, Planning, and Memory, 10%"</em>. <strong>No such section exists in the body</strong>, and the four real domains already sum to 100%. It is agentic-AI vocabulary left over from the NCP-AAI guide (NVIDIA's own filename is <code>...copy-updates-v2</code>, and the body still contains a <code>MModule</code> typo). Ignore it.</li>
+<li>The trademark footer names <strong>NeMo, NIM, Nsight, TensorRT, Triton</strong> — none appear in the body. This is not an inference-serving exam.</li>
+</ul>
+<p>Weights of 31/23/23/23 circulate on third-party sites. The study guide says 32/28/20/20.</p>
+<h2 id="what-to-skip-and-why-a-list-of-absences-earns-its-place">What to skip — and why a list of absences earns its place</h2>
+<p>A negative list looks like padding until you notice what it costs to be wrong. My own first outline for this article opened with NCCL deadlock debugging and a full Xid table, because that is what an operations background assumes a GPU exam tests. Neither appears in the blueprint. That assumption was worth about two wasted weeks.</p>
+<p>So: the things you will be tempted to study, and what the blueprint actually says about them.</p>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>In blueprint?</th>
+<th>Do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NCCL</strong> tuning &amp; debugging</td>
+<td><strong>Not mentioned at all</strong></td>
+<td>Know it only as a Magnum IO component</td>
+</tr>
+<tr>
+<td><strong>Xid taxonomy</strong></td>
+<td>Not named</td>
+<td>Common ones via DCGM. Don't memorise the table</td>
+</tr>
+<tr>
+<td>Nsight Systems</td>
+<td>Footer only</td>
+<td>Skip</td>
+</tr>
+<tr>
+<td>Pyxis / Enroot</td>
+<td>Not mentioned</td>
+<td>Skip</td>
+</tr>
+<tr>
+<td>Triton / TensorRT / NeMo</td>
+<td>Footer only</td>
+<td>Skip</td>
+</tr>
+<tr>
+<td><strong>Fleet Command</strong></td>
+<td><strong>Item 1.1</strong></td>
+<td>Budget real time — nobody studies it</td>
+</tr>
+<tr>
+<td><strong>DOCA on DPU-Arm</strong></td>
+<td><strong>Item 3.6</strong></td>
+<td>Same</td>
+</tr>
+<tr>
+<td><strong>Cloud VMI</strong></td>
+<td><strong>Item 3.4</strong></td>
+<td>Narrow, cheap to learn</td>
+</tr>
+<tr>
+<td><strong>Magnum IO / GPUDirect</strong></td>
+<td><strong>Item 4.4</strong></td>
+<td>Named in Troubleshooting</td>
+</tr>
+</tbody>
+</table>
+<p>The pattern, stated concretely. <strong>GPU internals</strong> — why a GPU crashed, how collectives move data between GPUs, how a CUDA kernel spends its time — barely appear. <strong>NVIDIA's management products</strong> — BCM, Fleet Command, Run:ai, NGC, DOCA — are most of the blueprint.</p>
+<p>That is the difference between <em>"Xid 79 appeared, what died"</em> and <em>"add this node to the cluster and get Slurm scheduling on it."</em> The first is hardware forensics. The second is administering NVIDIA's tooling, and it is what gets examined.</p>
+<hr />
+<h1 id="3-domain-by-domain">3. Domain by Domain</h1>
+<p>Markers: <strong><code>[LAB]</code></strong> reproducible free, no GPU · <strong><code>[HW]</code></strong> needs real hardware · <strong><code>[DOC]</code></strong> read-only.</p>
+<h2 id="31-administration-28">3.1 Administration — 28%</h2>
+<p><strong>1.1 — Administer Fleet Command</strong> <code>[DOC]</code>
+A cloud-hosted control plane for edge AI fleets: enrolled edge systems, containerised applications pushed to them over the air. Know locations, deployments, update rollout, and <strong>how to open an interactive remote console</strong> — the study guide cites that doc page by name, which is usually a tell.</p>
+<p>Being <code>[DOC]</code>-only makes it <em>pure MCQ</em> material, and almost nobody preparing for this exam studies it. Cheap points.</p>
+<p><strong>1.2 — Administer Slurm clusters</strong> <code>[LAB]</code>
+The most practisable item on the blueprint, and half of Lab A. Know cold: <code>sinfo -R</code>, the <code>squeue</code> REASON codes, <code>scontrol show node|job</code>, <code>scontrol update state=drain|resume</code>, <code>sacct</code> for finished jobs, <code>sacctmgr</code> for associations, and DOWN vs DRAINED.</p>
+<p><strong>1.3 — Design data center architecture for AI workloads</strong> <code>[DOC]</code>
+Power and cooling envelopes, leaf-spine and rail-optimised fabric, storage tiering, scalable-unit building blocks. Mostly revision from <a href="/prepare-for-nvidia-certified-associate-ai-infrastructure-and-operations-nca-aiio-exam.html">article 51</a>.</p>
+<p><strong>1.4 — Administer Run:ai</strong> <code>[LAB]</code> partial
+NVIDIA-owned since January 2025 and being open-sourced. Know projects and departments, fair-share quota with over-quota borrowing, node pools, <strong>GPU fractions</strong> (not MIG, not time-slicing), and the workload types — training, interactive, inference — and why each is scheduled differently.</p>
+<p>The scheduler half is open source as <strong>KAI Scheduler</strong>, installable on kind, so this item is partly practisable for free.</p>
+<p><strong>1.5 — Configure MIG for AI and HPC</strong> <code>[HW]</code>
+Hardware partitioning on A100/H100-class silicon. Know GPU instance vs compute instance, the profile naming (<code>1g.10gb</code>, <code>3g.40gb</code>), that enabling MIG mode needs no running processes, and — on the Kubernetes side — that the <strong><code>single</code> vs <code>mixed</code> strategy</strong> changes which resource name pods request (<code>nvidia.com/gpu</code> vs <code>nvidia.com/mig-1g.10gb</code>).</p>
+<p>MIG is the wrong answer when one large job needs the whole GPU: it partitions memory and SMs statically, so it suits many small inference tenants and hurts a single big training run.</p>
+<h2 id="32-workload-management-20">3.2 Workload Management — 20%</h2>
+<p><strong>2.1 — Administer Kubernetes</strong> <code>[LAB]</code>
+Scheduling, resource requests, node readiness, pod-failure triage. Note the lab says <em>run a workload</em>, not CNI internals.</p>
+<p><strong>2.2 — DCGM / NVSM / nvidia-smi</strong> <code>[HW]</code> for output, <code>[DOC]</code> for the map
+The scope split below, plus these by shape:</p>
+<div class="highlight"><pre><span></span><code>dcgmi<span class="w"> </span>discovery<span class="w"> </span>-l<span class="w">          </span><span class="c1"># what GPUs does DCGM see</span>
+dcgmi<span class="w"> </span>diag<span class="w"> </span>-r<span class="w"> </span><span class="m">1</span><span class="w">             </span><span class="c1"># -r 1/2/3 = escalating diagnostic depth</span>
+dcgmi<span class="w"> </span>dmon<span class="w">                  </span><span class="c1"># live telemetry</span>
+nvidia-smi<span class="w"> </span>-q<span class="w"> </span>-d<span class="w"> </span>ECC<span class="w">        </span><span class="c1"># ECC counters and remapping state</span>
+nvidia-smi<span class="w"> </span>topo<span class="w"> </span>-m<span class="w">          </span><span class="c1"># GPU/NIC affinity matrix</span>
+nvsm<span class="w"> </span>show<span class="w"> </span>health<span class="w">            </span><span class="c1"># chassis health, not GPU compute health</span>
+</code></pre></div>
+
+<p><strong>2.3 — Administer BCM and cluster provisioning</strong> <code>[LAB]</code>
+The commit model and the three config layers, below.</p>
+<p><strong>Tool scope — the testable part:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Scope</th>
+<th>Not for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nvidia-smi</code></td>
+<td>One host's GPUs, right now</td>
+<td>Fleet health, history</td>
+</tr>
+<tr>
+<td><strong>DCGM</strong></td>
+<td>GPU <em>compute</em> health, fleet-wide, over time</td>
+<td>Chassis hardware</td>
+</tr>
+<tr>
+<td><strong>NVSM</strong></td>
+<td><em>System</em> health of a DGX chassis — PSU, fans, storage, BMC</td>
+<td>GPU compute health</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidence bundles:</strong> <code>nvidia-bug-report.sh</code> for driver/GPU/Xid → RMA. <code>nvsm dump health</code> for chassis → platform support case.</p>
+<p><strong>GPU Operator chain, in dependency order — which is also the debug order:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">NFD</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">GPU</span><span class="w"> </span><span class="n">Feature</span><span class="w"> </span><span class="n">Discovery</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">driver</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="n">toolkit</span>
+<span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="n">device</span><span class="w"> </span><span class="n">plugin</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">DCGM</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">exporter</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">MIG</span><span class="w"> </span><span class="n">manager</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">validators</span>
+</code></pre></div>
+
+<p>Validators are symptoms, never causes. Read <em>down</em> the chain, not at the loudest pod. Use <code>driver.enabled=false</code> when the host already has a driver (DGX OS) — running both is a classic self-inflicted outage.</p>
+<p><strong>BCM's mental model — <code>cmsh</code> is modal and staged.</strong> Enter a mode (<code>device</code>, <code>category</code>, <code>softwareimage</code>, <code>network</code>, <code>partition</code>, <code>monitoring</code>, <code>user</code>, <code>jobs</code>), <code>use</code> an object, <code>set</code> fields — and <strong>nothing happens until <code>commit</code></strong>. <code>refresh</code> discards. It is <code>kubectl apply</code> semantics with the editor built in.</p>
+<table>
+<thead>
+<tr>
+<th>BCM layer</th>
+<th>What it is</th>
+<th>K8s analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Software image</td>
+<td>OS filesystem nodes boot</td>
+<td>Container image</td>
+</tr>
+<tr>
+<td>Category</td>
+<td>Nodes sharing an image + settings</td>
+<td>Node pool</td>
+</tr>
+<tr>
+<td>Configuration overlay</td>
+<td>Targeted config on top</td>
+<td>Kustomize patch</td>
+</tr>
+</tbody>
+</table>
+<p>Provisioning flow — and Lab C <em>is</em> this flow: <strong>PXE/DHCP → node-installer → image sync → disk layout → finalize → hand off to the workload manager.</strong></p>
+<p><code>cm-wlm-setup</code> is how BCM stands up Slurm or Kubernetes, which also means hand-editing <code>slurm.conf</code> afterwards fights the tool. <code>imageupdate</code> syncs an image to a <em>live</em> node — it has a dry-run, and you never run it against a node executing a job.</p>
+<h2 id="33-install-and-deploy-32">3.3 Install and Deploy — 32%</h2>
+<p><strong>3.1 — Install and configure BCM</strong> <code>[LAB]</code>
+Head node from the ISO, licensing, the split between provisioning and external networks, disk layout. Free license — see §4.</p>
+<p><strong>3.2 — Install and initialize Kubernetes on NVIDIA hosts using BCM</strong> <code>[LAB]</code>
+Note the <em>using BCM</em>: this is <code>cm-wlm-setup</code>, not <code>kubeadm</code> and not a distro. Genuinely different from how most of us install clusters, which is why it gets asked. Do it once for real.</p>
+<p><strong>3.3 — Deploy containers from NGC</strong> <code>[LAB]</code>
+NVIDIA's container and model registry. Know the <code>nvcr.io</code> path, how API keys work with <code>docker login</code> (the username is the literal string <code>$oauthtoken</code>), the split between the public catalogue and entitled NVIDIA AI Enterprise content, tag conventions, and the <code>ngc</code> CLI. The registry mechanics are practisable with no GPU — you just cannot usefully run the images.</p>
+<p><strong>3.4 — Deploy cloud VMI containers</strong> <code>[DOC]</code>
+NVIDIA's Virtual Machine Images: preconfigured cloud VM images carrying the GPU driver and container stack. Narrow and obscure, therefore cheap to learn. Know what a VMI is and why it exists — driver and toolkit version-matching pain.</p>
+<p><strong>3.5 — Understand storage requirements for AI data centers</strong> <code>[DOC]</code>
+Throughput vs IOPS vs capacity per tier, bursty checkpoint writes, random-read dataloader patterns, parallel filesystems. Revision from article 51.</p>
+<p><strong>3.6 — Deploy DOCA services on DPU-Arm</strong> <code>[DOC]</code>
+DOCA is the SDK and runtime for BlueField DPUs. The phrase <em>DPU-Arm</em> is the point: a BlueField DPU has its own Arm cores running their own Linux, and DOCA services are containers that run <strong>on the DPU</strong>, not on the host. Know that distinction, and that BlueMan is the DPU's web management service.</p>
+<p>Almost nobody preparing for this exam has a BlueField card. Everyone gets asked. Read the DOCA installation guide once.</p>
+<h2 id="34-troubleshooting-and-optimization-20">3.4 Troubleshooting and Optimization — 20%</h2>
+<p><strong>4.1 — Troubleshoot Docker</strong> <code>[LAB]</code>
+The GPU-specific failure is <em>container cannot see the GPU</em>. Check in this order:</p>
+<ol>
+<li>Container toolkit not installed</li>
+<li>Runtime not registered in the Docker / containerd config</li>
+<li><code>--gpus</code> flag or RuntimeClass missing</li>
+<li>Device cgroup restrictions</li>
+<li>Driver / toolkit version mismatch</li>
+</ol>
+<p><strong>4.2 — Troubleshoot Fabric Manager</strong> <code>[HW]</code>
+<code>nvidia-fabricmanager</code> is the service people forget. Without it, NVSwitch-class GPUs form no NVLink, and it surfaces as a confusing peer-to-peer error rather than anything mentioning fabric. <strong>Its version must match the driver exactly.</strong></p>
+<p><strong>4.3 — Troubleshoot BCM</strong> <code>[LAB]</code>
+CMDaemon logs, node stuck in the installer, image sync failures, PXE failures, and <strong>split-brain recovery in an HA head-node pair</strong> — the study guide cites that doc page by name, which usually means a question exists.</p>
+<p><strong>4.4 — Troubleshoot Magnum IO</strong> <code>[HW]</code>
+Magnum IO is the umbrella for NVIDIA's data-movement stack: <strong>GPUDirect RDMA</strong> (NIC straight to GPU memory), <strong>GPUDirect Storage</strong> (NVMe straight to GPU memory), and NCCL. Know what each one bypasses, so you recognise the symptom when it silently falls back to a host-memory bounce path — it works, but at a fraction of the expected bandwidth.</p>
+<p><strong>4.5 — Troubleshoot storage performance</strong> <code>[LAB]</code> partial
+<strong>Sawtooth</strong> GPU utilisation means the GPU is repeatedly waiting for data. Utilisation is not SM occupancy. Dataloader worker count and prefetch depth are the cheapest fixes.</p>
+<p><strong>Firmware update order</strong> — out of order surfaces as Fabric Manager refusing to start or version-mismatch errors:</p>
+<div class="highlight"><pre><span></span><code><span class="n">BMC</span><span class="o">/</span><span class="n">BIOS</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">NIC</span><span class="w"> </span><span class="n">firmware</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">GPU</span><span class="w"> </span><span class="n">VBIOS</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">driver</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">CUDA</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="n">toolkit</span>
+</code></pre></div>
+
+<hr />
+<h1 id="4-building-the-three-labs">4. Building the Three Labs</h1>
+<blockquote>
+<p><strong>NVIDIA Base Command Manager has a free-to-use license.</strong> Register at the NVIDIA Enterprise Product Registration portal. No Enterprise Support, valid up to <strong>eight accelerators per node at any cluster size</strong>, one-year renewable term. NVIDIA's FAQ lists evaluation, education, demos <em>and production</em> as covered. <strong>A corporate email address is required</strong> — personal domains are rejected.</p>
+</blockquote>
+<p>Eight accelerators per node is the ceiling. <strong>Zero is inside it.</strong> BCM provisions nodes that have no GPU at all, because provisioning is a PXE-and-image problem, not a CUDA problem.</p>
+<table>
+<thead>
+<tr>
+<th>Lab</th>
+<th>Build with</th>
+<th>GPU</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>BCM free license on VMs + Slurm via <code>cm-wlm-setup</code>; or <a href="https://github.com/blackmetalz/slurm-101"><code>slurm-101</code></a> for pure CLI reps</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>kind or k3s + KWOK + <code>fake-gpu-operator</code></td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>BCM head node VM + one blank VM to PXE-boot into it</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>The real barrier is <strong>RAM</strong>: 16 GB host is the floor for a head plus one compute node, 32 GB to be comfortable.</p>
+<blockquote>
+<p><strong>Honesty marker:</strong> I have not yet stood up BCM on VMs. The free license and its terms are documented by NVIDIA; the nested-VM path is my plan, not my experience. PXE inside a hypervisor needs the head node owning DHCP on its own network, and I expect that to be the fight.</p>
+</blockquote>
+<p><strong>Lab A drills</strong> — the scenario shape is <em>jobs pending / node not accepting work / job fails immediately</em>:</p>
+<ul>
+<li><code>sinfo -R</code> — why nodes are down or drained, with the reason string. Highest-value single command on the exam</li>
+<li><code>squeue --start</code>, and the REASON codes: <code>Resources</code>, <code>Priority</code>, <code>Dependency</code>, <code>QOSMaxJobsPerUserLimit</code>, <code>ReqNodeNotAvail</code></li>
+<li><code>scontrol show node &lt;n&gt;</code> — State, Reason, CfgTRES vs AllocTRES</li>
+<li><code>scontrol update nodename=&lt;n&gt; state=resume</code> — the recovery verb</li>
+<li><code>sacct -j &lt;id&gt; --format=JobID,State,ExitCode,DerivedExitCode</code> — post-mortem</li>
+<li><code>sacctmgr show assoc where user=&lt;u&gt;</code> — when the answer is "no association"</li>
+</ul>
+<p><strong>Lab B:</strong> rehearse the full loop — write or fix a manifest, apply, watch it fail to schedule, diagnose, fix, confirm Running. KWOK fabricates nodes the scheduler treats as real; <code>fake-gpu-operator</code> makes them advertise <code>nvidia.com/gpu</code>.</p>
+<p><strong>Lab C</strong> — the end state, rehearsed until boring:</p>
+<ol>
+<li>Head node up and licensed</li>
+<li><code>cmsh</code> → <code>device</code> mode → <code>add physicalnode</code>, set MAC, set category, <strong><code>commit</code></strong></li>
+<li>Boot the blank VM: PXE → node-installer → image sync</li>
+<li>Node UP; confirm from both layers — <code>cmsh -c "device; list"</code> and <code>sinfo</code></li>
+<li><strong>Break it deliberately</strong>: wrong MAC, wrong category, wrong network. Read the failure. Fix it.</li>
+</ol>
+<p>Step 5 is the exam. A live lab hands you a broken state, not a blank one.</p>
+<hr />
+<h1 id="5-how-to-actually-practise-this">5. How to Actually Practise This</h1>
+<p><strong>Rule 1: do, then read.</strong> Never open a document as the day's task. Run the command, get confused, <em>then</em> look up one section. A study guide used as a lookup table sticks; the same guide used as homework does not.</p>
+<p><strong>Rule 2: every session produces text.</strong> One append-only log, three lines minimum:</p>
+<div class="highlight"><pre><span></span><code><span class="o">##</span> <span class="n">S07</span> <span class="err">—</span> <span class="mi">2026</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">06</span> <span class="err">—</span> <span class="n">scontrol</span> <span class="n">update</span> <span class="n">state</span><span class="o">=</span><span class="n">drain</span>
+<span class="o">$</span> <span class="n">scontrol</span> <span class="n">update</span> <span class="n">nodename</span><span class="o">=</span><span class="n">cpu</span><span class="o">-</span><span class="mi">0</span> <span class="n">state</span><span class="o">=</span><span class="n">drain</span> <span class="n">reason</span><span class="o">=</span><span class="s">&quot;test&quot;</span>
+<span class="o">$</span> <span class="n">sinfo</span> <span class="o">-</span><span class="n">R</span>
+<span class="o">&gt;</span> <span class="n">Surprise</span><span class="p">:</span> <span class="n">pending</span> <span class="n">jobs</span> <span class="n">stayed</span> <span class="n">PENDING</span> <span class="n">with</span> <span class="n">no</span> <span class="n">new</span> <span class="n">reason</span> <span class="n">string</span><span class="p">.</span>
+</code></pre></div>
+
+<p>That file is exam practice and proof of progress at the same time.</p>
+<p><strong>The labs themselves live in a repo, not in this article.</strong> Twenty-seven exercises in order, one file each, covering Slurm reflexes → BCM install and node provisioning → Kubernetes with a simulated GPU layer → a timed full rehearsal: <a href="https://github.com/blackmetalz/slurm-101/tree/master/lab"><code>slurm-101/lab/</code></a>. They are task sheets — what to run and what to look for — not transcripts, because I have not run all of them yet and inventing output would defeat the purpose.</p>
+<p><strong>The gate: do not pay the $500 until you have rehearsed all three labs end to end, under 80 minutes.</strong> Three labs at 50% of the score is not a section you can hope your way through.</p>
+<hr />
+<h1 id="6-quick-recall">6. Quick Recall</h1>
+<h3 id="tool-job">Tool → job</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Use for</th>
+<th>Not for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nvidia-smi</code></td>
+<td>One host, right now</td>
+<td>Fleet health, history</td>
+</tr>
+<tr>
+<td><code>dcgmi</code></td>
+<td>GPU compute health, diagnostics, telemetry</td>
+<td>Chassis hardware</td>
+</tr>
+<tr>
+<td><code>nvsm</code></td>
+<td>DGX chassis: PSU, fans, storage, BMC</td>
+<td>GPU compute health</td>
+</tr>
+<tr>
+<td><code>cmsh</code></td>
+<td>Everything BCM: nodes, images, categories, networks</td>
+<td>Scheduling decisions</td>
+</tr>
+<tr>
+<td><code>sinfo</code>/<code>squeue</code>/<code>scontrol</code></td>
+<td>Slurm state and triage</td>
+<td>Anything K8s</td>
+</tr>
+<tr>
+<td><code>kubectl</code></td>
+<td>K8s workloads and nodes</td>
+<td>Bare-metal provisioning</td>
+</tr>
+<tr>
+<td><code>ngc</code></td>
+<td>NVIDIA registry: containers, models</td>
+<td>Running them</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cmsh-kubectl"><code>cmsh</code> → <code>kubectl</code></h3>
+<table>
+<thead>
+<tr>
+<th>Intent</th>
+<th><code>cmsh</code></th>
+<th><code>kubectl</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>List</td>
+<td><code>device; list</code></td>
+<td><code>kubectl get nodes</code></td>
+</tr>
+<tr>
+<td>Describe</td>
+<td><code>use node001; show</code></td>
+<td><code>kubectl describe node node001</code></td>
+</tr>
+<tr>
+<td>Edit</td>
+<td><code>set &lt;field&gt; &lt;value&gt;</code></td>
+<td><code>kubectl edit</code></td>
+</tr>
+<tr>
+<td><strong>Apply</strong></td>
+<td><strong><code>commit</code></strong></td>
+<td><strong><code>kubectl apply</code></strong></td>
+</tr>
+<tr>
+<td>Discard</td>
+<td><code>refresh</code></td>
+<td>quit the editor</td>
+</tr>
+<tr>
+<td>Non-interactive</td>
+<td><code>cmsh -c "device; list"</code></td>
+<td><code>kubectl get -o json</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="slurm-symptom-first-command">Slurm — symptom → first command</h3>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>First command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nodes missing from the pool</td>
+<td><code>sinfo -R</code></td>
+</tr>
+<tr>
+<td>Job stuck PENDING</td>
+<td><code>squeue --start</code>, read REASON</td>
+</tr>
+<tr>
+<td>Node refusing work</td>
+<td><code>scontrol show node &lt;n&gt;</code></td>
+</tr>
+<tr>
+<td>Node drained, needs to return</td>
+<td><code>scontrol update nodename=&lt;n&gt; state=resume</code></td>
+</tr>
+<tr>
+<td>Job died, cause unknown</td>
+<td><code>sacct -j &lt;id&gt; --format=JobID,State,ExitCode</code></td>
+</tr>
+<tr>
+<td>User cannot submit at all</td>
+<td><code>sacctmgr show assoc where user=&lt;u&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="appendix-the-zero-hardware-lab-stack">Appendix: The Zero-Hardware Lab Stack</h1>
+<p>Covers <strong>10 of the blueprint's 19 numbered items</strong> and all three labs, for the price of RAM:</p>
+<table>
+<thead>
+<tr>
+<th>Piece</th>
+<th>Gets you</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/blackmetalz/slurm-101"><code>slurm-101</code></a></td>
+<td>Real Slurm on kind, two operators, CPU-only</td>
+<td>Free</td>
+</tr>
+<tr>
+<td><strong>BCM free license</strong></td>
+<td>Head node, provisioning, <code>cmsh</code>, <code>cm-wlm-setup</code></td>
+<td>Free, corporate email</td>
+</tr>
+<tr>
+<td>kind / k3s</td>
+<td>Kubernetes</td>
+<td>Free</td>
+</tr>
+<tr>
+<td>KWOK</td>
+<td>Fabricated nodes the scheduler believes</td>
+<td>Free</td>
+</tr>
+<tr>
+<td><code>fake-gpu-operator</code></td>
+<td>Nodes advertising <code>nvidia.com/gpu</code></td>
+<td>Free</td>
+</tr>
+<tr>
+<td>KAI Scheduler</td>
+<td>Open-source Run:ai scheduling</td>
+<td>Free</td>
+</tr>
+<tr>
+<td><a href="https://github.com/ld-singh/ai-factory-ops-lab"><code>ai-factory-ops-lab</code></a></td>
+<td>Six packaged lessons, 0–5 GPU-free</td>
+<td>Free</td>
+</tr>
+<tr>
+<td>One rented GPU VM, once</td>
+<td>Confirm the real driver stack behaves</td>
+<td>~$5–10</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The honest ceiling:</strong> MIG, NVLink/NVSwitch and Fabric Manager, InfiniBand, real ECC/Xid failures, BlueField DPUs. Those stay <code>[DOC]</code> — and per §2, the blueprint leans lighter on that column than instinct expects.</p>
+<hr />
+<blockquote>
+<p><strong>Sources.</strong> Exam structure, weights and all numbered items: <em>NVIDIA-Certified Professional: AI Operations Exam Study Guide</em>, doc <code>4929800</code>, <code>FEB26</code>, from the <a href="https://www.nvidia.com/en-us/learn/certification/ai-operations-professional/">certification page</a>. BCM free-license terms: NVIDIA's <a href="https://docs.nvidia.com/pdf/base-command-manager-free-license-faq.pdf">free license FAQ</a> and <a href="https://docs.nvidia.com/base-command-manager/bcm-licensing-and-support/index.html">BCM licensing docs</a>. Verify before booking — NVIDIA revises these and the weights have moved once already.</p>
+</blockquote>
+
+
+             
+ 
+            
+            
+            
+
+
+
+
+
+
+
+            <hr/>
+        </div>
+        <section id="article-sidebar" class="span2">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2026-09-29T00:00:00+07:00">Tue 29 September 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="https://blackmetalz.github.io/categories.html#knowledge-base-ref">Knowledge Base</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="https://blackmetalz.github.io/tags.html#ai-ref">ai
+                    <span class="superscript">2</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#bcm-ref">bcm
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#certification-ref">certification
+                    <span class="superscript">16</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#devops-ref">devops
+                    <span class="superscript">9</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#hpc-ref">hpc
+                    <span class="superscript">2</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#kubernetes-ref">kubernetes
+                    <span class="superscript">1</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#nvidia-ref">nvidia
+                    <span class="superscript">2</span>
+</a></li>
+                <li><a href="https://blackmetalz.github.io/tags.html#slurm-ref">slurm
+                    <span class="superscript">1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+<div id="sidebar-social-link">
+</div>
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+</div>
+</article>
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>                    </div>
+                    <div class="span1"></div>
+                </div>
+            </div>
+        </div>
+<footer>
+
+
+
+
+    <div id="fpowered">
+        Powered by: <a href="http://getpelican.com/" title="Pelican Home Page" target="_blank" rel="nofollow noopener noreferrer">Pelican</a>
+        Theme: <a href="https://elegant.oncrashreboot.com/" title="Theme Elegant Home Page" target="_blank" rel="nofollow noopener noreferrer">Elegant</a>
+    </div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="https://blackmetalz.github.io/theme/js/elegant.prod.9e9d5ce754.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    <script>
+    (function () {
+        if (window.location.hash.match(/^#comment-\d+$/)) {
+            $('#comment_thread').collapse('show');
+        }
+    })();
+    window.onhashchange=function(){
+        if (window.location.hash.match(/^#comment-\d+$/))
+            window.location.reload(true);
+    }
+    $('#comment_thread').on('shown', function () {
+        var link = document.getElementById('comment-accordion-toggle');
+        var old_innerHTML = link.innerHTML;
+        $(link).fadeOut(200, function() {
+            $(this).text('Click here to hide comments').fadeIn(200);
+        });
+        $('#comment_thread').on('hidden', function () {
+            $(link).fadeOut(200, function() {
+                $(this).text(old_innerHTML).fadeIn(200);
+            });
+        })
+    })
+</script>
+
+    </body>
+    <!-- Theme: Elegant built for Pelican
+        License : MIT -->
+</html>
