@@ -15,6 +15,10 @@
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
+&lt;td&gt;Exam code&lt;/td&gt;
+&lt;td&gt;NCP-AIO, now listed as &lt;strong&gt;NCP-AIOL&lt;/strong&gt; (&lt;em&gt;AI Operations with Labs&lt;/em&gt;)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
 &lt;td&gt;Format&lt;/td&gt;
 &lt;td&gt;&lt;strong&gt;30 multiple choice + 3 performance-based labs&lt;/strong&gt;&lt;/td&gt;
 &lt;/tr&gt;
@@ -77,6 +81,19 @@
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;&lt;strong&gt;Time budget:&lt;/strong&gt; ~35–40 min for the MCQ, 80+ for the labs. Running out of lab time is the failure mode, not running out of knowledge.&lt;/p&gt;
+&lt;h2 id="tips-from-someone-who-passed"&gt;Tips from someone who passed&lt;/h2&gt;
+&lt;p&gt;From Kyle Law's &lt;em&gt;"Exam Review — Nvidia Certified Professional — AI Operations with Labs (NCP-AIOL)"&lt;/em&gt; on Medium (June 2026), a candidate who sat the new with-labs format and passed. Paraphrased:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;The MCQ section is a one-way door.&lt;/strong&gt; Once you enter the labs, you cannot go back and change your answers. Finish &lt;em&gt;and review&lt;/em&gt; the MCQ before you move on. Then the 80 minutes belong to the labs alone.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;The lab terminal can freeze. Know the two fixes before you need them.&lt;/strong&gt; The reviewer got stuck twice:&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Top left:&lt;/strong&gt; select the stuck session and click &lt;strong&gt;Reconnect&lt;/strong&gt;. This reconnects the terminal only.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Bottom right:&lt;/strong&gt; the &lt;strong&gt;reload&lt;/strong&gt; icon reloads the whole exam browser.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Labs take longer than they look.&lt;/strong&gt; This matches the time budget above. Budget the MCQ tightly.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;BCM is the main hurdle.&lt;/strong&gt; Don't sit the exam without hands-on BCM time. Kubernetes and Slurm can be practised on ordinary machines.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The review counts &lt;strong&gt;35&lt;/strong&gt; MCQ. The official certification page still says &lt;strong&gt;30&lt;/strong&gt;. Trust the official number, and don't be surprised if your exam differs.&lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1 id="2-the-blueprint"&gt;2. The Blueprint&lt;/h1&gt;
 &lt;table&gt;
@@ -380,7 +397,7 @@ Magnum IO is the umbrella for NVIDIA's data-movement stack: &lt;strong&gt;GPUDir
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;That file is exam practice and proof of progress at the same time.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;The labs themselves live in a repo, not in this article.&lt;/strong&gt; Twenty-seven exercises in order, one file each, covering Slurm reflexes → BCM install and node provisioning → Kubernetes with a simulated GPU layer → a timed full rehearsal: &lt;a href="https://github.com/blackmetalz/slurm-101/tree/master/lab"&gt;&lt;code&gt;slurm-101/lab/&lt;/code&gt;&lt;/a&gt;. They are task sheets — what to run and what to look for — not transcripts, because I have not run all of them yet and inventing output would defeat the purpose.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;The labs themselves live in a repo, not in this article.&lt;/strong&gt; Thirty-four exercises in order, one file each, covering Slurm reflexes → BCM install and node provisioning → Kubernetes with a simulated GPU layer → a timed full rehearsal → a final block on a real GPU cluster (MIG, Fabric Manager, DCGM, NCCL): &lt;a href="https://github.com/blackmetalz/slurm-101/tree/master/lab"&gt;&lt;code&gt;slurm-101/lab/&lt;/code&gt;&lt;/a&gt;. They are task sheets — what to run and what to look for — not transcripts, because I have not run all of them yet and inventing output would defeat the purpose.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;The gate: do not pay the $500 until you have rehearsed all three labs end to end, under 80 minutes.&lt;/strong&gt; Three labs at 50% of the score is not a section you can hope your way through.&lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1 id="6-quick-recall"&gt;6. Quick Recall&lt;/h1&gt;
@@ -565,7 +582,7 @@ Magnum IO is the umbrella for NVIDIA's data-movement stack: &lt;strong&gt;GPUDir
 &lt;p&gt;&lt;strong&gt;The honest ceiling:&lt;/strong&gt; MIG, NVLink/NVSwitch and Fabric Manager, InfiniBand, real ECC/Xid failures, BlueField DPUs. Those stay &lt;code&gt;[DOC]&lt;/code&gt; — and per §2, the blueprint leans lighter on that column than instinct expects.&lt;/p&gt;
 &lt;hr /&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;Sources.&lt;/strong&gt; Exam structure, weights and all numbered items: &lt;em&gt;NVIDIA-Certified Professional: AI Operations Exam Study Guide&lt;/em&gt;, doc &lt;code&gt;4929800&lt;/code&gt;, &lt;code&gt;FEB26&lt;/code&gt;, from the &lt;a href="https://www.nvidia.com/en-us/learn/certification/ai-operations-professional/"&gt;certification page&lt;/a&gt;. BCM free-license terms: NVIDIA's &lt;a href="https://docs.nvidia.com/pdf/base-command-manager-free-license-faq.pdf"&gt;free license FAQ&lt;/a&gt; and &lt;a href="https://docs.nvidia.com/base-command-manager/bcm-licensing-and-support/index.html"&gt;BCM licensing docs&lt;/a&gt;. Verify before booking — NVIDIA revises these and the weights have moved once already.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Sources.&lt;/strong&gt; Exam structure, weights and all numbered items: &lt;em&gt;NVIDIA-Certified Professional: AI Operations Exam Study Guide&lt;/em&gt;, doc &lt;code&gt;4929800&lt;/code&gt;, &lt;code&gt;FEB26&lt;/code&gt;, from the &lt;a href="https://www.nvidia.com/en-us/learn/certification/ai-operations-professional/"&gt;certification page&lt;/a&gt;. Exam-day tips: Kyle Law's NCP-AIOL exam review, Medium, June 2026. BCM free-license terms: NVIDIA's &lt;a href="https://docs.nvidia.com/pdf/base-command-manager-free-license-faq.pdf"&gt;free license FAQ&lt;/a&gt; and &lt;a href="https://docs.nvidia.com/base-command-manager/bcm-licensing-and-support/index.html"&gt;BCM licensing docs&lt;/a&gt;. Verify before booking — NVIDIA revises these and the weights have moved once already.&lt;/p&gt;
 &lt;/blockquote&gt;</content><category term="Knowledge Base"/><category term="nvidia"/><category term="hpc"/><category term="ai"/><category term="certification"/><category term="devops"/><category term="slurm"/><category term="kubernetes"/><category term="bcm"/></entry><entry><title>Prepare for NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO) Exam</title><link href="https://blackmetalz.github.io/prepare-for-nvidia-certified-associate-ai-infrastructure-and-operations-nca-aiio-exam.html" rel="alternate"/><published>2026-09-27T00:00:00+07:00</published><updated>2026-09-27T00:00:00+07:00</updated><author><name>kienlt</name></author><id>tag:blackmetalz.github.io,2026-09-27:/prepare-for-nvidia-certified-associate-ai-infrastructure-and-operations-nca-aiio-exam.html</id><summary type="html"/><content type="html">&lt;p&gt;TLDR: Study guide for the &lt;strong&gt;NVIDIA Certified Associate: AI Infrastructure and Operations (NCA-AIIO)&lt;/strong&gt; exam, written from an operations background — if you already run Kubernetes or Slurm, this maps the AI infrastructure world onto what you already know.&lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1 id="introduction-why-this-fuckin-certification"&gt;Introduction: Why This Fuckin' Certification&lt;/h1&gt;
