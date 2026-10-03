@@ -348,7 +348,7 @@ Magnum IO is the umbrella for NVIDIA's data-movement stack: &lt;strong&gt;GPUDir
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;&lt;strong&gt;A&lt;/strong&gt;&lt;/td&gt;
-&lt;td&gt;BCM free license on VMs + Slurm via &lt;code&gt;cm-wlm-setup&lt;/code&gt;; or &lt;a href="https://github.com/blackmetalz/slurm-101"&gt;&lt;code&gt;slurm-101&lt;/code&gt;&lt;/a&gt; for pure CLI reps&lt;/td&gt;
+&lt;td&gt;BCM free license on VMs + Slurm via &lt;code&gt;cm-wlm-setup&lt;/code&gt;; or Slurm on kind via &lt;a href="https://slinky.schedmd.com/"&gt;Slinky&lt;/a&gt; for pure CLI reps&lt;/td&gt;
 &lt;td&gt;No&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
@@ -397,7 +397,6 @@ Magnum IO is the umbrella for NVIDIA's data-movement stack: &lt;strong&gt;GPUDir
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;That file is exam practice and proof of progress at the same time.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;The labs themselves live in a repo, not in this article.&lt;/strong&gt; Thirty-four exercises in order, one file each, covering Slurm reflexes → BCM install and node provisioning → Kubernetes with a simulated GPU layer → a timed full rehearsal → a final block on a real GPU cluster (MIG, Fabric Manager, DCGM, NCCL): &lt;a href="https://github.com/blackmetalz/slurm-101/tree/master/lab"&gt;&lt;code&gt;slurm-101/lab/&lt;/code&gt;&lt;/a&gt;. They are task sheets — what to run and what to look for — not transcripts, because I have not run all of them yet and inventing output would defeat the purpose.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;The gate: do not pay the $500 until you have rehearsed all three labs end to end, under 80 minutes.&lt;/strong&gt; Three labs at 50% of the score is not a section you can hope your way through.&lt;/p&gt;
 &lt;hr /&gt;
 &lt;h1 id="6-quick-recall"&gt;6. Quick Recall&lt;/h1&gt;
@@ -538,8 +537,8 @@ Magnum IO is the umbrella for NVIDIA's data-movement stack: &lt;strong&gt;GPUDir
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td&gt;&lt;a href="https://github.com/blackmetalz/slurm-101"&gt;&lt;code&gt;slurm-101&lt;/code&gt;&lt;/a&gt;&lt;/td&gt;
-&lt;td&gt;Real Slurm on kind, two operators, CPU-only&lt;/td&gt;
+&lt;td&gt;&lt;a href="https://slinky.schedmd.com/"&gt;Slinky&lt;/a&gt; or &lt;a href="https://github.com/nebius/soperator"&gt;soperator&lt;/a&gt; on kind&lt;/td&gt;
+&lt;td&gt;Real Slurm on Kubernetes, CPU-only&lt;/td&gt;
 &lt;td&gt;Free&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;

@@ -427,7 +427,7 @@ Magnum IO is the umbrella for NVIDIA's data-movement stack: <strong>GPUDirect RD
 <tbody>
 <tr>
 <td><strong>A</strong></td>
-<td>BCM free license on VMs + Slurm via <code>cm-wlm-setup</code>; or <a href="https://github.com/blackmetalz/slurm-101"><code>slurm-101</code></a> for pure CLI reps</td>
+<td>BCM free license on VMs + Slurm via <code>cm-wlm-setup</code>; or Slurm on kind via <a href="https://slinky.schedmd.com/">Slinky</a> for pure CLI reps</td>
 <td>No</td>
 </tr>
 <tr>
@@ -476,7 +476,6 @@ Magnum IO is the umbrella for NVIDIA's data-movement stack: <strong>GPUDirect RD
 </code></pre></div>
 
 <p>That file is exam practice and proof of progress at the same time.</p>
-<p><strong>The labs themselves live in a repo, not in this article.</strong> Thirty-four exercises in order, one file each, covering Slurm reflexes → BCM install and node provisioning → Kubernetes with a simulated GPU layer → a timed full rehearsal → a final block on a real GPU cluster (MIG, Fabric Manager, DCGM, NCCL): <a href="https://github.com/blackmetalz/slurm-101/tree/master/lab"><code>slurm-101/lab/</code></a>. They are task sheets — what to run and what to look for — not transcripts, because I have not run all of them yet and inventing output would defeat the purpose.</p>
 <p><strong>The gate: do not pay the $500 until you have rehearsed all three labs end to end, under 80 minutes.</strong> Three labs at 50% of the score is not a section you can hope your way through.</p>
 <hr />
 <h1 id="6-quick-recall">6. Quick Recall</h1>
@@ -617,8 +616,8 @@ Magnum IO is the umbrella for NVIDIA's data-movement stack: <strong>GPUDirect RD
 </thead>
 <tbody>
 <tr>
-<td><a href="https://github.com/blackmetalz/slurm-101"><code>slurm-101</code></a></td>
-<td>Real Slurm on kind, two operators, CPU-only</td>
+<td><a href="https://slinky.schedmd.com/">Slinky</a> or <a href="https://github.com/nebius/soperator">soperator</a> on kind</td>
+<td>Real Slurm on Kubernetes, CPU-only</td>
 <td>Free</td>
 </tr>
 <tr>
