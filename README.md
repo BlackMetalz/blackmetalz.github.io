@@ -64,3 +64,5 @@ jobs:
         publish_dir: output
         publish_branch: gh-pages
 ```
+### Docs
+- [Nhét app tĩnh vào path con của github.io](docs/subsite-guide.md)
